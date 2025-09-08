@@ -1,3 +1,5 @@
+import { ChevronRight } from "lucide-react";
+import Link from "next/link";
 import {
   Card,
   CardAction,
@@ -7,8 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { ChevronRight } from "lucide-react";
-import Link from "next/link";
 
 export function EnVogue() {
   return (
@@ -34,6 +34,45 @@ export function EnVogue() {
               <div className="flex w-full flex-col gap-6 flex-1">
                 <div className="flex-1 pt-4">
                   <div className="grid grid-cols-1 justify-center gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Card Title</CardTitle>
+                        <CardDescription>Card Description</CardDescription>
+                        <CardAction>Card Action</CardAction>
+                      </CardHeader>
+                      <CardContent>
+                        <p>Card Content</p>
+                      </CardContent>
+                      <CardFooter>
+                        <p>Card Footer</p>
+                      </CardFooter>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Card Title</CardTitle>
+                        <CardDescription>Card Description</CardDescription>
+                        <CardAction>Card Action</CardAction>
+                      </CardHeader>
+                      <CardContent>
+                        <p>Card Content</p>
+                      </CardContent>
+                      <CardFooter>
+                        <p>Card Footer</p>
+                      </CardFooter>
+                    </Card>
+                    <Card>
+                      <CardHeader>
+                        <CardTitle>Card Title</CardTitle>
+                        <CardDescription>Card Description</CardDescription>
+                        <CardAction>Card Action</CardAction>
+                      </CardHeader>
+                      <CardContent>
+                        <p>Card Content</p>
+                      </CardContent>
+                      <CardFooter>
+                        <p>Card Footer</p>
+                      </CardFooter>
+                    </Card>
                     <Card>
                       <CardHeader>
                         <CardTitle>Card Title</CardTitle>

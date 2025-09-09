@@ -45,7 +45,7 @@ export function Hero() {
             speedSegment={0.3}
             delay={0.5}
             as="p"
-            className="mx-auto mt-6 max-w-2xl text-pretty text-sm md:text-lg text-muted-foreground"
+            className="mx-auto mt-6 max-w-2xl text-pretty text-sm md:text-base text-muted-foreground"
           >
             WhatsApp groups and their hellish notifications are such a cluncky
             mess, either looking for something to eat or promote your restaurant

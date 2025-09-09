@@ -1,8 +1,21 @@
-export const Logo = () => {
+import { cn } from "@/lib/utils";
+
+export const Logo = ({
+  isSidebarCollapsed,
+}: {
+  isSidebarCollapsed?: boolean;
+}) => {
   return (
-    <div className="flex items-center gap-1 self-center">
-      <div className="text-2xl">📒</div>
-      <span className="font-mono font-semibold text-xl">Noter.</span>
-    </div>
+    <span className="flex items-center gap-2 py-2 rounded-lg">
+      <span className="text-2xl bg-primary rounded-lg">🥘</span>
+      <span
+        className={cn(
+          "font-mono font-bold text-lg",
+          isSidebarCollapsed ? "hidden" : ""
+        )}
+      >
+        starva
+      </span>
+    </span>
   );
 };

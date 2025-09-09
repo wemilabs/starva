@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   AudioWaveform,
   // BookOpen,
@@ -9,6 +10,7 @@ import {
   Frame,
   GalleryVerticalEnd,
   LifeBuoy,
+  LogIn,
   Map as MapIcon,
   PieChart,
   Send,
@@ -16,30 +18,28 @@ import {
   // SquareTerminal,
   Star,
 } from "lucide-react";
-import type * as React from "react";
 
+import { useSession } from "@/lib/auth-client";
+import { Logo } from "@/components/logo";
+// import { TeamSwitcher } from "@/components/team-switcher";
 import { NavMain } from "@/components/nav-main";
 // import { NavProjects } from "@/components/nav-projects";
 import { NavUser } from "@/components/nav-user";
-import { TeamSwitcher } from "@/components/team-switcher";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
+  SidebarMenuButton,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
-import { NavSecondary } from "./nav-secondary";
-
-// import { Logo } from "./logo";
+import { NavSecondary } from "@/components/nav-secondary";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 // This is sample data.
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   teams: [
     {
       name: "Starva Corp.",
@@ -195,11 +195,17 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { data: session } = useSession();
+  const user = session?.user;
+  const { state: sidebarState } = useSidebar();
+
   return (
     <Sidebar collapsible="icon" variant="inset" {...props}>
       <SidebarHeader>
-        {/* <Logo /> */}
-        <TeamSwitcher teams={data.teams} />
+        <Link href="/">
+          <Logo isSidebarCollapsed={sidebarState === "collapsed"} />
+        </Link>
+        {/* <TeamSwitcher teams={data.teams} /> */}
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
@@ -207,7 +213,37 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        {user ? (
+          <NavUser user={user} />
+        ) : sidebarState === "collapsed" ? (
+          <SidebarMenuButton
+            asChild
+            tooltip="Sign in"
+            className="w-full bg-primary text-primary-foreground"
+          >
+            <Link href="/sign-in" className="flex items-center gap-2">
+              <LogIn />
+              <span>Sign in</span>
+            </Link>
+          </SidebarMenuButton>
+        ) : (
+          <Card className="border border-dashed bg-sidebar">
+            <CardContent className="flex flex-col gap-2">
+              <p className="text-xs text-muted-foreground text-center">
+                Start this pleasant and better experience
+              </p>
+              <Button
+                asChild
+                className="w-full bg-primary text-primary-foreground"
+              >
+                <Link href="/sign-in" className="flex items-center gap-2">
+                  <LogIn />
+                  <span>Sign in</span>
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

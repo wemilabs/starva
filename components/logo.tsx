@@ -10,7 +10,7 @@ export const Logo = ({
       <span className="text-2xl bg-primary rounded-lg">🥘</span>
       <span
         className={cn(
-          "font-mono font-bold text-lg",
+          "font-semibold text-lg",
           isSidebarCollapsed ? "hidden" : ""
         )}
       >

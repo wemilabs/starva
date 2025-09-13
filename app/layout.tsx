@@ -59,24 +59,6 @@ export default function RootLayout({
             <SidebarProvider>
               <AppSidebar />
               <SidebarInset>
-                {/* <header className="flex h-16 shrink-0 items-center gap-2 px-4 justify-between transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 sticky top-0 z-10 border-b rounded-lg bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/50">
-                  <div className="flex items-center gap-2">
-                    <SidebarTrigger className="-ml-1" />
-                    <Separator
-                      orientation="vertical"
-                      className="mr-2 data-[orientation=vertical]:h-4"
-                    />
-                    <NavBreadcrumbs base={baseCrumbs} />
-                  </div>
-                  <div className="flex items-center gap-2">
-                  <ModeToggle />
-                  <Button asChild size="sm">
-                  <Link href="/sign-in">
-                    <span>Sign In</span>
-                  </Link>
-                </Button>
-                  </div>
-                </header> */}
                 <Header baseCrumbs={baseCrumbs} />
                 <main className="flex flex-1 flex-col gap-4 p-4 pt-0">
                   <NuqsAdapter>{children}</NuqsAdapter>

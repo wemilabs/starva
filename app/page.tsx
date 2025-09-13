@@ -1,5 +1,5 @@
-import { Hero } from "@/components/hero";
 import { EnVogue } from "@/components/en-vogue";
+import { Hero } from "@/components/hero";
 
 export default function Home() {
   return (

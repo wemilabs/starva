@@ -1,18 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   BadgeCheck,
   Bell,
   ChevronsUpDown,
   CreditCard,
+  Loader2,
   LogOut,
   Sparkles,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
-
-import { signOut } from "@/lib/auth-client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -29,6 +28,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { signOut } from "@/lib/auth-client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -57,30 +57,31 @@ export function NavUser({
     | undefined;
 }) {
   const { isMobile } = useSidebar();
-  const [isSigningOut, setIsSigningOut] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSigningOutPending, startSigningOutTransition] = useTransition();
 
   const router = useRouter();
 
-  const handleSignOut = async () => {
-    try {
-      setIsSigningOut(true);
-      await signOut({
-        fetchOptions: {
-          onSuccess: () => {
-            router.push("/");
-            toast.success("Successfully signed out. See you soon!");
-            setIsDialogOpen(false);
+  const handleSignOut = () => {
+    startSigningOutTransition(async () => {
+      try {
+        await signOut({
+          fetchOptions: {
+            onSuccess: () => {
+              router.push("/");
+              router.refresh();
+              toast.success("Successfully signed out. See you soon!");
+              setIsDialogOpen(false);
+            },
           },
-        },
-      });
-    } catch (error) {
-      console.error("Sign out error:", error);
-      toast.error("Failed to sign out");
-      setIsDialogOpen(false);
-    } finally {
-      setIsSigningOut(false);
-    }
+        });
+      } catch (error: unknown) {
+        const e = error as Error;
+        console.error("Sign out error:", e.message);
+        toast.error("Failed to sign out");
+        setIsDialogOpen(false);
+      }
+    });
   };
 
   const userInitials = user?.name
@@ -182,9 +183,16 @@ export function NavUser({
                       e.preventDefault();
                       handleSignOut();
                     }}
-                    disabled={isSigningOut}
+                    disabled={isSigningOutPending}
                   >
-                    {isSigningOut ? "Signing out..." : "Continue"}
+                    {isSigningOutPending ? (
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="size-4 animate-spin" />
+                        Signing out...
+                      </div>
+                    ) : (
+                      "Continue"
+                    )}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>

@@ -3,8 +3,9 @@
 import Link from "next/link";
 import {
   AudioWaveform,
-  // BookOpen,
+  BookOpenText,
   // Bot,
+  CircleQuestionMark,
   Clock,
   Command,
   Frame,
@@ -164,6 +165,16 @@ const data = {
     // },
   ],
   navSecondary: [
+    {
+      title: "About",
+      url: "#",
+      icon: CircleQuestionMark,
+    },
+    {
+      title: "Blog",
+      url: "#",
+      icon: BookOpenText,
+    },
     {
       title: "Support",
       url: "#",

@@ -24,7 +24,7 @@ import {
   useSession,
 } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
-import { CreateBusinessForm } from "./forms/create-business-form";
+import { RegisterBusinessForm } from "./forms/register-business-form";
 import {
   Dialog,
   DialogContent,
@@ -137,7 +137,7 @@ export function BusinessSwitcher() {
                             Create a new business to get started.
                           </DialogDescription>
                         </DialogHeader>
-                        <CreateBusinessForm />
+                        <RegisterBusinessForm />
                       </DialogContent>
                     </Dialog>
                   </CommandItem>

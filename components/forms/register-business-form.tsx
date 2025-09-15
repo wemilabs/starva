@@ -2,6 +2,8 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, LogIn } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -17,16 +19,14 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { organization, useSession } from "@/lib/auth-client";
-import { useRouter } from "next/navigation";
 import { Card, CardContent } from "../ui/card";
-import Link from "next/link";
 
 const formSchema = z.object({
   name: z.string().min(2).max(50),
   slug: z.string().min(2).max(50),
 });
 
-export function CreateBusinessForm() {
+export function RegisterBusinessForm() {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const { data: session } = useSession();
@@ -45,7 +45,7 @@ export function CreateBusinessForm() {
       try {
         if (!ownerId) {
           toast.message("Please sign in first", {
-            description: "You must be signed in to create a business.",
+            description: "You must be signed in to register a business.",
           });
           router.push("/sign-in");
           return;
@@ -56,11 +56,11 @@ export function CreateBusinessForm() {
           slug: values.slug,
           ownerId,
         });
-        toast.success("Business created successfully");
+        toast.success("Business registered successfully");
       } catch (error: unknown) {
         const e = error as Error;
         console.error(e.message);
-        toast.error("Failed to create business");
+        toast.error("Failed to register business");
       }
     });
   }
@@ -101,10 +101,10 @@ export function CreateBusinessForm() {
             {isPending ? (
               <div className="flex items-center gap-2">
                 <Loader2 className="size-4 animate-spin" />
-                <p>Creating Business...</p>
+                <p>Registering Business...</p>
               </div>
             ) : (
-              "Create Business"
+              "Register Business"
             )}
           </Button>
         </form>
@@ -112,7 +112,7 @@ export function CreateBusinessForm() {
         <Card className="border border-dashed bg-sidebar">
           <CardContent className="flex flex-col gap-2">
             <p className="text-sm text-muted-foreground text-center">
-              You need to sign in first to create a business
+              First, you need to sign in to register your business
             </p>
             <Button
               asChild

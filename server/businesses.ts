@@ -5,24 +5,24 @@ import { db } from "@/db/drizzle";
 import { member, organization } from "@/db/schema";
 import { getCurrentUser } from "./users";
 
-export async function getOrganizations() {
+export async function getBusinesses() {
   const { currentUser } = await getCurrentUser();
 
   const members = await db.query.member.findMany({
     where: eq(member.userId, currentUser.id),
   });
 
-  const organizations = await db.query.organization.findMany({
+  const businesses = await db.query.organization.findMany({
     where: inArray(
       organization.id,
       members.map((member) => member.organizationId)
     ),
   });
 
-  return organizations;
+  return businesses;
 }
 
-export async function getActiveOrganization(userId: string) {
+export async function getActiveBusiness(userId: string) {
   const memberUser = await db.query.member.findFirst({
     where: eq(member.userId, userId),
   });
@@ -31,16 +31,16 @@ export async function getActiveOrganization(userId: string) {
     return null;
   }
 
-  const activeOrganization = await db.query.organization.findFirst({
+  const activeBusiness = await db.query.organization.findFirst({
     where: eq(organization.id, memberUser.organizationId),
   });
 
-  return activeOrganization;
+  return activeBusiness;
 }
 
-export async function getOrganizationBySlug(slug: string) {
+export async function getBusinessBySlug(slug: string) {
   try {
-    const organizationBySlug = await db.query.organization.findFirst({
+    const businessBySlug = await db.query.organization.findFirst({
       where: eq(organization.slug, slug),
       with: {
         members: {
@@ -51,7 +51,7 @@ export async function getOrganizationBySlug(slug: string) {
       },
     });
 
-    return organizationBySlug;
+    return businessBySlug;
   } catch (error) {
     console.error(error);
     return null;

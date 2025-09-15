@@ -34,24 +34,27 @@ export function NavMain({
 }) {
   return (
     <SidebarGroup>
-      <SidebarMenuItem className="mt-2">
-        <SidebarMenuButton asChild tooltip="Home">
-          <Link href="/">
-            <Home />
-            <span>Home</span>
-          </Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      <SidebarMenuItem className="mt-1">
-        <SidebarMenuButton asChild tooltip="Trends">
-          <Link href="/trends">
-            <Globe />
-            <span>Trends</span>
-          </Link>
-        </SidebarMenuButton>
-      </SidebarMenuItem>
-      <SidebarMenuItem></SidebarMenuItem>
-      <SidebarGroupLabel className="mt-4">Board</SidebarGroupLabel>
+      <SidebarMenu className="-mt-1 group-data-[collapsible=icon]:mt-2">
+        <SidebarMenuItem>
+          <SidebarMenuButton asChild tooltip="Home">
+            <Link href="/">
+              <Home />
+              <span>Home</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+        <SidebarMenuItem className="mt-1">
+          <SidebarMenuButton asChild tooltip="Trends">
+            <Link href="/trends">
+              <Globe />
+              <span>Trends</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+      <SidebarGroupLabel className="mt-6 group-data-[collapsible=icon]:mt-0">
+        Board
+      </SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible

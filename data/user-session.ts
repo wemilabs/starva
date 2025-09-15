@@ -1,7 +1,7 @@
-import "server-only";
 import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
 import { connection } from "next/server";
+import "server-only";
+import { auth } from "@/lib/auth";
 
 export async function verifySession() {
   await connection();

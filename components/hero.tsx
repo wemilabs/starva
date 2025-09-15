@@ -46,10 +46,10 @@ export function Hero() {
             as="h1"
             per="word"
             className="text-balance text-2xl sm:text-4xl font-semibold md:text-5xl tracking-tight text-primary-foreground"
-            highlightWords={["Bon", "appétit."]}
+            highlightWords={["Bon", "appétit"]}
             highlightWrapperAs="span"
           >
-            Search. Order. Bon appétit. 😋
+            Search. Order. Bon appétit 😋
           </TextEffect>
           <TextEffect
             per="line"
@@ -57,11 +57,11 @@ export function Hero() {
             speedSegment={0.3}
             delay={0.5}
             as="p"
-            className="mx-auto mt-6 max-w-2xl text-pretty text-sm md:text-base text-primary-foreground"
+            className="mx-auto mt-6 max-w-2xl text-pretty text-xs md:text-sm text-primary-foreground"
           >
-            WhatsApp groups and their hellish notifications are such a cluncky
-            mess, either looking for something to eat or promote your restaurant
-            business. Enters Starva solving it.
+            WhatsApp groups and their hellish notifications: such a maddening
+            experience. Either looking for something to eat or promote your
+            restaurant business. Fortunately, enters Starva solving it.
           </TextEffect>
 
           <AnimatedGroup

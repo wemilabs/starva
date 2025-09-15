@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
+import { organization } from "better-auth/plugins";
 // import { Resend } from "resend";
 
 import { db } from "@/db/drizzle";
@@ -63,5 +64,18 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     },
   },
-  plugins: [nextCookies()],
+  plugins: [
+    nextCookies(),
+    organization({
+      schema: {
+        organization: {
+          additionalFields: {
+            ownerId: {
+              type: "string",
+            },
+          },
+        },
+      },
+    }),
+  ],
 });

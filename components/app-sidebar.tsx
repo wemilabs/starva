@@ -1,31 +1,30 @@
 "use client";
 
-import Link from "next/link";
 import {
-  AudioWaveform,
   BookOpenText,
   // Bot,
   CircleQuestionMark,
   Clock,
-  Command,
   Frame,
-  GalleryVerticalEnd,
   LifeBuoy,
   LogIn,
   Map as MapIcon,
   PieChart,
   Send,
-  // Settings2,
+  Settings,
   // SquareTerminal,
   Star,
 } from "lucide-react";
+import Link from "next/link";
 
-import { useSession } from "@/lib/auth-client";
+import { BusinessSwitcher } from "@/components/business-switcher";
 import { Logo } from "@/components/logo";
-// import { TeamSwitcher } from "@/components/team-switcher";
 import { NavMain } from "@/components/nav-main";
+import { NavSecondary } from "@/components/nav-secondary";
 // import { NavProjects } from "@/components/nav-projects";
 import { NavUser } from "@/components/nav-user";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Sidebar,
   SidebarContent,
@@ -35,29 +34,10 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { NavSecondary } from "@/components/nav-secondary";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useSession } from "@/lib/auth-client";
 
 // This is sample data.
 const data = {
-  teams: [
-    {
-      name: "Starva Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Starva Inc.",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Starva Pvt.",
-      logo: Command,
-      plan: "Free",
-    },
-  ],
   navMain: [
     // {
     //   title: "Playground",
@@ -140,29 +120,29 @@ const data = {
     //     },
     //   ],
     // },
-    // {
-    //   title: "Settings",
-    //   url: "#",
-    //   icon: Settings2,
-    //   items: [
-    //     {
-    //       title: "General",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Team",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Billing",
-    //       url: "#",
-    //     },
-    //     {
-    //       title: "Limits",
-    //       url: "#",
-    //     },
-    //   ],
-    // },
+    {
+      title: "Settings",
+      url: "#",
+      icon: Settings,
+      items: [
+        {
+          title: "General",
+          url: "#",
+        },
+        {
+          title: "Team",
+          url: "#",
+        },
+        {
+          title: "Billing",
+          url: "#",
+        },
+        {
+          title: "Limits",
+          url: "#",
+        },
+      ],
+    },
   ],
   navSecondary: [
     {
@@ -214,9 +194,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar collapsible="icon" variant="inset" {...props}>
       <SidebarHeader>
         <Link href="/">
-          <Logo isSidebarCollapsed={sidebarState === "collapsed"} />
+          <Logo />
         </Link>
-        {/* <TeamSwitcher teams={data.teams} /> */}
+
+        <BusinessSwitcher />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />

@@ -132,9 +132,9 @@ export function BusinessSwitcher() {
                       </DialogTrigger>
                       <DialogContent>
                         <DialogHeader>
-                          <DialogTitle>Create Business</DialogTitle>
+                          <DialogTitle>Register Business</DialogTitle>
                           <DialogDescription>
-                            Create a new business to get started.
+                            Register a new business to get started.
                           </DialogDescription>
                         </DialogHeader>
                         <RegisterBusinessForm />

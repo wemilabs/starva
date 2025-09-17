@@ -1,5 +1,6 @@
 import {
   inferOrgAdditionalFields,
+  lastLoginMethodClient,
   organizationClient,
 } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
@@ -9,6 +10,7 @@ const authClient = createAuthClient({
   baseURL:
     (process.env.NEXT_PUBLIC_BASE_URL as string) ?? "http://localhost:3000",
   plugins: [
+    lastLoginMethodClient(),
     organizationClient({
       schema: inferOrgAdditionalFields<typeof auth>(),
     }),
@@ -22,6 +24,7 @@ export const {
   resetPassword,
   getSession,
   useSession,
+  getLastUsedLoginMethod,
   useActiveOrganization,
   useListOrganizations,
   organization,

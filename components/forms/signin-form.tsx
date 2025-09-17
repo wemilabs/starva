@@ -25,9 +25,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { signIn } from "@/lib/auth-client";
+import { getLastUsedLoginMethod, signIn } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { signInUser } from "@/server/users";
+import { Badge } from "../ui/badge";
 
 const formSchema = z.object({
   email: z.email(),
@@ -39,6 +40,7 @@ export const SignInForm = ({
   ...props
 }: React.ComponentProps<"div">) => {
   const router = useRouter();
+  const lastLoginMethod = getLastUsedLoginMethod();
 
   const [_, startTransition] = useTransition();
   const [isGooglePending, startGoogleTransition] = useTransition();
@@ -82,7 +84,7 @@ export const SignInForm = ({
               <div className="flex flex-col gap-6">
                 <Button
                   variant="outline"
-                  className="w-full border-primary/50 shadow-primary/50 hover:bg-primary/10"
+                  className="relative"
                   onClick={() =>
                     startGoogleTransition(async () => {
                       try {
@@ -119,8 +121,16 @@ export const SignInForm = ({
                           fill="currentColor"
                         />
                       </svg>
-                      Sign in with Google
+                      Sign in with Google{" "}
                     </>
+                  )}
+                  {lastLoginMethod === "google" && (
+                    <Badge
+                      variant="outline"
+                      className="absolute -right-[1.5px] -top-2 bg-primary text-primary-foreground text-[9px] border-none"
+                    >
+                      last used
+                    </Badge>
                   )}
                 </Button>
 
@@ -136,7 +146,17 @@ export const SignInForm = ({
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Email</FormLabel>
+                        <div className="flex items-center justify-between">
+                          <FormLabel>Email</FormLabel>
+                          {lastLoginMethod === "email" && (
+                            <Badge
+                              variant="outline"
+                              className="bg-primary text-primary-foreground text-[9px] border-none"
+                            >
+                              last used
+                            </Badge>
+                          )}
+                        </div>
                         <FormControl>
                           <Input placeholder="m@example.com" {...field} />
                         </FormControl>
@@ -155,7 +175,7 @@ export const SignInForm = ({
                           <FormLabel>Password</FormLabel>
                           <Link
                             href="/forgot-password"
-                            className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                            className="ml-auto inline-block text-xs underline-offset-4 hover:underline"
                           >
                             Forgot your password?
                           </Link>

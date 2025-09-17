@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
-import { organization } from "better-auth/plugins";
+import { lastLoginMethod, organization } from "better-auth/plugins";
 // import { Resend } from "resend";
 
 import { db } from "@/db/drizzle";
@@ -66,6 +66,7 @@ export const auth = betterAuth({
   },
   plugins: [
     nextCookies(),
+    lastLoginMethod({ storeInDatabase: true }),
     organization({
       schema: {
         organization: {

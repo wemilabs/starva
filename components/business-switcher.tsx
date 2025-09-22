@@ -42,6 +42,7 @@ import {
 
 export function BusinessSwitcher() {
   const [open, setOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [value, setValue] = useState("");
   const { data: businesses } = useListOrganizations();
   const { isMobile, state: sidebarState } = useSidebar();
@@ -53,6 +54,7 @@ export function BusinessSwitcher() {
   // const handleBusinessChange = async (organizationId: string) => {};
 
   // TODO: add logo for business so when collapsed sidebar it shows the logo
+  // TODO: Once we hover a business, the ordered number changes to edit and delete icons, like the list in windsurf board
 
   return (
     <SidebarMenu className="group-data-[collapsible=icon]:mt-4">
@@ -86,7 +88,7 @@ export function BusinessSwitcher() {
                     businesses?.map((business, index) => (
                       <Link
                         key={business.id}
-                        href={`/business/${business.slug}`}
+                        href={`/businesses/${business.slug}`}
                       >
                         <CommandItem
                           value={business.name}
@@ -117,12 +119,13 @@ export function BusinessSwitcher() {
                 <CommandSeparator />
                 <CommandGroup>
                   <CommandItem className="pt-1.5 pb-0 px-0">
-                    <Dialog>
+                    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                       <DialogTrigger asChild>
                         <Button
                           size="sm"
                           variant="ghost"
                           className="text-muted-foreground hover:text-muted-foreground"
+                          onClick={() => setDialogOpen(true)}
                         >
                           <div className="border rounded-md p-1">
                             <Plus className="size-4" />
@@ -137,7 +140,9 @@ export function BusinessSwitcher() {
                             Register a new business to get started.
                           </DialogDescription>
                         </DialogHeader>
-                        <RegisterBusinessForm />
+                        <RegisterBusinessForm
+                          onSuccess={() => setDialogOpen(false)}
+                        />
                       </DialogContent>
                     </Dialog>
                   </CommandItem>

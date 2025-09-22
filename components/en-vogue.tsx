@@ -2,7 +2,7 @@ import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { fallbackProductData } from "@/data/fallback-product-data";
 import { FilteredProducts } from "./products/filtered-products";
-import { getProducts } from "@/server/products";
+import { getProducts } from "@/data/products";
 
 export async function EnVogue() {
   const products = await getProducts();

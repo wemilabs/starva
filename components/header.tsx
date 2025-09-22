@@ -12,9 +12,8 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { getBusinessesPerUser } from "@/data/businesses";
 import { verifySession } from "@/data/user-session";
-import { cn } from "@/lib/utils";
-import { getBusinesses } from "@/server/businesses";
 import { RegisterBusinessForm } from "./forms/register-business-form";
 // import { SearchForm } from "./forms/search-form";
 
@@ -24,7 +23,7 @@ export async function Header({
   baseCrumbs: { label: string; href: string }[];
 }) {
   const { success } = await verifySession();
-  const businesses = success ? await getBusinesses() : [];
+  const businesses = success ? await getBusinessesPerUser() : [];
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 px-4 justify-between transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 sticky top-0 z-11 border-b rounded-lg bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/50">

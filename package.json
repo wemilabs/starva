@@ -7,7 +7,8 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "biome check",
-    "format": "biome format --write"
+    "format": "biome format --write",
+    "db-push": "npx drizzle-kit push"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",

@@ -219,7 +219,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </Link>
           </SidebarMenuButton>
         ) : (
-          <Card className="border border-dashed bg-sidebar">
+          <Card className="border border-dashed border-muted-foreground/50 bg-sidebar">
             <CardContent className="flex flex-col gap-2">
               <p className="text-xs text-muted-foreground text-center">
                 Start this pleasant and better experience

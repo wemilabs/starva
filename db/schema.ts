@@ -1,5 +1,15 @@
 import { relations } from "drizzle-orm";
-import { boolean, pgEnum, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import {
+  boolean,
+  decimal,
+  index,
+  integer,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  unique,
+} from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -85,13 +95,7 @@ export const organizationRelations = relations(
   })
 );
 
-export type Organization = typeof organization.$inferSelect & {
-  owner: typeof user.$inferSelect;
-};
-
 export const role = pgEnum("role", ["member", "admin", "owner"]);
-
-export type Role = (typeof role.enumValues)[number];
 
 export const member = pgTable("member", {
   id: text("id").primaryKey(),
@@ -116,12 +120,6 @@ export const memberRelations = relations(member, ({ one }) => ({
   }),
 }));
 
-export type Member = typeof member.$inferSelect & {
-  user: typeof user.$inferSelect;
-};
-
-export type User = typeof user.$inferSelect;
-
 export const invitation = pgTable("invitation", {
   id: text("id").primaryKey(),
   organizationId: text("organization_id")
@@ -136,6 +134,116 @@ export const invitation = pgTable("invitation", {
     .references(() => user.id, { onDelete: "cascade" }),
 });
 
+export const invitationRelations = relations(invitation, ({ one }) => ({
+  organization: one(organization, {
+    fields: [invitation.organizationId],
+    references: [organization.id],
+  }),
+  inviter: one(user, {
+    fields: [invitation.inviterId],
+    references: [user.id],
+  }),
+}));
+
+export const status = pgEnum("status", ["active", "inactive", "archived"]);
+
+export const product = pgTable(
+  "product",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    slug: text("slug").unique().notNull(),
+    description: text("description").notNull(),
+    price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+    likesCount: integer("likes_count").default(0),
+    status: status("status").default("active").notNull(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    calories: integer("calories"),
+    imageUrl: text("image_url"),
+    brand: text("brand"),
+    createdAt: timestamp("created_at")
+      .$defaultFn(() => /* @__PURE__ */ new Date())
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .$defaultFn(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (t) => [
+    index("product_slug_idx").on(t.slug),
+    index("product_org_idx").on(t.organizationId),
+  ]
+);
+
+export const tag = pgTable(
+  "tag",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    slug: text("slug").unique().notNull(),
+    description: text("description"),
+    status: status("status").default("active").notNull(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at")
+      .$defaultFn(() => /* @__PURE__ */ new Date())
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .$defaultFn(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  },
+  (t) => [
+    index("tag_slug_idx").on(t.slug),
+    index("tag_org_idx").on(t.organizationId),
+  ]
+);
+
+export const productTag = pgTable(
+  "product_tag",
+  {
+    id: text("id").primaryKey(),
+    productId: text("product_id")
+      .notNull()
+      .references(() => product.id, {
+        onDelete: "cascade",
+      }),
+    tagId: text("tag_id")
+      .notNull()
+      .references(() => tag.id, { onDelete: "cascade" }),
+  },
+  (t) => [
+    index("product_tag_product_idx").on(t.productId),
+    index("product_tag_tag_idx").on(t.tagId),
+    unique("product_tag_unique").on(t.productId, t.tagId),
+  ]
+);
+
+export const productRelations = relations(product, ({ one, many }) => ({
+  organization: one(organization, {
+    fields: [product.organizationId],
+    references: [organization.id],
+  }),
+  productTags: many(productTag),
+}));
+
+export const tagRelations = relations(tag, ({ many }) => ({
+  productTags: many(productTag),
+}));
+
+export type Organization = typeof organization.$inferSelect & {
+  owner: typeof user.$inferSelect;
+};
+export type Role = (typeof role.enumValues)[number];
+export type Member = typeof member.$inferSelect & {
+  user: typeof user.$inferSelect;
+};
+export type User = typeof user.$inferSelect;
+export type Product = typeof product.$inferSelect;
+export type Tag = typeof tag.$inferSelect;
+export type Status = (typeof status.enumValues)[number];
+
 export const schema = {
   user,
   session,
@@ -144,6 +252,12 @@ export const schema = {
   organization,
   member,
   invitation,
+  product,
+  tag,
+  productTag,
   organizationRelations,
   memberRelations,
+  invitationRelations,
+  productRelations,
+  tagRelations,
 };

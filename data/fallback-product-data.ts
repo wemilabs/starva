@@ -1,10 +1,10 @@
-export const fallbackFoodData = [
+export const fallbackProductData = [
   {
     id: 1,
     name: "Closeup spicy cooked rice + meat",
     image:
       "https://img.freepik.com/premium-photo/closeup-spicy-cooked-rice-with-meat_974629-173776.jpg",
-    price: 100,
+    price: 5000,
     description: "Description",
     likes: 100,
     orderedXTimes: 100,

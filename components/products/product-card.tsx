@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 
-type FoodItemCardProps = {
+type ProductCardProps = {
   id: number;
   name: string;
   image: string;
@@ -25,7 +25,7 @@ const getInitials = (name: string) =>
     .slice(0, 2)
     .toUpperCase();
 
-export function FoodItemCard({
+export function ProductCard({
   name,
   image,
   price,
@@ -33,7 +33,7 @@ export function FoodItemCard({
   likes,
   orderedXTimes,
   itemFrom,
-}: FoodItemCardProps) {
+}: ProductCardProps) {
   return (
     <Card className="group relative overflow-hidden p-0">
       <div className="relative aspect-[16/9]">
@@ -44,7 +44,6 @@ export function FoodItemCard({
           priority
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        {/* <div className="absolute inset-0 bg-[radial-gradient(90%_80%_at_70%_10%,rgba(255,255,255,0.05)_0%,rgba(0,0,0,0.2)_40%,rgba(0,0,0,0.6)_100%)]" /> */}
         <div className="absolute inset-0 bg-gradient-to-tr from-black/70 via-black/30 to-transparent" />
       </div>
       <div className="absolute inset-0 flex flex-col justify-end p-6 text-white">
@@ -56,7 +55,7 @@ export function FoodItemCard({
           <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[10px] font-medium tracking-wide text-white/90 ring-1 ring-white/15 backdrop-blur-sm">
             {new Intl.NumberFormat("en-US", {
               style: "currency",
-              currency: "USD",
+              currency: "RWF",
               maximumFractionDigits: 0,
             }).format(price)}
           </div>

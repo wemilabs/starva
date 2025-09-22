@@ -1,22 +1,14 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { connection } from "next/server";
 import "./globals.css";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { AppSidebar } from "@/components/app-sidebar";
-import { ModeToggle } from "@/components/mode-toggle";
-import { NavBreadcrumbs } from "@/components/nav-breadcrumbs";
+import { Header } from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Separator } from "@/components/ui/separator";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { BreadcrumbsProvider } from "@/contexts/breadcrumbs-context";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Header } from "@/components/header";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,13 +28,14 @@ export const metadata: Metadata = {
 
 const baseCrumbs = [{ label: "Home", href: "/" }];
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
   auth,
 }: Readonly<{
   children: React.ReactNode;
   auth: React.ReactNode;
 }>) {
+  await connection();
   return (
     <html lang="en" suppressHydrationWarning>
       <body

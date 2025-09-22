@@ -1,9 +1,12 @@
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { FoodItemCard } from "@/components/food/food-item-card";
-import { fallbackFoodData } from "@/data/fallback-food-data";
+import { fallbackProductData } from "@/data/fallback-product-data";
+import { FilteredProducts } from "./products/filtered-products";
+import { getProducts } from "@/server/products";
 
-export function EnVogue() {
+export async function EnVogue() {
+  const products = await getProducts();
+
   return (
     <section className="mx-auto flex w-full max-w-[1264px] flex-1 flex-col gap-4 mt-8">
       <div className="flex flex-col gap-1 py-2">
@@ -24,9 +27,9 @@ export function EnVogue() {
         <div className="flex w-full flex-col gap-6 flex-1">
           <div className="flex-1 pt-4">
             <div className="grid grid-cols-1 justify-center gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {fallbackFoodData.map((food) => (
-                <FoodItemCard key={food.id} {...food} />
-              ))}
+              <FilteredProducts
+                data={(products.data as any) ?? fallbackProductData}
+              />
             </div>
           </div>
         </div>

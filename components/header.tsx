@@ -16,6 +16,7 @@ import { verifySession } from "@/data/user-session";
 import { cn } from "@/lib/utils";
 import { getBusinesses } from "@/server/businesses";
 import { RegisterBusinessForm } from "./forms/register-business-form";
+// import { SearchForm } from "./forms/search-form";
 
 export async function Header({
   baseCrumbs,
@@ -26,7 +27,7 @@ export async function Header({
   const businesses = success ? await getBusinesses() : [];
 
   return (
-    <header className="flex h-16 shrink-0 items-center gap-2 px-4 justify-between transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 sticky top-0 z-10 border-b rounded-lg bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/50">
+    <header className="flex h-16 shrink-0 items-center gap-2 px-4 justify-between transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 sticky top-0 z-11 border-b rounded-lg bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/50">
       <div className="flex items-center gap-2">
         <SidebarTrigger className="-ml-1" />
         <Separator
@@ -35,9 +36,12 @@ export async function Header({
         />
         <NavBreadcrumbs base={baseCrumbs} />
       </div>
+      {/* <div>
+        <div>Search input drops here once scrolled at a certain level</div>
+      </div> */}
       <div className="flex items-center gap-2">
         {!success ? (
-          <Button asChild variant="default" size="sm" className={cn()}>
+          <Button asChild variant="default" size="sm">
             <Link href="/sign-in">
               <span>Sign In</span>
             </Link>

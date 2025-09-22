@@ -90,7 +90,7 @@ export const SignInForm = ({
                       try {
                         await signIn.social({
                           provider: "google",
-                          callbackURL: "/dashboard",
+                          callbackURL: "/",
                           errorCallbackURL: "/error",
                         });
                       } catch (error: unknown) {

@@ -19,7 +19,7 @@ export const fallbackProductData = [
     name: "Closeup spicy cooked rice + meat - 2",
     image:
       "https://img.freepik.com/premium-photo/closeup-spicy-cooked-rice-with-meat_636537-35873.jpg",
-    price: 100,
+    price: 6000,
     description: "Description",
     likes: 100,
     orderedXTimes: 100,
@@ -34,7 +34,7 @@ export const fallbackProductData = [
     name: "Closeup spicy cooked rice + meat - 3",
     image:
       "https://img.freepik.com/premium-photo/closeup-spicy-cooked-rice-with-meat_974629-173891.jpg",
-    price: 100,
+    price: 7000,
     description: "Description",
     likes: 100,
     orderedXTimes: 100,
@@ -49,7 +49,7 @@ export const fallbackProductData = [
     name: "Panned fish + fries + sauce",
     image:
       "https://th.bing.com/th/id/R.fca48b13c3ceda7275fb2333765dd4d5?rik=GJXlmgOf9aRFiQ&pid=ImgRaw&r=0",
-    price: 100,
+    price: 6500,
     description: "Description",
     likes: 100,
     orderedXTimes: 100,
@@ -64,7 +64,7 @@ export const fallbackProductData = [
     name: "Shawarma taste",
     image:
       "https://tse2.mm.bing.net/th/id/OIP.9HdNj8GYwMgoN5DZji2jmQHaHa?rs=1&pid=ImgDetMain&o=7&rm=3",
-    price: 100,
+    price: 4500,
     description: "Description",
     likes: 100,
     orderedXTimes: 100,
@@ -79,7 +79,7 @@ export const fallbackProductData = [
     name: "Pepperoni Pizza",
     image:
       "https://www.mashed.com/img/gallery/why-pizza-always-tastes-better-at-a-restaurant/l-intro-1670705601.jpg",
-    price: 100,
+    price: 10000,
     description: "Appreciate the unique flavour of our pepperoni pizza",
     likes: 100,
     orderedXTimes: 100,
@@ -94,7 +94,7 @@ export const fallbackProductData = [
     name: "Champion Breakfast Burger",
     image:
       "https://th.bing.com/th/id/R.def69b6da763f9ad39188ecc6d1b5100?rik=RA2UOYeRo968dQ&pid=ImgRaw&r=0",
-    price: 100,
+    price: 6000,
     description:
       "A mix of fresh meat and vegetables, beacon, egg, lettuce, tomato, onion, pickles, mayonnaise, ketchup, mustard, chili sauce, salt, pepper",
     likes: 100,

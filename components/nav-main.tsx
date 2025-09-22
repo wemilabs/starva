@@ -1,6 +1,12 @@
 "use client";
 
-import { ChevronRight, Globe, Home, type LucideIcon } from "lucide-react";
+import {
+  ChevronRight,
+  Globe,
+  Home,
+  Store,
+  type LucideIcon,
+} from "lucide-react";
 import Link from "next/link";
 import {
   Collapsible,
@@ -44,13 +50,21 @@ export function NavMain({
           </SidebarMenuButton>
         </SidebarMenuItem>
         <SidebarMenuItem className="mt-1">
+          <SidebarMenuButton asChild tooltip="Merchants">
+            <Link href="/merchants">
+              <Store />
+              <span>Merchants</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+        {/* <SidebarMenuItem className="mt-1">
           <SidebarMenuButton asChild tooltip="Trends">
             <Link href="/trends">
               <Globe />
               <span>Trends</span>
             </Link>
           </SidebarMenuButton>
-        </SidebarMenuItem>
+        </SidebarMenuItem> */}
       </SidebarMenu>
       <SidebarGroupLabel className="mt-6 group-data-[collapsible=icon]:mt-0">
         Board

@@ -1,7 +1,7 @@
-"use server";
+import "server-only";
+import { eq } from "drizzle-orm";
 // import { verifySession } from "@/data/user-session";
 import { cache } from "react";
-import { eq } from "drizzle-orm";
 
 import { db } from "@/db/drizzle";
 import { product } from "@/db/schema";

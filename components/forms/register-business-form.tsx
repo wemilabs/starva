@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, LogIn } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useEffect, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { organization, useSession } from "@/lib/auth-client";
+import { slugify } from "@/lib/utils";
 import { Card, CardContent } from "../ui/card";
 
 const formSchema = z.object({
@@ -26,7 +27,11 @@ const formSchema = z.object({
   slug: z.string().min(2).max(50),
 });
 
-export function RegisterBusinessForm() {
+interface RegisterBusinessFormProps {
+  onSuccess?: () => void;
+}
+
+export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const { data: session } = useSession();
@@ -39,6 +44,17 @@ export function RegisterBusinessForm() {
     },
   });
   const ownerId = session?.user?.id;
+
+  const watchedName = form.watch("name");
+
+  useEffect(() => {
+    if (watchedName) {
+      const slugValue = slugify(watchedName);
+      form.setValue("slug", slugValue, { shouldValidate: true });
+    } else {
+      form.setValue("slug", "", { shouldValidate: false });
+    }
+  }, [watchedName, form]);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     startTransition(async () => {
@@ -57,6 +73,7 @@ export function RegisterBusinessForm() {
           ownerId,
         });
         toast.success("Business registered successfully");
+        onSuccess?.();
       } catch (error: unknown) {
         const e = error as Error;
         console.error(e.message);
@@ -90,7 +107,12 @@ export function RegisterBusinessForm() {
               <FormItem>
                 <FormLabel>Slug</FormLabel>
                 <FormControl>
-                  <Input placeholder="my-business" {...field} />
+                  <Input
+                    placeholder="my-business"
+                    readOnly
+                    className="bg-muted cursor-not-allowed text-muted-foreground"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

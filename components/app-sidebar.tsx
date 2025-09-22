@@ -59,44 +59,44 @@ const data = {
     //     },
     //   ],
     // },
-    {
-      title: "History",
-      url: "#",
-      icon: Clock,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Favorites",
-      url: "#",
-      icon: Star,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
+    // {
+    //   title: "History",
+    //   url: "#",
+    //   icon: Clock,
+    //   items: [
+    //     {
+    //       title: "Genesis",
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Explorer",
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Quantum",
+    //       url: "#",
+    //     },
+    //   ],
+    // },
+    // {
+    //   title: "Favorites",
+    //   url: "#",
+    //   icon: Star,
+    //   items: [
+    //     {
+    //       title: "Genesis",
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Explorer",
+    //       url: "#",
+    //     },
+    //     {
+    //       title: "Quantum",
+    //       url: "#",
+    //     },
+    //   ],
+    // },
     // {
     //   title: "Documentation",
     //   url: "#",
@@ -129,16 +129,12 @@ const data = {
           title: "General",
           url: "#",
         },
-        {
-          title: "Team",
-          url: "#",
-        },
+        // {
+        //   title: "Team",
+        //   url: "#",
+        // },
         {
           title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
           url: "#",
         },
       ],
@@ -150,16 +146,16 @@ const data = {
       url: "#",
       icon: CircleQuestionMark,
     },
-    {
-      title: "Blog",
-      url: "#",
-      icon: BookOpenText,
-    },
-    {
-      title: "Support",
-      url: "#",
-      icon: LifeBuoy,
-    },
+    // {
+    //   title: "Blog",
+    //   url: "#",
+    //   icon: BookOpenText,
+    // },
+    // {
+    //   title: "Support",
+    //   url: "#",
+    //   icon: LifeBuoy,
+    // },
     {
       title: "Feedback",
       url: "#",

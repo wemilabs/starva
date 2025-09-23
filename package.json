@@ -23,6 +23,7 @@
     "@radix-ui/react-separator": "^1.1.7",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tooltip": "^1.2.8",
+    "@uploadthing/react": "^7.3.3",
     "better-auth": "^1.3.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -38,6 +39,7 @@
     "react-hook-form": "^7.62.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
+    "uploadthing": "^7.7.4",
     "zod": "^4.1.5"
   },
   "devDependencies": {

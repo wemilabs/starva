@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { relations } from "drizzle-orm";
 import {
   boolean,
@@ -150,7 +151,9 @@ export const status = pgEnum("status", ["active", "inactive", "archived"]);
 export const product = pgTable(
   "product",
   {
-    id: text("id").primaryKey(),
+    id: text("id")
+      .$defaultFn(() => randomUUID())
+      .primaryKey(),
     name: text("name").notNull(),
     slug: text("slug").unique().notNull(),
     description: text("description").notNull(),

@@ -14,6 +14,8 @@ export const fallbackProductData = [
         "https://media.istockphoto.com/photos/restaurant-sign-picture-id182438072?k=6&m=182438072&s=612x612&w=0&h=Fwh-8P044GqI_qh0Bms-3adZ7v1bFwscs5MLAR2rVJU=",
     },
   },
+
+  // and what about tag when adding a new product? remember how we planned to do it
   {
     id: 2,
     name: "Closeup spicy cooked rice + meat - 2",

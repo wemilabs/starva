@@ -1,39 +1,41 @@
-import { Heart, Users } from "lucide-react";
+import { Heart } from "lucide-react";
 import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
+import type { Product } from "@/db/schema";
 
-type ProductCardProps = {
-  id: number;
-  name: string;
-  image: string;
-  price: number;
-  description: string;
-  likes: number;
-  orderedXTimes: number;
-  itemFrom: {
-    name: string;
-    image: string;
-  };
+type Props = Product & {
+  organization?: { id: string; name: string; logo: string | null } | null;
 };
 
-const getInitials = (name: string) =>
-  name
+function getInitials(name?: string | null) {
+  if (!name) return "";
+  return name
     .split(" ")
+    .filter(Boolean)
     .map((n) => n[0])
     .join("")
     .slice(0, 2)
     .toUpperCase();
+}
 
 export function ProductCard({
   name,
-  image,
+  imageUrl,
   price,
   description,
-  likes,
-  orderedXTimes,
-  itemFrom,
-}: ProductCardProps) {
+  likesCount,
+  brand,
+  organization,
+}: Props) {
+  const priceNumber = Number(price as unknown as any) || 0;
+  const image =
+    imageUrl ||
+    "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=2070&auto=format&fit=crop";
+
+  const orgName = organization?.name ?? null;
+  const orgLogo = organization?.logo ?? null;
+
   return (
     <Card className="group relative overflow-hidden p-0">
       <div className="relative aspect-[16/9]">
@@ -48,45 +50,47 @@ export function ProductCard({
       </div>
       <div className="absolute inset-0 flex flex-col justify-end p-6 text-white">
         <div className="mb-2 flex items-center justify-between gap-2">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[10px] font-medium tracking-wide text-white/90 ring-1 ring-white/15 backdrop-blur-sm">
-            <span className="h-1.5 w-1.5 rounded-full bg-orange-400" />
-            {itemFrom.name}
-          </div>
+          {brand ? (
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[10px] font-medium tracking-wide text-white/90 ring-1 ring-white/15 backdrop-blur-sm">
+              <span className="h-1.5 w-1.5 rounded-full bg-orange-400" />
+              {brand}
+            </div>
+          ) : (
+            <span />
+          )}
           <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[10px] font-medium tracking-wide text-white/90 ring-1 ring-white/15 backdrop-blur-sm">
             {new Intl.NumberFormat("en-US", {
               style: "currency",
               currency: "RWF",
               maximumFractionDigits: 0,
-            }).format(price)}
+            }).format(priceNumber)}
           </div>
         </div>
         <h3 className="text-balance text-xl font-semibold leading-tight">
           {name}
         </h3>
-        <p className="mt-2 max-w-[46ch] text-xs text-white/80">{description}</p>
+        {description ? (
+          <p className="mt-2 max-w-[46ch] text-xs text-white/80">
+            {description}
+          </p>
+        ) : null}
         <div className="mt-4 flex items-center justify-between">
           <div className="inline-flex items-center gap-2 rounded-full bg-black/30 ring-1 ring-white/10 backdrop-blur-sm">
             <Avatar className="size-9 ring-1 ring-white/20">
               <AvatarImage
-                src={itemFrom.image}
-                alt={itemFrom.name}
+                src={orgLogo || ""}
+                alt={orgName || ""}
                 className="object-cover"
               />
               <AvatarFallback className="text-muted-foreground text-xs">
-                {getInitials(itemFrom.name)}
+                {getInitials(orgName)}
               </AvatarFallback>
             </Avatar>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-2.5 py-1 text-white/90 ring-1 ring-white/10 backdrop-blur-sm">
-              <Users className="size-3.5" aria-hidden="true" />
-              <span className="text-[11px]">{orderedXTimes}</span>
-            </div>
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-2.5 py-1 text-white/90 ring-1 ring-white/10 backdrop-blur-sm">
-              <Heart className="size-3.5" aria-hidden="true" />
-              <span className="text-[11px]">{likes}</span>
-            </div>
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-2.5 py-1 text-white/90 ring-1 ring-white/10 backdrop-blur-sm">
+            <Heart className="size-3.5" aria-hidden="true" />
+            <span className="text-[11px]">{likesCount ?? 0}</span>
           </div>
         </div>
       </div>

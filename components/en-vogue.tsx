@@ -1,8 +1,7 @@
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { fallbackProductData } from "@/data/fallback-product-data";
-import { FilteredProducts } from "./products/filtered-products";
 import { getProducts } from "@/data/products";
+import { FilteredProducts } from "./products/filtered-products";
 
 export async function EnVogue() {
   const products = await getProducts();
@@ -27,9 +26,7 @@ export async function EnVogue() {
         <div className="flex w-full flex-col gap-6 flex-1">
           <div className="flex-1 pt-4">
             <div className="grid grid-cols-1 justify-center gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              <FilteredProducts
-                data={(products.data as any) ?? fallbackProductData}
-              />
+              <FilteredProducts data={products ?? []} />
             </div>
           </div>
         </div>

@@ -3,6 +3,7 @@
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -53,7 +54,6 @@ export function BusinessSwitcher() {
 
   // const handleBusinessChange = async (organizationId: string) => {};
 
-  // TODO: add logo for business so when collapsed sidebar it shows the logo
   // TODO: Once we hover a business, the ordered number changes to edit and delete icons, like the list in windsurf board
 
   return (
@@ -67,10 +67,29 @@ export function BusinessSwitcher() {
               aria-expanded={open}
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground justify-between"
             >
-              {value
-                ? businesses?.find((business) => business.name === value)?.name
-                : "Select business..."}
-              <ChevronsUpDown className="opacity-50 group-data-[collapsible=icon]:hidden" />
+              {(() => {
+                const selected = businesses?.find((b) => b.name === value);
+                const label = selected?.name ?? "Select business...";
+                return (
+                  <div className="flex w-full items-center gap-2">
+                    <Avatar className="size-6">
+                      <AvatarImage
+                        src={
+                          (selected?.logo as string | undefined) ?? undefined
+                        }
+                        alt={selected?.name ?? "Business logo"}
+                      />
+                      <AvatarFallback>
+                        {(selected?.name ?? "B").slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span className="truncate group-data-[collapsible=icon]:hidden">
+                      {label}
+                    </span>
+                    <ChevronsUpDown className="ml-auto opacity-50 group-data-[collapsible=icon]:hidden size-4" />
+                  </div>
+                );
+              })()}
             </SidebarMenuButton>
           </PopoverTrigger>
           <PopoverContent
@@ -100,18 +119,32 @@ export function BusinessSwitcher() {
                           }}
                           className="py-2.5"
                         >
-                          {business.name}
-                          <Check
-                            className={cn(
-                              "ml-auto",
-                              value === business.name
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                          <span className="text-muted-foreground text-xs">
-                            ⌘{index + 1}
-                          </span>
+                          <div className="flex w-full items-center gap-2">
+                            <Avatar className="size-6">
+                              <AvatarImage
+                                src={
+                                  (business.logo as string | undefined) ??
+                                  undefined
+                                }
+                                alt={business.name}
+                              />
+                              <AvatarFallback>
+                                {business.name.slice(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="truncate">{business.name}</span>
+                            <Check
+                              className={cn(
+                                "ml-auto",
+                                value === business.name
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
+                            />
+                            <span className="text-muted-foreground text-xs">
+                              ⌘{index + 1}
+                            </span>
+                          </div>
                         </CommandItem>
                       </Link>
                     ))}

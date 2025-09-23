@@ -1,25 +1,49 @@
 import "server-only";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 // import { verifySession } from "@/data/user-session";
 import { cache } from "react";
 
 import { db } from "@/db/drizzle";
 import { product } from "@/db/schema";
+// import { getCurrentUser } from "@/server/users";
 
 export const getProducts = cache(async () => {
   const products = await db.query.product.findMany({
     where: eq(product.status, "active"),
+    with: {
+      organization: {
+        columns: {
+          id: true,
+          name: true,
+          logo: true,
+        },
+      },
+    },
   });
 
-  return { message: "success", data: /*products*/ null };
+  return products;
 });
 
-// export const getProductById = cache(async (productId: string) => {
-//   await verifySession();
-
-//   const product = await db.query.product.findFirst({
-//     where: eq(product.id, productId),
-//   });
-
-//   return { message: "success", data: product };
-// });
+export async function getProductsPerBusiness(organizationId: string) {
+  try {
+    const products = await db.query.product.findMany({
+      where: and(
+        eq(product.organizationId, organizationId),
+        eq(product.status, "active")
+      ),
+      with: {
+        organization: {
+          columns: {
+            id: true,
+            name: true,
+            logo: true,
+          },
+        },
+      },
+    });
+    return products;
+  } catch (error) {
+    console.error(error);
+    return [] as (typeof product.$inferSelect)[];
+  }
+}

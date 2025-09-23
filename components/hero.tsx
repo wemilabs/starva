@@ -28,7 +28,7 @@ export function Hero() {
     <section className="overflow-hidden [--color-primary-foreground:var(--color-white)] [--color-primary:var(--color-orange-600)] rounded-lg">
       <div className="relative mx-auto max-w-full px-6 py-20 lg:pt-30">
         <Image
-          src="https://ubrw5iu3hw.ufs.sh/f/TFsxjrtdWsEImBqksMSp37LwhtgkreHYdqObMmJu5FG9zDis"
+          src="https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dz7JnPyW2kz06ogjwmFnOXWGv2lN4VS7CTLua"
           alt="Pre-prepared food showcasing ready-eat delicious meals"
           width={1000}
           height={1000}

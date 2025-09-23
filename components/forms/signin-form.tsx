@@ -158,7 +158,11 @@ export const SignInForm = ({
                           )}
                         </div>
                         <FormControl>
-                          <Input placeholder="m@example.com" {...field} />
+                          <Input
+                            placeholder="m@example.com"
+                            disabled
+                            {...field}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -184,6 +188,7 @@ export const SignInForm = ({
                           <Input
                             type="password"
                             placeholder="********"
+                            disabled
                             {...field}
                           />
                         </FormControl>
@@ -196,8 +201,8 @@ export const SignInForm = ({
                 <div className="flex flex-col gap-3">
                   <Button
                     type="submit"
-                    className="w-full"
-                    disabled={form.formState.isSubmitting}
+                    // disabled={form.formState.isSubmitting}
+                    disabled
                   >
                     {form.formState.isSubmitting ? (
                       <div className="flex items-center gap-2">

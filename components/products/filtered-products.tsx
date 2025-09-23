@@ -1,24 +1,18 @@
 "use client";
 
 import { useQueryState } from "nuqs";
-// import { Product } from "@/db/schema";
+import type { Product } from "@/db/schema";
 import { ProductCard } from "./product-card";
 
-type ProductProps = {
-  id: number;
-  name: string;
-  image: string;
-  price: number;
-  description: string;
-  likes: number;
-  orderedXTimes: number;
-  itemFrom: {
-    name: string;
-    image: string;
-  };
+type ProductWithOrg = Product & {
+  organization?: { id: string; name: string; logo: string | null } | null;
 };
 
-export function FilteredProducts({ data }: { data: ProductProps[] }) {
+type Props = {
+  data: ProductWithOrg[];
+};
+
+export function FilteredProducts({ data }: Props) {
   const [search] = useQueryState("search", { defaultValue: "" });
   const filteredProducts = data?.filter((product) =>
     product.name.toLowerCase().includes(search.toLowerCase())

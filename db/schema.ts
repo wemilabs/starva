@@ -146,7 +146,11 @@ export const invitationRelations = relations(invitation, ({ one }) => ({
   }),
 }));
 
-export const status = pgEnum("status", ["active", "inactive", "archived"]);
+export const status = pgEnum("status", [
+  "in_stock",
+  "out_of_stock",
+  "archived",
+]);
 
 export const product = pgTable(
   "product",
@@ -159,7 +163,7 @@ export const product = pgTable(
     description: text("description").notNull(),
     price: decimal("price", { precision: 10, scale: 2 }).notNull(),
     likesCount: integer("likes_count").default(0),
-    status: status("status").default("active").notNull(),
+    status: status("status").default("in_stock").notNull(),
     organizationId: text("organization_id")
       .notNull()
       .references(() => organization.id, { onDelete: "cascade" }),
@@ -186,7 +190,7 @@ export const tag = pgTable(
     name: text("name").notNull(),
     slug: text("slug").unique().notNull(),
     description: text("description"),
-    status: status("status").default("active").notNull(),
+    status: status("status").default("in_stock").notNull(),
     organizationId: text("organization_id")
       .notNull()
       .references(() => organization.id, { onDelete: "cascade" }),

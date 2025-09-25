@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  devIndicators: {
+    position: "top-left",
+  },
   images: {
     remotePatterns: [
       {
@@ -9,6 +12,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  typedRoutes: true,
 };
 
 export default nextConfig;

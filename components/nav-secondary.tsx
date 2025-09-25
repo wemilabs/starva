@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
+import type { Route } from "next";
 import Link from "next/link";
-import type * as React from "react";
+import type { ComponentPropsWithoutRef } from "react";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -18,15 +19,15 @@ export function NavSecondary({
     url: string;
     icon: LucideIcon;
   }[];
-} & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
+} & ComponentPropsWithoutRef<typeof SidebarGroup>) {
   return (
     <SidebarGroup {...props}>
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton asChild size="sm">
-                <Link href={item.url}>
+              <SidebarMenuButton asChild size="sm" tooltip={item.title}>
+                <Link href={item.url as Route}>
                   <item.icon />
                   <span>{item.title}</span>
                 </Link>

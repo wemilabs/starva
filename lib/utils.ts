@@ -5,7 +5,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// Helper function to slugify text
 export const slugify = (text: string): string => {
   return text
     .toLowerCase()
@@ -14,4 +13,8 @@ export const slugify = (text: string): string => {
     .replace(/[^\w-]+/g, "") // Remove non-alphanumeric characters except hyphens
     .replace(/--+/g, "-") // Replace multiple hyphens with single hyphen
     .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
+};
+
+export const removeUnderscoreAndCapitalize = (text: string): string => {
+  return text.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
 };

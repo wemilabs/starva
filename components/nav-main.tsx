@@ -4,9 +4,10 @@ import {
   ChevronRight,
   Globe,
   Home,
-  Store,
   type LucideIcon,
+  Store,
 } from "lucide-react";
+import type { Route } from "next";
 import Link from "next/link";
 import {
   Collapsible,
@@ -40,7 +41,7 @@ export function NavMain({
 }) {
   return (
     <SidebarGroup>
-      <SidebarMenu className="-mt-1 group-data-[collapsible=icon]:mt-2">
+      <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton asChild tooltip="Home">
             <Link href="/">
@@ -49,7 +50,7 @@ export function NavMain({
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
-        <SidebarMenuItem className="mt-1">
+        <SidebarMenuItem>
           <SidebarMenuButton asChild tooltip="Merchants">
             <Link href="/merchants">
               <Store />
@@ -57,14 +58,14 @@ export function NavMain({
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
-        {/* <SidebarMenuItem className="mt-1">
+        <SidebarMenuItem>
           <SidebarMenuButton asChild tooltip="Trends">
             <Link href="/trends">
               <Globe />
               <span>Trends</span>
             </Link>
           </SidebarMenuButton>
-        </SidebarMenuItem> */}
+        </SidebarMenuItem>
       </SidebarMenu>
       <SidebarGroupLabel className="mt-6 group-data-[collapsible=icon]:mt-0">
         Board
@@ -90,7 +91,7 @@ export function NavMain({
                   {item.items?.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.title}>
                       <SidebarMenuSubButton asChild>
-                        <Link href={subItem.url}>
+                        <Link href={subItem.url as Route}>
                           <span>{subItem.title}</span>
                         </Link>
                       </SidebarMenuSubButton>

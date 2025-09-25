@@ -28,7 +28,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { STATUS_VALUES } from "@/lib/constants";
 import { UploadButton } from "@/lib/uploadthing";
-import { slugify } from "@/lib/utils";
+import { removeUnderscoreAndCapitalize, slugify } from "@/lib/utils";
 import { createProductAction } from "@/server/products";
 
 const schema = z.object({
@@ -112,7 +112,8 @@ export function AddProductForm({
     <Dialog>
       <DialogTrigger asChild>
         <Button className={className} size="sm">
-          <Plus className="mr-2 size-4" /> Add product
+          <Plus className="size-4" />
+          Add product
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[520px]">
@@ -132,7 +133,11 @@ export function AddProductForm({
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Grilled chicken" {...field} />
+                    <Input
+                      placeholder="Grilled chicken"
+                      className="placeholder:text-sm"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -149,7 +154,7 @@ export function AddProductForm({
                     <Input
                       placeholder="grilled-chicken"
                       readOnly
-                      className="bg-muted cursor-not-allowed text-muted-foreground"
+                      className="bg-muted cursor-not-allowed text-muted-foreground placeholder:text-sm"
                       {...field}
                     />
                   </FormControl>
@@ -169,6 +174,7 @@ export function AddProductForm({
                       <Input
                         inputMode="decimal"
                         placeholder="2500"
+                        className="placeholder:text-sm"
                         {...field}
                       />
                     </FormControl>
@@ -246,7 +252,11 @@ export function AddProductForm({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Input placeholder="Short description" {...field} />
+                    <Input
+                      placeholder="Short description"
+                      className="placeholder:text-sm"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -266,7 +276,7 @@ export function AddProductForm({
                     >
                       {STATUS_VALUES.map((v) => (
                         <option key={v} value={v}>
-                          {v.charAt(0).toUpperCase() + v.slice(1)}
+                          {removeUnderscoreAndCapitalize(v)}
                         </option>
                       ))}
                     </select>

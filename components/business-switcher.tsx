@@ -72,7 +72,7 @@ export function BusinessSwitcher() {
                 const label = selected?.name ?? "Select business...";
                 return (
                   <div className="flex w-full items-center gap-2">
-                    <Avatar className="size-6">
+                    <Avatar className="size-6 -ml-1 group-data-[collapsible=icon]:mx-auto">
                       <AvatarImage
                         src={
                           (selected?.logo as string | undefined) ?? undefined
@@ -120,7 +120,7 @@ export function BusinessSwitcher() {
                           className="py-2.5"
                         >
                           <div className="flex w-full items-center gap-2">
-                            <Avatar className="size-6">
+                            <Avatar className="size-6 rounded-lg">
                               <AvatarImage
                                 src={
                                   (business.logo as string | undefined) ??

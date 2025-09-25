@@ -9,7 +9,7 @@ import { product } from "@/db/schema";
 
 export const getProducts = cache(async () => {
   const products = await db.query.product.findMany({
-    where: eq(product.status, "active"),
+    where: eq(product.status, "in_stock"),
     with: {
       organization: {
         columns: {
@@ -29,7 +29,7 @@ export async function getProductsPerBusiness(organizationId: string) {
     const products = await db.query.product.findMany({
       where: and(
         eq(product.organizationId, organizationId),
-        eq(product.status, "active")
+        eq(product.status, "in_stock")
       ),
       with: {
         organization: {

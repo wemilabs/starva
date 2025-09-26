@@ -29,9 +29,6 @@ export function ProductCard({
   organization,
 }: Props) {
   const priceNumber = Number(price as unknown as any) || 0;
-  const image =
-    imageUrl ||
-    "https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=2070&auto=format&fit=crop";
 
   const orgName = organization?.name ?? null;
   const orgLogo = organization?.logo ?? null;
@@ -40,7 +37,10 @@ export function ProductCard({
     <Card className="group relative overflow-hidden p-0">
       <div className="relative aspect-[16/9]">
         <Image
-          src={image}
+          src={
+            imageUrl ??
+            "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6d89s9BRYhvCEDrKcu2HNpfYQo7eR4FUT8wVgS"
+          }
           alt={name}
           fill
           priority

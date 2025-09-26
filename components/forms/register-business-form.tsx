@@ -72,12 +72,16 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
           slug: values.slug,
           ownerId,
         });
-        toast.success("Business registered successfully");
+        toast.success("Success", {
+          description: "A new business has successfully been registered ",
+        });
         onSuccess?.();
       } catch (error: unknown) {
         const e = error as Error;
         console.error(e.message);
-        toast.error("Failed to register business");
+        toast.error("Failure", {
+          description: e.message || "Failed to register business",
+        });
       }
     });
   }

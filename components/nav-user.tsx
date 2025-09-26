@@ -70,7 +70,9 @@ export function NavUser({
             onSuccess: () => {
               router.push("/");
               router.refresh();
-              toast.success("Successfully signed out. See you soon!");
+              toast.success("Success", {
+                description: "Successfully signed out. See you soon!",
+              });
               setIsDialogOpen(false);
             },
           },
@@ -78,7 +80,9 @@ export function NavUser({
       } catch (error: unknown) {
         const e = error as Error;
         console.error("Sign out error:", e.message);
-        toast.error("Failed to sign out");
+        toast.error("Failure", {
+          description: e.message || "Failed to sign out",
+        });
         setIsDialogOpen(false);
       }
     });

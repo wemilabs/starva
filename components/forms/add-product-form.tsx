@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Plus } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -29,7 +29,7 @@ import { Input } from "@/components/ui/input";
 import { STATUS_VALUES } from "@/lib/constants";
 import { UploadButton } from "@/lib/uploadthing";
 import { removeUnderscoreAndCapitalize, slugify } from "@/lib/utils";
-import { createProductAction } from "@/server/products";
+import { createProduct } from "@/server/products";
 
 const schema = z.object({
   name: z.string().min(2, "Name is too short").max(100),
@@ -57,6 +57,7 @@ export function AddProductForm({
   businessSlug,
   className,
 }: Props) {
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const form = useForm<z.infer<typeof schema>>({
@@ -83,35 +84,41 @@ export function AddProductForm({
 
   function onSubmit(values: z.infer<typeof schema>) {
     startTransition(async () => {
-      const res = await createProductAction({
-        organizationId,
-        name: values.name,
-        slug: values.slug,
-        price: values.price,
-        description: values.description || "",
-        imageUrl: values.imageUrl || "",
-        status: values.status,
-        revalidateTargetPath: `/businesses/${businessSlug}`,
-      });
-
-      if (res.ok) {
+      try {
+        await createProduct({
+          organizationId,
+          name: values.name,
+          slug: values.slug,
+          price: values.price,
+          description: values.description || "",
+          imageUrl: values.imageUrl || "",
+          status: values.status,
+          revalidateTargetPath: `/businesses/${businessSlug}`,
+        });
         form.reset();
-        // Dialog will auto-close because trigger is outside; keep simple UX
-      } else {
-        // basic error surfacing in form; you can wire sonner if desired
-        const errors = res.error || {};
-        (Object.keys(errors) as (keyof typeof errors)[]).forEach((key) => {
-          const message = errors[key]?.join(", ") || "Invalid field";
-          form.setError(key as any, { message });
+        toast.success("Success", {
+          description: "A new product has successfully been added",
+        });
+        setDialogOpen(false);
+      } catch (error: unknown) {
+        const e = error as Error;
+        console.error(e);
+        toast.error("Failure", {
+          description:
+            e.message || "Failed to add product. Please try again later.",
         });
       }
     });
   }
 
   return (
-    <Dialog>
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button className={className} size="sm">
+        <Button
+          className={className}
+          size="sm"
+          onClick={() => setDialogOpen(true)}
+        >
           <Plus className="size-4" />
           Add product
         </Button>

@@ -2,6 +2,7 @@
 
 import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import {
+  organization,
   useActiveOrganization,
   useListOrganizations,
   useSession,
@@ -44,17 +46,32 @@ import {
 export function BusinessSwitcher() {
   const [open, setOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [value, setValue] = useState("");
   const { data: businesses } = useListOrganizations();
-  const { isMobile, state: sidebarState } = useSidebar();
-  // const { data: activeBusiness } = useActiveOrganization();
+  const { isMobile } = useSidebar();
+  const { data: activeBusiness } = useActiveOrganization();
   const { data: session } = useSession();
+  const router = useRouter();
 
   const userId = session?.session?.userId;
 
-  // const handleBusinessChange = async (organizationId: string) => {};
+  console.log("Active Business:", activeBusiness);
+  console.log("All Businesses:", businesses);
 
-  // TODO: Once we hover a business, the ordered number changes to edit and delete icons, like the list in windsurf board
+  const handleBusinessChange = async (
+    organizationId: string,
+    organizationSlug: string
+  ) => {
+    try {
+      await organization.setActive({
+        organizationId,
+        organizationSlug,
+      });
+      router.push(`/businesses/${organizationSlug}`);
+      setOpen(false);
+    } catch (error) {
+      console.error("Error switching business:", error);
+    }
+  };
 
   return (
     <SidebarMenu className="group-data-[collapsible=icon]:mt-4">
@@ -68,23 +85,24 @@ export function BusinessSwitcher() {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground justify-between"
             >
               {(() => {
-                const selected = businesses?.find((b) => b.name === value);
-                const label = selected?.name ?? "Select business...";
                 return (
                   <div className="flex w-full items-center gap-2">
                     <Avatar className="size-6 -ml-1 group-data-[collapsible=icon]:mx-auto">
                       <AvatarImage
                         src={
-                          (selected?.logo as string | undefined) ?? undefined
+                          (activeBusiness?.logo as string | undefined) ??
+                          undefined
                         }
-                        alt={selected?.name ?? "Business logo"}
+                        alt={activeBusiness?.name ?? "Business logo"}
                       />
                       <AvatarFallback>
-                        {(selected?.name ?? "B").slice(0, 2).toUpperCase()}
+                        {(activeBusiness?.name ?? "B")
+                          .slice(0, 2)
+                          .toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     <span className="truncate group-data-[collapsible=icon]:hidden">
-                      {label}
+                      {activeBusiness?.name ?? "Select business..."}
                     </span>
                     <ChevronsUpDown className="ml-auto opacity-50 group-data-[collapsible=icon]:hidden size-4" />
                   </div>
@@ -105,48 +123,41 @@ export function BusinessSwitcher() {
                 <CommandGroup>
                   {userId &&
                     businesses?.map((business, index) => (
-                      <Link
+                      <CommandItem
                         key={business.id}
-                        href={`/businesses/${business.slug}`}
+                        value={business.name}
+                        onSelect={() =>
+                          handleBusinessChange(business.id, business.slug)
+                        }
+                        className="py-2.5 cursor-pointer"
                       >
-                        <CommandItem
-                          value={business.name}
-                          onSelect={(currentValue) => {
-                            setValue(
-                              currentValue === value ? "" : currentValue
-                            );
-                            setOpen(false);
-                          }}
-                          className="py-2.5"
-                        >
-                          <div className="flex w-full items-center gap-2">
-                            <Avatar className="size-6 rounded-lg">
-                              <AvatarImage
-                                src={
-                                  (business.logo as string | undefined) ??
-                                  undefined
-                                }
-                                alt={business.name}
-                              />
-                              <AvatarFallback>
-                                {business.name.slice(0, 2).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span className="truncate">{business.name}</span>
-                            <Check
-                              className={cn(
-                                "ml-auto",
-                                value === business.name
-                                  ? "opacity-100"
-                                  : "opacity-0"
-                              )}
+                        <div className="flex w-full items-center gap-2">
+                          <Avatar className="size-6 rounded-lg">
+                            <AvatarImage
+                              src={
+                                (business.logo as string | undefined) ??
+                                undefined
+                              }
+                              alt={business.name}
                             />
-                            <span className="text-muted-foreground text-xs">
-                              ⌘{index + 1}
-                            </span>
-                          </div>
-                        </CommandItem>
-                      </Link>
+                            <AvatarFallback>
+                              {business.name.slice(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="truncate">{business.name}</span>
+                          <Check
+                            className={cn(
+                              "ml-auto",
+                              activeBusiness?.id === business.id
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          <span className="text-muted-foreground text-xs">
+                            ⌘{index + 1}
+                          </span>
+                        </div>
+                      </CommandItem>
                     ))}
                 </CommandGroup>
                 <CommandSeparator />

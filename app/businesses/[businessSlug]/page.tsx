@@ -1,9 +1,7 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { AddProductForm } from "@/components/forms/add-product-form";
-import { SearchForm } from "@/components/forms/search-form";
 import { UpdateBusinessLogoForm } from "@/components/forms/update-business-logo";
-import { FilteredProducts } from "@/components/products/filtered-products";
+import { ProductCatalogueSection } from "@/components/products/product-catalogue-section";
 import { getBusinessBySlug } from "@/data/businesses";
 import { getProductsPerBusiness } from "@/data/products";
 import { updateBusinessLogo } from "@/server/businesses";
@@ -55,21 +53,12 @@ export default async function BusinessSlugPage(
         </div>
       </section>
 
-      <section className="grid gap-6">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <h2 className="text-lg font-semibold">Catalogue</h2>
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <SearchForm className="flex-1 md:w-[380px]" />
-            <AddProductForm
-              organizationId={businessId}
-              businessSlug={resolvedSlug}
-            />
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <FilteredProducts data={products} />
-        </div>
+      <section className="grid gap-6 mt-10">
+        <ProductCatalogueSection
+          products={products}
+          businessId={businessId}
+          businessSlug={resolvedSlug}
+        />
       </section>
     </div>
   );

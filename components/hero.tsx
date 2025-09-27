@@ -75,7 +75,10 @@ export function Hero() {
             }}
             className="mt-12"
           >
-            <SearchForm className="mx-auto max-w-lg" />
+            <SearchForm
+              formProps={{ className: "mx-auto max-w-lg" }}
+              inputOnlyClassName="h-10 md:h-12"
+            />
           </AnimatedGroup>
         </div>
       </div>

@@ -46,17 +46,13 @@ const schema = z.object({
   status: z.enum(STATUS_VALUES),
 });
 
-type Props = {
-  organizationId: string;
-  businessSlug: string;
-  className?: string;
-};
-
 export function AddProductForm({
   organizationId,
   businessSlug,
-  className,
-}: Props) {
+}: {
+  organizationId: string;
+  businessSlug: string;
+}) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -114,13 +110,9 @@ export function AddProductForm({
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button
-          className={className}
-          size="sm"
-          onClick={() => setDialogOpen(true)}
-        >
-          <Plus className="size-4" />
-          Add product
+        <Button type="button" onClick={() => setDialogOpen(true)}>
+          <Plus className="size-4 sm:hidden" />
+          <span className="hidden sm:block">Add product</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[520px]">

@@ -1,13 +1,13 @@
 "use client";
 
-import { useQueryState } from "nuqs";
-import { usePathname } from "next/navigation";
-import type { Product } from "@/db/schema";
-import { ProductCard } from "./product-card";
-import { EditProductForm } from "../forms/edit-product-form";
-import { DeleteProductForm } from "../forms/delete-product-form";
-import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { useQueryState } from "nuqs";
+import { Button } from "@/components/ui/button";
+import type { Product } from "@/db/schema";
+import { DeleteProductForm } from "../forms/delete-product-form";
+import { EditProductForm } from "../forms/edit-product-form";
+import { ProductCard } from "./product-card";
 
 type ProductWithOrg = Product & {
   organization?: {
@@ -20,14 +20,27 @@ type ProductWithOrg = Product & {
 
 type FilteredProductsProps = {
   data: ProductWithOrg[];
+  filterByStatus?: string;
 };
 
-export function FilteredProducts({ data }: FilteredProductsProps) {
+export function FilteredProducts({
+  data,
+  filterByStatus,
+}: FilteredProductsProps) {
   const [search] = useQueryState("search", { defaultValue: "" });
   const pathname = usePathname();
-  const filteredProducts = data?.filter((product) =>
-    product.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredProducts = data?.filter((product) => {
+    const matchesSearch =
+      product.name.toLowerCase().includes(search.toLowerCase()) ||
+      product.organization?.name.toLowerCase().includes(search.toLowerCase());
+
+    const matchesStatus =
+      !filterByStatus ||
+      filterByStatus === "all" ||
+      product.status === filterByStatus;
+
+    return matchesSearch && matchesStatus;
+  });
 
   if (!filteredProducts?.length)
     return (

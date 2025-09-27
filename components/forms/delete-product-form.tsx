@@ -13,7 +13,6 @@ import { Loader2, Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { deleteProduct } from "@/server/products";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { z } from "zod";
 
 const schema = z.object({
@@ -66,14 +65,8 @@ export function DeleteProductForm({
 
   return (
     <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      <AlertDialogTrigger>
-        <Button
-          variant="destructive"
-          size="sm"
-          className="hover:bg-destructive/80"
-        >
-          <Trash2 className="size-4" />
-        </Button>
+      <AlertDialogTrigger className="py-2 px-2.5 bg-destructive hover:bg-destructive/80 text-white rounded-md">
+        <Trash2 className="size-4" />
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

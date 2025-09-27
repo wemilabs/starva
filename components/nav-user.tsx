@@ -68,12 +68,12 @@ export function NavUser({
         await signOut({
           fetchOptions: {
             onSuccess: () => {
-              router.push("/");
-              router.refresh();
               toast.success("Success", {
                 description: "Successfully signed out. See you soon!",
               });
               setIsDialogOpen(false);
+              router.push("/");
+              router.refresh();
             },
           },
         });

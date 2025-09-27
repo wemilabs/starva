@@ -3,6 +3,7 @@ import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import type { Product } from "@/db/schema";
+import { cn, removeUnderscoreAndCapitalize } from "@/lib/utils";
 
 type Props = Product & {
   organization?: { id: string; name: string; logo: string | null } | null;
@@ -25,7 +26,7 @@ export function ProductCard({
   price,
   description,
   likesCount,
-  brand,
+  status,
   organization,
 }: Props) {
   const priceNumber = Number(price as unknown as any) || 0;
@@ -50,14 +51,17 @@ export function ProductCard({
       </div>
       <div className="absolute inset-0 flex flex-col justify-end p-6 text-white">
         <div className="mb-2 flex items-center justify-between gap-2">
-          {brand ? (
-            <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[10px] font-medium tracking-wide text-white/90 ring-1 ring-white/15 backdrop-blur-sm">
-              <span className="h-1.5 w-1.5 rounded-full bg-orange-400" />
-              {brand}
-            </div>
-          ) : (
-            <span />
-          )}
+          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[10px] font-medium tracking-wide text-white/90 ring-1 ring-white/15 backdrop-blur-sm">
+            <span
+              className={cn("size-1.5 rounded-full", {
+                "bg-green-600": status === "in_stock",
+                "bg-red-600": status === "out_of_stock",
+                "bg-gray-600": status === "archived",
+              })}
+            />
+            {removeUnderscoreAndCapitalize(status)}
+          </div>
+
           <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[10px] font-medium tracking-wide text-white/90 ring-1 ring-white/15 backdrop-blur-sm">
             {new Intl.NumberFormat("en-US", {
               style: "currency",

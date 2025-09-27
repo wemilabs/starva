@@ -1,11 +1,12 @@
 "use server";
 
+import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/db/drizzle";
 import { product as productTable } from "@/db/schema";
 import { STATUS_VALUES } from "@/lib/constants";
-import { and, eq } from "drizzle-orm";
+import { extractFileKeyFromUrl, utapi } from "@/lib/uploadthing-server";
 
 const productSchema = z.object({
   organizationId: z.string().min(1),
@@ -106,18 +107,6 @@ export async function updateProduct(
   }
 }
 
-// export async function deleteProduct(id: string, revalidateTargetPath: string) {
-//   try {
-//     await db.delete(productTable).where(eq(productTable.id, id));
-//     revalidatePath(revalidateTargetPath);
-//     return { ok: true } as const;
-//   } catch (error: unknown) {
-//     const e = error as Error;
-//     console.error(e);
-//     return { ok: false, error: e.message } as const;
-//   }
-// }
-
 const deleteProductSchema = z.object({
   productId: z.string().min(1),
   organizationId: z.string().min(1),
@@ -134,6 +123,24 @@ export async function deleteProduct(
 
   try {
     const { productId, organizationId, revalidateTargetPath } = parsed.data;
+
+    const productToDelete = await db
+      .select({ imageUrl: productTable.imageUrl })
+      .from(productTable)
+      .where(
+        and(
+          eq(productTable.id, productId),
+          eq(productTable.organizationId, organizationId)
+        )
+      )
+      .limit(1);
+
+    if (productToDelete.length === 0) {
+      return { ok: false, error: "Product not found" } as const;
+    }
+
+    const { imageUrl } = productToDelete[0];
+
     await db
       .delete(productTable)
       .where(
@@ -142,6 +149,20 @@ export async function deleteProduct(
           eq(productTable.organizationId, organizationId)
         )
       );
+
+    if (imageUrl) {
+      try {
+        const fileKey = extractFileKeyFromUrl(imageUrl);
+        if (fileKey) {
+          await utapi.deleteFiles(fileKey);
+          console.log(`Successfully deleted image: ${fileKey}`);
+        }
+      } catch (error: unknown) {
+        const e = error as Error;
+        console.error(`Failed to delete image from UploadThing: ${e.message}`);
+      }
+    }
+
     revalidatePath(revalidateTargetPath);
     return { ok: true } as const;
   } catch (error: unknown) {

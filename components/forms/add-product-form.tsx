@@ -28,7 +28,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { STATUS_VALUES } from "@/lib/constants";
 import { UploadButton } from "@/lib/uploadthing";
-import { removeUnderscoreAndCapitalize, slugify } from "@/lib/utils";
+import {
+  removeUnderscoreAndCapitalizeOnlyTheFirstChar,
+  slugify,
+} from "@/lib/utils";
 import { createProduct } from "@/server/products";
 
 const schema = z.object({
@@ -168,7 +171,7 @@ export function AddProductForm({
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Price (RWF)</FormLabel>
+                    <FormLabel>Price (RF)</FormLabel>
                     <FormControl>
                       <Input
                         inputMode="decimal"
@@ -219,11 +222,7 @@ export function AddProductForm({
                           endpoint="productImage"
                           className="ut-button:bg-primary ut-button:ut-readying:bg-primary/50"
                           onClientUploadComplete={(res) => {
-                            const url =
-                              (res?.[0] &&
-                                ((res[0] as any).ufsUrl ||
-                                  (res[0] as any).url)) ||
-                              "";
+                            const url = res?.[0]?.ufsUrl || "";
                             if (url)
                               form.setValue("imageUrl", url, {
                                 shouldValidate: true,
@@ -275,7 +274,7 @@ export function AddProductForm({
                     >
                       {STATUS_VALUES.map((v) => (
                         <option key={v} value={v}>
-                          {removeUnderscoreAndCapitalize(v)}
+                          {removeUnderscoreAndCapitalizeOnlyTheFirstChar(v)}
                         </option>
                       ))}
                     </select>

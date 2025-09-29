@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import type { Product } from "@/db/schema";
 import { STATUS_VALUES } from "@/lib/constants";
-import { removeUnderscoreAndCapitalize } from "@/lib/utils";
+import { removeUnderscoreAndCapitalizeOnlyTheFirstChar } from "@/lib/utils";
 
 type ProductWithOrg = Product & {
   organization?: {
@@ -53,24 +53,27 @@ export function ProductCatalogueSection({
           />
         </div>
 
-        <div className="flex items-center justify-between md:justify-start gap-3 w-full md:w-auto">
-          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All</SelectItem>
-              {STATUS_VALUES.map((status) => (
-                <SelectItem key={status} value={status}>
-                  {removeUnderscoreAndCapitalize(status)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <SearchForm
-            formProps={{ className: "w-full md:w-[380px]" }}
-            inputOnlyClassName="h-9"
-          />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All</SelectItem>
+                {STATUS_VALUES.map((status) => (
+                  <SelectItem key={status} value={status}>
+                    {removeUnderscoreAndCapitalizeOnlyTheFirstChar(status)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <SearchForm
+              formProps={{ className: "w-full md:w-[380px]" }}
+              inputFieldOnlyClassName="h-9"
+            />
+          </div>
+          <div className="text-sm">Filter by Tag</div>
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useQueryState } from "nuqs";
 import { Button } from "@/components/ui/button";
@@ -21,11 +22,13 @@ type ProductWithOrg = Product & {
 type FilteredProductsProps = {
   data: ProductWithOrg[];
   filterByStatus?: string;
+  filterByTag?: string[];
 };
 
 export function FilteredProducts({
   data,
   filterByStatus,
+  filterByTag,
 }: FilteredProductsProps) {
   const [search] = useQueryState("search", { defaultValue: "" });
   const pathname = usePathname();
@@ -82,10 +85,13 @@ export function FilteredProducts({
                   Interested in this item?
                 </div>
                 <Button size="sm" variant="secondary" className="group">
-                  <span className="inline-flex items-center gap-1">
+                  <Link
+                    href={`/products/${product.slug}`}
+                    className="inline-flex items-center gap-1"
+                  >
                     View details
                     <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-                  </span>
+                  </Link>
                 </Button>
               </div>
             )}

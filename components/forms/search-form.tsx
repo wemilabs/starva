@@ -8,16 +8,18 @@ import { cn } from "@/lib/utils";
 
 export function SearchForm({
   formProps,
-  inputOnlyClassName,
+  inputFieldOnlyClassName,
+  controlledAutoFocus,
 }: {
   formProps?: React.ComponentProps<"form">;
-  inputOnlyClassName?: string;
+  inputFieldOnlyClassName?: string;
+  controlledAutoFocus?: boolean;
 }) {
   const [search, setSearch] = useQueryState("search", { defaultValue: "" });
 
   return (
     <form {...formProps}>
-      <div className="bg-background has-[input:focus]:ring-muted relative grid grid-cols-[1fr_auto] items-center rounded-lg border shadow shadow-zinc-950/5 has-[input:focus]:ring-2">
+      <div className="bg-background has-[input:focus]:ring-muted relative grid grid-cols-[1fr_auto] items-center rounded-lg border shadow shadow-zinc-950/5 has-[input:focus]:ring-2 transition duration-300 ease-in-out">
         <Label htmlFor="search" className="sr-only">
           Search
         </Label>
@@ -26,18 +28,19 @@ export function SearchForm({
           type="search"
           placeholder="e.g. thiep, vosgienne, calaba, etc."
           className={cn(
-            "w-full bg-transparent pl-10 focus:outline-none rounded-lg placeholder:text-xs md:placeholder:text-sm text-xs md:text-sm",
-            inputOnlyClassName
+            "w-full bg-transparent pl-10 focus:outline-none rounded-lg placeholder:text-xs md:placeholder:text-sm text-xs md:text-sm transition duration-300 ease-in-out",
+            inputFieldOnlyClassName
           )}
           value={search}
           onChange={(e) => setSearch(e.target.value || null)}
+          autoFocus={controlledAutoFocus}
         />
 
         {search ? (
           <button
             type="reset"
             onClick={() => setSearch("")}
-            className="absolute top-1/2 right-3.5 -translate-y-1/2"
+            className="absolute top-1/2 right-3.5 -translate-y-1/2 transition duration-300 ease-in-out"
           >
             <X className="size-4 opacity-50" />
           </button>

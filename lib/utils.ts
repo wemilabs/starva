@@ -15,6 +15,9 @@ export const slugify = (text: string): string => {
     .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
 };
 
-export const removeUnderscoreAndCapitalize = (text: string): string => {
-  return text.replace(/_/g, " ").replace(/\b\w/g, (char) => char.toUpperCase());
+export const removeUnderscoreAndCapitalizeOnlyTheFirstChar = (
+  text: string
+): string => {
+  const withSpaces = text.replace(/_/g, " ");
+  return withSpaces.charAt(0).toUpperCase() + withSpaces.slice(1);
 };

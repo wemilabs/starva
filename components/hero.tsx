@@ -77,7 +77,8 @@ export function Hero() {
           >
             <SearchForm
               formProps={{ className: "mx-auto max-w-lg" }}
-              inputOnlyClassName="h-10 md:h-12"
+              inputFieldOnlyClassName="h-10 md:h-12"
+              controlledAutoFocus
             />
           </AnimatedGroup>
         </div>

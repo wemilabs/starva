@@ -5,7 +5,7 @@ import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
 import { product } from "@/db/schema";
 
-export const getProducts = cache(async () => {
+export const getInStockProducts = cache(async () => {
   const products = await db.query.product.findMany({
     where: eq(product.status, "in_stock"),
     with: {
@@ -23,11 +23,12 @@ export const getProducts = cache(async () => {
   return products;
 });
 
-export async function getProductsPerBusiness(organizationId: string) {
-  try {
-    const { success } = await verifySession();
-    if (!success) return [];
+export const getProductsPerBusiness = cache(async (organizationId: string) => {
+  const { success, session } = await verifySession();
+  if (!success || !session)
+    return { message: "Please sign in to access this page" };
 
+  try {
     const products = await db.query.product.findMany({
       where: and(eq(product.organizationId, organizationId)),
       with: {
@@ -43,7 +44,38 @@ export async function getProductsPerBusiness(organizationId: string) {
     });
     return products;
   } catch (error) {
-    console.error(error);
-    return [] as (typeof product.$inferSelect)[];
+    console.error(
+      "Failed to fetch products for organization:",
+      organizationId,
+      error
+    );
+    return { message: "Failed to fetch products for organization" };
   }
-}
+});
+
+export const getProductBySlug = cache(async (slug: string) => {
+  const { success, session } = await verifySession();
+  if (!success || !session)
+    return { message: "Please sign in to purchase this product" };
+
+  try {
+    const specificProduct = await db.query.product.findFirst({
+      where: eq(product.slug, slug),
+      with: {
+        organization: {
+          columns: {
+            id: true,
+            name: true,
+            logo: true,
+            slug: true,
+          },
+        },
+      },
+    });
+
+    return specificProduct;
+  } catch (error) {
+    console.error("Failed to fetch product by slug:", slug, error);
+    return { message: "Failed to fetch product by slug" };
+  }
+});

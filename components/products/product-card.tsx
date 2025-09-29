@@ -3,7 +3,7 @@ import Image from "next/image";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import type { Product } from "@/db/schema";
-import { cn, removeUnderscoreAndCapitalize } from "@/lib/utils";
+import { cn, removeUnderscoreAndCapitalizeOnlyTheFirstChar } from "@/lib/utils";
 
 type Props = Product & {
   organization?: { id: string; name: string; logo: string | null } | null;
@@ -29,7 +29,7 @@ export function ProductCard({
   status,
   organization,
 }: Props) {
-  const priceNumber = Number(price as unknown as any) || 0;
+  const priceNumber = Number(price) || 0;
 
   const orgName = organization?.name ?? null;
   const orgLogo = organization?.logo ?? null;
@@ -59,11 +59,11 @@ export function ProductCard({
                 "bg-gray-600": status === "archived",
               })}
             />
-            {removeUnderscoreAndCapitalize(status)}
+            {removeUnderscoreAndCapitalizeOnlyTheFirstChar(status)}
           </div>
 
           <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[10px] font-medium tracking-wide text-white/90 ring-1 ring-white/15 backdrop-blur-sm">
-            {new Intl.NumberFormat("en-US", {
+            {new Intl.NumberFormat("rw-RW", {
               style: "currency",
               currency: "RWF",
               maximumFractionDigits: 0,

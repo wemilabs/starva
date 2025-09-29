@@ -1,10 +1,12 @@
 "use client";
 
-import { z } from "zod";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { STATUS_VALUES } from "@/lib/constants";
+import { Loader2, Pencil } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,12 +26,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { UploadButton } from "@/lib/uploadthing";
-import { removeUnderscoreAndCapitalize, slugify } from "@/lib/utils";
-import { toast } from "sonner";
-import Image from "next/image";
-import { Loader2, Pencil } from "lucide-react";
 import type { Product } from "@/db/schema";
+import { STATUS_VALUES } from "@/lib/constants";
+import { UploadButton } from "@/lib/uploadthing";
+import {
+  removeUnderscoreAndCapitalizeOnlyTheFirstChar,
+  slugify,
+} from "@/lib/utils";
 import { updateProduct } from "@/server/products";
 
 const schema = z.object({
@@ -66,7 +69,7 @@ export function EditProductForm({
     defaultValues: {
       name: product.name || "",
       slug: product.slug || "",
-      price: String(product.price as unknown as any) || "",
+      price: product.price || "",
       imageUrl: product.imageUrl || "",
       description: product.description || "",
       status:
@@ -177,7 +180,7 @@ export function EditProductForm({
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Price (RWF)</FormLabel>
+                    <FormLabel>Price (RF)</FormLabel>
                     <FormControl>
                       <Input
                         inputMode="decimal"
@@ -228,11 +231,7 @@ export function EditProductForm({
                           endpoint="productImage"
                           className="ut-button:bg-primary ut-button:ut-readying:bg-primary/50"
                           onClientUploadComplete={(res) => {
-                            const url =
-                              (res?.[0] &&
-                                ((res[0] as any).ufsUrl ||
-                                  (res[0] as any).url)) ||
-                              "";
+                            const url = res?.[0]?.ufsUrl || "";
                             if (url)
                               form.setValue("imageUrl", url, {
                                 shouldValidate: true,
@@ -284,7 +283,7 @@ export function EditProductForm({
                     >
                       {STATUS_VALUES.map((v) => (
                         <option key={v} value={v}>
-                          {removeUnderscoreAndCapitalize(v)}
+                          {removeUnderscoreAndCapitalizeOnlyTheFirstChar(v)}
                         </option>
                       ))}
                     </select>

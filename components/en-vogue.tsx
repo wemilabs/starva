@@ -1,10 +1,10 @@
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { getProducts } from "@/data/products";
+import { getInStockProducts } from "@/data/products";
 import { FilteredProducts } from "./products/filtered-products";
 
 export async function EnVogue() {
-  const products = await getProducts();
+  const products = await getInStockProducts();
 
   return (
     <section className="mx-auto flex w-full max-w-[1264px] flex-1 flex-col gap-4 mt-8">
@@ -12,7 +12,7 @@ export async function EnVogue() {
         <div className="flex items-center justify-between">
           <h2 className="font-medium tracking-tight">En Vogue</h2>
           <Link
-            href="/trends"
+            href="/products"
             className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary focus-visible:ring-primary"
           >
             <span>Browse all</span>

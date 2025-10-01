@@ -1,10 +1,7 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useQueryState } from "nuqs";
-import { Button } from "@/components/ui/button";
 import type { Product } from "@/db/schema";
 import { DeleteProductForm } from "../forms/delete-product-form";
 import { EditProductForm } from "../forms/edit-product-form";
@@ -27,8 +24,8 @@ type FilteredProductsProps = {
 
 export function FilteredProducts({
   data,
+  // filterByTag,
   filterByStatus,
-  filterByTag,
 }: FilteredProductsProps) {
   const [search] = useQueryState("search", { defaultValue: "" });
   const pathname = usePathname();
@@ -54,11 +51,17 @@ export function FilteredProducts({
       </div>
     );
 
+  const isHomePage = pathname === "/";
+
   return (
     <>
       {filteredProducts?.map((product) => (
         <div key={product.id}>
-          <ProductCard {...product} />
+          <ProductCard
+            {...product}
+            href={isHomePage ? product.slug : undefined}
+          />
+
           <div className="mt-3 rounded-xl border border-amber-200/70 bg-amber-50/40 p-3 shadow-sm transition-colors dark:border-amber-900/40 dark:bg-amber-950/20">
             {pathname === `/businesses/${product.organization?.slug}` ? (
               <div className="flex items-center justify-between gap-3">
@@ -79,22 +82,7 @@ export function FilteredProducts({
                   />
                 </div>
               </div>
-            ) : (
-              <div className="flex items-center justify-between gap-3">
-                <div className="text-xs text-muted-foreground">
-                  Interested in this item?
-                </div>
-                <Button size="sm" variant="secondary" className="group">
-                  <Link
-                    href={`/products/${product.slug}`}
-                    className="inline-flex items-center gap-1"
-                  >
-                    View details
-                    <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-                  </Link>
-                </Button>
-              </div>
-            )}
+            ) : null}
           </div>
         </div>
       ))}

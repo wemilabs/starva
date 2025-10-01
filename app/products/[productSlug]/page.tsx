@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getProductBySlug } from "@/data/products";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LogIn, ShoppingBasket } from "lucide-react";
+import { CalendarClock, LogIn, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { removeUnderscoreAndCapitalizeOnlyTheFirstChar } from "@/lib/utils";
@@ -67,33 +67,24 @@ export default async function ProductSlugPage(
   return (
     <div className="container mx-auto px-4 py-8 space-y-12">
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <div>
-          <div className="aspect-square w-full overflow-hidden rounded-lg bg-muted">
-            <Image
-              src={
-                result.imageUrl ??
-                "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6d89s9BRYhvCEDrKcu2HNpfYQo7eR4FUT8wVgS"
-              }
-              alt={result.name}
-              className="h-full w-full object-cover"
-              width={500}
-              height={500}
-              priority
-            />
-          </div>
+        <div className="aspect-square w-full overflow-hidden rounded-lg bg-muted">
+          <Image
+            src={
+              result.imageUrl ??
+              "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6d89s9BRYhvCEDrKcu2HNpfYQo7eR4FUT8wVgS"
+            }
+            alt={result.name}
+            className="h-full w-full object-cover"
+            width={500}
+            height={500}
+            priority
+          />
         </div>
 
         <div className="flex flex-col gap-6">
-          <div>
-            <h1 className="text-3xl font-semibold tracking-tight">
-              {result.name}
-            </h1>
-            {result.brand ? (
-              <p className="mt-1 text-sm text-muted-foreground">
-                by {result.brand}
-              </p>
-            ) : null}
-          </div>
+          <h1 className="text-3xl font-semibold tracking-tight">
+            {result.name}
+          </h1>
 
           <div className="text-2xl font-bold">{price}</div>
 
@@ -104,9 +95,9 @@ export default async function ProductSlugPage(
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div className="rounded-md border p-4">
               <p className="text-muted-foreground">Status</p>
-              <p className="mt-1 font-medium">
+              <Badge variant="available" className="mt-1">
                 {removeUnderscoreAndCapitalizeOnlyTheFirstChar(result.status)}
-              </p>
+              </Badge>
             </div>
             <div className="rounded-md border p-4">
               <p className="text-muted-foreground">Calories</p>
@@ -121,7 +112,7 @@ export default async function ProductSlugPage(
               <p className="mt-1 font-medium">
                 <Link
                   className="underline underline-offset-4 hover:no-underline"
-                  href={`/businesses/${result.organization.slug}`}
+                  href={`/merchants/${result.organization.slug}`}
                 >
                   {result.organization.name}
                 </Link>
@@ -130,20 +121,18 @@ export default async function ProductSlugPage(
           </div>
 
           <div className="mt-2 flex flex-wrap gap-3">
-            <Button>Order right away</Button>
-
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline">
-                  <ShoppingBasket className="size-4" />
-                  Add to cart
+                <Button>
+                  <ShoppingBag className="size-4" />
+                  <span className="hidden sm:block">Order right away</span>
                 </Button>
               </SheetTrigger>
               <SheetContent className="flex flex-col gap-4">
                 <SheetHeader className="text-left">
                   <SheetTitle>Add “{result.name}”</SheetTitle>
                   <SheetDescription>
-                    Review item details, set quantity, and add to your cart.
+                    Review item details, set quantity, and confirm your order.
                   </SheetDescription>
                 </SheetHeader>
 
@@ -165,7 +154,7 @@ export default async function ProductSlugPage(
                     <div className="flex-1">
                       <p className="text-sm font-medium">{result.name}</p>
                       <div className="mt-1 flex items-center gap-2">
-                        <Badge variant="secondary">
+                        <Badge variant="available">
                           {removeUnderscoreAndCapitalizeOnlyTheFirstChar(
                             result.status
                           )}
@@ -205,8 +194,8 @@ export default async function ProductSlugPage(
 
                 <SheetFooter className="gap-2 sm:justify-between">
                   <Button className="sm:w-auto">
-                    <ShoppingBasket className="size-4" />
-                    Make order — {price}
+                    <ShoppingBag className="size-4" />
+                    Place order — {price}
                   </Button>
                   <SheetClose asChild>
                     <Button variant="outline" className="sm:w-auto">
@@ -216,6 +205,11 @@ export default async function ProductSlugPage(
                 </SheetFooter>
               </SheetContent>
             </Sheet>
+
+            <Button variant="outline" disabled>
+              <CalendarClock className="size-4" />
+              <span className="hidden sm:block">Schedule delivery</span>
+            </Button>
           </div>
         </div>
       </div>

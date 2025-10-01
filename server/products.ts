@@ -41,7 +41,7 @@ export async function createProduct(input: z.infer<typeof productSchema>) {
       name,
       slug,
       description: description || "",
-      price: price as unknown as any,
+      price,
       organizationId,
       imageUrl: imageUrl || null,
       status,
@@ -81,14 +81,32 @@ export async function updateProduct(
       revalidateTargetPath,
     } = parsed.data;
 
+    const existingProduct = await db
+      .select({ imageUrl: productTable.imageUrl })
+      .from(productTable)
+      .where(
+        and(
+          eq(productTable.id, productId),
+          eq(productTable.organizationId, organizationId)
+        )
+      )
+      .limit(1);
+
+    if (existingProduct.length === 0) {
+      return { ok: false, error: "Product not found" } as const;
+    }
+
+    const oldImageUrl = existingProduct[0].imageUrl;
+    const newImageUrl = imageUrl || null;
+
     await db
       .update(productTable)
       .set({
         name,
         slug,
         description: description || "",
-        price: price as unknown as any,
-        imageUrl: imageUrl || null,
+        price,
+        imageUrl: newImageUrl,
         status,
       })
       .where(
@@ -97,6 +115,21 @@ export async function updateProduct(
           eq(productTable.organizationId, organizationId)
         )
       );
+
+    if (oldImageUrl && oldImageUrl !== newImageUrl) {
+      try {
+        const fileKey = extractFileKeyFromUrl(oldImageUrl);
+        if (fileKey) {
+          await utapi.deleteFiles(fileKey);
+          console.log(`Successfully deleted old image: ${fileKey}`);
+        }
+      } catch (error: unknown) {
+        const e = error as Error;
+        console.error(
+          `Failed to delete old image from UploadThing: ${e.message}`
+        );
+      }
+    }
 
     revalidatePath(revalidateTargetPath);
     return { ok: true } as const;

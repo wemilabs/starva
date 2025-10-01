@@ -1,5 +1,6 @@
 import { Heart } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import type { Product } from "@/db/schema";
@@ -7,6 +8,7 @@ import { cn, removeUnderscoreAndCapitalizeOnlyTheFirstChar } from "@/lib/utils";
 
 type Props = Product & {
   organization?: { id: string; name: string; logo: string | null } | null;
+  href?: string;
 };
 
 function getInitials(name?: string | null) {
@@ -28,14 +30,15 @@ export function ProductCard({
   likesCount,
   status,
   organization,
+  href,
 }: Props) {
   const priceNumber = Number(price) || 0;
 
   const orgName = organization?.name ?? null;
   const orgLogo = organization?.logo ?? null;
 
-  return (
-    <Card className="group relative overflow-hidden p-0">
+  const cardContent = (
+    <>
       <div className="relative aspect-[16/9]">
         <Image
           src={
@@ -98,6 +101,16 @@ export function ProductCard({
           </div>
         </div>
       </div>
+    </>
+  );
+
+  return (
+    <Card className="group relative overflow-hidden p-0">
+      {href ? (
+        <Link href={`/products/${href}`}>{cardContent}</Link>
+      ) : (
+        cardContent
+      )}
     </Card>
   );
 }

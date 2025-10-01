@@ -15,6 +15,21 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { getBusinessesPerUser } from "@/data/businesses";
 import { verifySession } from "@/data/user-session";
 import { RegisterBusinessForm } from "./forms/register-business-form";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "./ui/sheet";
+// import { removeUnderscoreAndCapitalizeOnlyTheFirstChar } from "@/lib/utils";
+// import { Label } from "@/components/ui/label";
+import { ShoppingBag } from "lucide-react";
+// import { Input } from "@/components/ui/input";
+// import { Textarea } from "@/components/ui/textarea";
 // import { SearchForm } from "./forms/search-form";
 
 export async function Header({
@@ -38,7 +53,7 @@ export async function Header({
       {/* <div>
         <div>Search input drops here once scrolled at a certain level</div>
       </div> */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-0.5">
         {!success ? (
           <Button asChild variant="default" size="sm">
             <Link href="/sign-in">
@@ -62,6 +77,94 @@ export async function Header({
           </Dialog>
         ) : null}
 
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="relative border-none shadow-none bg-transparent hover:bg-muted"
+            >
+              <ShoppingBag className="size-4" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent className="flex flex-col gap-4">
+            <SheetHeader className="text-left">
+              <SheetTitle>Cart</SheetTitle>
+              <SheetDescription>
+                Review item details, set quantity, and confirm your order.
+              </SheetDescription>
+            </SheetHeader>
+
+            {/* <div className="space-y-4 px-4">
+                  <div className="flex items-start gap-4">
+                    <div className="relative size-16 overflow-hidden rounded-md bg-muted">
+                      <Image
+                        src={
+                          result.imageUrl ??
+                          "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6d89s9BRYhvCEDrKcu2HNpfYQo7eR4FUT8wVgS"
+                        }
+                        alt={result.name}
+                        width={64}
+                        height={64}
+                        className="size-fit object-cover"
+                        priority
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{result.name}</p>
+                      <div className="mt-1 flex items-center gap-2">
+                        <Badge variant="secondary">
+                          {removeUnderscoreAndCapitalizeOnlyTheFirstChar(
+                            result.status
+                          )}
+                        </Badge>
+                        <span className="text-sm text-muted-foreground">
+                          {price}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div className="grid gap-3">
+                    <Label htmlFor="quantity">Quantity</Label>
+                    <Input
+                      id="quantity"
+                      name="quantity"
+                      type="number"
+                      min={1}
+                      defaultValue={1}
+                      className="w-28"
+                    />
+                  </div>
+
+                  <div className="grid gap-3">
+                    <Label htmlFor="notes">Special instructions</Label>
+                    <Textarea
+                      id="notes"
+                      name="notes"
+                      rows={4}
+                      placeholder="Add a note..."
+                      className="placeholder:text-sm"
+                    />
+                  </div>
+                </div> */}
+
+            <SheetFooter className="gap-2 sm:justify-between">
+              <Button className="sm:w-auto">
+                <ShoppingBag className="size-4" />
+                {/* Make order — {price} */}
+                Place order
+              </Button>
+              <SheetClose asChild>
+                <Button variant="outline" className="sm:w-auto">
+                  Close
+                </Button>
+              </SheetClose>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
         <ModeToggle />
       </div>
     </header>

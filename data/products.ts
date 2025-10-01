@@ -18,6 +18,7 @@ export const getInStockProducts = cache(async () => {
         },
       },
     },
+    orderBy: (product, { desc }) => [desc(product.createdAt)],
   });
 
   return products;
@@ -41,6 +42,7 @@ export const getProductsPerBusiness = cache(async (organizationId: string) => {
           },
         },
       },
+      orderBy: (product, { desc }) => [desc(product.createdAt)],
     });
     return products;
   } catch (error) {
@@ -71,6 +73,7 @@ export const getProductBySlug = cache(async (slug: string) => {
           },
         },
       },
+      orderBy: (product, { desc }) => [desc(product.createdAt)],
     });
 
     return specificProduct;

@@ -4,6 +4,7 @@ import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -54,22 +55,27 @@ export function BusinessSwitcher() {
 
   const userId = session?.session?.userId;
 
-  console.log("Active Business:", activeBusiness);
-  console.log("All Businesses:", businesses);
-
   const handleBusinessChange = async (
+    e: React.MouseEvent<HTMLAnchorElement>,
     organizationId: string,
     organizationSlug: string
   ) => {
+    e.preventDefault();
     try {
       await organization.setActive({
         organizationId,
         organizationSlug,
       });
-      router.push(`/businesses/${organizationSlug}`);
       setOpen(false);
+      router.push(`/businesses/${organizationSlug}`);
+      toast.success("Success", {
+        description: "Business has been switched successfully.",
+      });
     } catch (error) {
       console.error("Error switching business:", error);
+      toast.error("Error", {
+        description: "Failed to switch business.",
+      });
     }
   };
 
@@ -123,41 +129,45 @@ export function BusinessSwitcher() {
                 <CommandGroup>
                   {userId &&
                     businesses?.map((business, index) => (
-                      <CommandItem
+                      <Link
                         key={business.id}
-                        value={business.name}
-                        onSelect={() =>
-                          handleBusinessChange(business.id, business.slug)
+                        href={`/businesses/${business.slug}`}
+                        onClick={(e) =>
+                          handleBusinessChange(e, business.id, business.slug)
                         }
-                        className="py-2.5 cursor-pointer"
                       >
-                        <div className="flex w-full items-center gap-2">
-                          <Avatar className="size-6 rounded-lg">
-                            <AvatarImage
-                              src={
-                                (business.logo as string | undefined) ??
-                                undefined
-                              }
-                              alt={business.name}
+                        <CommandItem
+                          value={business.name}
+                          className="py-2.5 cursor-pointer"
+                        >
+                          <div className="flex w-full items-center gap-2">
+                            <Avatar className="size-6 rounded-lg">
+                              <AvatarImage
+                                src={
+                                  (business.logo as string | undefined) ??
+                                  undefined
+                                }
+                                alt={business.name}
+                              />
+                              <AvatarFallback>
+                                {business.name.slice(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="truncate">{business.name}</span>
+                            <Check
+                              className={cn(
+                                "ml-auto",
+                                activeBusiness?.id === business.id
+                                  ? "opacity-100"
+                                  : "opacity-0"
+                              )}
                             />
-                            <AvatarFallback>
-                              {business.name.slice(0, 2).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="truncate">{business.name}</span>
-                          <Check
-                            className={cn(
-                              "ml-auto",
-                              activeBusiness?.id === business.id
-                                ? "opacity-100"
-                                : "opacity-0"
-                            )}
-                          />
-                          <span className="text-muted-foreground text-xs">
-                            ⌘{index + 1}
-                          </span>
-                        </div>
-                      </CommandItem>
+                            <span className="text-muted-foreground text-xs">
+                              ⌘{index + 1}
+                            </span>
+                          </div>
+                        </CommandItem>
+                      </Link>
                     ))}
                 </CommandGroup>
                 <CommandSeparator />

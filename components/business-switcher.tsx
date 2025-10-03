@@ -69,12 +69,12 @@ export function BusinessSwitcher() {
       setOpen(false);
       router.push(`/businesses/${organizationSlug}`);
       toast.success("Success", {
-        description: "Business has been switched successfully.",
+        description: "Business has been successfully set.",
       });
     } catch (error) {
-      console.error("Error switching business:", error);
+      console.error("Error setting business:", error);
       toast.error("Error", {
-        description: "Failed to switch business.",
+        description: "Failed to set business.",
       });
     }
   };

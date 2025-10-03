@@ -20,3 +20,5 @@ export async function updateBusinessLogo(
 
   revalidatePath(`/businesses/${resolvedSlug}`);
 }
+
+// update and delete

@@ -4,6 +4,8 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db/drizzle";
 import { organization } from "@/db/schema";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
 export async function updateBusinessLogo(
   businessId: string,
@@ -21,4 +23,45 @@ export async function updateBusinessLogo(
   revalidatePath(`/businesses/${resolvedSlug}`);
 }
 
-// update and delete
+export async function updateBusinessName(
+  businessId: string,
+  businessSlug: string,
+  name: string
+) {
+  const trimmedName = name.trim();
+  if (!trimmedName) return;
+
+  await auth.api.updateOrganization({
+    body: {
+      organizationId: businessId,
+      data: {
+        name: trimmedName,
+      },
+    },
+    headers: await headers(),
+  });
+
+  revalidatePath(`/businesses/${businessSlug}`);
+}
+
+export async function updateBusinessDescription(
+  businessId: string,
+  businessSlug: string,
+  description: string
+) {
+  const trimmedDescription = description.trim();
+
+  await auth.api.updateOrganization({
+    body: {
+      organizationId: businessId,
+      data: {
+        metadata: {
+          description: trimmedDescription,
+        },
+      },
+    },
+    headers: await headers(),
+  });
+
+  revalidatePath(`/businesses/${businessSlug}`);
+}

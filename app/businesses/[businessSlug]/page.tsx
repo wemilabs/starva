@@ -5,8 +5,12 @@ import { ProductCatalogueSection } from "@/components/products/product-catalogue
 import { getBusinessBySlug } from "@/data/businesses";
 import { getProductsPerBusiness } from "@/data/products";
 import { updateBusinessLogo } from "@/server/businesses";
+import { EditableBusinessName } from "@/components/forms/editable-business-name";
+import { updateBusinessName } from "@/server/businesses";
+import { EditableBusinessDescription } from "@/components/forms/editable-business-desc";
+import { updateBusinessDescription } from "@/server/businesses";
 
-export default async function BusinessSlugPage(
+export default async function BusinessIdPage(
   props: PageProps<"/businesses/[businessSlug]">
 ) {
   const { businessSlug } = await props.params;
@@ -14,9 +18,13 @@ export default async function BusinessSlugPage(
   const business = await getBusinessBySlug(businessSlug);
   if (!business) return notFound();
 
-  const resolvedSlug = business.slug ?? businessSlug;
+  const resolvedSlug = business.slug || businessSlug;
 
   const productsPerBusiness = await getProductsPerBusiness(business.id);
+
+  // Parse metadata
+  const metadata = business.metadata ? JSON.parse(business.metadata) : {};
+  const description = metadata.description || "";
 
   if ("message" in productsPerBusiness) {
     return (
@@ -38,12 +46,19 @@ export default async function BusinessSlugPage(
           <div className="absolute inset-0 bg-black/50" />
           <div className="relative z-10 px-6 py-16 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div className="text-white">
-              <h1 className="text-3xl md:text-5xl font-semibold tracking-tight">
-                {business.name}
-              </h1>
-              {business.slug ? (
-                <p className="mt-2 text-white/80">@{business.slug}</p>
-              ) : null}
+              <EditableBusinessName
+                businessId={business.id}
+                businessSlug={resolvedSlug}
+                initialName={business.name}
+                updateAction={updateBusinessName}
+              />
+              <p className="mt-2 text-white/80">@{resolvedSlug}</p>
+              <EditableBusinessDescription
+                businessId={business.id}
+                businessSlug={resolvedSlug}
+                initialDescription={description}
+                updateAction={updateBusinessDescription}
+              />
             </div>
 
             <UpdateBusinessLogoForm
@@ -86,12 +101,19 @@ export default async function BusinessSlugPage(
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10 px-6 py-16 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="text-white">
-            <h1 className="text-3xl md:text-5xl font-semibold tracking-tight">
-              {business.name}
-            </h1>
-            {business.slug ? (
-              <p className="mt-2 text-white/80">@{business.slug}</p>
-            ) : null}
+            <EditableBusinessName
+              businessId={business.id}
+              businessSlug={resolvedSlug}
+              initialName={business.name}
+              updateAction={updateBusinessName}
+            />
+            <p className="mt-2 text-white/80">@{resolvedSlug}</p>
+            <EditableBusinessDescription
+              businessId={business.id}
+              businessSlug={resolvedSlug}
+              initialDescription={description}
+              updateAction={updateBusinessDescription}
+            />
           </div>
 
           <UpdateBusinessLogoForm

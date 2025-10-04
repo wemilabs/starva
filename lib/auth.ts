@@ -65,18 +65,8 @@ export const auth = betterAuth({
     },
   },
   plugins: [
-    nextCookies(),
     lastLoginMethod({ storeInDatabase: true }),
-    organization({
-      schema: {
-        organization: {
-          additionalFields: {
-            ownerId: {
-              type: "string",
-            },
-          },
-        },
-      },
-    }),
+    nextCookies(),
+    organization(),
   ],
 });

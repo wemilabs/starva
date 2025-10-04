@@ -25,8 +25,7 @@ export function UpdateBusinessLogoForm({ action, className }: Props) {
         endpoint="businessLogo"
         className="ut-button:bg-primary ut-button:ut-readying:bg-primary/50"
         onClientUploadComplete={(res) => {
-          const url =
-            (res?.[0] && ((res[0] as any).ufsUrl || (res[0] as any).url)) || "";
+          const url = res?.[0]?.ufsUrl || "";
           if (hiddenInputRef.current && url) {
             hiddenInputRef.current.value = url;
             hiddenInputRef.current.form?.requestSubmit();

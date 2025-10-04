@@ -21,10 +21,12 @@ import { Input } from "@/components/ui/input";
 import { organization, useSession } from "@/lib/auth-client";
 import { slugify } from "@/lib/utils";
 import { Card, CardContent } from "../ui/card";
+import { Textarea } from "../ui/textarea";
 
 const formSchema = z.object({
   name: z.string().min(2).max(50),
   slug: z.string().min(2).max(50),
+  description: z.string().min(2).max(100).optional(),
 });
 
 interface RegisterBusinessFormProps {
@@ -41,6 +43,7 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
     defaultValues: {
       name: "",
       slug: "",
+      description: "",
     },
   });
   const ownerId = session?.user?.id;
@@ -70,7 +73,7 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
         await organization.create({
           name: values.name,
           slug: values.slug,
-          ownerId,
+          metadata: { description: values.description },
         });
         toast.success("Success", {
           description: "A new business has successfully been registered ",
@@ -115,6 +118,23 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
                     placeholder="my-business"
                     readOnly
                     className="bg-muted cursor-not-allowed text-muted-foreground"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Welcome to my business. Here is what we offer."
                     {...field}
                   />
                 </FormControl>

@@ -82,23 +82,15 @@ export const organization = pgTable("organization", {
   name: text("name").notNull(),
   slug: text("slug").unique().notNull(),
   logo: text("logo"),
-  ownerId: text("owner_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").notNull(),
   metadata: text("metadata"),
 });
 
-export const organizationRelations = relations(
-  organization,
-  ({ many, one }) => ({
-    members: many(member),
-    owner: one(user, {
-      fields: [organization.ownerId],
-      references: [user.id],
-    }),
-  })
-);
+export const organizationRelations = relations(organization, ({ many }) => ({
+  members: many(member),
+  invitations: many(invitation),
+  products: many(product),
+}));
 
 export const role = pgEnum("role", ["member", "admin", "owner"]);
 
@@ -243,9 +235,7 @@ export const tagRelations = relations(tag, ({ many }) => ({
   productTags: many(productTag),
 }));
 
-export type Organization = typeof organization.$inferSelect & {
-  owner: typeof user.$inferSelect;
-};
+export type Organization = typeof organization.$inferSelect;
 export type Role = (typeof role.enumValues)[number];
 export type Member = typeof member.$inferSelect & {
   user: typeof user.$inferSelect;

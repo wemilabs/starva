@@ -12,6 +12,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { BreadcrumbsProvider } from "@/contexts/breadcrumbs-context";
+import { Analytics } from "@vercel/analytics/next"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -65,6 +66,7 @@ export default async function RootLayout({
           </BreadcrumbsProvider>
           <Toaster richColors />
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );

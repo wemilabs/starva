@@ -1,6 +1,7 @@
-import "server-only";
 import { and, eq } from "drizzle-orm";
 import { cache } from "react";
+import "server-only";
+
 import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
 import { product } from "@/db/schema";
@@ -49,11 +50,40 @@ export const getProductsPerBusiness = cache(async (organizationId: string) => {
     console.error(
       "Failed to fetch products for organization:",
       organizationId,
-      error
+      error,
     );
     return { message: "Failed to fetch products for organization" };
   }
 });
+
+export const getProductsPerBusinessWithoutAuth = cache(
+  async (organizationId: string) => {
+    try {
+      const products = await db.query.product.findMany({
+        where: and(eq(product.organizationId, organizationId)),
+        with: {
+          organization: {
+            columns: {
+              id: true,
+              name: true,
+              logo: true,
+              slug: true,
+            },
+          },
+        },
+        orderBy: (product, { desc }) => [desc(product.createdAt)],
+      });
+      return products;
+    } catch (error) {
+      console.error(
+        "Failed to fetch products for organization:",
+        organizationId,
+        error,
+      );
+      return { message: "Failed to fetch products for organization" };
+    }
+  },
+);
 
 export const getProductBySlug = cache(async (slug: string) => {
   const { success, session } = await verifySession();

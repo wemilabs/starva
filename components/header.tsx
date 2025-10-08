@@ -45,8 +45,8 @@ export async function Header({
       <div className="flex items-center gap-2">
         <SidebarTrigger className="-ml-1" />
         <Separator
-          orientation="vertical"
           className="mr-2 data-[orientation=vertical]:h-4"
+          orientation="vertical"
         />
         <NavBreadcrumbs base={baseCrumbs} />
       </div>
@@ -55,7 +55,7 @@ export async function Header({
       </div> */}
       <div className="flex items-center gap-0.5">
         {!success ? (
-          <Button asChild variant="default" size="sm">
+          <Button asChild size="sm" variant="default">
             <Link href="/sign-in">
               <span>Sign In</span>
             </Link>
@@ -80,9 +80,9 @@ export async function Header({
         <Sheet>
           <SheetTrigger asChild>
             <Button
-              variant="outline"
-              size="sm"
               className="relative border-none shadow-none bg-transparent hover:bg-muted"
+              size="sm"
+              variant="outline"
             >
               <ShoppingBag className="size-4" />
             </Button>
@@ -158,7 +158,7 @@ export async function Header({
                 Place order
               </Button>
               <SheetClose asChild>
-                <Button variant="outline" className="sm:w-auto">
+                <Button className="sm:w-auto" variant="outline">
                   Close
                 </Button>
               </SheetClose>

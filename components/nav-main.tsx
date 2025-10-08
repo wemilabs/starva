@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Building2,
   ChevronRight,
   Globe,
   Home,
@@ -71,6 +72,14 @@ export function NavMain({
         Board
       </SidebarGroupLabel>
       <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton asChild tooltip="My Own Businesses">
+            <Link href="/businesses">
+              <Building2 />
+              <span>My Own Businesses</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
         {items.map((item) => (
           <Collapsible
             key={item.title}

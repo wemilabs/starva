@@ -5,6 +5,7 @@ import { Pencil, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { Spinner } from "../ui/spinner";
 
 interface EditableBusinessNameProps {
   businessId: string;
@@ -13,7 +14,7 @@ interface EditableBusinessNameProps {
   updateAction: (
     businessId: string,
     businessSlug: string,
-    name: string
+    name: string,
   ) => Promise<void>;
 }
 
@@ -80,33 +81,43 @@ export function EditableBusinessName({
           onChange={(e) => setName(e.target.value)}
           onKeyDown={handleKeyDown}
           disabled={isPending}
-          // className="text-3xl md:text-5xl font-semibold tracking-tight bg-white/10 backdrop-blur rounded-lg px-3 py-1 ring-1 ring-white/15 text-white placeholder:text-white/50 focus:outline-none focus:ring-2 focus:ring-white/30 disabled:opacity-50"
+          className="text-3xl md:text-5xl font-semibold px-3 py-6 max-w-[500px]"
           maxLength={100}
         />
-        <Button
-          onClick={handleSave}
-          disabled={isPending || !name.trim()}
-          size="icon"
-          variant="ghost"
-          className="h-10 w-10 text-white hover:bg-white/10"
-        >
-          <Check className="size-4" />
-        </Button>
-        <Button
-          onClick={handleCancel}
-          disabled={isPending}
-          size="icon"
-          variant="ghost"
-          className="h-10 w-10 text-white hover:bg-white/10"
-        >
-          <X className="size-4" />
-        </Button>
+        <div className="flex items-center">
+          <Button
+            onClick={handleSave}
+            disabled={isPending || !name.trim()}
+            size="icon"
+            variant="ghost"
+            className="size-9 hover:bg-white/10"
+          >
+            {isPending ? (
+              <>
+                <Spinner />
+              </>
+            ) : (
+              <>
+                <Check className="size-4 text-green-300" />
+              </>
+            )}
+          </Button>
+          <Button
+            onClick={handleCancel}
+            disabled={isPending}
+            size="icon"
+            variant="ghost"
+            className="size-9 hover:bg-white/10"
+          >
+            <X className="size-4 text-red-500" />
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center gap-3 group">
+    <div className="flex items-center gap-3">
       <h1 className="text-3xl md:text-5xl font-semibold tracking-tight">
         {name}
       </h1>
@@ -114,7 +125,7 @@ export function EditableBusinessName({
         onClick={handleEdit}
         size="icon"
         variant="ghost"
-        className="h-9 w-9 opacity-0 group-hover:opacity-100 transition-opacity text-white hover:bg-white/10"
+        className="size-9 hover:bg-white/10"
       >
         <Pencil className="size-4" />
       </Button>

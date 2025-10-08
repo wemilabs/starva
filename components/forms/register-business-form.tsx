@@ -79,6 +79,7 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
           description: "A new business has successfully been registered ",
         });
         onSuccess?.();
+        router.refresh();
       } catch (error: unknown) {
         const e = error as Error;
         console.error(e.message);

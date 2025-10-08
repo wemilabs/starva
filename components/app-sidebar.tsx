@@ -1,19 +1,13 @@
 "use client";
 
 import {
-  BookOpenText,
-  // Bot,
   CircleQuestionMark,
-  Clock,
   Frame,
-  LifeBuoy,
   LogIn,
   Map as MapIcon,
   PieChart,
   Send,
   Settings,
-  // SquareTerminal,
-  Star,
 } from "lucide-react";
 import Link from "next/link";
 

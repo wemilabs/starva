@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -51,6 +52,7 @@ export function BusinessSwitcher() {
   const { isMobile } = useSidebar();
   const { data: activeBusiness } = useActiveOrganization();
   const { data: session } = useSession();
+
   const router = useRouter();
 
   const userId = session?.session?.userId;
@@ -58,7 +60,7 @@ export function BusinessSwitcher() {
   const handleBusinessChange = async (
     e: React.MouseEvent<HTMLAnchorElement>,
     organizationId: string,
-    organizationSlug: string
+    organizationSlug: string,
   ) => {
     e.preventDefault();
     try {
@@ -82,24 +84,24 @@ export function BusinessSwitcher() {
   return (
     <SidebarMenu className="group-data-[collapsible=icon]:mt-4">
       <SidebarMenuItem>
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover onOpenChange={setOpen} open={open}>
           <PopoverTrigger asChild>
             <SidebarMenuButton
-              size="lg"
-              role="combobox"
               aria-expanded={open}
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground justify-between"
+              role="combobox"
+              size="lg"
             >
               {(() => {
                 return (
                   <div className="flex w-full items-center gap-2">
                     <Avatar className="size-6 -ml-1 group-data-[collapsible=icon]:mx-auto">
                       <AvatarImage
+                        alt={activeBusiness?.name ?? "Business logo"}
                         src={
                           (activeBusiness?.logo as string | undefined) ??
                           undefined
                         }
-                        alt={activeBusiness?.name ?? "Business logo"}
                       />
                       <AvatarFallback>
                         {(activeBusiness?.name ?? "B")
@@ -117,37 +119,37 @@ export function BusinessSwitcher() {
             </SidebarMenuButton>
           </PopoverTrigger>
           <PopoverContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg p-1"
             align="start"
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg p-1"
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
             <Command>
-              <CommandInput placeholder="Search business..." className="h-9" />
+              <CommandInput className="h-9" placeholder="Search business..." />
               <CommandList>
                 <CommandEmpty>No business found.</CommandEmpty>
                 <CommandGroup>
                   {userId &&
                     businesses?.map((business, index) => (
                       <Link
-                        key={business.id}
                         href={`/businesses/${business.slug}`}
+                        key={business.id}
                         onClick={(e) =>
                           handleBusinessChange(e, business.id, business.slug)
                         }
                       >
                         <CommandItem
-                          value={business.name}
                           className="py-2.5 cursor-pointer"
+                          value={business.name}
                         >
                           <div className="flex w-full items-center gap-2">
                             <Avatar className="size-6 rounded-lg">
                               <AvatarImage
+                                alt={business.name}
                                 src={
                                   (business.logo as string | undefined) ??
                                   undefined
                                 }
-                                alt={business.name}
                               />
                               <AvatarFallback>
                                 {business.name.slice(0, 2).toUpperCase()}
@@ -159,9 +161,10 @@ export function BusinessSwitcher() {
                                 "ml-auto",
                                 activeBusiness?.id === business.id
                                   ? "opacity-100"
-                                  : "opacity-0"
+                                  : "opacity-0",
                               )}
                             />
+
                             <span className="text-muted-foreground text-xs">
                               ⌘{index + 1}
                             </span>
@@ -173,13 +176,13 @@ export function BusinessSwitcher() {
                 <CommandSeparator />
                 <CommandGroup>
                   <CommandItem className="pt-1.5 pb-0 px-0">
-                    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                    <Dialog onOpenChange={setDialogOpen} open={dialogOpen}>
                       <DialogTrigger asChild>
                         <Button
-                          size="sm"
-                          variant="ghost"
                           className="text-muted-foreground hover:text-muted-foreground"
                           onClick={() => setDialogOpen(true)}
+                          size="sm"
+                          variant="ghost"
                         >
                           <div className="border rounded-md p-1">
                             <Plus className="size-4" />

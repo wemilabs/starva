@@ -43,7 +43,7 @@ const schema = z.object({
     .min(1, "Price is required")
     .refine(
       (v) => !Number.isNaN(Number(v)) && Number(v) >= 0,
-      "Enter a valid price"
+      "Enter a valid price",
     ),
   imageUrl: z.url("Provide a valid URL").optional().or(z.literal("")),
   description: z.string().max(500).optional().or(z.literal("")),
@@ -240,7 +240,8 @@ export function EditProductForm({
                           onUploadError={(err) => {
                             console.error(err);
                             toast.error(
-                              err?.message || "Upload failed. Please try again."
+                              err?.message ||
+                                "Upload failed. Please try again.",
                             );
                           }}
                         />

@@ -42,7 +42,7 @@ export const session = pgTable("session", {
     .references(() => user.id, { onDelete: "cascade" }),
   activeOrganizationId: text("active_organization_id").references(
     () => organization.id,
-    { onDelete: "set null" }
+    { onDelete: "set null" },
   ),
 });
 
@@ -70,10 +70,10 @@ export const verification = pgTable("verification", {
   value: text("value").notNull(),
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").$defaultFn(
-    () => /* @__PURE__ */ new Date()
+    () => /* @__PURE__ */ new Date(),
   ),
   updatedAt: timestamp("updated_at").$defaultFn(
-    () => /* @__PURE__ */ new Date()
+    () => /* @__PURE__ */ new Date(),
   ),
 });
 
@@ -176,7 +176,7 @@ export const product = pgTable(
   (t) => [
     index("product_slug_idx").on(t.slug),
     index("product_org_idx").on(t.organizationId),
-  ]
+  ],
 );
 
 export const tag = pgTable(
@@ -200,7 +200,7 @@ export const tag = pgTable(
   (t) => [
     index("tag_slug_idx").on(t.slug),
     index("tag_org_idx").on(t.organizationId),
-  ]
+  ],
 );
 
 export const productTag = pgTable(
@@ -220,7 +220,7 @@ export const productTag = pgTable(
     index("product_tag_product_idx").on(t.productId),
     index("product_tag_tag_idx").on(t.tagId),
     unique("product_tag_unique").on(t.productId, t.tagId),
-  ]
+  ],
 );
 
 export const productRelations = relations(product, ({ one, many }) => ({

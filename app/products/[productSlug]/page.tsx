@@ -24,7 +24,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 
 export default async function ProductSlugPage(
-  props: PageProps<"/products/[productSlug]">
+  props: PageProps<"/products/[productSlug]">,
 ) {
   const { productSlug } = await props.params;
   const result = await getProductBySlug(productSlug);
@@ -156,7 +156,7 @@ export default async function ProductSlugPage(
                       <div className="mt-1 flex items-center gap-2">
                         <Badge variant="available">
                           {removeUnderscoreAndCapitalizeOnlyTheFirstChar(
-                            result.status
+                            result.status,
                           )}
                         </Badge>
                         <span className="text-sm text-muted-foreground">

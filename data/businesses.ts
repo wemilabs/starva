@@ -7,7 +7,9 @@ import { getCurrentUser } from "@/server/users";
 
 export const getAllBusinesses = cache(async () => {
   try {
-    const businesses = await db.query.organization.findMany();
+    const businesses = await db.query.organization.findMany({
+      orderBy: (organization, { desc }) => [desc(organization.createdAt)],
+    });
     return businesses;
   } catch (error: unknown) {
     const e = error as Error;
@@ -26,8 +28,9 @@ export async function getBusinessesPerUser() {
   const businesses = await db.query.organization.findMany({
     where: inArray(
       organization.id,
-      members.map((member) => member.organizationId)
+      members.map((member) => member.organizationId),
     ),
+    orderBy: (organization, { desc }) => [desc(organization.createdAt)],
   });
 
   return businesses;

@@ -1,17 +1,19 @@
-import Image from "next/image";
-import { notFound } from "next/navigation";
+import { EditableBusinessDescription } from "@/components/forms/editable-business-desc";
+import { EditableBusinessName } from "@/components/forms/editable-business-name";
 import { UpdateBusinessLogoForm } from "@/components/forms/update-business-logo";
 import { ProductCatalogueSection } from "@/components/products/product-catalogue-section";
 import { getBusinessBySlug } from "@/data/businesses";
 import { getProductsPerBusiness } from "@/data/products";
-import { updateBusinessLogo } from "@/server/businesses";
-import { EditableBusinessName } from "@/components/forms/editable-business-name";
-import { updateBusinessName } from "@/server/businesses";
-import { EditableBusinessDescription } from "@/components/forms/editable-business-desc";
-import { updateBusinessDescription } from "@/server/businesses";
+import {
+  updateBusinessDescription,
+  updateBusinessLogo,
+  updateBusinessName,
+} from "@/server/businesses";
+import Image from "next/image";
+import { notFound } from "next/navigation";
 
-export default async function BusinessIdPage(
-  props: PageProps<"/businesses/[businessSlug]">
+export default async function BusinessSlugPage(
+  props: PageProps<"/businesses/[businessSlug]">,
 ) {
   const { businessSlug } = await props.params;
 
@@ -22,7 +24,6 @@ export default async function BusinessIdPage(
 
   const productsPerBusiness = await getProductsPerBusiness(business.id);
 
-  // Parse metadata
   const metadata = business.metadata ? JSON.parse(business.metadata) : {};
   const description = metadata.description || "";
 
@@ -100,14 +101,14 @@ export default async function BusinessIdPage(
         </div>
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10 px-6 py-16 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-          <div className="text-white">
+          <div className="text-white flex flex-col gap-2">
             <EditableBusinessName
               businessId={business.id}
               businessSlug={resolvedSlug}
               initialName={business.name}
               updateAction={updateBusinessName}
             />
-            <p className="mt-2 text-white/80">@{resolvedSlug}</p>
+            <p className="text-white/80">@{resolvedSlug}</p>
             <EditableBusinessDescription
               businessId={business.id}
               businessSlug={resolvedSlug}
@@ -125,7 +126,7 @@ export default async function BusinessIdPage(
 
       <section className="grid gap-6 mt-10">
         <ProductCatalogueSection
-          products={productsPerBusiness}
+          data={productsPerBusiness}
           businessId={business.id}
           businessSlug={resolvedSlug}
         />

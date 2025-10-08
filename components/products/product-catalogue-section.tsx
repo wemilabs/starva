@@ -14,6 +14,7 @@ import {
 import type { Product } from "@/db/schema";
 import { STATUS_VALUES } from "@/lib/constants";
 import { removeUnderscoreAndCapitalizeOnlyTheFirstChar } from "@/lib/utils";
+import { usePathname } from "next/navigation";
 
 type ProductWithOrg = Product & {
   organization?: {
@@ -25,17 +26,18 @@ type ProductWithOrg = Product & {
 };
 
 type ProductCatalogueSectionProps = {
-  products: ProductWithOrg[];
+  data: ProductWithOrg[];
   businessId: string;
   businessSlug: string;
 };
 
 export function ProductCatalogueSection({
-  products,
+  data,
   businessId,
   businessSlug,
 }: ProductCatalogueSectionProps) {
   const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const pathname = usePathname();
 
   return (
     <>
@@ -44,13 +46,17 @@ export function ProductCatalogueSection({
           <div className="flex flex-col gap-1">
             <h2 className="text-lg font-semibold">Catalogue</h2>
             <p className="text-muted-foreground text-sm">
-              Manage your products here
+              {pathname === `/business/${businessSlug}`
+                ? "Manage your products here"
+                : "View products here"}
             </p>
           </div>
-          <AddProductForm
-            organizationId={businessId}
-            businessSlug={businessSlug}
-          />
+          {pathname === `/business/${businessSlug}` ? (
+            <AddProductForm
+              organizationId={businessId}
+              businessSlug={businessSlug}
+            />
+          ) : null}
         </div>
 
         <div className="flex items-center justify-between">
@@ -78,7 +84,7 @@ export function ProductCatalogueSection({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <FilteredProducts data={products} filterByStatus={selectedStatus} />
+        <FilteredProducts data={data} filterByStatus={selectedStatus} />
       </div>
     </>
   );

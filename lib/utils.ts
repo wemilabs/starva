@@ -4,6 +4,14 @@ import { twMerge } from "tailwind-merge";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+export const extractInitials = (text: string) => {
+  return text
+    .split(" ")
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+};
 
 export const slugify = (text: string): string => {
   return text
@@ -16,7 +24,7 @@ export const slugify = (text: string): string => {
 };
 
 export const removeUnderscoreAndCapitalizeOnlyTheFirstChar = (
-  text: string
+  text: string,
 ): string => {
   const withSpaces = text.replace(/_/g, " ");
   return withSpaces.charAt(0).toUpperCase() + withSpaces.slice(1);

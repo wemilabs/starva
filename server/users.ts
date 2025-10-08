@@ -26,7 +26,7 @@ export async function signInUser(email: string, password: string) {
 export async function signUpUser(
   email: string,
   password: string,
-  name: string
+  name: string,
 ) {
   try {
     await auth.api.signUpEmail({

@@ -2,15 +2,16 @@
 
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+
 import { db } from "@/db/drizzle";
 import { organization } from "@/db/schema";
 import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
 
 export async function updateBusinessLogo(
   businessId: string,
   resolvedSlug: string,
-  formData: FormData
+  formData: FormData,
 ) {
   const logoUrl = String(formData.get("logoUrl") || "").trim();
   if (!logoUrl) return;
@@ -26,7 +27,7 @@ export async function updateBusinessLogo(
 export async function updateBusinessName(
   businessId: string,
   businessSlug: string,
-  name: string
+  name: string,
 ) {
   const trimmedName = name.trim();
   if (!trimmedName) return;
@@ -47,7 +48,7 @@ export async function updateBusinessName(
 export async function updateBusinessDescription(
   businessId: string,
   businessSlug: string,
-  description: string
+  description: string,
 ) {
   const trimmedDescription = description.trim();
 
@@ -64,4 +65,15 @@ export async function updateBusinessDescription(
   });
 
   revalidatePath(`/businesses/${businessSlug}`);
+}
+
+export async function deleteBusiness(businessId: string) {
+  await auth.api.deleteOrganization({
+    body: {
+      organizationId: businessId,
+    },
+    headers: await headers(),
+  });
+
+  revalidatePath("/businesses");
 }

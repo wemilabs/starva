@@ -9,9 +9,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { deleteProduct } from "@/server/products";
 import { Loader2, Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
-import { deleteProduct } from "@/server/products";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -64,7 +64,7 @@ export function DeleteProductForm({
   };
 
   return (
-    <AlertDialog open={dialogOpen} onOpenChange={setDialogOpen}>
+    <AlertDialog onOpenChange={setDialogOpen} open={dialogOpen}>
       <AlertDialogTrigger className="py-2 px-2.5 bg-destructive hover:bg-destructive/80 text-white rounded-md">
         <Trash2 className="size-4" />
       </AlertDialogTrigger>
@@ -78,12 +78,12 @@ export function DeleteProductForm({
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
+            className="bg-destructive hover:bg-destructive/80"
+            disabled={isDeletingPending}
             onClick={(e) => {
               e.preventDefault();
               handleDelete();
             }}
-            className="bg-destructive hover:bg-destructive/80"
-            disabled={isDeletingPending}
           >
             {isDeletingPending ? (
               <div className="flex items-center gap-2">
@@ -91,7 +91,7 @@ export function DeleteProductForm({
                 Deleting...
               </div>
             ) : (
-              "Continue"
+              "Yes, delete"
             )}
           </AlertDialogAction>
         </AlertDialogFooter>

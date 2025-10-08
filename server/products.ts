@@ -61,7 +61,7 @@ const updateProductSchema = productSchema.extend({
 });
 
 export async function updateProduct(
-  input: z.infer<typeof updateProductSchema>
+  input: z.infer<typeof updateProductSchema>,
 ) {
   const parsed = updateProductSchema.safeParse(input);
   if (!parsed.success) {
@@ -87,8 +87,8 @@ export async function updateProduct(
       .where(
         and(
           eq(productTable.id, productId),
-          eq(productTable.organizationId, organizationId)
-        )
+          eq(productTable.organizationId, organizationId),
+        ),
       )
       .limit(1);
 
@@ -112,8 +112,8 @@ export async function updateProduct(
       .where(
         and(
           eq(productTable.id, productId),
-          eq(productTable.organizationId, organizationId)
-        )
+          eq(productTable.organizationId, organizationId),
+        ),
       );
 
     if (oldImageUrl && oldImageUrl !== newImageUrl) {
@@ -126,7 +126,7 @@ export async function updateProduct(
       } catch (error: unknown) {
         const e = error as Error;
         console.error(
-          `Failed to delete old image from UploadThing: ${e.message}`
+          `Failed to delete old image from UploadThing: ${e.message}`,
         );
       }
     }
@@ -147,7 +147,7 @@ const deleteProductSchema = z.object({
 });
 
 export async function deleteProduct(
-  input: z.infer<typeof deleteProductSchema>
+  input: z.infer<typeof deleteProductSchema>,
 ) {
   const parsed = deleteProductSchema.safeParse(input);
   if (!parsed.success) {
@@ -163,8 +163,8 @@ export async function deleteProduct(
       .where(
         and(
           eq(productTable.id, productId),
-          eq(productTable.organizationId, organizationId)
-        )
+          eq(productTable.organizationId, organizationId),
+        ),
       )
       .limit(1);
 
@@ -179,8 +179,8 @@ export async function deleteProduct(
       .where(
         and(
           eq(productTable.id, productId),
-          eq(productTable.organizationId, organizationId)
-        )
+          eq(productTable.organizationId, organizationId),
+        ),
       );
 
     if (imageUrl) {

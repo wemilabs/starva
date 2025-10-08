@@ -1,10 +1,11 @@
 "use client";
 
+import { Check, Pencil, X } from "lucide-react";
 import { useRef, useState, useTransition } from "react";
-import { Pencil, Check, X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { toast } from "sonner";
+import { Spinner } from "../ui/spinner";
 
 interface EditableBusinessDescriptionProps {
   businessId: string;
@@ -13,7 +14,7 @@ interface EditableBusinessDescriptionProps {
   updateAction: (
     businessId: string,
     businessSlug: string,
-    description: string
+    description: string,
   ) => Promise<void>;
 }
 
@@ -93,17 +94,26 @@ export function EditableBusinessDescription({
             size="sm"
             className="bg-white text-black hover:bg-white/90"
           >
-            <Check className="size-4 mr-1" />
-            Save
+            {isPending ? (
+              <>
+                <Spinner />
+                Saving...
+              </>
+            ) : (
+              <>
+                <Check className="size-4" />
+                Save
+              </>
+            )}
           </Button>
           <Button
             onClick={handleCancel}
             disabled={isPending}
             size="sm"
             variant="ghost"
-            className="text-white hover:bg-white/10"
+            className="hover:bg-white/10 hover:text-white"
           >
-            <X className="size-4 mr-1" />
+            <X className="size-4" />
             Cancel
           </Button>
           <span className="text-xs text-white/50 ml-auto">
@@ -129,17 +139,15 @@ export function EditableBusinessDescription({
   }
 
   return (
-    <div className="group relative">
-      <p className="text-white/80 text-sm leading-relaxed pr-8">
-        {description}
-      </p>
+    <div className="relative">
+      <p className="text-white/80 text-sm leading-relaxed">{description}</p>
       <Button
         onClick={handleEdit}
         size="icon"
         variant="ghost"
-        className="absolute top-0 right-0 h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-white hover:bg-white/10"
+        className="absolute top-0 right-0 size-6 hover:bg-white/10"
       >
-        <Pencil className="size-3" />
+        <Pencil className="size-4" />
       </Button>
     </div>
   );

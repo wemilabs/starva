@@ -1,17 +1,5 @@
 "use client";
 
-import {
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
-  Loader2,
-  LogOut,
-  Sparkles,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -29,6 +17,19 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { signOut } from "@/lib/auth-client";
+import { extractInitials } from "@/lib/utils";
+import {
+  BadgeCheck,
+  Bell,
+  ChevronsUpDown,
+  CreditCard,
+  Loader2,
+  LogOut,
+  Sparkles,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -88,13 +89,7 @@ export function NavUser({
     });
   };
 
-  const userInitials = user?.name
-    ? user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-    : "?";
+  const userInitials = user?.name ? extractInitials(user.name) : "?";
 
   return (
     <SidebarMenu>
@@ -102,12 +97,12 @@ export function NavUser({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
-              size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+              size="lg"
             >
               <Avatar className="size-8 rounded-lg">
                 {user?.image ? (
-                  <AvatarImage src={user?.image} alt={user?.name} />
+                  <AvatarImage alt={user?.name} src={user?.image} />
                 ) : (
                   <AvatarFallback className="rounded-lg">
                     {userInitials}
@@ -122,16 +117,16 @@ export function NavUser({
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
+            align="end"
             className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
             side={isMobile ? "bottom" : "right"}
-            align="end"
             sideOffset={4}
           >
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="size-8 rounded-lg">
                   {user?.image ? (
-                    <AvatarImage src={user?.image} alt={user?.name} />
+                    <AvatarImage alt={user?.name} src={user?.image} />
                   ) : (
                     <AvatarFallback className="rounded-lg">
                       {userInitials}
@@ -167,7 +162,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <AlertDialog onOpenChange={setIsDialogOpen} open={isDialogOpen}>
               <AlertDialogTrigger className="flex items-center gap-2 py-1 text-left text-sm hover:bg-sidebar-accent w-full">
                 <LogOut className="size-4 ml-2 text-accent-foreground/70" />
                 Sign out
@@ -183,11 +178,11 @@ export function NavUser({
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction
+                    disabled={isSigningOutPending}
                     onClick={(e) => {
                       e.preventDefault();
                       handleSignOut();
                     }}
-                    disabled={isSigningOutPending}
                   >
                     {isSigningOutPending ? (
                       <div className="flex items-center gap-2">

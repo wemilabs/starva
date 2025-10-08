@@ -98,7 +98,7 @@ export const SignInForm = ({
                         const e = error as Error;
                         console.error(e.message);
                         toast.error(
-                          "Something went wrong. Please try again later."
+                          "Something went wrong. Please try again later.",
                         );
                       }
                     })

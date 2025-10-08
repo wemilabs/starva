@@ -13,8 +13,8 @@ export const getUsers = async (organizationId: string) => {
       where: not(
         inArray(
           user.id,
-          members.map((member) => member.userId)
-        )
+          members.map((member) => member.userId),
+        ),
       ),
     });
 

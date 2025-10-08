@@ -29,7 +29,7 @@ export function SearchForm({
           placeholder="e.g. thiep, vosgienne, calaba, etc."
           className={cn(
             "w-full bg-transparent pl-10 focus:outline-none rounded-lg placeholder:text-xs md:placeholder:text-sm text-xs md:text-sm transition duration-300 ease-in-out",
-            inputFieldOnlyClassName
+            inputFieldOnlyClassName,
           )}
           value={search}
           onChange={(e) => setSearch(e.target.value || null)}

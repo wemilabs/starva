@@ -21,6 +21,7 @@ export default async function MerchantSlugPage(
 
   const metadata = merchant.metadata ? JSON.parse(merchant.metadata) : {};
   const description = metadata.description || "";
+  const phone = metadata.phone || "";
 
   return (
     <div className="space-y-8">
@@ -48,6 +49,7 @@ export default async function MerchantSlugPage(
             <p className="text-white/80 text-sm leading-relaxed">
               {description}
             </p>
+            <p className="text-white/80 text-sm leading-relaxed">{phone}</p>
           </div>
         </div>
       </section>
@@ -59,6 +61,7 @@ export default async function MerchantSlugPage(
             data={productsPerMerchant}
             businessId={merchant.id}
             businessSlug={resolvedSlug}
+            defaultStatus="in_stock"
           />
         ) : (
           <div className="text-center py-10 border border-dashed border-muted-foreground/50 rounded-lg">

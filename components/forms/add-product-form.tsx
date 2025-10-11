@@ -113,7 +113,7 @@ export function AddProductForm({
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button type="button" onClick={() => setDialogOpen(true)}>
+        <Button size="sm" type="button" onClick={() => setDialogOpen(true)}>
           <Plus className="size-4 sm:hidden" />
           <span className="hidden sm:block">Add product</span>
         </Button>

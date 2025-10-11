@@ -1,14 +1,7 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, LogIn } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Form,
   FormControl,
@@ -18,8 +11,24 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { organization, useSession } from "@/lib/auth-client";
+import { COUNTRIES } from "@/lib/constants";
 import { slugify } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2, LogIn } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 import { Card, CardContent } from "../ui/card";
 import { Textarea } from "../ui/textarea";
 
@@ -27,6 +36,12 @@ const formSchema = z.object({
   name: z.string().min(2).max(50),
   slug: z.string().min(2).max(50),
   description: z.string().min(2).max(100).optional(),
+  countryCode: z.string(),
+  phoneNumber: z
+    .string()
+    .min(6, "Phone number must be at least 6 digits")
+    .max(15, "Phone number must be at most 15 digits")
+    .regex(/^[0-9]+$/, "Phone number must contain only digits"),
 });
 
 interface RegisterBusinessFormProps {
@@ -44,6 +59,8 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
       name: "",
       slug: "",
       description: "",
+      countryCode: "+250",
+      phoneNumber: "",
     },
   });
   const ownerId = session?.user?.id;
@@ -73,7 +90,10 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
         await organization.create({
           name: values.name,
           slug: values.slug,
-          metadata: { description: values.description },
+          metadata: {
+            description: values.description,
+            phone: `${values.countryCode}${values.phoneNumber}`,
+          },
         });
         toast.success("Success", {
           description: "A new business has successfully been registered ",
@@ -101,7 +121,11 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
               <FormItem>
                 <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="My Business" {...field} />
+                  <Input
+                    placeholder="My Business"
+                    className="placeholder:text-sm"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -118,7 +142,7 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
                   <Input
                     placeholder="my-business"
                     readOnly
-                    className="bg-muted cursor-not-allowed text-muted-foreground"
+                    className="bg-muted cursor-not-allowed text-muted-foreground placeholder:text-sm"
                     {...field}
                   />
                 </FormControl>
@@ -136,6 +160,7 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
                 <FormControl>
                   <Textarea
                     placeholder="Welcome to my business. Here is what we offer."
+                    className="placeholder:text-sm"
                     {...field}
                   />
                 </FormControl>
@@ -143,6 +168,55 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
               </FormItem>
             )}
           />
+
+          <div className="space-y-2">
+            <FormLabel>Phone Number</FormLabel>
+            <ButtonGroup>
+              <FormField
+                control={form.control}
+                name="countryCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger className="min-w-[100px] rounded-r-none">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {COUNTRIES.map((country) => (
+                          <SelectItem key={country.code} value={country.code}>
+                            <span className="flex items-center gap-2">
+                              <span>{country.flag}</span>
+                              <span>{country.code}</span>
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="phoneNumber"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormControl>
+                      <Input
+                        className="rounded-l-none placeholder:text-sm"
+                        placeholder="123456789"
+                        type="tel"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </ButtonGroup>
+          </div>
 
           <Button disabled={isPending} type="submit">
             {isPending ? (

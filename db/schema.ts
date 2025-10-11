@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { relations } from "drizzle-orm";
 import {
   boolean,
@@ -11,6 +10,7 @@ import {
   timestamp,
   unique,
 } from "drizzle-orm/pg-core";
+import { randomUUID } from "node:crypto";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -90,6 +90,7 @@ export const organizationRelations = relations(organization, ({ many }) => ({
   members: many(member),
   invitations: many(invitation),
   products: many(product),
+  orders: many(order),
 }));
 
 export const role = pgEnum("role", ["member", "admin", "owner"]);
@@ -146,6 +147,15 @@ export const status = pgEnum("status", [
   "in_stock",
   "out_of_stock",
   "archived",
+]);
+
+export const orderStatus = pgEnum("order_status", [
+  "pending",
+  "confirmed",
+  "preparing",
+  "ready",
+  "delivered",
+  "cancelled",
 ]);
 
 export const product = pgTable(
@@ -229,6 +239,87 @@ export const productRelations = relations(product, ({ one, many }) => ({
     references: [organization.id],
   }),
   productTags: many(productTag),
+  orderItems: many(orderItem),
+}));
+
+export const order = pgTable(
+  "order",
+  {
+    id: text("id")
+      .$defaultFn(() => randomUUID())
+      .primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    notes: text("notes"),
+    status: orderStatus("status").default("pending").notNull(),
+    totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),
+    createdAt: timestamp("created_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (t) => [
+    index("order_user_idx").on(t.userId),
+    index("order_org_idx").on(t.organizationId),
+    index("order_status_idx").on(t.status),
+  ],
+);
+
+export const orderItem = pgTable(
+  "order_item",
+  {
+    id: text("id")
+      .$defaultFn(() => randomUUID())
+      .primaryKey(),
+    orderId: text("order_id")
+      .notNull()
+      .references(() => order.id, { onDelete: "cascade" }),
+    productId: text("product_id")
+      .notNull()
+      .references(() => product.id, { onDelete: "cascade" }),
+    quantity: integer("quantity").notNull().default(1),
+    priceAtOrder: decimal("price_at_order", {
+      precision: 10,
+      scale: 2,
+    }).notNull(),
+    subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
+    createdAt: timestamp("created_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (t) => [
+    index("order_item_order_idx").on(t.orderId),
+    index("order_item_product_idx").on(t.productId),
+  ],
+);
+
+export const orderRelations = relations(order, ({ one, many }) => ({
+  user: one(user, {
+    fields: [order.userId],
+    references: [user.id],
+  }),
+  organization: one(organization, {
+    fields: [order.organizationId],
+    references: [organization.id],
+  }),
+  orderItems: many(orderItem),
+}));
+
+export const orderItemRelations = relations(orderItem, ({ one }) => ({
+  order: one(order, {
+    fields: [orderItem.orderId],
+    references: [order.id],
+  }),
+  product: one(product, {
+    fields: [orderItem.productId],
+    references: [product.id],
+  }),
 }));
 
 export const tagRelations = relations(tag, ({ many }) => ({
@@ -244,6 +335,9 @@ export type User = typeof user.$inferSelect;
 export type Product = typeof product.$inferSelect;
 export type Tag = typeof tag.$inferSelect;
 export type Status = (typeof status.enumValues)[number];
+export type Order = typeof order.$inferSelect;
+export type OrderItem = typeof orderItem.$inferSelect;
+export type OrderStatus = (typeof orderStatus.enumValues)[number];
 
 export const schema = {
   user,
@@ -256,9 +350,13 @@ export const schema = {
   product,
   tag,
   productTag,
+  order,
+  orderItem,
   organizationRelations,
   memberRelations,
   invitationRelations,
   productRelations,
   tagRelations,
+  orderRelations,
+  orderItemRelations,
 };

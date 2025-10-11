@@ -1,5 +1,6 @@
 import { EditableBusinessDescription } from "@/components/forms/editable-business-desc";
 import { EditableBusinessName } from "@/components/forms/editable-business-name";
+import { EditableBusinessPhone } from "@/components/forms/editable-business-phone";
 import { UpdateBusinessLogoForm } from "@/components/forms/update-business-logo";
 import { ProductCatalogueSection } from "@/components/products/product-catalogue-section";
 import { getBusinessBySlug } from "@/data/businesses";
@@ -8,6 +9,7 @@ import {
   updateBusinessDescription,
   updateBusinessLogo,
   updateBusinessName,
+  updateBusinessPhone,
 } from "@/server/businesses";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -26,6 +28,7 @@ export default async function BusinessSlugPage(
 
   const metadata = business.metadata ? JSON.parse(business.metadata) : {};
   const description = metadata.description || "";
+  const phone = metadata.phone || "";
 
   if ("message" in productsPerBusiness) {
     return (
@@ -53,12 +56,18 @@ export default async function BusinessSlugPage(
                 initialName={business.name}
                 updateAction={updateBusinessName}
               />
-              <p className="mt-2 text-white/80">@{resolvedSlug}</p>
+              <p className="mt-2 text-white/80 text-sm">@{resolvedSlug}</p>
               <EditableBusinessDescription
                 businessId={business.id}
                 businessSlug={resolvedSlug}
                 initialDescription={description}
                 updateAction={updateBusinessDescription}
+              />
+              <EditableBusinessPhone
+                businessId={business.id}
+                businessSlug={resolvedSlug}
+                initialPhone={phone}
+                updateAction={updateBusinessPhone}
               />
             </div>
 
@@ -108,12 +117,18 @@ export default async function BusinessSlugPage(
               initialName={business.name}
               updateAction={updateBusinessName}
             />
-            <p className="text-white/80">@{resolvedSlug}</p>
+            <p className="text-white/80 text-sm">@{resolvedSlug}</p>
             <EditableBusinessDescription
               businessId={business.id}
               businessSlug={resolvedSlug}
               initialDescription={description}
               updateAction={updateBusinessDescription}
+            />
+            <EditableBusinessPhone
+              businessId={business.id}
+              businessSlug={resolvedSlug}
+              initialPhone={phone}
+              updateAction={updateBusinessPhone}
             />
           </div>
 

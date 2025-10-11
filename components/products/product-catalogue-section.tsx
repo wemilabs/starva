@@ -1,9 +1,16 @@
 "use client";
 
-import { useState } from "react";
 import { AddProductForm } from "@/components/forms/add-product-form";
 import { SearchForm } from "@/components/forms/search-form";
 import { FilteredProducts } from "@/components/products/filtered-products";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -12,9 +19,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Product } from "@/db/schema";
-import { STATUS_VALUES } from "@/lib/constants";
+import { STATUS_VALUES, type StatusValue } from "@/lib/constants";
 import { removeUnderscoreAndCapitalizeOnlyTheFirstChar } from "@/lib/utils";
+import { CalendarClock } from "lucide-react";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
+import { Button } from "../ui/button";
 
 type ProductWithOrg = Product & {
   organization?: {
@@ -29,14 +39,18 @@ type ProductCatalogueSectionProps = {
   data: ProductWithOrg[];
   businessId: string;
   businessSlug: string;
+  defaultStatus?: StatusValue;
 };
 
 export function ProductCatalogueSection({
   data,
   businessId,
   businessSlug,
+  defaultStatus,
 }: ProductCatalogueSectionProps) {
-  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [selectedStatus, setSelectedStatus] = useState<string>(
+    defaultStatus || "all",
+  );
   const pathname = usePathname();
 
   return (
@@ -51,11 +65,36 @@ export function ProductCatalogueSection({
                 : "View products here"}
             </p>
           </div>
-          {pathname === `/business/${businessSlug}` ? (
-            <AddProductForm
-              organizationId={businessId}
-              businessSlug={businessSlug}
-            />
+          {pathname === `/businesses/${businessSlug}` ? (
+            <div className="flex items-center gap-2">
+              <AddProductForm
+                organizationId={businessId}
+                businessSlug={businessSlug}
+              />
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-none shadow-none bg-transparent hover:bg-muted"
+                    type="button"
+                  >
+                    <CalendarClock className="size-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Setting time</DialogTitle>
+                    <DialogDescription>
+                      Define your business timetable
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="text-center text-sm text-muted-foreground py-4">
+                    Coming soon...
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
           ) : null}
         </div>
 

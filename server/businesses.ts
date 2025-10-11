@@ -52,12 +52,62 @@ export async function updateBusinessDescription(
 ) {
   const trimmedDescription = description.trim();
 
+  const currentBusiness = await auth.api.getFullOrganization({
+    query: {
+      organizationId: businessId,
+    },
+    headers: await headers(),
+  });
+
+  const currentMetadata = currentBusiness?.metadata
+    ? typeof currentBusiness.metadata === "string"
+      ? JSON.parse(currentBusiness.metadata)
+      : currentBusiness.metadata
+    : {};
+
   await auth.api.updateOrganization({
     body: {
       organizationId: businessId,
       data: {
         metadata: {
+          ...currentMetadata,
           description: trimmedDescription,
+        },
+      },
+    },
+    headers: await headers(),
+  });
+
+  revalidatePath(`/businesses/${businessSlug}`);
+}
+
+export async function updateBusinessPhone(
+  businessId: string,
+  businessSlug: string,
+  phone: string,
+) {
+  const trimmedPhone = phone.trim();
+
+  const currentBusiness = await auth.api.getFullOrganization({
+    query: {
+      organizationId: businessId,
+    },
+    headers: await headers(),
+  });
+
+  const currentMetadata = currentBusiness?.metadata
+    ? typeof currentBusiness.metadata === "string"
+      ? JSON.parse(currentBusiness.metadata)
+      : currentBusiness.metadata
+    : {};
+
+  await auth.api.updateOrganization({
+    body: {
+      organizationId: businessId,
+      data: {
+        metadata: {
+          ...currentMetadata,
+          phone: trimmedPhone,
         },
       },
     },

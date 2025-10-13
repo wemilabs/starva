@@ -1,10 +1,8 @@
 "use client";
 
+import type { Product } from "@/db/schema";
 import { usePathname } from "next/navigation";
 import { useQueryState } from "nuqs";
-import type { Product } from "@/db/schema";
-import { DeleteProductForm } from "../forms/delete-product-form";
-import { EditProductForm } from "../forms/edit-product-form";
 import { ProductCard } from "./product-card";
 
 type ProductWithOrg = Product & {
@@ -51,7 +49,8 @@ export function FilteredProducts({
       </div>
     );
 
-  const isHomePage = pathname === "/";
+  const isBusinessesPage =
+    pathname === `/businesses/${data[0].organization?.slug}`;
 
   return (
     <>
@@ -59,31 +58,8 @@ export function FilteredProducts({
         <div key={product.id}>
           <ProductCard
             {...product}
-            href={isHomePage ? product.slug : undefined}
+            href={!isBusinessesPage ? product.slug : undefined}
           />
-
-          <div className="mt-3 rounded-xl border border-amber-200/70 bg-amber-50/40 p-3 shadow-sm transition-colors dark:border-amber-900/40 dark:bg-amber-950/20">
-            {pathname === `/businesses/${product.organization?.slug}` ? (
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-xs font-medium text-amber-800/80 dark:text-amber-200/80">
-                  Manage this product
-                </span>
-                <div className="flex items-center gap-2">
-                  <EditProductForm
-                    product={product}
-                    organizationId={product.organizationId}
-                    businessSlug={product.organization?.slug || ""}
-                    className="shadow-sm hover:shadow"
-                  />
-                  <DeleteProductForm
-                    productId={product.id}
-                    organizationId={product.organizationId}
-                    businessSlug={product.organization?.slug || ""}
-                  />
-                </div>
-              </div>
-            ) : null}
-          </div>
         </div>
       ))}
     </>

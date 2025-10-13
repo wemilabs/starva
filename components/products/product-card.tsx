@@ -1,13 +1,31 @@
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Card } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import type { Product } from "@/db/schema";
+import { cn, removeUnderscoreAndCapitalizeOnlyTheFirstChar } from "@/lib/utils";
 import { Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card } from "@/components/ui/card";
-import type { Product } from "@/db/schema";
-import { cn, removeUnderscoreAndCapitalizeOnlyTheFirstChar } from "@/lib/utils";
+// import { Activity } from "react";
+
+import { DeleteProductForm } from "../forms/delete-product-form";
+import { EditProductForm } from "../forms/edit-product-form";
+import { AddToCartButton } from "./add-to-cart-button";
 
 type Props = Product & {
-  organization?: { id: string; name: string; logo: string | null } | null;
+  organization?: {
+    id: string;
+    name: string;
+    logo: string | null;
+    slug: string;
+  } | null;
   href?: string;
 };
 
@@ -23,13 +41,20 @@ function getInitials(name?: string | null) {
 }
 
 export function ProductCard({
+  id,
   name,
+  slug,
   imageUrl,
   price,
   description,
   likesCount,
   status,
   organization,
+  createdAt,
+  updatedAt,
+  calories,
+  brand,
+  organizationId,
   href,
 }: Props) {
   const priceNumber = Number(price) || 0;
@@ -37,7 +62,7 @@ export function ProductCard({
   const orgName = organization?.name ?? null;
   const orgLogo = organization?.logo ?? null;
 
-  const cardContent = (
+  const customCardContent = (
     <>
       <div className="relative aspect-[16/9]">
         <Image
@@ -76,11 +101,17 @@ export function ProductCard({
         <h3 className="text-balance text-xl font-semibold leading-tight">
           {name}
         </h3>
+        {/* <Activity mode={description ? "visible" : "hidden"}>
+            <p className="mt-2 max-w-[46ch] text-xs text-white/80">
+              {description}
+            </p>
+          </Activity> */}
         {description ? (
           <p className="mt-2 max-w-[46ch] text-xs text-white/80">
             {description}
           </p>
         ) : null}
+
         <div className="mt-4 flex items-center justify-between">
           <div className="inline-flex items-center gap-2 rounded-full bg-black/30 ring-1 ring-white/10 backdrop-blur-sm">
             <Avatar className="size-9 ring-1 ring-white/20">
@@ -105,12 +136,102 @@ export function ProductCard({
   );
 
   return (
-    <Card className="group relative overflow-hidden p-0">
-      {href ? (
-        <Link href={`/products/${href}`}>{cardContent}</Link>
-      ) : (
-        cardContent
-      )}
-    </Card>
+    <Dialog>
+      <DialogTrigger asChild>
+        <Card className="group relative overflow-hidden p-0">
+          {customCardContent}
+        </Card>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{name}</DialogTitle>
+        </DialogHeader>
+        <h1>General content with product info</h1>
+        {/* <Activity mode={href ? "visible" : "hidden"}>
+          <AddToCartButton
+            product={{
+              id,
+              name,
+              slug,
+              price,
+              imageUrl,
+            }}
+          />
+          <Link href={`/products/${href}`}>View product</Link>
+        </Activity> */}
+        {href ? (
+          <>
+            <AddToCartButton
+              product={{
+                id,
+                name,
+                slug,
+                price,
+                imageUrl,
+              }}
+            />
+            <Link href={`/products/${href}`}>View product</Link>
+          </>
+        ) : null}
+      </DialogContent>
+      {/* <Activity mode={!href ? "visible" : "hidden"}>
+        <DialogFooter>
+          <EditProductForm
+            product={{
+              id,
+              name,
+              slug,
+              price,
+              imageUrl,
+              description,
+              status,
+              likesCount,
+              createdAt,
+              organizationId,
+              calories,
+              updatedAt,
+              brand,
+            }}
+            organizationId={organization?.id || ""}
+            businessSlug={organization?.slug || ""}
+            className="shadow-sm hover:shadow"
+          />
+          <DeleteProductForm
+            productId={id}
+            organizationId={organization?.id || ""}
+            businessSlug={organization?.slug || ""}
+          />
+        </DialogFooter>
+      </Activity> */}
+      {!href ? (
+        <DialogFooter className="">
+          <EditProductForm
+            product={{
+              id,
+              name,
+              slug,
+              price,
+              imageUrl,
+              description,
+              status,
+              likesCount,
+              createdAt,
+              organizationId,
+              calories,
+              updatedAt,
+              brand,
+            }}
+            organizationId={organization?.id || ""}
+            businessSlug={organization?.slug || ""}
+            className="shadow-sm hover:shadow"
+          />
+          <DeleteProductForm
+            productId={id}
+            organizationId={organization?.id || ""}
+            businessSlug={organization?.slug || ""}
+          />
+        </DialogFooter>
+      ) : null}
+    </Dialog>
   );
 }

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { CartSheet } from "@/components/cart/cart-sheet";
 import { RegisterBusinessForm } from "@/components/forms/register-business-form";
 import { ModeToggle } from "@/components/mode-toggle";
@@ -15,7 +17,6 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { getBusinessesPerUser } from "@/data/businesses";
 import { verifySession } from "@/data/user-session";
-import Link from "next/link";
 
 export async function Header({
   baseCrumbs,

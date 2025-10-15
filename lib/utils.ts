@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { COUNTRIES } from "./constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -28,4 +29,16 @@ export const removeUnderscoreAndCapitalizeOnlyTheFirstChar = (
 ): string => {
   const withSpaces = text.replace(/_/g, " ");
   return withSpaces.charAt(0).toUpperCase() + withSpaces.slice(1);
+};
+
+export const parsePhoneNumber = (fullPhone: string) => {
+  if (!fullPhone) return { countryCode: COUNTRIES[0].code, phoneNumber: "" };
+  const country = COUNTRIES.find((c) => fullPhone.startsWith(c.code));
+  if (country) {
+    return {
+      countryCode: country.code,
+      phoneNumber: fullPhone.substring(country.code.length).trim(),
+    };
+  }
+  return { countryCode: COUNTRIES[0].code, phoneNumber: fullPhone };
 };

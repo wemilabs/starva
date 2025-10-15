@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { COUNTRIES } from "@/lib/constants";
+import { parsePhoneNumber } from "@/lib/utils";
 import { Check, Pencil, Phone, X } from "lucide-react";
 import { useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
@@ -35,22 +36,10 @@ export function EditableBusinessPhone({
 }: EditableBusinessPhoneProps) {
   const [isEditing, setIsEditing] = useState(false);
 
-  // Parse initial phone into country code and number
-  const parsePhone = (fullPhone: string) => {
-    if (!fullPhone) return { countryCode: COUNTRIES[0].code, phoneNumber: "" };
-    const country = COUNTRIES.find((c) => fullPhone.startsWith(c.code));
-    if (country) {
-      return {
-        countryCode: country.code,
-        phoneNumber: fullPhone.substring(country.code.length).trim(),
-      };
-    }
-    return { countryCode: COUNTRIES[0].code, phoneNumber: fullPhone };
-  };
-
-  const parsed = parsePhone(initialPhone);
+  const parsed = parsePhoneNumber(initialPhone);
   const [countryCode, setCountryCode] = useState<string>(parsed.countryCode);
   const [phoneNumber, setPhoneNumber] = useState<string>(parsed.phoneNumber);
+
   const [isPending, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -60,7 +49,7 @@ export function EditableBusinessPhone({
   };
 
   const handleCancel = () => {
-    const parsed = parsePhone(initialPhone);
+    const parsed = parsePhoneNumber(initialPhone);
     setCountryCode(parsed.countryCode);
     setPhoneNumber(parsed.phoneNumber);
     setIsEditing(false);
@@ -85,7 +74,7 @@ export function EditableBusinessPhone({
         });
       } catch (error) {
         console.error("Failed to update phone number:", error);
-        const parsed = parsePhone(initialPhone);
+        const parsed = parsePhoneNumber(initialPhone);
         setCountryCode(parsed.countryCode);
         setPhoneNumber(parsed.phoneNumber);
         toast.error("Failed to update phone number", {

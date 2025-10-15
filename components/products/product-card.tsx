@@ -4,7 +4,6 @@ import {
   Dialog,
   DialogContent,
   DialogFooter,
-  DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
@@ -142,37 +141,94 @@ export function ProductCard({
           {customCardContent}
         </Card>
       </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{name}</DialogTitle>
-        </DialogHeader>
-        <h1>General content with product info</h1>
-        {/* <Activity mode={href ? "visible" : "hidden"}>
-          <AddToCartButton
-            product={{
-              id,
-              name,
-              slug,
-              price,
-              imageUrl,
-            }}
+      <DialogContent className="flex h-[calc(100vh-12rem)] flex-col gap-0 p-0 md:flex-row border-none md:h-[calc(100vh-25rem)]">
+        <div className="relative aspect-square overflow-hidden md:aspect-auto md:w-1/2">
+          <Image
+            src={
+              imageUrl ??
+              "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6d89s9BRYhvCEDrKcu2HNpfYQo7eR4FUT8wVgS"
+            }
+            alt={name}
+            fill
+            priority
+            className="object-cover rounded-t-lg md:rounded-l-lg md:rounded-r-none"
           />
-          <Link href={`/products/${href}`}>View product</Link>
-        </Activity> */}
-        {href ? (
-          <>
-            <AddToCartButton
-              product={{
-                id,
-                name,
-                slug,
-                price,
-                imageUrl,
-              }}
-            />
-            <Link href={`/products/${href}`}>View product</Link>
-          </>
-        ) : null}
+        </div>
+        <div className="flex flex-1 flex-col gap-5 p-6 md:py-8">
+          <div className="flex flex-col gap-2">
+            {organization?.name && (
+              <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                {organization.name}
+              </p>
+            )}
+            <DialogTitle className="text-balance text-2xl font-bold leading-tight tracking-tight line-clamp-2">
+              {name}
+            </DialogTitle>
+            {description && (
+              <p className="text-sm leading-relaxed text-muted-foreground line-clamp-1">
+                {description}
+              </p>
+            )}
+          </div>
+
+          <div className="flex items-center gap-4">
+            <p className="text-3xl font-bold text-primary/90">
+              {new Intl.NumberFormat("rw-RW", {
+                style: "currency",
+                currency: "RWF",
+                maximumFractionDigits: 0,
+              }).format(priceNumber)}
+            </p>
+            {/* {priceNumber > 0 && (
+              <p className="text-sm text-muted-foreground line-through">
+                {new Intl.NumberFormat("rw-RW", {
+                  style: "currency",
+                  currency: "RWF",
+                  maximumFractionDigits: 0,
+                }).format(priceNumber * 1.13)}
+              </p>
+            )} */}
+          </div>
+
+          {/* <Activity mode={href ? "visible" : "hidden"}>
+            <div className="flex flex-col gap-3">
+              <AddToCartButton
+                product={{
+                  id,
+                  name,
+                  slug,
+                  price,
+                  imageUrl,
+                }}
+              />
+              <Link
+                href={`/products/${href}`}
+                className="text-center text-sm text-muted-foreground underline-offset-4 hover:underline"
+              >
+                View product details
+              </Link>
+            </div>
+          </Activity> */}
+          {href ? (
+            <div className="flex flex-col gap-3">
+              <AddToCartButton
+                product={{
+                  id,
+                  name,
+                  slug,
+                  price,
+                  imageUrl,
+                }}
+              />
+              <Link
+                href={`/products/${href}`}
+                className="text-center text-sm text-muted-foreground underline-offset-4 hover:underline"
+              >
+                View product details
+              </Link>
+            </div>
+          ) : null}
+        </div>
       </DialogContent>
       {/* <Activity mode={!href ? "visible" : "hidden"}>
         <DialogFooter>

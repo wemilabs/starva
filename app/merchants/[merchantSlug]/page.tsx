@@ -2,11 +2,20 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 
 import { ProductCatalogueSection } from "@/components/products/product-catalogue-section";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { getBusinessBySlug } from "@/data/businesses";
 import { getProductsPerBusinessWithoutAuth } from "@/data/products";
+import { DAYS, today } from "@/lib/constants";
+import { formatTime } from "@/lib/utils";
+import { Clock, Divide } from "lucide-react";
 
 export default async function MerchantSlugPage(
-  props: PageProps<"/merchants/[merchantSlug]">,
+  props: PageProps<"/merchants/[merchantSlug]">
 ) {
   const { merchantSlug } = await props.params;
 
@@ -16,15 +25,21 @@ export default async function MerchantSlugPage(
   const resolvedSlug = merchant.slug || merchantSlug;
 
   const productsPerMerchant = await getProductsPerBusinessWithoutAuth(
-    merchant.id,
+    merchant.id
   );
 
   const metadata = merchant.metadata ? JSON.parse(merchant.metadata) : {};
   const description = metadata.description || "";
   const phone = metadata.phone || "";
+  const timetable = metadata.timetable || {};
+
+  const hasTimetable =
+    timetable &&
+    typeof timetable === "object" &&
+    Object.keys(timetable).length > 0;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       <section className="relative overflow-hidden rounded-xl border">
         <div className="absolute inset-0">
           {merchant.logo ? (
@@ -54,7 +69,72 @@ export default async function MerchantSlugPage(
         </div>
       </section>
 
-      <section className="grid gap-6 mt-10">
+      {hasTimetable ? (
+        <section className="grid gap-6">
+          <Accordion type="single" collapsible defaultValue="">
+            <AccordionItem value="business-hours">
+              <AccordionTrigger className="hover:no-underline">
+                <div className="flex items-center gap-2">
+                  <Clock className="size-4" />
+                  <span className="font-semibold">Opening Hours</span>
+                </div>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="space-y-3 pb-4">
+                  {DAYS.map((day) => {
+                    const dayData = timetable[day.key];
+                    const isToday = day.key === today;
+                    const isClosed = !dayData || dayData.closed;
+
+                    return (
+                      <div
+                        key={day.key}
+                        className={`flex justify-between items-center py-2 px-3 rounded-md transition-colors ${
+                          isToday
+                            ? "bg-primary/10 border border-primary/20"
+                            : "hover:bg-muted/50"
+                        }`}
+                      >
+                        <span
+                          className={`font-medium ${
+                            isToday ? "text-primary" : "text-foreground"
+                          }`}
+                        >
+                          {day.label}
+                          {isToday && (
+                            <span className="ml-2 text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full">
+                              Today
+                            </span>
+                          )}
+                        </span>
+                        <span
+                          className={`text-sm ${
+                            isClosed
+                              ? "text-muted-foreground italic"
+                              : "text-foreground"
+                          }`}
+                        >
+                          {isClosed
+                            ? "Closed"
+                            : `${formatTime(dayData.open)} - ${formatTime(
+                                dayData.close
+                              )}`}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </section>
+      ) : (
+        <div className="text-muted-foreground text-sm text-center py-10 border border-dashed border-muted-foreground/50 rounded-lg max-w-2xl mx-auto">
+          This merchant has not yet set a timetable
+        </div>
+      )}
+
+      <section className="grid gap-x-6">
         {Array.isArray(productsPerMerchant) &&
         productsPerMerchant.length > 0 ? (
           <ProductCatalogueSection

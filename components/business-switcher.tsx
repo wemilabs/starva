@@ -70,7 +70,7 @@ export function BusinessSwitcher() {
       });
       setOpen(false);
       router.push(`/businesses/${organizationSlug}`);
-      toast.success("Success", {
+      toast.success("Done!", {
         description: "Business has been successfully set.",
       });
     } catch (error) {

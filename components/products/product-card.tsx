@@ -3,7 +3,6 @@ import { Card } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
@@ -224,14 +223,14 @@ export function ProductCard({
                 href={`/products/${href}`}
                 className="text-center text-sm text-muted-foreground underline-offset-4 hover:underline"
               >
-                View product details
+                View more about
               </Link>
             </div>
           ) : null}
         </div>
       </DialogContent>
       {/* <Activity mode={!href ? "visible" : "hidden"}>
-        <DialogFooter>
+        <div className="flex items-center justify-between gap-2 p-2">
           <EditProductForm
             product={{
               id,
@@ -257,10 +256,15 @@ export function ProductCard({
             organizationId={organization?.id || ""}
             businessSlug={organization?.slug || ""}
           />
-        </DialogFooter>
+        </div>
       </Activity> */}
       {!href ? (
-        <DialogFooter className="">
+        <div className="flex items-center justify-between gap-2 p-2">
+          <DeleteProductForm
+            productId={id}
+            organizationId={organization?.id || ""}
+            businessSlug={organization?.slug || ""}
+          />
           <EditProductForm
             product={{
               id,
@@ -279,14 +283,9 @@ export function ProductCard({
             }}
             organizationId={organization?.id || ""}
             businessSlug={organization?.slug || ""}
-            className="shadow-sm hover:shadow"
+            className="shadow-sm hover:shadow w-full flex-1"
           />
-          <DeleteProductForm
-            productId={id}
-            organizationId={organization?.id || ""}
-            businessSlug={organization?.slug || ""}
-          />
-        </DialogFooter>
+        </div>
       ) : null}
     </Dialog>
   );

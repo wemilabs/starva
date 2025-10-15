@@ -117,6 +117,40 @@ export async function updateBusinessPhone(
   revalidatePath(`/businesses/${businessSlug}`);
 }
 
+export async function updateBusinessTimetable(
+  businessId: string,
+  businessSlug: string,
+  timetable: Record<string, { open: string; close: string; closed: boolean }>,
+) {
+  const currentBusiness = await auth.api.getFullOrganization({
+    query: {
+      organizationId: businessId,
+    },
+    headers: await headers(),
+  });
+
+  const currentMetadata = currentBusiness?.metadata
+    ? typeof currentBusiness.metadata === "string"
+      ? JSON.parse(currentBusiness.metadata)
+      : currentBusiness.metadata
+    : {};
+
+  await auth.api.updateOrganization({
+    body: {
+      organizationId: businessId,
+      data: {
+        metadata: {
+          ...currentMetadata,
+          timetable,
+        },
+      },
+    },
+    headers: await headers(),
+  });
+
+  revalidatePath(`/businesses/${businessSlug}`);
+}
+
 export async function deleteBusiness(businessId: string) {
   await auth.api.deleteOrganization({
     body: {

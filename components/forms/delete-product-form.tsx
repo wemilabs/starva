@@ -65,8 +65,8 @@ export function DeleteProductForm({
 
   return (
     <AlertDialog onOpenChange={setDialogOpen} open={dialogOpen}>
-      <AlertDialogTrigger className="py-2 px-2.5 bg-destructive hover:bg-destructive/80 text-white rounded-md">
-        <Trash2 className="size-4" />
+      <AlertDialogTrigger className="py-2 px-2.5 bg-destructive hover:bg-destructive/80 text-white rounded-md w-full flex-1">
+        <Trash2 className="size-4 mx-auto" />
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>

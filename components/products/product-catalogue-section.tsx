@@ -1,6 +1,7 @@
 "use client";
 
 import { AddProductForm } from "@/components/forms/add-product-form";
+import { EditBusinessTimetable } from "@/components/forms/edit-business-timetable";
 import { SearchForm } from "@/components/forms/search-form";
 import { FilteredProducts } from "@/components/products/filtered-products";
 import {
@@ -21,7 +22,7 @@ import {
 import type { Product } from "@/db/schema";
 import { STATUS_VALUES, type StatusValue } from "@/lib/constants";
 import { removeUnderscoreAndCapitalizeOnlyTheFirstChar } from "@/lib/utils";
-import { CalendarClock } from "lucide-react";
+import { CalendarClock, Clock } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Button } from "../ui/button";
@@ -32,6 +33,7 @@ type ProductWithOrg = Product & {
     name: string;
     logo: string | null;
     slug: string;
+    metadata: string | null;
   } | null;
 };
 
@@ -51,12 +53,20 @@ export function ProductCatalogueSection({
   const [selectedStatus, setSelectedStatus] = useState<string>(
     defaultStatus || "all",
   );
+  const [isBusinessHoursOpen, setIsBusinessHoursOpen] = useState(false);
   const pathname = usePathname();
+
+  const metadata = data[0]?.organization?.metadata
+    ? typeof data[0].organization.metadata === "string"
+      ? JSON.parse(data[0].organization.metadata)
+      : data[0].organization.metadata
+    : {};
+  const timetable = metadata.timetable || undefined;
 
   return (
     <>
       <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between mt-3 mb-2">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex flex-col gap-1">
             <h2 className="text-lg font-semibold">Catalogue</h2>
             <p className="text-muted-foreground text-sm">
@@ -71,7 +81,11 @@ export function ProductCatalogueSection({
                 organizationId={businessId}
                 businessSlug={businessSlug}
               />
-              <Dialog>
+
+              <Dialog
+                open={isBusinessHoursOpen}
+                onOpenChange={setIsBusinessHoursOpen}
+              >
                 <DialogTrigger asChild>
                   <Button
                     variant="outline"
@@ -84,21 +98,27 @@ export function ProductCatalogueSection({
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Setting time</DialogTitle>
+                    <DialogTitle className="flex items-center gap-2">
+                      <Clock className="size-5" />
+                      Business Hours
+                    </DialogTitle>
                     <DialogDescription>
-                      Define your business timetable
+                      Set your business operating hours for each day of the week
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="text-center text-sm text-muted-foreground py-4">
-                    Coming soon...
-                  </div>
+                  <EditBusinessTimetable
+                    businessId={businessId}
+                    businessSlug={businessSlug}
+                    initialTimetable={timetable}
+                    onSuccess={() => setIsBusinessHoursOpen(false)}
+                  />
                 </DialogContent>
               </Dialog>
             </div>
           ) : null}
         </div>
 
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1 sm:gap-2">
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
               <SelectTrigger>
@@ -118,11 +138,11 @@ export function ProductCatalogueSection({
               inputFieldOnlyClassName="h-9"
             />
           </div>
-          <div className="text-sm">Filter by Tag</div>
+          <div className="text-sm">TagFilter</div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 py-6">
         <FilteredProducts data={data} filterByStatus={selectedStatus} />
       </div>
     </>

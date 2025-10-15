@@ -1,12 +1,13 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
-import { z } from "zod";
 import { db } from "@/db/drizzle";
 import { product as productTable } from "@/db/schema";
 import { STATUS_VALUES } from "@/lib/constants";
 import { extractFileKeyFromUrl, utapi } from "@/lib/uploadthing-server";
+import { and, eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { after } from "next/server";
+import { z } from "zod";
 
 const productSchema = z.object({
   organizationId: z.string().min(1),
@@ -116,20 +117,22 @@ export async function updateProduct(
         ),
       );
 
-    if (oldImageUrl && oldImageUrl !== newImageUrl) {
-      try {
-        const fileKey = extractFileKeyFromUrl(oldImageUrl);
-        if (fileKey) {
-          await utapi.deleteFiles(fileKey);
-          console.log(`Successfully deleted old image: ${fileKey}`);
+    after(async () => {
+      if (oldImageUrl && oldImageUrl !== newImageUrl) {
+        try {
+          const fileKey = extractFileKeyFromUrl(oldImageUrl);
+          if (fileKey) {
+            await utapi.deleteFiles(fileKey);
+            console.log(`Successfully deleted old image: ${fileKey}`);
+          }
+        } catch (error: unknown) {
+          const e = error as Error;
+          console.error(
+            `Failed to delete old image from UploadThing: ${e.message}`,
+          );
         }
-      } catch (error: unknown) {
-        const e = error as Error;
-        console.error(
-          `Failed to delete old image from UploadThing: ${e.message}`,
-        );
       }
-    }
+    });
 
     revalidatePath(revalidateTargetPath);
     return { ok: true } as const;
@@ -183,18 +186,22 @@ export async function deleteProduct(
         ),
       );
 
-    if (imageUrl) {
-      try {
-        const fileKey = extractFileKeyFromUrl(imageUrl);
-        if (fileKey) {
-          await utapi.deleteFiles(fileKey);
-          console.log(`Successfully deleted image: ${fileKey}`);
+    after(async () => {
+      if (imageUrl) {
+        try {
+          const fileKey = extractFileKeyFromUrl(imageUrl);
+          if (fileKey) {
+            await utapi.deleteFiles(fileKey);
+            console.log(`Successfully deleted image: ${fileKey}`);
+          }
+        } catch (error: unknown) {
+          const e = error as Error;
+          console.error(
+            `Failed to delete image from UploadThing: ${e.message}`,
+          );
         }
-      } catch (error: unknown) {
-        const e = error as Error;
-        console.error(`Failed to delete image from UploadThing: ${e.message}`);
       }
-    }
+    });
 
     revalidatePath(revalidateTargetPath);
     return { ok: true } as const;

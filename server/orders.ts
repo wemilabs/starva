@@ -132,19 +132,21 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
     const itemsList = orderItems
       .map(
         (item) =>
-          `📦 ${item.productName}\n` +
+          `📦 *${item.productName}*\n` +
           `   Qty: ${item.quantity} × ${formatPrice(Number(item.priceAtOrder))} = ${formatPrice(Number(item.subtotal))}` +
-          (item.notes ? `\n   Note: ${item.notes}` : ""),
+          (item.notes ? `\n   _Note: ${item.notes}_` : ""),
       )
       .join("\n\n");
 
     const message =
+    `Order ID: ${newOrder.id}\n\n` +
       `Hello! I'd like to place an order:\n\n` +
       itemsList +
-      `\n\n💵 Total: ${formatPrice(totalPrice)}\n` +
-      (notes ? `\n📝 Order Note: ${notes}\n` : "") +
-      `\n👤 Customer: ${userData?.name || session.user.name}\n` +
-      `📧 Email: ${userData?.email || session.user.email}`;
+      `\n\n💵 *Total: ${formatPrice(totalPrice)}*\n` +
+      (notes ? `\n📝 *Order Note: ${notes}*\n` : "") +
+      `\n👤 *Customer: ${userData?.name || session.user.name}*\n` +
+      `📧 Email: ${userData?.email || session.user.email}\n\n` +
+      "_*Powered by Starva*_";
 
     const whatsappUrl = `https://wa.me/${whatsappPhone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(message)}`;
 

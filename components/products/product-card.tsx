@@ -8,14 +8,13 @@ import {
 } from "@/components/ui/dialog";
 import type { Product } from "@/db/schema";
 import { cn, removeUnderscoreAndCapitalizeOnlyTheFirstChar } from "@/lib/utils";
-import { Heart } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-// import { Activity } from "react";
 
 import { DeleteProductForm } from "../forms/delete-product-form";
 import { EditProductForm } from "../forms/edit-product-form";
 import { AddToCartButton } from "./add-to-cart-button";
+import { ProductLikeButton } from "./product-like-button";
 
 type Props = Product & {
   organization?: {
@@ -25,6 +24,7 @@ type Props = Product & {
     slug: string;
   } | null;
   href?: string;
+  isLiked?: boolean;
 };
 
 function getInitials(name?: string | null) {
@@ -54,6 +54,7 @@ export function ProductCard({
   brand,
   organizationId,
   href,
+  isLiked = false,
 }: Props) {
   const priceNumber = Number(price) || 0;
 
@@ -111,23 +112,35 @@ export function ProductCard({
         ) : null}
 
         <div className="mt-4 flex items-center justify-between">
-          <div className="inline-flex items-center gap-2 rounded-full bg-black/30 ring-1 ring-white/10 backdrop-blur-sm">
+          <Link
+            href={`/merchants/${organization?.slug}`}
+            className="inline-flex items-center gap-2 rounded-full bg-black/30 ring-1 ring-white/10 backdrop-blur-sm"
+          >
             <Avatar className="size-9 ring-1 ring-white/20">
               <AvatarImage
-                src={orgLogo || ""}
-                alt={orgName || ""}
+                src={orgLogo ?? ""}
+                alt={orgName ?? ""}
                 className="object-cover"
               />
               <AvatarFallback className="text-muted-foreground text-xs">
                 {getInitials(orgName)}
               </AvatarFallback>
             </Avatar>
-          </div>
+          </Link>
 
-          <div className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-2.5 py-1 text-white/90 ring-1 ring-white/10 backdrop-blur-sm">
-            <Heart className="size-3.5" aria-hidden="true" />
-            <span className="text-[11px]">{likesCount ?? 0}</span>
-          </div>
+          {href ? (
+            <ProductLikeButton
+              productId={id}
+              initialIsLiked={isLiked}
+              initialLikesCount={likesCount ?? 0}
+              revalidateTargetPath="/"
+              variant="compact"
+            />
+          ) : (
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-2.5 py-1 text-white/90 ring-1 ring-white/10 backdrop-blur-sm">
+              <span className="text-[11px]">{likesCount ?? 0}</span>
+            </div>
+          )}
         </div>
       </div>
     </>

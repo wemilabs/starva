@@ -4,9 +4,19 @@ import "server-only";
 
 import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
-import { product } from "@/db/schema";
+import { product, productLike } from "@/db/schema";
+
+const getUserLikedProductIds = async (userId: string): Promise<Set<string>> => {
+  const likes = await db
+    .select({ productId: productLike.productId })
+    .from(productLike)
+    .where(eq(productLike.userId, userId));
+  return new Set(likes.map((like) => like.productId));
+};
 
 export const getInStockProducts = cache(async () => {
+  const { success, session } = await verifySession();
+
   const products = await db.query.product.findMany({
     where: eq(product.status, "in_stock"),
     with: {
@@ -23,7 +33,12 @@ export const getInStockProducts = cache(async () => {
     orderBy: (product, { desc }) => [desc(product.createdAt)],
   });
 
-  return products;
+  if (!success || !session) {
+    return products.map((p) => ({ ...p, isLiked: false }));
+  }
+
+  const likedProductIds = await getUserLikedProductIds(session.user.id);
+  return products.map((p) => ({ ...p, isLiked: likedProductIds.has(p.id) }));
 });
 
 export const getProductsPerBusiness = cache(async (organizationId: string) => {
@@ -47,7 +62,8 @@ export const getProductsPerBusiness = cache(async (organizationId: string) => {
       },
       orderBy: (product, { desc }) => [desc(product.createdAt)],
     });
-    return products;
+    const likedProductIds = await getUserLikedProductIds(session.user.id);
+    return products.map((p) => ({ ...p, isLiked: likedProductIds.has(p.id) }));
   } catch (error) {
     console.error(
       "Failed to fetch products for organization:",
@@ -76,7 +92,7 @@ export const getProductsPerBusinessWithoutAuth = cache(
         },
         orderBy: (product, { desc }) => [desc(product.createdAt)],
       });
-      return products;
+      return products.map((p) => ({ ...p, isLiked: false }));
     } catch (error) {
       console.error(
         "Failed to fetch products for organization:",
@@ -110,7 +126,13 @@ export const getProductBySlug = cache(async (slug: string) => {
       orderBy: (product, { desc }) => [desc(product.createdAt)],
     });
 
-    return specificProduct;
+    if (!specificProduct) return undefined;
+
+    const likedProductIds = await getUserLikedProductIds(session.user.id);
+    return {
+      ...specificProduct,
+      isLiked: likedProductIds.has(specificProduct.id),
+    };
   } catch (error) {
     console.error("Failed to fetch product by slug:", slug, error);
     return { message: "Failed to fetch product by slug" };

@@ -233,6 +233,40 @@ export const productTag = pgTable(
   ],
 );
 
+export const productLike = pgTable(
+  "product_like",
+  {
+    id: text("id")
+      .$defaultFn(() => randomUUID())
+      .primaryKey(),
+    productId: text("product_id")
+      .notNull()
+      .references(() => product.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (t) => [
+    index("product_like_product_idx").on(t.productId),
+    index("product_like_user_idx").on(t.userId),
+    unique("product_like_unique").on(t.productId, t.userId),
+  ],
+);
+
+export const productLikeRelations = relations(productLike, ({ one }) => ({
+  product: one(product, {
+    fields: [productLike.productId],
+    references: [product.id],
+  }),
+  user: one(user, {
+    fields: [productLike.userId],
+    references: [user.id],
+  }),
+}));
+
 export const productRelations = relations(product, ({ one, many }) => ({
   organization: one(organization, {
     fields: [product.organizationId],
@@ -240,6 +274,7 @@ export const productRelations = relations(product, ({ one, many }) => ({
   }),
   productTags: many(productTag),
   orderItems: many(orderItem),
+  productLikes: many(productLike),
 }));
 
 export const order = pgTable(
@@ -333,6 +368,7 @@ export type Member = typeof member.$inferSelect & {
 };
 export type User = typeof user.$inferSelect;
 export type Product = typeof product.$inferSelect;
+export type ProductLike = typeof productLike.$inferSelect;
 export type Tag = typeof tag.$inferSelect;
 export type Status = (typeof status.enumValues)[number];
 export type Order = typeof order.$inferSelect;
@@ -348,6 +384,7 @@ export const schema = {
   member,
   invitation,
   product,
+  productLike,
   tag,
   productTag,
   order,
@@ -356,6 +393,7 @@ export const schema = {
   memberRelations,
   invitationRelations,
   productRelations,
+  productLikeRelations,
   tagRelations,
   orderRelations,
   orderItemRelations,

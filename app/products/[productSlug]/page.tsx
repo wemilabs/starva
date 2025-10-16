@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { AddToCartButton } from "@/components/products/add-to-cart-button";
+import { ProductLikeButton } from "@/components/products/product-like-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,21 +28,16 @@ export default async function ProductSlugPage(
               <div className="rounded-full bg-primary/10 p-4">
                 <LogIn className="size-8 text-primary" />
               </div>
-              
+
               <div className="space-y-2 text-center">
-                <h2 className="text-lg font-semibold">
-                  Sign in required
-                </h2>
+                <h2 className="text-lg font-semibold">Sign in required</h2>
                 <p className="text-sm text-muted-foreground max-w-sm">
-                  You need to be signed in to view this product and make a purchase
+                  You need to be signed in to view this product and make a
+                  purchase
                 </p>
               </div>
 
-              <Button
-                asChild
-                size="lg"
-                className="w-full"
-              >
+              <Button asChild size="lg" className="w-full">
                 <Link href="/sign-in" className="flex items-center gap-2">
                   <LogIn className="size-4" />
                   <span>Sign in to continue</span>
@@ -50,8 +46,8 @@ export default async function ProductSlugPage(
 
               <p className="text-xs text-muted-foreground">
                 Don't have an account?{" "}
-                <Link 
-                  href="/sign-in" 
+                <Link
+                  href="/sign-in"
                   className="font-medium text-primary underline-offset-4 hover:underline"
                 >
                   Sign up
@@ -112,8 +108,14 @@ export default async function ProductSlugPage(
               <p className="mt-1 font-medium">{result.calories ?? "N/A"}</p>
             </div>
             <div className="rounded-md border p-4">
-              <p className="text-muted-foreground">Likes</p>
-              <p className="mt-1 font-medium">{result.likesCount ?? 0}</p>
+              <p className="text-muted-foreground mb-2">Likes</p>
+              <ProductLikeButton
+                productId={result.id}
+                initialIsLiked={result.isLiked ?? false}
+                initialLikesCount={result.likesCount ?? 0}
+                revalidateTargetPath={`/products/${result.slug}`}
+                variant="default"
+              />
             </div>
             <div className="rounded-md border p-4">
               <p className="text-muted-foreground">From</p>

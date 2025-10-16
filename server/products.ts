@@ -1,10 +1,11 @@
 "use server";
 
+import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
-import { product as productTable } from "@/db/schema";
+import { productLike, product as productTable } from "@/db/schema";
 import { STATUS_VALUES } from "@/lib/constants";
 import { extractFileKeyFromUrl, utapi } from "@/lib/uploadthing-server";
-import { and, eq } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { z } from "zod";
@@ -209,5 +210,102 @@ export async function deleteProduct(
     const e = error as Error;
     console.error(e);
     return { ok: false, error: e.message } as const;
+  }
+}
+
+const toggleProductLikeSchema = z.object({
+  productId: z.string().min(1),
+  revalidateTargetPath: z.string().min(1),
+});
+
+export async function toggleProductLike(
+  input: z.infer<typeof toggleProductLikeSchema>,
+) {
+  const parsed = toggleProductLikeSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: z.treeifyError(parsed.error),
+      isLiked: false,
+      likesCount: 0,
+    } as const;
+  }
+
+  try {
+    const { success, session } = await verifySession();
+    if (!success || !session) {
+      return {
+        ok: false,
+        error: "Unauthorized",
+        isLiked: false,
+        likesCount: 0,
+      } as const;
+    }
+
+    const { productId, revalidateTargetPath } = parsed.data;
+    const userId = session.user.id;
+
+    const existingLike = await db
+      .select()
+      .from(productLike)
+      .where(
+        and(
+          eq(productLike.productId, productId),
+          eq(productLike.userId, userId),
+        ),
+      )
+      .limit(1);
+
+    const isLiked = existingLike.length === 0;
+
+    if (!isLiked) {
+      await db
+        .delete(productLike)
+        .where(
+          and(
+            eq(productLike.productId, productId),
+            eq(productLike.userId, userId),
+          ),
+        );
+
+      await db
+        .update(productTable)
+        .set({
+          likesCount: sql`GREATEST(0, ${productTable.likesCount} - 1)`,
+        })
+        .where(eq(productTable.id, productId));
+    } else {
+      await db.insert(productLike).values({
+        productId,
+        userId,
+      });
+
+      await db
+        .update(productTable)
+        .set({
+          likesCount: sql`${productTable.likesCount} + 1`,
+        })
+        .where(eq(productTable.id, productId));
+    }
+
+    const updatedProduct = await db
+      .select({ likesCount: productTable.likesCount })
+      .from(productTable)
+      .where(eq(productTable.id, productId))
+      .limit(1);
+
+    const likesCount = updatedProduct[0]?.likesCount ?? 0;
+
+    revalidatePath(revalidateTargetPath);
+    return { ok: true, isLiked, likesCount } as const;
+  } catch (error: unknown) {
+    const e = error as Error;
+    console.error(e);
+    return {
+      ok: false,
+      error: e.message,
+      isLiked: false,
+      likesCount: 0,
+    } as const;
   }
 }

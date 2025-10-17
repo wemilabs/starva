@@ -117,7 +117,7 @@ export function CartSheet() {
       } else {
         console.error(result.error);
         toast.error("Failed to place order", {
-          description: "WhatsApp not configured",
+          description: "WhatsApp not configured for this merchant",
         });
       }
     });

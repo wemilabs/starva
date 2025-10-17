@@ -95,11 +95,12 @@ export function CartSheet() {
       }
 
       if (result.whatsappUrl) {
-        window.open(result.whatsappUrl, "_blank");
         clearCart();
         setIsOpen(false);
         setOrderNotes("");
-        toast.success("Order placed! Opening WhatsApp...");
+        toast.success("Order placed! Redirecting to WhatsApp...");
+        // Use location.href instead of window.open for better mobile compatibility
+        window.location.href = result.whatsappUrl;
       } else {
         console.error(result.error);
         toast.error("Failed to place order", {

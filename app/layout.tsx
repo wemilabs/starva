@@ -25,9 +25,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Starva",
+  title: "starva - The Right Place for Local Commerce",
   description:
-    "Just the right place where local businesses and customers meet. Easy, fast and reliable.",
+    "A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
   metadataBase: new URL("https://starva.vercel.app/"),
   keywords: [
     "starva",
@@ -58,24 +58,24 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://starva.vercel.app/",
-    title: "Starva",
+    title: "starva - The Right Place for Local Commerce",
     description:
-      "Just the right place where local businesses and customers meet. Easy, fast and reliable.",
+      "A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
     siteName: "Starva",
     images: [
       {
         url: "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dacuUyMdwvZO8oJpYyFEwgT69CVIdltrHUQc7",
         width: 1200,
         height: 630,
-        alt: "Starva app - Just the right place where local businesses and customers meet. Easy, fast and reliable.",
+        alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Starva",
+    title: "starva - The Right Place for Local Commerce",
     description:
-      "Just the right place where local businesses and customers meet. Easy, fast and reliable.",
+      "A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
     images: [
       "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dacuUyMdwvZO8oJpYyFEwgT69CVIdltrHUQc7",
     ],

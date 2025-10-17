@@ -98,9 +98,22 @@ export function CartSheet() {
         clearCart();
         setIsOpen(false);
         setOrderNotes("");
-        toast.success("Order placed! Redirecting to WhatsApp...");
-        // Use location.href instead of window.open for better mobile compatibility
-        window.location.href = result.whatsappUrl;
+        
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        
+        if (isSafari) {
+          toast.success("Order placed! Redirecting to WhatsApp...");
+          window.location.href = result.whatsappUrl;
+        } else {
+          const newWindow = window.open(result.whatsappUrl, "_blank");
+          
+          if (!newWindow || newWindow.closed || typeof newWindow.closed === "undefined") {
+            toast.success("Order placed! Redirecting to WhatsApp...");
+            window.location.href = result.whatsappUrl;
+          } else {
+            toast.success("Order placed! Opening WhatsApp...");
+          }
+        }
       } else {
         console.error(result.error);
         toast.error("Failed to place order", {

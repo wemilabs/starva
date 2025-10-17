@@ -138,9 +138,11 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       )
       .join("\n\n");
 
+    const orgTimezone = metadata.timezone ?? "Africa/Kigali";
     const orderDate = new Intl.DateTimeFormat("en-US", {
       dateStyle: "medium",
       timeStyle: "short",
+      timeZone: orgTimezone,
     }).format(newOrder.createdAt);
 
     const message =
@@ -150,8 +152,7 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       itemsList +
       `\n\n💵 *Total: ${formatPrice(totalPrice)}*\n` +
       (notes ? `\n📝 *Order Note: ${notes}*\n` : "") +
-      `\n👤 *Customer: ${userData?.name || session.user.name}*\n` +
-      `📧 Email: ${userData?.email || session.user.email}\n\n` +
+      `\n👤 *Customer: ${userData?.name || session.user.name}*\n\n` +
       "_*Powered by Starva*_";
 
     const whatsappUrl = `https://wa.me/${whatsappPhone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(message)}`;

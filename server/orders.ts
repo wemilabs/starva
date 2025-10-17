@@ -138,8 +138,14 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       )
       .join("\n\n");
 
+    const orderDate = new Intl.DateTimeFormat("en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    }).format(newOrder.createdAt);
+
     const message =
-    `Order ID: ${newOrder.id}\n\n` +
+      `🛒 *New Order #${newOrder.orderNumber}*\n` +
+      `📅 ${orderDate}\n\n` +
       `Hello! I'd like to place an order:\n\n` +
       itemsList +
       `\n\n💵 *Total: ${formatPrice(totalPrice)}*\n` +

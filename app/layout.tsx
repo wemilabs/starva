@@ -1,10 +1,3 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { connection } from "next/server";
-import "./globals.css";
-import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
-import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "@/app/api/uploadthing/core";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Header } from "@/components/header";
@@ -12,7 +5,14 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { BreadcrumbsProvider } from "@/contexts/breadcrumbs-context";
-import { Analytics } from "@vercel/analytics/next"
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
+import { Analytics } from "@vercel/analytics/next";
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import { connection } from "next/server";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { extractRouterConfig } from "uploadthing/server";
+import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,7 +27,60 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Starva",
   description:
-    "A businesses search engine and suite of tools for customers and solopreneurs.",
+    "Just the right place where local businesses and customers meet. Easy, fast and reliable.",
+  metadataBase: new URL("https://starva.vercel.app/"),
+  keywords: [
+    "starva",
+    "business",
+    "customer",
+    "meeting",
+    "local business",
+    "local customer",
+    "business customer",
+    "food",
+    "fast-food",
+    "restaurant",
+    "dress-up",
+    "clothing",
+    "housing",
+    "real-estate",
+    "rental",
+    "rental property",
+  ],
+  authors: [
+    {
+      name: "Mr T",
+      url: "https://cuttypiedev.vercel.app/",
+    },
+  ],
+  creator: "Mr T",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://starva.vercel.app/",
+    title: "Starva",
+    description:
+      "Just the right place where local businesses and customers meet. Easy, fast and reliable.",
+    siteName: "Starva",
+    images: [
+      {
+        url: "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dacuUyMdwvZO8oJpYyFEwgT69CVIdltrHUQc7",
+        width: 1200,
+        height: 630,
+        alt: "Starva app - Just the right place where local businesses and customers meet. Easy, fast and reliable.",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Starva",
+    description:
+      "Just the right place where local businesses and customers meet. Easy, fast and reliable.",
+    images: [
+      "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dacuUyMdwvZO8oJpYyFEwgT69CVIdltrHUQc7",
+    ],
+    creator: "@DorianTho5",
+  },
 };
 
 const baseCrumbs = [{ label: "Home", href: "/" }];

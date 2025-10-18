@@ -1,5 +1,5 @@
-export const STATUS_VALUES = ["in_stock", "out_of_stock", "archived"] as const;
-export type StatusValue = (typeof STATUS_VALUES)[number];
+export const PRODUCT_STATUS_VALUES = ["in_stock", "out_of_stock", "archived"] as const;
+export type ProductStatusValue = (typeof PRODUCT_STATUS_VALUES)[number];
 
 export const COUNTRIES = [
   { code: "+250", name: "Rwanda", flag: "🇷🇼" },

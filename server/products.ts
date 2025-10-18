@@ -3,7 +3,7 @@
 import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
 import { productLike, product as productTable } from "@/db/schema";
-import { STATUS_VALUES } from "@/lib/constants";
+import { PRODUCT_STATUS_VALUES } from "@/lib/constants";
 import { extractFileKeyFromUrl, utapi } from "@/lib/uploadthing-server";
 import { and, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
@@ -17,7 +17,7 @@ const productSchema = z.object({
   price: z.string().min(1),
   description: z.string().optional().default(""),
   imageUrl: z.url().optional().or(z.literal("")),
-  status: z.enum(STATUS_VALUES),
+  status: z.enum(PRODUCT_STATUS_VALUES),
   revalidateTargetPath: z.string().min(1),
 });
 

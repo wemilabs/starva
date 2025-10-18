@@ -1,5 +1,32 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import type { Product } from "@/db/schema";
+import { PRODUCT_STATUS_VALUES } from "@/lib/constants";
+import { UploadButton } from "@/lib/uploadthing";
+import {
+    removeUnderscoreAndCapitalizeOnlyTheFirstChar,
+    slugify,
+} from "@/lib/utils";
+import { updateProduct } from "@/server/products";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Pencil } from "lucide-react";
 import Image from "next/image";
@@ -7,33 +34,6 @@ import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import type { Product } from "@/db/schema";
-import { STATUS_VALUES } from "@/lib/constants";
-import { UploadButton } from "@/lib/uploadthing";
-import {
-  removeUnderscoreAndCapitalizeOnlyTheFirstChar,
-  slugify,
-} from "@/lib/utils";
-import { updateProduct } from "@/server/products";
 
 const schema = z.object({
   name: z.string().min(2, "Name is too short").max(100),
@@ -47,7 +47,7 @@ const schema = z.object({
     ),
   imageUrl: z.url("Provide a valid URL").optional().or(z.literal("")),
   description: z.string().max(500).optional().or(z.literal("")),
-  status: z.enum(STATUS_VALUES),
+  status: z.enum(PRODUCT_STATUS_VALUES),
 });
 
 export function EditProductForm({
@@ -73,7 +73,7 @@ export function EditProductForm({
       imageUrl: product.imageUrl || "",
       description: product.description || "",
       status:
-        (product.status as (typeof STATUS_VALUES)[number]) || STATUS_VALUES[0],
+        (product.status as (typeof PRODUCT_STATUS_VALUES)[number]) || PRODUCT_STATUS_VALUES[0],
     },
   });
 
@@ -282,7 +282,7 @@ export function EditProductForm({
                       className="w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                       {...field}
                     >
-                      {STATUS_VALUES.map((v) => (
+                      {PRODUCT_STATUS_VALUES.map((v) => (
                         <option key={v} value={v}>
                           {removeUnderscoreAndCapitalizeOnlyTheFirstChar(v)}
                         </option>

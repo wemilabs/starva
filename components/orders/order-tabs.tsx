@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Order, OrderItem } from "@/db/schema";
 import { ORDER_STATUS_VALUES } from "@/lib/constants";
 import { ShoppingBag, Store } from "lucide-react";
+import { Suspense } from "react";
 import { OrderList } from "./order-list";
 import { OrderStats } from "./order-stats";
 
@@ -98,14 +99,18 @@ export function OrderTabs({
 
       <TabsContent value="my-orders" className="space-y-6 mt-6">
         <OrderStats stats={myOrdersStats} />
-        <OrderList orders={myOrders} variant="customer" />
+        <Suspense fallback={<div className="text-center text-muted-foreground">Loading orders...</div>}>
+          <OrderList orders={myOrders} variant="customer" />
+        </Suspense>
       </TabsContent>
 
       <TabsContent value="customer-orders" className="space-y-6 mt-6">
         {hasActiveBusiness ? (
           <>
             <OrderStats stats={merchantStats} />
-            <OrderList orders={customerOrders} variant="merchant" />
+            <Suspense fallback={<div className="text-center text-muted-foreground">Loading orders...</div>}>
+              <OrderList orders={customerOrders} variant="merchant" />
+            </Suspense>
           </>
         ) : (
           <div className="text-center py-12 flex flex-col items-center justify-center border border-dashed rounded-md">

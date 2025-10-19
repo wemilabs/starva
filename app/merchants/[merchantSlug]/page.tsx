@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 
 import { ProductCatalogueSection } from "@/components/products/product-catalogue-section";
 import {
@@ -138,14 +137,12 @@ export default async function MerchantSlugPage(
       <section className="grid gap-x-6">
         {Array.isArray(productsPerMerchant) &&
         productsPerMerchant.length > 0 ? (
-          <Suspense fallback={<div className="text-center text-muted-foreground">Loading products...</div>}>
-            <ProductCatalogueSection
-              data={productsPerMerchant}
-              businessId={merchant.id}
-              businessSlug={resolvedSlug}
-              defaultStatus="in_stock"
-            />
-          </Suspense>
+          <ProductCatalogueSection
+            data={productsPerMerchant}
+            businessId={merchant.id}
+            businessSlug={resolvedSlug}
+            defaultStatus="in_stock"
+          />
         ) : (
           <div className="text-center py-10 border border-dashed border-muted-foreground/50 rounded-lg">
             <h2 className="font-semibold">No products available</h2>

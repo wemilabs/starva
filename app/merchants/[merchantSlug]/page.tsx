@@ -12,10 +12,10 @@ import { getBusinessBySlug } from "@/data/businesses";
 import { getProductsPerBusinessWithoutAuth } from "@/data/products";
 import { DAYS, today } from "@/lib/constants";
 import { formatTime } from "@/lib/utils";
-import { Clock, Divide } from "lucide-react";
+import { Clock } from "lucide-react";
 
 export default async function MerchantSlugPage(
-  props: PageProps<"/merchants/[merchantSlug]">
+  props: PageProps<"/merchants/[merchantSlug]">,
 ) {
   const { merchantSlug } = await props.params;
 
@@ -25,7 +25,7 @@ export default async function MerchantSlugPage(
   const resolvedSlug = merchant.slug || merchantSlug;
 
   const productsPerMerchant = await getProductsPerBusinessWithoutAuth(
-    merchant.id
+    merchant.id,
   );
 
   const metadata = merchant.metadata ? JSON.parse(merchant.metadata) : {};
@@ -117,7 +117,7 @@ export default async function MerchantSlugPage(
                           {isClosed
                             ? "Closed"
                             : `${formatTime(dayData.open)} - ${formatTime(
-                                dayData.close
+                                dayData.close,
                               )}`}
                         </span>
                       </div>

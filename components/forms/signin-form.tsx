@@ -1,14 +1,5 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
-import type { Route } from "next";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useTransition } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -29,6 +20,15 @@ import { Input } from "@/components/ui/input";
 import { getLastUsedLoginMethod, signIn } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { signInUser } from "@/server/users";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import type { Route } from "next";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 import { Badge } from "../ui/badge";
 
 const formSchema = z.object({
@@ -60,7 +60,7 @@ export const SignInForm = ({
       if (response.success) {
         toast.success(response.message);
         startTransition(() => {
-          router.push("/dashboard");
+          router.push("/");
         });
       } else {
         toast.error(response.message);

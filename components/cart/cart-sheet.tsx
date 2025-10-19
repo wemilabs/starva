@@ -23,6 +23,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useSession } from "@/lib/auth-client";
 import { useCartStore } from "@/lib/cart-store";
+import { formatPriceInRWF } from "@/lib/utils";
 import { placeOrder } from "@/server/orders";
 import { Separator } from "../ui/separator";
 import { Spinner } from "../ui/spinner";
@@ -51,13 +52,6 @@ export function CartSheet() {
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  const formatPrice = (price: number) =>
-    new Intl.NumberFormat("rw-RW", {
-      style: "currency",
-      currency: "RWF",
-      maximumFractionDigits: 0,
-    }).format(price);
 
   const handlePlaceOrder = () => {
     if (items.length === 0) {
@@ -98,16 +92,22 @@ export function CartSheet() {
         clearCart();
         setIsOpen(false);
         setOrderNotes("");
-        
-        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-        
+
+        const isSafari = /^((?!chrome|android).)*safari/i.test(
+          navigator.userAgent,
+        );
+
         if (isSafari) {
           toast.success("Order placed! Redirecting to WhatsApp...");
           window.location.href = result.whatsappUrl;
         } else {
           const newWindow = window.open(result.whatsappUrl, "_blank");
-          
-          if (!newWindow || newWindow.closed || typeof newWindow.closed === "undefined") {
+
+          if (
+            !newWindow ||
+            newWindow.closed ||
+            typeof newWindow.closed === "undefined"
+          ) {
             toast.success("Order placed! Redirecting to WhatsApp...");
             window.location.href = result.whatsappUrl;
           } else {
@@ -197,7 +197,7 @@ export function CartSheet() {
                           </Button>
                         </div>
                         <p className="text-sm text-muted-foreground">
-                          {formatPrice(Number(item.price))}
+                          {formatPriceInRWF(item.price)}
                         </p>
                       </div>
                     </div>
@@ -238,7 +238,7 @@ export function CartSheet() {
                         </Button>
                       </div>
                       <p className="ml-auto text-sm font-medium">
-                        {formatPrice(Number(item.price) * item.quantity)}
+                        {formatPriceInRWF(Number(item.price) * item.quantity)}
                       </p>
                     </div>
 
@@ -284,7 +284,7 @@ export function CartSheet() {
               <div className="flex items-center justify-between rounded-lg bg-muted px-3 py-2">
                 <span className="font-medium">Total</span>
                 <span className="text-lg font-bold">
-                  {formatPrice(totalPrice)}
+                  {formatPriceInRWF(totalPrice)}
                 </span>
               </div>
             </div>

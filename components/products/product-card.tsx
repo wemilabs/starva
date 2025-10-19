@@ -7,7 +7,11 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import type { Product } from "@/db/schema";
-import { cn, removeUnderscoreAndCapitalizeOnlyTheFirstChar } from "@/lib/utils";
+import {
+  cn,
+  formatPriceInRWF,
+  removeUnderscoreAndCapitalizeOnlyTheFirstChar,
+} from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -90,11 +94,7 @@ export function ProductCard({
           </div>
 
           <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[10px] font-medium tracking-wide text-white/90 ring-1 ring-white/15 backdrop-blur-sm">
-            {new Intl.NumberFormat("rw-RW", {
-              style: "currency",
-              currency: "RWF",
-              maximumFractionDigits: 0,
-            }).format(priceNumber)}
+            {formatPriceInRWF(priceNumber)}
           </div>
         </div>
         <h3 className="text-balance text-xl font-semibold leading-tight">
@@ -185,19 +185,11 @@ export function ProductCard({
 
           <div className="flex items-center gap-4">
             <p className="text-3xl font-bold text-primary/90">
-              {new Intl.NumberFormat("rw-RW", {
-                style: "currency",
-                currency: "RWF",
-                maximumFractionDigits: 0,
-              }).format(priceNumber)}
+              {formatPriceInRWF(priceNumber)}
             </p>
             {/* {priceNumber > 0 && (
               <p className="text-sm text-muted-foreground line-through">
-                {new Intl.NumberFormat("rw-RW", {
-                  style: "currency",
-                  currency: "RWF",
-                  maximumFractionDigits: 0,
-                }).format(priceNumber * 1.13)}
+                {formatPriceInRWF(priceNumber * 1.13)}
               </p>
             )} */}
           </div>

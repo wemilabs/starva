@@ -6,13 +6,14 @@ import { ProductCatalogueSection } from "@/components/products/product-catalogue
 import { getBusinessBySlug } from "@/data/businesses";
 import { getProductsPerBusiness } from "@/data/products";
 import {
-  updateBusinessDescription,
-  updateBusinessLogo,
-  updateBusinessName,
-  updateBusinessPhone,
+    updateBusinessDescription,
+    updateBusinessLogo,
+    updateBusinessName,
+    updateBusinessPhone,
 } from "@/server/businesses";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 export default async function BusinessSlugPage(
   props: PageProps<"/businesses/[businessSlug]">,
@@ -140,11 +141,13 @@ export default async function BusinessSlugPage(
       </section>
 
       <section className="grid gap-6 mt-10">
-        <ProductCatalogueSection
-          data={productsPerBusiness}
-          businessId={business.id}
-          businessSlug={resolvedSlug}
-        />
+        <Suspense fallback={<div className="text-center text-muted-foreground">Loading products...</div>}>
+          <ProductCatalogueSection
+            data={productsPerBusiness}
+            businessId={business.id}
+            businessSlug={resolvedSlug}
+          />
+        </Suspense>
       </section>
     </div>
   );

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Suspense } from "react";
 import { AnimatedGroup } from "./animated-group";
 import { SearchForm } from "./forms/search-form";
 import { TextEffect } from "./text-effect";
@@ -75,11 +76,13 @@ export function Hero() {
             }}
             className="mt-12"
           >
-            <SearchForm
-              formProps={{ className: "mx-auto max-w-lg" }}
-              inputFieldOnlyClassName="h-10 md:h-12"
-              controlledAutoFocus
-            />
+            <Suspense fallback={<div className="h-10 md:h-12" />}>
+              <SearchForm
+                formProps={{ className: "mx-auto max-w-lg" }}
+                inputFieldOnlyClassName="h-10 md:h-12"
+                controlledAutoFocus
+              />
+            </Suspense>
           </AnimatedGroup>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { Building2 } from "lucide-react";
+import { Suspense } from "react";
 
 import { BusinessCatalogueSection } from "@/components/businesses/business-catalogue section";
 import { ExtractedRegisterBusinessDialog } from "@/components/forms/extracted-register-business-dialog";
@@ -46,7 +47,15 @@ export default async function BusinessesPage() {
           </EmptyContent>
         </Empty>
       ) : (
-        <BusinessCatalogueSection data={businessesPerUser} />
+        <Suspense
+          fallback={
+            <div className="text-center text-muted-foreground">
+              Loading businesses...
+            </div>
+          }
+        >
+          <BusinessCatalogueSection data={businessesPerUser} />
+        </Suspense>
       )}
     </div>
   );

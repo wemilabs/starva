@@ -1,12 +1,13 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 import { ProductCatalogueSection } from "@/components/products/product-catalogue-section";
 import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
 } from "@/components/ui/accordion";
 import { getBusinessBySlug } from "@/data/businesses";
 import { getProductsPerBusinessWithoutAuth } from "@/data/products";
@@ -137,12 +138,14 @@ export default async function MerchantSlugPage(
       <section className="grid gap-x-6">
         {Array.isArray(productsPerMerchant) &&
         productsPerMerchant.length > 0 ? (
-          <ProductCatalogueSection
-            data={productsPerMerchant}
-            businessId={merchant.id}
-            businessSlug={resolvedSlug}
-            defaultStatus="in_stock"
-          />
+          <Suspense fallback={<div className="text-center text-muted-foreground">Loading products...</div>}>
+            <ProductCatalogueSection
+              data={productsPerMerchant}
+              businessId={merchant.id}
+              businessSlug={resolvedSlug}
+              defaultStatus="in_stock"
+            />
+          </Suspense>
         ) : (
           <div className="text-center py-10 border border-dashed border-muted-foreground/50 rounded-lg">
             <h2 className="font-semibold">No products available</h2>

@@ -24,7 +24,7 @@ import { PRODUCT_STATUS_VALUES, type ProductStatusValue } from "@/lib/constants"
 import { removeUnderscoreAndCapitalizeOnlyTheFirstChar } from "@/lib/utils";
 import { CalendarClock, Clock } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { Button } from "../ui/button";
 
 type ProductWithOrg = Product & {
@@ -133,17 +133,21 @@ export function ProductCatalogueSection({
                 ))}
               </SelectContent>
             </Select>
-            <SearchForm
-              formProps={{ className: "w-full md:w-[380px]" }}
-              inputFieldOnlyClassName="h-9"
-            />
+            <Suspense fallback={<div className="h-9 w-full md:w-[380px] animate-pulse bg-muted rounded-lg" />}>
+              <SearchForm
+                formProps={{ className: "w-full md:w-[380px]" }}
+                inputFieldOnlyClassName="h-9"
+              />
+            </Suspense>
           </div>
           <div className="text-sm">TagFilter</div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 py-6">
-        <FilteredProducts data={data} filterByStatus={selectedStatus} />
+        <Suspense fallback={<div className="col-span-full text-center text-muted-foreground">Loading products...</div>}>
+          <FilteredProducts data={data} filterByStatus={selectedStatus} />
+        </Suspense>
       </div>
     </>
   );

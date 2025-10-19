@@ -16,7 +16,6 @@ import {
 import { verifySession } from "@/data/user-session";
 import { ScrollText } from "lucide-react";
 import Link from "next/link";
-import { Suspense } from "react";
 
 export default async function OrdersPage() {
   const sessionData = await verifySession();
@@ -83,14 +82,12 @@ export default async function OrdersPage() {
           </EmptyHeader>
         </Empty>
       ) : (
-        <Suspense fallback={<div className="text-center text-muted-foreground">Loading orders...</div>}>
-          <OrderTabs
-            myOrders={myOrders}
-            customerOrders={customerOrders}
-            merchantStats={merchantStats}
-            hasActiveBusiness={!!activeOrgId}
-          />
-        </Suspense>
+        <OrderTabs
+          myOrders={myOrders}
+          customerOrders={customerOrders}
+          merchantStats={merchantStats}
+          hasActiveBusiness={!!activeOrgId}
+        />
       )}
     </div>
   );

@@ -13,7 +13,6 @@ import {
 } from "@/server/businesses";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
 
 export default async function BusinessSlugPage(
   props: PageProps<"/businesses/[businessSlug]">,
@@ -141,13 +140,11 @@ export default async function BusinessSlugPage(
       </section>
 
       <section className="grid gap-6 mt-10">
-        <Suspense fallback={<div className="text-center text-muted-foreground">Loading products...</div>}>
-          <ProductCatalogueSection
-            data={productsPerBusiness}
-            businessId={business.id}
-            businessSlug={resolvedSlug}
-          />
-        </Suspense>
+        <ProductCatalogueSection
+          data={productsPerBusiness}
+          businessId={business.id}
+          businessSlug={resolvedSlug}
+        />
       </section>
     </div>
   );

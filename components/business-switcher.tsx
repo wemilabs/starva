@@ -69,7 +69,7 @@ export function BusinessSwitcher() {
         organizationSlug,
       });
       setOpen(false);
-      router.push(`/businesses/${organizationSlug}`);
+      router.refresh();
       toast.success("Done!", {
         description: "Business has been successfully set.",
       });

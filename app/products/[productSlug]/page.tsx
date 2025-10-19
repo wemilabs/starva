@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { getProductBySlug } from "@/data/products";
-import { removeUnderscoreAndCapitalizeOnlyTheFirstChar } from "@/lib/utils";
+import { formatPriceInRWF, removeUnderscoreAndCapitalizeOnlyTheFirstChar } from "@/lib/utils";
 
 export default async function ProductSlugPage(
   props: PageProps<"/products/[productSlug]">,
@@ -60,12 +60,6 @@ export default async function ProductSlugPage(
     );
   }
 
-  const price = new Intl.NumberFormat("rw-RW", {
-    style: "currency",
-    currency: "RWF",
-    maximumFractionDigits: 0,
-  }).format(Number(result.price));
-
   //  const relatedProducts = await getRelatedProducts(result.organizationId, result.id, 10);
 
   return (
@@ -90,7 +84,7 @@ export default async function ProductSlugPage(
             {result.name}
           </h1>
 
-          <div className="text-2xl font-bold">{price}</div>
+          <div className="text-2xl font-bold">{formatPriceInRWF(result.price)}</div>
 
           <div className="prose max-w-none text-sm text-muted-foreground">
             <p>{result.description}</p>

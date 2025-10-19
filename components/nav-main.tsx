@@ -1,16 +1,6 @@
 "use client";
 
 import {
-  Building2,
-  ChevronRight,
-  Globe,
-  Home,
-  type LucideIcon,
-  Store,
-} from "lucide-react";
-import type { Route } from "next";
-import Link from "next/link";
-import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -25,6 +15,19 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import {
+  Building2,
+  ChartColumn,
+  ChevronRight,
+  Globe,
+  Home,
+  Receipt,
+  ScrollText,
+  Store,
+  type LucideIcon,
+} from "lucide-react";
+import type { Route } from "next";
+import Link from "next/link";
 
 export function NavMain({
   items,
@@ -73,10 +76,34 @@ export function NavMain({
       </SidebarGroupLabel>
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton asChild tooltip="My Own Businesses">
+          <SidebarMenuButton asChild tooltip="Businesses">
             <Link href="/businesses">
               <Building2 />
-              <span>My Own Businesses</span>
+              <span>Businesses</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+        <SidebarMenuItem>
+          <SidebarMenuButton asChild tooltip="Orders">
+            <Link href="/orders">
+              <ScrollText />
+              <span>Orders</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+        <SidebarMenuItem>
+          <SidebarMenuButton asChild tooltip="Transactions">
+            <Link href="/transactions">
+              <Receipt />
+              <span>Transactions</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+        <SidebarMenuItem>
+          <SidebarMenuButton asChild tooltip="Analytics">
+            <Link href="/analytics">
+              <ChartColumn />
+              <span>Analytics</span>
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>

@@ -6,6 +6,16 @@ export const COUNTRIES = [
   { code: "+241", name: "Gabon", flag: "🇬🇦" },
 ] as const;
 
+export const ORDER_STATUS_VALUES = [
+  "pending",
+  "confirmed",
+  "preparing",
+  "ready",
+  "delivered",
+  "cancelled",
+] as const;
+export type OrderStatusValue = (typeof ORDER_STATUS_VALUES)[number];
+
 export const DAYS = [
   { key: "monday", label: "Monday" },
   { key: "tuesday", label: "Tuesday" },

@@ -1,17 +1,17 @@
 import { OrderTabs } from "@/components/orders/order-tabs";
 import { Button } from "@/components/ui/button";
 import {
-    Empty,
-    EmptyContent,
-    EmptyDescription,
-    EmptyHeader,
-    EmptyMedia,
-    EmptyTitle,
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
 } from "@/components/ui/empty";
 import {
-    getOrdersByOrganization,
-    getOrdersByUser,
-    getOrderStats,
+  getOrdersByOrganization,
+  getOrdersByUser,
+  getOrderStats,
 } from "@/data/orders";
 import { verifySession } from "@/data/user-session";
 import { ScrollText } from "lucide-react";
@@ -22,7 +22,7 @@ export default async function OrdersPage() {
 
   if (!sessionData.success || !sessionData.session) {
     return (
-      <div className="container max-w-7xl py-7 space-y-7">
+      <div className="container mx-auto max-w-7xl py-7 space-y-7">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Orders</h1>
           <p className="text-muted-foreground mt-0.5 text-sm">
@@ -61,7 +61,7 @@ export default async function OrdersPage() {
   ]);
 
   return (
-    <div className="container max-w-7xl py-7 space-y-7">
+    <div className="container mx-auto max-w-7xl py-7 space-y-7">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Orders</h1>
         <p className="text-muted-foreground mt-0.5 text-sm">

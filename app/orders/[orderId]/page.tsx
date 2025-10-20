@@ -28,14 +28,11 @@ export default async function OrderPage(props: PageProps<"/orders/[orderId]">) {
   }
 
   const order = await getOrderById(orderId);
-
   if (!order) notFound();
 
   const isOwner = order.userId === session.session.user.id;
   const activeOrgId = session.session.session.activeOrganizationId;
   const isMerchant = order.organizationId === activeOrgId;
-
-  
 
   const totalItems = order.orderItems.reduce(
     (sum, item) => sum + item.quantity,
@@ -43,7 +40,7 @@ export default async function OrderPage(props: PageProps<"/orders/[orderId]">) {
   );
 
   return (
-    <div className="container max-w-7xl py-7 space-y-7">
+    <div className="container mx-auto max-w-7xl py-7 space-y-7">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" asChild>
           <Link href="/orders">
@@ -107,7 +104,9 @@ export default async function OrderPage(props: PageProps<"/orders/[orderId]">) {
                       )}
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-medium text-sm md:text-base">{item.product.name}</h4>
+                      <h4 className="font-medium text-sm md:text-base">
+                        {item.product.name}
+                      </h4>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <span>
                           {formatPriceInRWF(item.priceAtOrder)} ×{" "}

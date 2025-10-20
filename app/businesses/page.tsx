@@ -18,7 +18,7 @@ export default async function BusinessesPage() {
   const businessesPerUser = success ? await getBusinessesPerUser() : [];
 
   return (
-    <div className="container max-w-7xl py-7 space-y-7">
+    <div className="container mx-auto max-w-7xl py-7 space-y-7">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Businesses</h1>

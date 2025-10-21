@@ -43,11 +43,21 @@ export const parsePhoneNumber = (fullPhone: string) => {
   return { countryCode: COUNTRIES[0].code, phoneNumber: fullPhone };
 };
 
-export const formatDate = (date: Date) => {
+export const formatDate = (date: Date | string) => {
+  const dateObj = date instanceof Date ? date : new Date(date);
   return new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
     timeStyle: "short",
-  }).format(new Date(date));
+  }).format(dateObj);
+};
+
+export const formatDateShort = (date: Date | string) => {
+  const dateObj = date instanceof Date ? date : new Date(date);
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(dateObj);
 };
 
 export const formatTime = (time: string) => {

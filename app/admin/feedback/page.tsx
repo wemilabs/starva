@@ -1,3 +1,3 @@
 export default function AdminFeedbackPage() {
-  return <div>Admin Feedback</div>;
+  return <div>Admin Feedback Page</div>;
 }

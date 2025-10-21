@@ -158,6 +158,20 @@ export const orderStatus = pgEnum("order_status", [
   "cancelled",
 ]);
 
+export const feedbackType = pgEnum("feedback_type", [
+  "bug",
+  "feature",
+  "improvement",
+  "general",
+]);
+
+export const feedbackStatus = pgEnum("feedback_status", [
+  "pending",
+  "reviewing",
+  "completed",
+  "rejected",
+]);
+
 export const product = pgTable(
   "product",
   {
@@ -364,6 +378,41 @@ export const tagRelations = relations(tag, ({ many }) => ({
   productTags: many(productTag),
 }));
 
+export const feedback = pgTable(
+  "feedback",
+  {
+    id: text("id")
+      .$defaultFn(() => randomUUID())
+      .primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    type: feedbackType("type").notNull(),
+    status: feedbackStatus("status").default("pending").notNull(),
+    subject: text("subject").notNull(),
+    message: text("message").notNull(),
+    email: text("email"),
+    createdAt: timestamp("created_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (t) => [
+    index("feedback_user_idx").on(t.userId),
+    index("feedback_type_idx").on(t.type),
+    index("feedback_status_idx").on(t.status),
+  ],
+);
+
+export const feedbackRelations = relations(feedback, ({ one }) => ({
+  user: one(user, {
+    fields: [feedback.userId],
+    references: [user.id],
+  }),
+}));
+
 export type Organization = typeof organization.$inferSelect;
 export type Role = (typeof role.enumValues)[number];
 export type Member = typeof member.$inferSelect & {
@@ -377,6 +426,9 @@ export type Status = (typeof status.enumValues)[number];
 export type Order = typeof order.$inferSelect;
 export type OrderItem = typeof orderItem.$inferSelect;
 export type OrderStatus = (typeof orderStatus.enumValues)[number];
+export type Feedback = typeof feedback.$inferSelect;
+export type FeedbackType = (typeof feedbackType.enumValues)[number];
+export type FeedbackStatus = (typeof feedbackStatus.enumValues)[number];
 
 export const schema = {
   user,
@@ -392,6 +444,7 @@ export const schema = {
   productTag,
   order,
   orderItem,
+  feedback,
   organizationRelations,
   memberRelations,
   invitationRelations,
@@ -400,4 +453,5 @@ export const schema = {
   tagRelations,
   orderRelations,
   orderItemRelations,
+  feedbackRelations,
 };

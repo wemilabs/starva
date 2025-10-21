@@ -1,10 +1,9 @@
 "use client";
 
-import { useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { XCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 
-import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,8 +15,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { cancelOrder } from "@/server/orders";
 import { toast } from "sonner";
+import { Spinner } from "../ui/spinner";
 
 interface CancelOrderButtonProps {
   orderId: string;
@@ -26,25 +27,32 @@ interface CancelOrderButtonProps {
 export function CancelOrderButton({ orderId }: CancelOrderButtonProps) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const [alertDialogOpen, setAlertDialogOpen] = useState(false);
 
   const handleCancel = () => {
     startTransition(async () => {
-      const result = await cancelOrder(orderId);
-
-      if (result.ok) {
-        toast.success("Order cancelled successfully");
+      try {
+         await cancelOrder(orderId);
+        toast.success("Done!", {
+          description: "Order cancelled successfully",
+        });
         router.refresh();
-      } else {
-        toast.error(result.error || "Failed to cancel order");
+        setAlertDialogOpen(false);
+      } catch (error) {
+        const e = error as Error;
+        console.error("Cancel order error:", e.message);
+        toast.error("Failure", {
+          description: e.message || "Failed to cancel order",
+        });
       }
     });
   };
 
   return (
-    <AlertDialog>
+    <AlertDialog onOpenChange={setAlertDialogOpen} open={alertDialogOpen}>
       <AlertDialogTrigger asChild>
         <Button variant="destructive" className="w-full" disabled={isPending}>
-          <XCircle className="mr-2 h-4 w-4" />
+          <XCircle className="size-4" />
           Cancel Order
         </Button>
       </AlertDialogTrigger>
@@ -59,11 +67,21 @@ export function CancelOrderButton({ orderId }: CancelOrderButtonProps) {
         <AlertDialogFooter>
           <AlertDialogCancel>No, keep order</AlertDialogCancel>
           <AlertDialogAction
-            onClick={handleCancel}
+            onClick={(e) => {
+              e.preventDefault();
+              handleCancel();
+            }}
             disabled={isPending}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className="bg-destructive hover:bg-destructive/90"
           >
-            {isPending ? "Cancelling..." : "Yes, cancel order"}
+            {isPending ? (
+              <div className="flex items-center gap-2">
+                <Spinner />
+                Cancelling...
+              </div>
+            ) : (
+              "Yes, cancel order"
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

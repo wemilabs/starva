@@ -14,6 +14,7 @@ import { Loader2, Trash2 } from "lucide-react";
 import { useState, useTransition } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
+import { Spinner } from "../ui/spinner";
 
 const schema = z.object({
   productId: z.string().min(1),
@@ -49,7 +50,7 @@ export function DeleteProductForm({
 
       try {
         await deleteProduct(parsed.data);
-        toast.success("Success", {
+        toast.success("Done!", {
           description: "Product deleted successfully",
         });
         setDialogOpen(false);
@@ -87,7 +88,7 @@ export function DeleteProductForm({
           >
             {isDeletingPending ? (
               <div className="flex items-center gap-2">
-                <Loader2 className="size-4 animate-spin" />
+                <Spinner />
                 Deleting...
               </div>
             ) : (

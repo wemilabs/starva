@@ -6,7 +6,6 @@ import {
   integer,
   pgEnum,
   pgTable,
-  serial,
   text,
   timestamp,
   unique,
@@ -284,7 +283,6 @@ export const order = pgTable(
     id: text("id")
       .$defaultFn(() => randomUUID())
       .primaryKey(),
-    orderNumber: serial("order_number").notNull(),
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),

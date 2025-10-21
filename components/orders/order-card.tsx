@@ -28,6 +28,8 @@ interface OrderCardProps {
         price: string;
       };
     })[];
+    merchantOrderNumber?: number;
+    customerOrderNumber?: number;
   };
   variant?: "customer" | "merchant";
 }
@@ -38,14 +40,19 @@ export function OrderCard({ order, variant = "merchant" }: OrderCardProps) {
     0,
   );
 
+  const orderNumber =
+    variant === "merchant"
+      ? order.merchantOrderNumber
+      : order.customerOrderNumber;
+
   return (
-    <Link href={`/orders/${order.id}`}>
-      <Card className="hover:shadow-md transition-shadow cursor-pointer">
+    <Card className="hover:shadow-md transition-shadow cursor-pointer">
+      <Link href={`/orders/${order.id}`}>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-lg">#{order.orderNumber}</h3>
+                <h3 className="font-semibold text-lg">#{orderNumber}</h3>
                 <OrderStatusBadge status={order.status} />
               </div>
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -97,9 +104,7 @@ export function OrderCard({ order, variant = "merchant" }: OrderCardProps) {
                     <p className="text-sm font-medium">
                       {order.organization.name}
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      Business
-                    </p>
+                    <p className="text-xs text-muted-foreground">Business</p>
                   </div>
                 </>
               ) : null}
@@ -114,7 +119,7 @@ export function OrderCard({ order, variant = "merchant" }: OrderCardProps) {
             </div>
           )}
         </CardContent>
-      </Card>
-    </Link>
+      </Link>
+    </Card>
   );
 }

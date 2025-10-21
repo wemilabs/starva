@@ -1,7 +1,47 @@
 import { db } from "@/db/drizzle";
 import { type OrderStatus, order } from "@/db/schema";
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, lt, or, sql } from "drizzle-orm";
 import "server-only";
+
+async function calculateMerchantOrderNumberPerOrg(
+  organizationId: string,
+  orderCreatedAt: Date,
+): Promise<number> {
+  const result = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(order)
+    .where(
+      and(
+        eq(order.organizationId, organizationId),
+        or(
+          lt(order.createdAt, orderCreatedAt),
+          and(eq(order.createdAt, orderCreatedAt)),
+        ),
+      ),
+    );
+  return result[0]?.count || 0;
+}
+
+async function calculateCustomerOrderNumberPerUserPerOrg(
+  userId: string,
+  organizationId: string,
+  orderCreatedAt: Date,
+): Promise<number> {
+  const result = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(order)
+    .where(
+      and(
+        eq(order.userId, userId),
+        eq(order.organizationId, organizationId),
+        or(
+          lt(order.createdAt, orderCreatedAt),
+          and(eq(order.createdAt, orderCreatedAt)),
+        ),
+      ),
+    );
+  return result[0]?.count || 0;
+}
 
 export async function getOrdersByOrganization(organizationId: string) {
   const orders = await db.query.order.findMany({
@@ -31,7 +71,20 @@ export async function getOrdersByOrganization(organizationId: string) {
     orderBy: [desc(order.createdAt)],
   });
 
-  return orders;
+  const ordersWithNumbers = await Promise.all(
+    orders.map(async (ord) => {
+      const merchantOrderNumber = await calculateMerchantOrderNumberPerOrg(
+        organizationId,
+        ord.createdAt,
+      );
+      return {
+        ...ord,
+        merchantOrderNumber,
+      };
+    }),
+  );
+
+  return ordersWithNumbers;
 }
 
 export async function getOrderById(orderId: string) {
@@ -70,7 +123,25 @@ export async function getOrderById(orderId: string) {
     },
   });
 
-  return orderData;
+  if (!orderData) return null;
+
+  const [merchantOrderNumber, customerOrderNumber] = await Promise.all([
+    calculateMerchantOrderNumberPerOrg(
+      orderData.organizationId,
+      orderData.createdAt,
+    ),
+    calculateCustomerOrderNumberPerUserPerOrg(
+      orderData.userId,
+      orderData.organizationId,
+      orderData.createdAt,
+    ),
+  ]);
+
+  return {
+    ...orderData,
+    merchantOrderNumber,
+    customerOrderNumber,
+  };
 }
 
 export async function getOrdersByUser(userId: string) {
@@ -101,7 +172,22 @@ export async function getOrdersByUser(userId: string) {
     orderBy: [desc(order.createdAt)],
   });
 
-  return orders;
+  const ordersWithNumbers = await Promise.all(
+    orders.map(async (ord) => {
+      const customerOrderNumber =
+        await calculateCustomerOrderNumberPerUserPerOrg(
+          userId,
+          ord.organizationId,
+          ord.createdAt,
+        );
+      return {
+        ...ord,
+        customerOrderNumber,
+      };
+    }),
+  );
+
+  return ordersWithNumbers;
 }
 
 export async function getOrdersByStatus(
@@ -140,7 +226,20 @@ export async function getOrdersByStatus(
     orderBy: [desc(order.createdAt)],
   });
 
-  return orders;
+  const ordersWithNumbers = await Promise.all(
+    orders.map(async (ord) => {
+      const merchantOrderNumber = await calculateMerchantOrderNumberPerOrg(
+        organizationId,
+        ord.createdAt,
+      );
+      return {
+        ...ord,
+        merchantOrderNumber,
+      };
+    }),
+  );
+
+  return ordersWithNumbers;
 }
 
 export async function getOrderStats(organizationId: string) {
@@ -186,5 +285,18 @@ export async function getRecentOrders(
     limit,
   });
 
-  return orders;
+  const ordersWithNumbers = await Promise.all(
+    orders.map(async (ord) => {
+      const merchantOrderNumber = await calculateMerchantOrderNumberPerOrg(
+        organizationId,
+        ord.createdAt,
+      );
+      return {
+        ...ord,
+        merchantOrderNumber,
+      };
+    }),
+  );
+
+  return ordersWithNumbers;
 }

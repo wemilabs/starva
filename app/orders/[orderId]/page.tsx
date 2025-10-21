@@ -36,8 +36,12 @@ export default async function OrderPage(props: PageProps<"/orders/[orderId]">) {
 
   const totalItems = order.orderItems.reduce(
     (sum, item) => sum + item.quantity,
-    0
+    0,
   );
+
+  const orderNumber = isMerchant
+    ? order.merchantOrderNumber
+    : order.customerOrderNumber;
 
   return (
     <div className="container mx-auto max-w-7xl py-7 space-y-7">
@@ -49,7 +53,7 @@ export default async function OrderPage(props: PageProps<"/orders/[orderId]">) {
         </Button>
         <div className="flex-1">
           <h1 className="text-2xl font-bold tracking-tight">
-            Order #{order.orderNumber}
+            Order #{orderNumber}
           </h1>
           <p className="text-muted-foreground mt-0.5 text-sm">
             Placed on {formatDate(order.createdAt)}

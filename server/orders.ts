@@ -1,6 +1,6 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -84,9 +84,19 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       };
     });
 
+    // Generate sequential order number per organization
+    const maxOrderResult = await db
+      .select({
+        maxNum: sql<number>`COALESCE(MAX(${orderTable.orderNumber}), 0)`,
+      })
+      .from(orderTable)
+      .where(eq(orderTable.organizationId, organizationId));
+    const nextOrderNumber = (maxOrderResult[0]?.maxNum || 0) + 1;
+
     const [newOrder] = await db
       .insert(orderTable)
       .values({
+        orderNumber: nextOrderNumber,
         userId: session.user.id,
         organizationId,
         notes: notes || null,

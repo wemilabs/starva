@@ -283,6 +283,7 @@ export const order = pgTable(
     id: text("id")
       .$defaultFn(() => randomUUID())
       .primaryKey(),
+    orderNumber: integer("order_number").notNull(),
     userId: text("user_id")
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
@@ -303,6 +304,8 @@ export const order = pgTable(
     index("order_user_idx").on(t.userId),
     index("order_org_idx").on(t.organizationId),
     index("order_status_idx").on(t.status),
+    index("order_number_idx").on(t.orderNumber),
+    unique("order_number_per_org").on(t.organizationId, t.orderNumber),
   ],
 );
 

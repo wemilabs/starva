@@ -1,19 +1,21 @@
 "use client";
 
-import { Search, X } from "lucide-react";
-import { useQueryState } from "nuqs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { Search, X } from "lucide-react";
+import { useQueryState } from "nuqs";
 
 export function SearchForm({
   formProps,
   inputFieldOnlyClassName,
   controlledAutoFocus,
+  placeholder,
 }: {
   formProps?: React.ComponentProps<"form">;
   inputFieldOnlyClassName?: string;
   controlledAutoFocus?: boolean;
+  placeholder?: string;
 }) {
   const [search, setSearch] = useQueryState("search", { defaultValue: "" });
 
@@ -26,7 +28,7 @@ export function SearchForm({
         <Input
           id="search"
           type="search"
-          placeholder="e.g. thiep, vosgienne, calaba, etc."
+          placeholder={placeholder}
           className={cn(
             "w-full bg-transparent pl-10 focus:outline-none rounded-lg placeholder:text-xs md:placeholder:text-sm text-xs md:text-sm transition duration-300 ease-in-out",
             inputFieldOnlyClassName,

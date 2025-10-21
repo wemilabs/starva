@@ -143,7 +143,7 @@ export const invitationRelations = relations(invitation, ({ one }) => ({
   }),
 }));
 
-export const status = pgEnum("status", [
+export const productStatus = pgEnum("status", [
   "in_stock",
   "out_of_stock",
   "archived",
@@ -183,7 +183,7 @@ export const product = pgTable(
     description: text("description").notNull(),
     price: decimal("price", { precision: 10, scale: 2 }).notNull(),
     likesCount: integer("likes_count").default(0),
-    status: status("status").default("in_stock").notNull(),
+    status: productStatus("status").default("in_stock").notNull(),
     organizationId: text("organization_id")
       .notNull()
       .references(() => organization.id, { onDelete: "cascade" }),
@@ -210,7 +210,6 @@ export const tag = pgTable(
     name: text("name").notNull(),
     slug: text("slug").unique().notNull(),
     description: text("description"),
-    status: status("status").default("in_stock").notNull(),
     organizationId: text("organization_id")
       .notNull()
       .references(() => organization.id, { onDelete: "cascade" }),
@@ -406,9 +405,46 @@ export const feedback = pgTable(
   ],
 );
 
-export const feedbackRelations = relations(feedback, ({ one }) => ({
+export const feedbackRelations = relations(feedback, ({ one, many }) => ({
   user: one(user, {
     fields: [feedback.userId],
+    references: [user.id],
+  }),
+  history: many(feedbackHistory),
+}));
+
+export const feedbackHistory = pgTable(
+  "feedback_history",
+  {
+    id: text("id")
+      .$defaultFn(() => randomUUID())
+      .primaryKey(),
+    feedbackId: text("feedback_id")
+      .notNull()
+      .references(() => feedback.id, { onDelete: "cascade" }),
+    previousStatus: feedbackStatus("previous_status").notNull(),
+    newStatus: feedbackStatus("new_status").notNull(),
+    changedBy: text("changed_by")
+      .notNull()
+      .references(() => user.id),
+    changedAt: timestamp("changed_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+    note: text("note"),
+  },
+  (t) => [
+    index("feedback_history_feedback_idx").on(t.feedbackId),
+    index("feedback_history_changed_by_idx").on(t.changedBy),
+  ],
+);
+
+export const feedbackHistoryRelations = relations(feedbackHistory, ({ one }) => ({
+  feedback: one(feedback, {
+    fields: [feedbackHistory.feedbackId],
+    references: [feedback.id],
+  }),
+  changedByUser: one(user, {
+    fields: [feedbackHistory.changedBy],
     references: [user.id],
   }),
 }));
@@ -422,13 +458,14 @@ export type User = typeof user.$inferSelect;
 export type Product = typeof product.$inferSelect;
 export type ProductLike = typeof productLike.$inferSelect;
 export type Tag = typeof tag.$inferSelect;
-export type Status = (typeof status.enumValues)[number];
+export type ProductStatus = (typeof productStatus.enumValues)[number];
 export type Order = typeof order.$inferSelect;
 export type OrderItem = typeof orderItem.$inferSelect;
 export type OrderStatus = (typeof orderStatus.enumValues)[number];
 export type Feedback = typeof feedback.$inferSelect;
 export type FeedbackType = (typeof feedbackType.enumValues)[number];
 export type FeedbackStatus = (typeof feedbackStatus.enumValues)[number];
+export type FeedbackHistory = typeof feedbackHistory.$inferSelect;
 
 export const schema = {
   user,
@@ -454,4 +491,6 @@ export const schema = {
   orderRelations,
   orderItemRelations,
   feedbackRelations,
+  feedbackHistory,
+  feedbackHistoryRelations,
 };

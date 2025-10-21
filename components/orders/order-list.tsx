@@ -38,7 +38,7 @@ interface OrderListProps {
 export function OrderList({ orders, variant = "merchant" }: OrderListProps) {
   const [selectedStatus, setSelectedStatus] = useQueryState(
     "status",
-    parseAsStringLiteral(["all", ...ORDER_STATUS_VALUES]).withDefault("all")
+    parseAsStringLiteral(["all", ...ORDER_STATUS_VALUES]).withDefault("all"),
   );
   const [search] = useQueryState("search", { defaultValue: "" });
 
@@ -71,6 +71,7 @@ export function OrderList({ orders, variant = "merchant" }: OrderListProps) {
           formProps={{
             className: "w-full md:w-80",
           }}
+          placeholder="eg. order number, customer name, etc."
         />
       </div>
 

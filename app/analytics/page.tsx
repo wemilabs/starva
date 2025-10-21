@@ -10,20 +10,23 @@ export default function AnalyticsPage() {
             <div className="inline-flex items-center justify-center size-16 rounded-full bg-primary/10 mb-6">
               <BarChart3 className="size-8 text-primary" />
             </div>
-            
+
             <div className="space-y-3">
               <div className="inline-flex items-center gap-2 text-primary">
                 <Sparkles className="size-4" />
-                <span className="text-xs font-medium uppercase tracking-wider">Coming Soon</span>
+                <span className="text-xs font-medium uppercase tracking-wider">
+                  Coming Soon
+                </span>
               </div>
-              
+
               <h1 className="text-3xl font-bold tracking-tight">
                 Analytics Dashboard
               </h1>
-              
+
               <p className="text-muted-foreground text-sm leading-relaxed">
-                We're building powerful insights and analytics to help you make data-driven decisions.
-                Stay tuned for detailed metrics, charts, and reports.
+                We're building powerful insights and analytics to help you make
+                data-driven decisions. Stay tuned for detailed metrics, charts,
+                and reports.
               </p>
             </div>
           </div>

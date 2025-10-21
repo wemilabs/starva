@@ -81,6 +81,7 @@ export function Hero() {
                 formProps={{ className: "mx-auto max-w-lg" }}
                 inputFieldOnlyClassName="h-10 md:h-12"
                 controlledAutoFocus
+                placeholder="eg. vosgienne, odika, pizza, etc."
               />
             </Suspense>
           </AnimatedGroup>

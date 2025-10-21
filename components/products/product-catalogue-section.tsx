@@ -5,22 +5,22 @@ import { EditBusinessTimetable } from "@/components/forms/edit-business-timetabl
 import { SearchForm } from "@/components/forms/search-form";
 import { FilteredProducts } from "@/components/products/filtered-products";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
-import type { Product } from "@/db/schema";
-import { PRODUCT_STATUS_VALUES, type ProductStatusValue } from "@/lib/constants";
+import type { Product, ProductStatus } from "@/db/schema";
+import { PRODUCT_STATUS_VALUES } from "@/lib/constants";
 import { removeUnderscoreAndCapitalizeOnlyTheFirstChar } from "@/lib/utils";
 import { CalendarClock, Clock } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -41,7 +41,7 @@ type ProductCatalogueSectionProps = {
   data: ProductWithOrg[];
   businessId: string;
   businessSlug: string;
-  defaultStatus?: ProductStatusValue;
+  defaultStatus?: ProductStatus;
 };
 
 export function ProductCatalogueSection({
@@ -133,10 +133,15 @@ export function ProductCatalogueSection({
                 ))}
               </SelectContent>
             </Select>
-            <Suspense fallback={<div className="h-9 w-full md:w-[380px] animate-pulse bg-muted rounded-lg" />}>
+            <Suspense
+              fallback={
+                <div className="h-9 w-full md:w-[380px] animate-pulse bg-muted rounded-lg" />
+              }
+            >
               <SearchForm
                 formProps={{ className: "w-full md:w-[380px]" }}
                 inputFieldOnlyClassName="h-9"
+                placeholder="eg. burger, pizza, etc."
               />
             </Suspense>
           </div>
@@ -145,7 +150,13 @@ export function ProductCatalogueSection({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 py-6">
-        <Suspense fallback={<div className="col-span-full text-center text-muted-foreground">Loading products...</div>}>
+        <Suspense
+          fallback={
+            <div className="col-span-full text-center text-muted-foreground">
+              Loading products...
+            </div>
+          }
+        >
           <FilteredProducts data={data} filterByStatus={selectedStatus} />
         </Suspense>
       </div>

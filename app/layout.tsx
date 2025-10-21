@@ -82,6 +82,8 @@ export const metadata: Metadata = {
   },
 };
 
+export const dynamic = "force-dynamic";
+
 const baseCrumbs = [{ label: "Home", href: "/" }];
 
 export default async function RootLayout({

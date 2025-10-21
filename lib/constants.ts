@@ -1,5 +1,10 @@
-export const PRODUCT_STATUS_VALUES = ["in_stock", "out_of_stock", "archived"] as const;
-export type ProductStatusValue = (typeof PRODUCT_STATUS_VALUES)[number];
+import type { FeedbackStatus, FeedbackType } from "@/db/schema";
+
+export const PRODUCT_STATUS_VALUES = [
+  "in_stock",
+  "out_of_stock",
+  "archived",
+] as const;
 
 export const COUNTRIES = [
   { code: "+250", name: "Rwanda", flag: "🇷🇼" },
@@ -14,7 +19,6 @@ export const ORDER_STATUS_VALUES = [
   "delivered",
   "cancelled",
 ] as const;
-export type OrderStatusValue = (typeof ORDER_STATUS_VALUES)[number];
 
 export const DAYS = [
   { key: "monday", label: "Monday" },
@@ -35,3 +39,53 @@ export const DEFAULT_HOURS = {
 export const today = new Date()
   .toLocaleDateString("en-US", { weekday: "long" })
   .toLowerCase();
+
+export const FEEDBACK_TYPE_LABELS = {
+  bug: "🐛 Bug",
+  feature: "✨ Feature",
+  improvement: "📈 Improvement",
+  general: "💬 General",
+} as const;
+
+export const FEEDBACK_STATUS_VARIANTS = {
+  pending: "secondary",
+  reviewing: "default",
+  completed: "available",
+  rejected: "destructive",
+} as const;
+
+export const FEEDBACK_TYPE_VALUES = [
+  "bug",
+  "feature",
+  "improvement",
+  "general",
+] as const;
+
+export const FEEDBACK_STATUS_VALUES = [
+  "pending",
+  "reviewing",
+  "completed",
+  "rejected",
+] as const;
+
+export const feedbackTypeOptions: {
+  value: FeedbackType | "all";
+  label: string;
+}[] = [
+  { value: "all", label: "All Types" },
+  { value: "bug", label: "🐛 Bug" },
+  { value: "feature", label: "✨ Feature" },
+  { value: "improvement", label: "📈 Improvement" },
+  { value: "general", label: "💬 General" },
+];
+
+export const feedbackStatusOptions: {
+  value: FeedbackStatus | "all";
+  label: string;
+}[] = [
+  { value: "all", label: "All Status" },
+  { value: "pending", label: "Pending" },
+  { value: "reviewing", label: "Reviewing" },
+  { value: "completed", label: "Completed" },
+  { value: "rejected", label: "Rejected" },
+];

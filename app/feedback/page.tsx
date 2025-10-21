@@ -2,40 +2,30 @@ import { FeedbackForm } from "@/components/forms/feedback-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
 } from "@/components/ui/card";
 import {
-	Empty,
-	EmptyContent,
-	EmptyDescription,
-	EmptyHeader,
-	EmptyMedia,
-	EmptyTitle,
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
 } from "@/components/ui/empty";
 import { Separator } from "@/components/ui/separator";
 import { getFeedbackByUser } from "@/data/feedback";
 import { verifySession } from "@/data/user-session";
+import {
+  FEEDBACK_STATUS_VARIANTS,
+  FEEDBACK_TYPE_LABELS,
+} from "@/lib/constants";
 import { formatDateShort } from "@/lib/utils";
 import { MessageSquare } from "lucide-react";
 import Link from "next/link";
-
-const feedbackTypeLabels = {
-  bug: "🐛 Bug",
-  feature: "✨ Feature",
-  improvement: "📈 Improvement",
-  general: "💬 General",
-};
-
-const statusVariants = {
-  pending: "secondary" as const,
-  reviewing: "default" as const,
-  completed: "default" as const,
-  rejected: "destructive" as const,
-};
 
 export default async function FeedbackPage() {
   const sessionData = await verifySession();
@@ -125,10 +115,10 @@ export default async function FeedbackPage() {
                             </p>
                             <div className="flex items-center gap-2 flex-wrap">
                               <Badge variant="outline" className="text-xs">
-                                {feedbackTypeLabels[item.type]}
+                                {FEEDBACK_TYPE_LABELS[item.type]}
                               </Badge>
                               <Badge
-                                variant={statusVariants[item.status]}
+                                variant={FEEDBACK_STATUS_VARIANTS[item.status]}
                                 className="text-xs"
                               >
                                 {item.status}

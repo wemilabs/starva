@@ -2,10 +2,12 @@
 
 import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
-import { productLike, product as productTable } from "@/db/schema";
+import { productLike, product as productTable, tag, productTag } from "@/db/schema";
 import { PRODUCT_STATUS_VALUES } from "@/lib/constants";
 import { extractFileKeyFromUrl, utapi } from "@/lib/uploadthing-server";
+import { slugify } from "@/lib/utils";
 import { and, eq, sql } from "drizzle-orm";
+import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { z } from "zod";
@@ -18,6 +20,7 @@ const productSchema = z.object({
   description: z.string().optional().default(""),
   imageUrl: z.url().optional().or(z.literal("")),
   status: z.enum(PRODUCT_STATUS_VALUES),
+  tagNames: z.array(z.string()).optional().default([]),
   revalidateTargetPath: z.string().min(1),
 });
 
@@ -36,10 +39,11 @@ export async function createProduct(input: z.infer<typeof productSchema>) {
       description,
       imageUrl,
       status,
+      tagNames,
       revalidateTargetPath,
     } = parsed.data;
 
-    await db.insert(productTable).values({
+    const [newProduct] = await db.insert(productTable).values({
       name,
       slug,
       description: description || "",
@@ -47,7 +51,41 @@ export async function createProduct(input: z.infer<typeof productSchema>) {
       organizationId,
       imageUrl: imageUrl || null,
       status,
-    });
+    }).returning();
+
+    if (tagNames && tagNames.length > 0) {
+      const tagIds: string[] = [];
+      
+      for (const tagName of tagNames) {
+        const tagSlug = slugify(tagName);
+        
+        const existingTag = await db
+          .select()
+          .from(tag)
+          .where(eq(tag.slug, tagSlug))
+          .limit(1);
+
+        if (existingTag.length > 0) {
+          tagIds.push(existingTag[0].id);
+        } else {
+          const [newTag] = await db.insert(tag).values({
+            id: randomUUID(),
+            name: tagName,
+            slug: tagSlug,
+          }).returning();
+          tagIds.push(newTag.id);
+        }
+      }
+
+      if (tagIds.length > 0) {
+        const productTagValues = tagIds.map((tagId) => ({
+          id: randomUUID(),
+          productId: newProduct.id,
+          tagId,
+        }));
+        await db.insert(productTag).values(productTagValues);
+      }
+    }
 
     revalidatePath(revalidateTargetPath);
     return { ok: true } as const;
@@ -80,6 +118,7 @@ export async function updateProduct(
       description,
       imageUrl,
       status,
+      tagNames,
       revalidateTargetPath,
     } = parsed.data;
 
@@ -117,6 +156,44 @@ export async function updateProduct(
           eq(productTable.organizationId, organizationId),
         ),
       );
+
+    if (tagNames) {
+      await db.delete(productTag).where(eq(productTag.productId, productId));
+
+      if (tagNames.length > 0) {
+        const tagIds: string[] = [];
+        
+        for (const tagName of tagNames) {
+          const tagSlug = slugify(tagName);
+          
+          const existingTag = await db
+            .select()
+            .from(tag)
+            .where(eq(tag.slug, tagSlug))
+            .limit(1);
+
+          if (existingTag.length > 0) {
+            tagIds.push(existingTag[0].id);
+          } else {
+            const [newTag] = await db.insert(tag).values({
+              id: randomUUID(),
+              name: tagName,
+              slug: tagSlug,
+            }).returning();
+            tagIds.push(newTag.id);
+          }
+        }
+
+        if (tagIds.length > 0) {
+          const productTagValues = tagIds.map((tagId) => ({
+            id: randomUUID(),
+            productId,
+            tagId,
+          }));
+          await db.insert(productTag).values(productTagValues);
+        }
+      }
+    }
 
     after(async () => {
       if (oldImageUrl && oldImageUrl !== newImageUrl) {

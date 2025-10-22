@@ -1,0 +1,135 @@
+"use client";
+
+import { SearchForm } from "@/components/forms/search-form";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { Tag } from "@/db/schema";
+import { Filter, X } from "lucide-react";
+import { parseAsArrayOf, parseAsString, useQueryStates } from "nuqs";
+
+type ProductFiltersProps = {
+  availableTags: Array<Tag & { productCount: number }>;
+};
+
+export function ProductFilters({ availableTags }: ProductFiltersProps) {
+  const [{ search, tags, sort }, setFilters] = useQueryStates(
+    {
+      search: parseAsString.withDefault(""),
+      tags: parseAsArrayOf(parseAsString).withDefault([]),
+      sort: parseAsString.withDefault("newest"),
+    },
+    { shallow: false }
+  );
+
+  const toggleTag = (tagSlug: string) => {
+    const newTags = tags.includes(tagSlug)
+      ? tags.filter((t) => t !== tagSlug)
+      : [...tags, tagSlug];
+
+    setFilters({ tags: newTags.length > 0 ? newTags : null });
+  };
+
+  const clearAllFilters = () => {
+    setFilters({ search: null, tags: null, sort: "newest" });
+  };
+
+  const hasActiveFilters = search || tags.length > 0;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col md:flex-row justify-between gap-4">
+      <SearchForm
+        formProps={{ className: "w-full md:w-[380px]" }}
+        inputFieldOnlyClassName="h-9"
+        placeholder="Search products..."
+      />
+
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-2">
+          <Filter className="size-4 text-muted-foreground" />
+          <span className="text-sm font-medium">Filters:</span>
+        </div>
+
+        <Select
+          value={sort}
+          onValueChange={(value) => setFilters({ sort: value })}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="newest">Newest First</SelectItem>
+            <SelectItem value="oldest">Oldest First</SelectItem>
+            <SelectItem value="price_low">Price: Low to High</SelectItem>
+            <SelectItem value="price_high">Price: High to Low</SelectItem>
+            <SelectItem value="popular">Most Popular</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {hasActiveFilters && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearAllFilters}
+            className="h-8"
+          >
+            <X className="size-4" />
+            Clear all
+          </Button>
+        )}
+      </div>
+      </div>
+
+      {availableTags.length > 0 && (
+        <div>
+          <p className="text-sm font-medium mb-2">Tags:</p>
+          <div className="flex flex-wrap gap-2">
+            {availableTags.map((tag) => (
+              <Badge
+                key={tag.id}
+                variant={tags.includes(tag.slug) ? "default" : "outline"}
+                className="cursor-pointer"
+                onClick={() => toggleTag(tag.slug)}
+              >
+                {tag.name}
+                <span className="ml-1 text-xs opacity-70">
+                  ({tag.productCount})
+                </span>
+              </Badge>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {tags.length > 0 && (
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Active tags:</span>
+          <div className="flex flex-wrap gap-2">
+            {tags.map((tagSlug) => {
+              const tag = availableTags.find((t) => t.slug === tagSlug);
+              return tag ? (
+                <Badge key={tagSlug} variant="secondary" className="gap-1">
+                  {tag.name}
+                  <button
+                    type="button"
+                    onClick={() => toggleTag(tagSlug)}
+                    className="ml-1 rounded-full"
+                  >
+                    <X className="size-3" />
+                  </button>
+                </Badge>
+              ) : null;
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

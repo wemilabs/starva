@@ -1,5 +1,6 @@
 "use client";
 
+import { TagInput } from "@/components/forms/tag-input";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -19,13 +20,14 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import type { Product } from "@/db/schema";
+import type { Product, Tag } from "@/db/schema";
 import { PRODUCT_STATUS_VALUES } from "@/lib/constants";
 import { UploadButton } from "@/lib/uploadthing";
 import {
     removeUnderscoreAndCapitalizeOnlyTheFirstChar,
     slugify,
 } from "@/lib/utils";
+import { getAllTags, getProductTags } from "@/server/tags";
 import { updateProduct } from "@/server/products";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Pencil } from "lucide-react";
@@ -48,21 +50,25 @@ const schema = z.object({
   imageUrl: z.url("Provide a valid URL").optional().or(z.literal("")),
   description: z.string().max(500).optional().or(z.literal("")),
   status: z.enum(PRODUCT_STATUS_VALUES),
+  tags: z.array(z.custom<Tag>()),
 });
 
 export function EditProductForm({
   product,
   organizationId,
   businessSlug,
+  productTags = [],
   className,
 }: {
   product: Product;
   organizationId: string;
   businessSlug: string;
+  productTags?: Tag[];
   className?: string;
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [availableTags, setAvailableTags] = useState<Tag[]>([]);
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
@@ -74,8 +80,36 @@ export function EditProductForm({
       description: product.description || "",
       status:
         (product.status as (typeof PRODUCT_STATUS_VALUES)[number]) || PRODUCT_STATUS_VALUES[0],
+      tags: productTags,
     },
   });
+
+  const handleDialogOpenChange = (open: boolean) => {
+    setDialogOpen(open);
+    
+    if (open) {
+      Promise.all([
+        getAllTags(),
+        getProductTags(product.id),
+      ]).then(([allTagsResult, productTagsResult]) => {
+        if (allTagsResult.ok) {
+          setAvailableTags(allTagsResult.tags);
+        }
+        if (productTagsResult.ok) {
+          form.reset({
+            name: product.name || "",
+            slug: product.slug || "",
+            price: product.price || "",
+            imageUrl: product.imageUrl || "",
+            description: product.description || "",
+            status:
+              (product.status as (typeof PRODUCT_STATUS_VALUES)[number]) || PRODUCT_STATUS_VALUES[0],
+            tags: productTagsResult.tags,
+          });
+        }
+      });
+    }
+  };
 
   const watchedName = form.watch("name");
   useEffect(() => {
@@ -99,6 +133,7 @@ export function EditProductForm({
           description: values.description || "",
           imageUrl: values.imageUrl || "",
           status: values.status,
+          tagNames: values.tags.map((t) => t.name),
           revalidateTargetPath: `/businesses/${businessSlug}`,
         });
         toast.success("Success", {
@@ -116,13 +151,12 @@ export function EditProductForm({
   }
 
   return (
-    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+    <Dialog open={dialogOpen} onOpenChange={handleDialogOpenChange}>
       <DialogTrigger asChild>
         <Button
           variant="outline"
           size="sm"
           className={className}
-          onClick={() => setDialogOpen(true)}
         >
           <Pencil className="size-4" />
         </Button>
@@ -288,6 +322,25 @@ export function EditProductForm({
                         </option>
                       ))}
                     </select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="tags"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tags</FormLabel>
+                  <FormControl>
+                    <TagInput
+                      availableTags={availableTags}
+                      selectedTags={field.value}
+                      onTagsChange={field.onChange}
+                      disabled={isPending}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

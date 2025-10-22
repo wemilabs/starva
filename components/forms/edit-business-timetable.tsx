@@ -12,13 +12,13 @@ import { toast } from "sonner";
 import { ScrollArea } from "../ui/scroll-area";
 import { Spinner } from "../ui/spinner";
 
-type DayTimetable = {
+export type DayTimetable = {
   open: string;
   close: string;
   closed: boolean;
 };
 
-type TimetableData = Record<string, DayTimetable>;
+export type TimetableData = Record<string, DayTimetable>;
 
 type EditBusinessTimetableProps = {
   businessId: string;

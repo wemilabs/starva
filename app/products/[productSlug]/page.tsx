@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { CalendarClock, LogIn } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,13 +9,11 @@ import { ProductLikeButton } from "@/components/products/product-like-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getProductBySlug } from "@/data/products";
 import { formatPriceInRWF, removeUnderscoreAndCapitalizeOnlyTheFirstChar } from "@/lib/utils";
 
-export default async function ProductSlugPage(
-  props: PageProps<"/products/[productSlug]">,
-) {
-  const { productSlug } = await props.params;
+async function ProductDisplay({ productSlug }: { productSlug: string }) {
   const result = await getProductBySlug(productSlug);
 
   if (!result) return notFound();
@@ -143,5 +142,49 @@ export default async function ProductSlugPage(
         </div>
       </div>
     </div>
+  );
+}
+
+function ProductSlugSkeleton() {
+  return (
+    <div className="container mx-auto px-4 py-8 space-y-12">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+        <Skeleton className="aspect-square w-full rounded-lg" />
+        
+        <div className="flex flex-col gap-6">
+          <Skeleton className="h-10 w-3/4" />
+          <Skeleton className="h-8 w-32" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-2/3" />
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <Skeleton className="h-24 rounded-md" />
+            <Skeleton className="h-24 rounded-md" />
+            <Skeleton className="h-24 rounded-md" />
+            <Skeleton className="h-24 rounded-md" />
+          </div>
+          
+          <div className="flex gap-3">
+            <Skeleton className="h-10 w-40" />
+            <Skeleton className="h-10 w-40" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default async function ProductSlugPage(
+  props: PageProps<"/products/[productSlug]">,
+) {
+  const { productSlug } = await props.params;
+
+  return (
+    <Suspense fallback={<ProductSlugSkeleton />}>
+      <ProductDisplay productSlug={productSlug} />
+    </Suspense>
   );
 }

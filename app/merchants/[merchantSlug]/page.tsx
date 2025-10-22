@@ -1,7 +1,11 @@
+import { Suspense } from "react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { Clock } from "lucide-react";
 
+import { ProductCatalogueControls } from "@/components/products/product-catalogue-controls";
 import { ProductCatalogueSection } from "@/components/products/product-catalogue-section";
+import { SkeletonProductCard } from "@/components/products/skeleton-product-card";
 import {
     Accordion,
     AccordionContent,
@@ -12,7 +16,25 @@ import { getBusinessBySlug } from "@/data/businesses";
 import { getProductsPerBusinessWithoutAuth } from "@/data/products";
 import { DAYS, today } from "@/lib/constants";
 import { formatTime } from "@/lib/utils";
-import { Clock } from "lucide-react";
+
+async function ProductsList({ merchantId }: { merchantId: string }) {
+  const productsPerMerchant = await getProductsPerBusinessWithoutAuth(
+    merchantId,
+  );
+
+  if (!Array.isArray(productsPerMerchant) || productsPerMerchant.length === 0) {
+    return (
+      <div className="text-center py-10 border border-dashed border-muted-foreground/50 rounded-lg">
+        <h2 className="font-semibold">No products available</h2>
+        <p className="text-muted-foreground text-sm">
+          This merchant has no products yet.
+        </p>
+      </div>
+    );
+  }
+
+  return <ProductCatalogueSection data={productsPerMerchant} />;
+}
 
 export default async function MerchantSlugPage(
   props: PageProps<"/merchants/[merchantSlug]">,
@@ -23,10 +45,6 @@ export default async function MerchantSlugPage(
   if (!merchant) return notFound();
 
   const resolvedSlug = merchant.slug || merchantSlug;
-
-  const productsPerMerchant = await getProductsPerBusinessWithoutAuth(
-    merchant.id,
-  );
 
   const metadata = merchant.metadata ? JSON.parse(merchant.metadata) : {};
   const description = metadata.description || "";
@@ -135,22 +153,31 @@ export default async function MerchantSlugPage(
       )}
 
       <section className="grid gap-x-6">
-        {Array.isArray(productsPerMerchant) &&
-        productsPerMerchant.length > 0 ? (
-          <ProductCatalogueSection
-            data={productsPerMerchant}
-            businessId={merchant.id}
-            businessSlug={resolvedSlug}
-            defaultStatus="in_stock"
-          />
-        ) : (
-          <div className="text-center py-10 border border-dashed border-muted-foreground/50 rounded-lg">
-            <h2 className="font-semibold">No products available</h2>
-            <p className="text-muted-foreground text-sm">
-              This merchant has no products yet.
-            </p>
-          </div>
-        )}
+        <ProductCatalogueControls
+          businessId={merchant.id}
+          businessSlug={resolvedSlug}
+          timetable={timetable}
+          defaultStatus="in_stock"
+        />
+        <Suspense
+          fallback={
+            <>
+              <div className="col-span-full text-sm text-pretty text-muted-foreground mb-4">
+                Loading products...
+              </div>
+              <div className="grid grid-cols-1 justify-center gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <SkeletonProductCard />
+                <SkeletonProductCard />
+                <SkeletonProductCard />
+                <SkeletonProductCard />
+                <SkeletonProductCard />
+                <SkeletonProductCard />
+              </div>
+            </>
+          }
+        >
+          <ProductsList merchantId={merchant.id} />
+        </Suspense>
       </section>
     </div>
   );

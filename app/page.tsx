@@ -1,19 +1,7 @@
 import { EnVogue } from "@/components/en-vogue";
 import { Hero } from "@/components/hero";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Suspense } from "react";
-
-function SkeletonCard() {
-  return (
-    <div className="flex flex-col space-y-3">
-      <Skeleton className="h-[200px] w-[335px] rounded-xl" />
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-[250px]" />
-        <Skeleton className="h-4 w-[200px]" />
-      </div>
-    </div>
-  );
-}
+import { SkeletonProductCard } from "@/components/products/skeleton-product-card";
 
 export default async function Home() {
   return (
@@ -29,14 +17,14 @@ export default async function Home() {
               </p>
             </div>
             <div className="flex w-full flex-col gap-6 flex-1">
-              <div className="flex-1 pt-4">
-                <div className="grid grid-cols-1 justify-center gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  <SkeletonCard />
-                  <SkeletonCard />
-                  <SkeletonCard />
-                  <SkeletonCard />
-                  <SkeletonCard />
-                  <SkeletonCard />
+              <div className="flex-1">
+                <div className="grid grid-cols-1 justify-center gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                  <SkeletonProductCard />
+                  <SkeletonProductCard />
+                  <SkeletonProductCard />
+                  <SkeletonProductCard />
+                  <SkeletonProductCard />
+                  <SkeletonProductCard />
                 </div>
               </div>
             </div>

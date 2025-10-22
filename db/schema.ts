@@ -210,9 +210,6 @@ export const tag = pgTable(
     name: text("name").notNull(),
     slug: text("slug").unique().notNull(),
     description: text("description"),
-    organizationId: text("organization_id")
-      .notNull()
-      .references(() => organization.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at")
       .$defaultFn(() => /* @__PURE__ */ new Date())
       .notNull(),
@@ -222,7 +219,6 @@ export const tag = pgTable(
   },
   (t) => [
     index("tag_slug_idx").on(t.slug),
-    index("tag_org_idx").on(t.organizationId),
   ],
 );
 
@@ -377,6 +373,17 @@ export const tagRelations = relations(tag, ({ many }) => ({
   productTags: many(productTag),
 }));
 
+export const productTagRelations = relations(productTag, ({ one }) => ({
+  product: one(product, {
+    fields: [productTag.productId],
+    references: [product.id],
+  }),
+  tag: one(tag, {
+    fields: [productTag.tagId],
+    references: [tag.id],
+  }),
+}));
+
 export const feedback = pgTable(
   "feedback",
   {
@@ -488,6 +495,7 @@ export const schema = {
   productRelations,
   productLikeRelations,
   tagRelations,
+  productTagRelations,
   orderRelations,
   orderItemRelations,
   feedbackRelations,

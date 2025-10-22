@@ -1,5 +1,6 @@
 "use client";
 
+import { TagInput } from "@/components/forms/tag-input";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -19,12 +20,14 @@ import {
     FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import type { Tag } from "@/db/schema";
 import { PRODUCT_STATUS_VALUES } from "@/lib/constants";
 import { UploadButton } from "@/lib/uploadthing";
 import {
     removeUnderscoreAndCapitalizeOnlyTheFirstChar,
     slugify,
 } from "@/lib/utils";
+import { getAllTags } from "@/server/tags";
 import { createProduct } from "@/server/products";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Plus } from "lucide-react";
@@ -47,6 +50,7 @@ const schema = z.object({
   imageUrl: z.url("Provide a valid URL").optional().or(z.literal("")),
   description: z.string().max(500).optional().or(z.literal("")),
   status: z.enum(PRODUCT_STATUS_VALUES),
+  tags: z.array(z.custom<Tag>()),
 });
 
 export function AddProductForm({
@@ -58,6 +62,7 @@ export function AddProductForm({
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const [availableTags, setAvailableTags] = useState<Tag[]>([]);
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
@@ -68,8 +73,19 @@ export function AddProductForm({
       imageUrl: "",
       description: "",
       status: PRODUCT_STATUS_VALUES[0],
+      tags: [],
     },
   });
+
+  useEffect(() => {
+    if (dialogOpen) {
+      getAllTags().then((result) => {
+        if (result.ok) {
+          setAvailableTags(result.tags);
+        }
+      });
+    }
+  }, [dialogOpen]);
 
   const watchedName = form.watch("name");
   useEffect(() => {
@@ -92,6 +108,7 @@ export function AddProductForm({
           description: values.description || "",
           imageUrl: values.imageUrl || "",
           status: values.status,
+          tagNames: values.tags.map((t) => t.name),
           revalidateTargetPath: `/businesses/${businessSlug}`,
         });
         form.reset();
@@ -279,6 +296,25 @@ export function AddProductForm({
                         </option>
                       ))}
                     </select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="tags"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tags</FormLabel>
+                  <FormControl>
+                    <TagInput
+                      availableTags={availableTags}
+                      selectedTags={field.value}
+                      onTagsChange={field.onChange}
+                      disabled={isPending}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

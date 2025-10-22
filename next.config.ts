@@ -1,8 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // cacheComponents: true,
   devIndicators: {
     position: "top-left",
+  },
+  experimental:{
+    turbopackFileSystemCacheForDev: true,
   },
   images: {
     remotePatterns: [
@@ -12,6 +16,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  reactCompiler:true,
   typedRoutes: true,
 };
 

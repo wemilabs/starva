@@ -1,16 +1,14 @@
-import { ourFileRouter } from "@/app/api/uploadthing/core";
+import { UploadThingClient } from "@/components/uploadthing-client";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Header } from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { BreadcrumbsProvider } from "@/contexts/breadcrumbs-context";
-import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { extractRouterConfig } from "uploadthing/server";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -98,7 +96,7 @@ export default async function RootLayout({
       <body
         className={`${geistSans.className} ${geistMono.variable} antialiased`}
       >
-        <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
+        <UploadThingClient />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

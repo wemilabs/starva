@@ -97,9 +97,10 @@ export const formatRelativeTime = (date: Date | string) => {
 
 export const formatPriceInRWF = (price: string | number) => {
   const numPrice = typeof price === "string" ? parseFloat(price) : price;
-  return new Intl.NumberFormat("rw-RW", {
+  return new Intl.NumberFormat("en-RW", {
     style: "currency",
     currency: "RWF",
+    minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(numPrice);
 };

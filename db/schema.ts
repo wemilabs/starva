@@ -77,6 +77,44 @@ export const verification = pgTable("verification", {
   ),
 });
 
+export const role = pgEnum("role", ["member", "admin", "owner"]);
+
+export const productStatus = pgEnum("status", [
+  "in_stock",
+  "out_of_stock",
+  "archived",
+]);
+
+export const orderStatus = pgEnum("order_status", [
+  "pending",
+  "confirmed",
+  "preparing",
+  "ready",
+  "delivered",
+  "cancelled",
+]);
+
+export const feedbackType = pgEnum("feedback_type", [
+  "bug",
+  "feature",
+  "improvement",
+  "general",
+]);
+
+export const feedbackStatus = pgEnum("feedback_status", [
+  "pending",
+  "reviewing",
+  "completed",
+  "rejected",
+]);
+
+export const subscriptionStatus = pgEnum("subscription_status", [
+  "active",
+  "cancelled",
+  "expired",
+  "trial",
+]);
+
 export const organization = pgTable("organization", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
@@ -86,6 +124,43 @@ export const organization = pgTable("organization", {
   metadata: text("metadata"),
 });
 
+export const subscription = pgTable(
+  "subscription",
+  {
+    id: text("id")
+      .$defaultFn(() => randomUUID())
+      .primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    planName: text("plan_name").notNull(),
+    status: subscriptionStatus("status").default("trial").notNull(),
+    startDate: timestamp("start_date")
+      .$defaultFn(() => new Date())
+      .notNull(),
+    endDate: timestamp("end_date"),
+    trialEndsAt: timestamp("trial_ends_at"),
+    cancelledAt: timestamp("cancelled_at"),
+    createdAt: timestamp("created_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (t) => [
+    index("subscription_user_idx").on(t.userId),
+    index("subscription_status_idx").on(t.status),
+  ],
+);
+
+export const userRelations = relations(user, ({ one }) => ({
+  subscription: one(subscription, {
+    fields: [user.id],
+    references: [subscription.userId],
+  }),
+}));
+
 export const organizationRelations = relations(organization, ({ many }) => ({
   members: many(member),
   invitations: many(invitation),
@@ -93,7 +168,12 @@ export const organizationRelations = relations(organization, ({ many }) => ({
   orders: many(order),
 }));
 
-export const role = pgEnum("role", ["member", "admin", "owner"]);
+export const subscriptionRelations = relations(subscription, ({ one }) => ({
+  user: one(user, {
+    fields: [subscription.userId],
+    references: [user.id],
+  }),
+}));
 
 export const member = pgTable("member", {
   id: text("id").primaryKey(),
@@ -142,35 +222,6 @@ export const invitationRelations = relations(invitation, ({ one }) => ({
     references: [user.id],
   }),
 }));
-
-export const productStatus = pgEnum("status", [
-  "in_stock",
-  "out_of_stock",
-  "archived",
-]);
-
-export const orderStatus = pgEnum("order_status", [
-  "pending",
-  "confirmed",
-  "preparing",
-  "ready",
-  "delivered",
-  "cancelled",
-]);
-
-export const feedbackType = pgEnum("feedback_type", [
-  "bug",
-  "feature",
-  "improvement",
-  "general",
-]);
-
-export const feedbackStatus = pgEnum("feedback_status", [
-  "pending",
-  "reviewing",
-  "completed",
-  "rejected",
-]);
 
 export const product = pgTable(
   "product",
@@ -473,6 +524,8 @@ export type Feedback = typeof feedback.$inferSelect;
 export type FeedbackType = (typeof feedbackType.enumValues)[number];
 export type FeedbackStatus = (typeof feedbackStatus.enumValues)[number];
 export type FeedbackHistory = typeof feedbackHistory.$inferSelect;
+export type Subscription = typeof subscription.$inferSelect;
+export type SubscriptionStatus = (typeof subscriptionStatus.enumValues)[number];
 
 export const schema = {
   user,
@@ -482,6 +535,7 @@ export const schema = {
   organization,
   member,
   invitation,
+  subscription,
   product,
   productLike,
   tag,
@@ -489,9 +543,11 @@ export const schema = {
   order,
   orderItem,
   feedback,
+  userRelations,
   organizationRelations,
   memberRelations,
   invitationRelations,
+  subscriptionRelations,
   productRelations,
   productLikeRelations,
   tagRelations,

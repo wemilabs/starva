@@ -64,7 +64,7 @@ export function BusinessCard({ business }: { business: Organization }) {
         <div className="flex items-start gap-4">
           <Avatar className="size-14 ring-2 ring-border transition-all group-hover:ring-primary/50">
             <AvatarImage alt={business.name} src={business.logo ?? ""} />
-            <AvatarFallback className="bg-gradient-to-br from-primary to-red-500 text-white text-base font-semibold">
+            <AvatarFallback className="bg-linear-to-br from-primary to-red-500 text-white text-base font-semibold">
               {extractInitials(business.name)}
             </AvatarFallback>
           </Avatar>

@@ -66,7 +66,7 @@ export function useUserSubscription() {
     isCancelled,
     isExpired,
     daysUntilTrialEnd,
-    planName: subscription?.planName || "Free",
+    planName: subscription?.planName || null,
     refetch,
   };
 }

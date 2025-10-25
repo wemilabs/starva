@@ -252,4 +252,7 @@ MIT
 
 ## TODO
 
-- [ ] Add support for multiple languages, currencies, payment gateways, and delivery methods
+- [ ] Multiple languages, currencies
+- [ ] Payment gateways
+- [ ] Delivery methods
+

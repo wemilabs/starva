@@ -15,7 +15,7 @@ import { Spinner } from "../ui/spinner";
 interface PricingCardProps {
   name: string;
   description: string;
-  price: number;
+  price: number | null;
   originalPrice: number | null;
   period: string;
   features: readonly string[];
@@ -39,7 +39,7 @@ export function PricingCard({
   isLoading = false,
   isCurrentPlan = false,
 }: PricingCardProps) {
-  const discountPercentage = originalPrice
+  const discountPercentage = originalPrice && price
     ? Math.round(((originalPrice - price) / originalPrice) * 100)
     : 0;
 
@@ -83,10 +83,10 @@ export function PricingCard({
             </p>
           )}
           <div className="flex items-baseline gap-1">
-            <span className="text-3xl md:text-4xl font-bold tracking-tight">
-              {price === 0 ? "Free" : formatPriceInRWF(price)}
+            <span className="text-3xl md:text-3xl lg:text-4xl font-bold tracking-tight">
+              {price === null ? "Custom"  : formatPriceInRWF(price)}
             </span>
-            {price > 0 && (
+            {price !== null && price > 0 && (
               <span className="text-muted-foreground">/{period}</span>
             )}
           </div>

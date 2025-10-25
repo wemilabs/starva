@@ -1,9 +1,9 @@
 "use client";
 
 import { PricingCard } from "@/components/pricing/pricing-card";
-import { PRICING_PLANS } from "@/lib/constants";
-import { useSession } from "@/lib/auth-client";
 import { useUserSubscription } from "@/hooks/use-user-subscription";
+import { useSession } from "@/lib/auth-client";
+import { PRICING_PLANS } from "@/lib/constants";
 import { createSubscription, updateSubscription } from "@/server/subscription";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -26,11 +26,6 @@ export default function PricingPage() {
       return;
     }
 
-    if (planName === "Free") {
-      toast.info("You're already on the Free plan");
-      return;
-    }
-
     if (planName === currentPlanName) {
       toast.info("You're already on this plan");
       return;
@@ -39,7 +34,7 @@ export default function PricingPage() {
     setLoadingPlan(planName);
 
     try {
-      if (currentPlanName && currentPlanName !== "Free") {
+      if (currentPlanName) {
         await updateSubscription(session.user.id, planName);
         toast.success(`Successfully switched to ${planName} plan!`);
       } else {
@@ -48,10 +43,7 @@ export default function PricingPage() {
           `Welcome to ${planName} plan! Your 14-day free trial has started.`,
         );
       }
-
-      // Refetch subscription to update UI
-      await refetch();
-      router.refresh();
+      refetch();
     } catch (error) {
       console.error("Subscription error:", error);
       toast.error("Failed to update subscription. Please try again.");
@@ -72,7 +64,7 @@ export default function PricingPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-14">
+      <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-8 md:gap-6 mt-14">
         {PRICING_PLANS.map((plan) => (
           <PricingCard
             key={plan.name}

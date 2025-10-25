@@ -141,6 +141,8 @@ export const subscription = pgTable(
     endDate: timestamp("end_date"),
     trialEndsAt: timestamp("trial_ends_at"),
     cancelledAt: timestamp("cancelled_at"),
+    orderLimit: integer("order_limit"),
+    ordersUsedThisMonth: integer("orders_used_this_month").default(0).notNull(),
     createdAt: timestamp("created_at")
       .$defaultFn(() => new Date())
       .notNull(),
@@ -151,6 +153,32 @@ export const subscription = pgTable(
   (t) => [
     index("subscription_user_idx").on(t.userId),
     index("subscription_status_idx").on(t.status),
+  ],
+);
+
+export const orderUsageTracking = pgTable(
+  "order_usage_tracking",
+  {
+    id: text("id")
+      .$defaultFn(() => randomUUID())
+      .primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    monthYear: text("month_year").notNull(),
+    orderCount: integer("order_count").default(0).notNull(),
+    limit: integer("limit").notNull(),
+    createdAt: timestamp("created_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (t) => [
+    index("order_usage_org_idx").on(t.organizationId),
+    index("order_usage_month_idx").on(t.monthYear),
+    unique("order_usage_org_month").on(t.organizationId, t.monthYear),
   ],
 );
 
@@ -166,6 +194,7 @@ export const organizationRelations = relations(organization, ({ many }) => ({
   invitations: many(invitation),
   products: many(product),
   orders: many(order),
+  orderUsageTracking: many(orderUsageTracking),
 }));
 
 export const subscriptionRelations = relations(subscription, ({ one }) => ({
@@ -174,6 +203,16 @@ export const subscriptionRelations = relations(subscription, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+export const orderUsageTrackingRelations = relations(
+  orderUsageTracking,
+  ({ one }) => ({
+    organization: one(organization, {
+      fields: [orderUsageTracking.organizationId],
+      references: [organization.id],
+    }),
+  }),
+);
 
 export const member = pgTable("member", {
   id: text("id").primaryKey(),
@@ -526,6 +565,7 @@ export type FeedbackStatus = (typeof feedbackStatus.enumValues)[number];
 export type FeedbackHistory = typeof feedbackHistory.$inferSelect;
 export type Subscription = typeof subscription.$inferSelect;
 export type SubscriptionStatus = (typeof subscriptionStatus.enumValues)[number];
+export type OrderUsageTracking = typeof orderUsageTracking.$inferSelect;
 
 export const schema = {
   user,
@@ -536,6 +576,7 @@ export const schema = {
   member,
   invitation,
   subscription,
+  orderUsageTracking,
   product,
   productLike,
   tag,
@@ -548,6 +589,7 @@ export const schema = {
   memberRelations,
   invitationRelations,
   subscriptionRelations,
+  orderUsageTrackingRelations,
   productRelations,
   productLikeRelations,
   tagRelations,

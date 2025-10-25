@@ -2,9 +2,9 @@
 
 import { db } from "@/db/drizzle";
 import { subscription } from "@/db/schema";
-import { eq, desc } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 import { PRICING_PLANS } from "@/lib/constants";
+import { desc, eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 
 export async function getUserSubscription(userId: string) {
   const [currentSubscription] = await db
@@ -108,18 +108,18 @@ export async function checkOrganizationLimit(userId: string) {
 
   if (!userSub || userSub.status === "cancelled" || userSub.status === "expired") {
     return {
-      canCreate: totalOrgs < 1,
-      maxOrgs: 1,
+      canCreate: false,
+      maxOrgs: 0,
       currentOrgs: totalOrgs,
-      planName: "Free",
+      planName: null,
     };
   }
 
   const plan = userSub.plan;
   const maxOrgs =
-    plan?.name === "Free"
+    plan?.name === "Starter"
       ? 1
-      : plan?.name === "Starter"
+      : plan?.name === "Growth"
         ? 3
         : plan?.name === "Pro"
           ? 10
@@ -129,6 +129,6 @@ export async function checkOrganizationLimit(userId: string) {
     canCreate: maxOrgs === -1 || totalOrgs < maxOrgs,
     maxOrgs: maxOrgs === -1 ? "Unlimited" : maxOrgs,
     currentOrgs: totalOrgs,
-    planName: plan?.name || "Free",
+    planName: plan?.name || null,
   };
 }

@@ -4,7 +4,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 export function SkeletonProductCard() {
   return (
     <Card className="relative overflow-hidden p-0">
-      <div className="relative aspect-[16/9]">
+      <div className="relative aspect-video">
         <Skeleton className="absolute inset-0" />
       </div>
       <div className="absolute inset-0 flex flex-col justify-end p-6 space-y-4">

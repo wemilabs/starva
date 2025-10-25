@@ -1,12 +1,12 @@
-import { Suspense } from "react";
 import { CalendarClock, LogIn } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 import { AddToCartButton } from "@/components/products/add-to-cart-button";
 import { ProductLikeButton } from "@/components/products/product-like-button";
 import { Badge } from "@/components/ui/badge";
+import { ProtectedImage } from "@/components/ui/protected-image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -65,7 +65,7 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
     <div className="container mx-auto px-4 py-8 space-y-12">
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div className="aspect-square w-full overflow-hidden rounded-lg bg-muted">
-          <Image
+          <ProtectedImage
             src={
               result.imageUrl ??
               "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6d89s9BRYhvCEDrKcu2HNpfYQo7eR4FUT8wVgS"
@@ -74,7 +74,7 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
             className="h-full w-full object-cover"
             width={500}
             height={500}
-            priority
+            preload
           />
         </div>
 

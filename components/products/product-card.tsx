@@ -15,11 +15,11 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 
+import { Activity } from "react";
 import { DeleteProductForm } from "../forms/delete-product-form";
 import { EditProductForm } from "../forms/edit-product-form";
 import { AddToCartButton } from "./add-to-cart-button";
 import { ProductLikeButton } from "./product-like-button";
-import { Activity } from "react";
 
 type Props = Product & {
   organization?: {
@@ -68,7 +68,7 @@ export function ProductCard({
 
   const customCardContent = (
     <>
-      <div className="relative aspect-[16/9]">
+      <div className="relative aspect-video">
         <Image
           src={
             imageUrl ??
@@ -79,7 +79,7 @@ export function ProductCard({
           priority
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-tr from-black/70 via-black/30 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-tr from-black/70 via-black/30 to-transparent" />
       </div>
       <div className="absolute inset-0 flex flex-col justify-end p-6 text-white">
         <div className="mb-2 flex items-center justify-between gap-2">
@@ -161,6 +161,7 @@ export function ProductCard({
               fill
               priority
               className="object-cover rounded-t-lg md:rounded-l-lg md:rounded-r-none"
+              onContextMenu={(e) => e.preventDefault()}
             />
           </div>
           <div className="flex flex-1 flex-col gap-5 p-6 md:py-8">

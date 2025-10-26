@@ -1,16 +1,16 @@
-import { ourFileRouter } from "@/app/api/uploadthing/core";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Header } from "@/components/header";
+import { HeaderSkeleton } from "@/components/header-skeleton";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
+import { UploadThingProvider } from "@/components/uploadthing-provider";
 import { BreadcrumbsProvider } from "@/contexts/breadcrumbs-context";
-import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { extractRouterConfig } from "uploadthing/server";
+import { Suspense } from "react";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -82,8 +82,6 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamic = "force-dynamic";
-
 const baseCrumbs = [{ label: "Home", href: "/" }];
 
 export default async function RootLayout({
@@ -98,7 +96,6 @@ export default async function RootLayout({
       <body
         className={`${geistSans.className} ${geistMono.variable} antialiased`}
       >
-        <NextSSRPlugin routerConfig={extractRouterConfig(ourFileRouter)} />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -110,9 +107,16 @@ export default async function RootLayout({
             <SidebarProvider>
               <AppSidebar />
               <SidebarInset>
-                <Header baseCrumbs={baseCrumbs} />
+                <Suspense fallback={<HeaderSkeleton  />}>
+                  <Header baseCrumbs={baseCrumbs} />
+                </Suspense>
                 <main className="flex flex-1 flex-col gap-4 p-4 pt-0">
-                  <NuqsAdapter>{children}</NuqsAdapter>
+                  <NuqsAdapter>
+                    <Suspense>
+                      <UploadThingProvider />
+                    </Suspense>
+                    {children}
+                  </NuqsAdapter>
                 </main>
               </SidebarInset>
             </SidebarProvider>

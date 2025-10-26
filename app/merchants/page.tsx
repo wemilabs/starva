@@ -1,5 +1,5 @@
-import { Suspense } from "react";
 import { Building2 } from "lucide-react";
+import { Suspense } from "react";
 
 import { BusinessCatalogueSection } from "@/components/businesses/business-catalogue section";
 import { SkeletonBusinessCard } from "@/components/businesses/skeleton-business-card";
@@ -16,6 +16,7 @@ import {
 import { getAllBusinesses } from "@/data/businesses";
 
 async function MerchantsList() {
+  "use cache";
   const merchants = await getAllBusinesses();
 
   if (!merchants || merchants.length === 0) {
@@ -52,11 +53,15 @@ export default async function MerchantsPage() {
         </div>
       </div>
 
-      <SearchForm
-        formProps={{ className: "w-full md:w-[380px]" }}
-        inputFieldOnlyClassName="h-9"
-        placeholder="eg. prestige restaurant, a la baguee, etc."
-      />
+      <Suspense fallback={
+        <div className="w-full md:w-[380px] h-9 rounded-lg border shadow bg-background animate-pulse" />
+      }>
+        <SearchForm
+          formProps={{ className: "w-full md:w-[380px]" }}
+          inputFieldOnlyClassName="h-9"
+          placeholder="eg. prestige restaurant, a la baguee, etc."
+        />
+      </Suspense>
 
       <Suspense
         fallback={

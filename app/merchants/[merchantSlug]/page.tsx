@@ -24,6 +24,7 @@ async function ProductsList({
   merchantId: string;
   defaultStatus?: string;
 }) {
+  "use cache";
   const productsPerMerchant =
     await getProductsPerBusinessWithoutAuth(merchantId);
 
@@ -46,10 +47,8 @@ async function ProductsList({
   );
 }
 
-export default async function MerchantSlugPage(
-  props: PageProps<"/merchants/[merchantSlug]">,
-) {
-  const { merchantSlug } = await props.params;
+async function MerchantContent({ params }: { params: Promise<{ merchantSlug: string }> }) {
+  const { merchantSlug } = await params;
 
   const merchant = await getBusinessBySlug(merchantSlug);
   if (!merchant) return notFound();
@@ -163,12 +162,16 @@ export default async function MerchantSlugPage(
       )}
 
       <section className="grid gap-x-6">
-        <ProductCatalogueControls
-          businessId={merchant.id}
-          businessSlug={resolvedSlug}
-          timetable={timetable}
-          defaultStatus="in_stock"
-        />
+        <Suspense fallback={
+          <div className="h-20 rounded-lg border bg-background animate-pulse mb-6" />
+        }>
+          <ProductCatalogueControls
+            businessId={merchant.id}
+            businessSlug={resolvedSlug}
+            timetable={timetable}
+            defaultStatus="in_stock"
+          />
+        </Suspense>
         <Suspense
           fallback={
             <>
@@ -190,5 +193,30 @@ export default async function MerchantSlugPage(
         </Suspense>
       </section>
     </div>
+  );
+}
+
+export default async function MerchantSlugPage(
+  props: PageProps<"/merchants/[merchantSlug]">,
+) {
+  return (
+    <Suspense
+      fallback={
+        <div className="space-y-4">
+          <div className="relative overflow-hidden rounded-xl border">
+            <div className="h-64 bg-linear-to-br from-orange-500 via-amber-500 to-yellow-500 animate-pulse" />
+          </div>
+          <div className="text-muted-foreground text-sm text-center py-10 border border-dashed border-muted-foreground/50 rounded-lg max-w-2xl mx-auto">
+            Loading merchant details...
+          </div>
+          <div className="h-20 rounded-lg border bg-background animate-pulse mb-6" />
+          <div className="col-span-full text-sm text-pretty text-muted-foreground mb-4">
+            Loading products...
+          </div>
+        </div>
+      }
+    >
+      <MerchantContent params={props.params} />
+    </Suspense>
   );
 }

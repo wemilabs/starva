@@ -1,9 +1,10 @@
 import { db } from "@/db/drizzle";
 import { feedback, user } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
+import { cache } from "react";
 import "server-only";
 
-export async function getFeedbackByUser(userId: string) {
+export const getFeedbackByUser=cache(async(userId: string) => {
   return await db
     .select({
       id: feedback.id,
@@ -18,9 +19,10 @@ export async function getFeedbackByUser(userId: string) {
     .from(feedback)
     .where(eq(feedback.userId, userId))
     .orderBy(desc(feedback.createdAt));
-}
+})
 
 export async function getAllFeedback() {
+  "use cache";
   return await db
     .select({
       id: feedback.id,
@@ -43,6 +45,7 @@ export async function getAllFeedback() {
 }
 
 export async function getFeedbackById(id: string) {
+  "use cache";
   const result = await db
     .select()
     .from(feedback)

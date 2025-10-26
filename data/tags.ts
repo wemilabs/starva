@@ -3,9 +3,10 @@ import { cache } from "react";
 import "server-only";
 
 import { db } from "@/db/drizzle";
-import { tag, productTag, product } from "@/db/schema";
+import { product, productTag, tag } from "@/db/schema";
 
 export const getAllTags = cache(async () => {
+  "use cache";
   try {
     const tags = await db
       .select({
@@ -28,6 +29,7 @@ export const getAllTags = cache(async () => {
 });
 
 export const getProductTags = cache(async (productId: string) => {
+  "use cache";
   try {
     const tags = await db
       .select({
@@ -49,6 +51,7 @@ export const getProductTags = cache(async (productId: string) => {
 });
 
 export const getAllTagsWithProducts = cache(async () => {
+  "use cache";
   try {
     const tags = await db
       .select({

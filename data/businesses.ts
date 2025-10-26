@@ -1,11 +1,12 @@
-import "server-only";
-import { eq, inArray } from "drizzle-orm";
-import { cache } from "react";
 import { db } from "@/db/drizzle";
 import { member, organization } from "@/db/schema";
 import { getCurrentUser } from "@/server/users";
+import { eq, inArray } from "drizzle-orm";
+import { cache } from "react";
+import "server-only";
 
 export const getAllBusinesses = cache(async () => {
+  "use cache";
   try {
     const businesses = await db.query.organization.findMany({
       orderBy: (organization, { desc }) => [desc(organization.createdAt)],
@@ -53,6 +54,7 @@ export async function getActiveBusiness(userId: string) {
 }
 
 export async function getBusinessBySlug(slug: string) {
+  "use cache";
   try {
     const businessBySlug = await db.query.organization.findFirst({
       where: eq(organization.slug, slug),

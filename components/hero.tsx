@@ -25,6 +25,7 @@ const transitionVariants = {
 };
 
 export async function Hero() {
+  "use cache";
   return (
     <section className="overflow-hidden [--color-primary-foreground:var(--color-white)] [--color-primary:var(--color-orange-600)] rounded-lg">
       <div className="relative mx-auto max-w-full px-6 py-20 lg:pt-30">

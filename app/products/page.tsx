@@ -1,18 +1,21 @@
-import { Suspense } from "react";
 import { FilteredProducts } from "@/components/products/filtered-products";
 import { ProductFilters } from "@/components/products/product-filters";
 import { SkeletonProductCard } from "@/components/products/skeleton-product-card";
-import { getAllTagsWithProducts } from "@/data/tags";
 import { getInStockProducts } from "@/data/products";
+import { getAllTagsWithProducts } from "@/data/tags";
+import { Suspense } from "react";
 
 async function ProductsList() {
   const products = await getInStockProducts();
   return <FilteredProducts data={products} />;
 }
 
-export default async function ProductsPage() {
+async function ProductFiltersWrapper() {
   const availableTags = await getAllTagsWithProducts();
+  return <ProductFilters availableTags={availableTags} />;
+}
 
+export default async function ProductsPage() {
   return (
     <div className="container mx-auto max-w-7xl py-7 space-y-7">
       <div className="mb-8">
@@ -23,7 +26,11 @@ export default async function ProductsPage() {
       </div>
 
       <div className="mb-8">
-        <ProductFilters availableTags={availableTags} />
+        <Suspense fallback={
+          <div className="h-32 rounded-lg border bg-background animate-pulse" />
+        }>
+          <ProductFiltersWrapper />
+        </Suspense>
       </div>
 
       <div className="grid grid-cols-1 justify-center gap-4 sm:grid-cols-2 lg:grid-cols-3">

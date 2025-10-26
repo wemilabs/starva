@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogTitle,
   DialogTrigger,
@@ -203,12 +204,14 @@ export function ProductCard({
                     imageUrl,
                   }}
                 />
-                <Link
-                  href={`/products/${href}`}
-                  className="text-center text-sm text-muted-foreground underline-offset-4 hover:underline"
-                >
-                  View product details
-                </Link>
+                <DialogClose asChild>
+                  <Link
+                    href={`/products/${href}`}
+                    className="text-center text-sm text-muted-foreground underline-offset-4 hover:underline"
+                  >
+                    View product details
+                  </Link>
+                </DialogClose>
               </div>
             </Activity>
           </div>

@@ -1,6 +1,6 @@
-import { Suspense } from "react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { Suspense } from "react";
 
 import { EditableBusinessDescription } from "@/components/forms/editable-business-desc";
 import { EditableBusinessName } from "@/components/forms/editable-business-name";
@@ -33,10 +33,8 @@ async function ProductsList({ businessId }: { businessId: string }) {
   return <ProductCatalogueSection data={productsPerBusiness} />;
 }
 
-export default async function BusinessSlugPage(
-  props: PageProps<"/businesses/[businessSlug]">,
-) {
-  const { businessSlug } = await props.params;
+async function BusinessContent({ params }: { params: Promise<{ businessSlug: string }> }) {
+  const { businessSlug } = await params;
 
   const business = await getBusinessBySlug(businessSlug);
   if (!business) return notFound();
@@ -95,11 +93,18 @@ export default async function BusinessSlugPage(
       </section>
 
       <section className="grid gap-6 mt-10">
-        <ProductCatalogueControls
-          businessId={business.id}
-          businessSlug={resolvedSlug}
-          timetable={metadata.timetable}
-        />
+        <Suspense
+          fallback={
+            <div className="h-20 rounded-lg border bg-background animate-pulse mb-6" />
+          }
+        >
+          <ProductCatalogueControls
+            businessId={business.id}
+            businessSlug={resolvedSlug}
+            timetable={metadata.timetable}
+            defaultStatus="all"
+          />
+        </Suspense>
         <Suspense
           fallback={
             <>
@@ -121,5 +126,29 @@ export default async function BusinessSlugPage(
         </Suspense>
       </section>
     </div>
+  );
+}
+
+export default async function BusinessSlugPage(
+  props: PageProps<"/businesses/[businessSlug]">,
+) {
+  return (
+    <Suspense
+      fallback={
+        <div className="space-y-8">
+          <div className="relative overflow-hidden rounded-xl border">
+            <div className="h-64 bg-linear-to-br from-orange-500 via-amber-500 to-yellow-500 animate-pulse" />
+          </div>
+          <div className="grid gap-6 mt-10">
+            <div className="h-20 rounded-lg border bg-background animate-pulse mb-6" />
+            <div className="col-span-full text-sm text-pretty text-muted-foreground mb-4">
+              Loading business details...
+            </div>
+          </div>
+        </div>
+      }
+    >
+      <BusinessContent params={props.params} />
+    </Suspense>
   );
 }

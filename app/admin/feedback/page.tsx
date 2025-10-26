@@ -1,14 +1,16 @@
 import { FeedbackList } from "@/components/admin/feedback-list";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getAllFeedback } from "@/data/feedback";
+import { Suspense } from "react";
 
-export default async function AdminFeedbackPage() {
+async function AdminFeedbackContent() {
 	const allFeedback = await getAllFeedback();
 
 	const stats = {
@@ -47,9 +49,53 @@ export default async function AdminFeedbackPage() {
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<FeedbackList feedback={allFeedback} />
+					<Suspense fallback={
+						<div className="text-center text-muted-foreground py-8">Loading feedback...</div>
+					}>
+						<FeedbackList feedback={allFeedback} />
+					</Suspense>
 				</CardContent>
 			</Card>
 		</div>
+	);
+}
+
+function AdminFeedbackSkeleton() {
+	return (
+		<div className="container mx-auto max-w-7xl py-7 space-y-7">
+			<div>
+				<Skeleton className="h-8 w-48" />
+				<Skeleton className="mt-2 h-4 w-64" />
+			</div>
+
+			<div className="grid gap-4 md:grid-cols-5">
+				{[1, 2, 3, 4, 5].map((i) => (
+					<Card key={i}>
+						<CardHeader className="pb-2">
+							<Skeleton className="h-4 w-16" />
+							<Skeleton className="h-8 w-8" />
+						</CardHeader>
+					</Card>
+				))}
+			</div>
+
+			<Card>
+				<CardHeader>
+					<Skeleton className="h-6 w-32" />
+					<Skeleton className="h-4 w-48" />
+				</CardHeader>
+				<CardContent>
+					<div className="text-center text-muted-foreground py-8">Loading feedback...</div>
+				</CardContent>
+			</Card>
+		</div>
+	);
+}
+
+export default async function AdminFeedbackPage() {
+	return (
+		<Suspense fallback={<AdminFeedbackSkeleton />}>
+			<AdminFeedbackContent />
+		</Suspense>
 	);
 }

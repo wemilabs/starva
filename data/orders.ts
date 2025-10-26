@@ -1,11 +1,12 @@
 import { db } from "@/db/drizzle";
 import { type OrderStatus, order } from "@/db/schema";
 import { and, desc, eq, inArray, lt, or, sql } from "drizzle-orm";
+import { cache } from "react";
 import "server-only";
 
 async function calculateMerchantOrderNumberPerOrg(
   organizationId: string,
-  orderCreatedAt: Date,
+  orderCreatedAt: Date
 ): Promise<number> {
   const result = await db
     .select({ count: sql<number>`count(*)::int` })
@@ -15,9 +16,9 @@ async function calculateMerchantOrderNumberPerOrg(
         eq(order.organizationId, organizationId),
         or(
           lt(order.createdAt, orderCreatedAt),
-          and(eq(order.createdAt, orderCreatedAt)),
-        ),
-      ),
+          and(eq(order.createdAt, orderCreatedAt))
+        )
+      )
     );
   return result[0]?.count || 0;
 }
@@ -25,7 +26,7 @@ async function calculateMerchantOrderNumberPerOrg(
 async function calculateCustomerOrderNumberPerUserPerOrg(
   userId: string,
   organizationId: string,
-  orderCreatedAt: Date,
+  orderCreatedAt: Date
 ): Promise<number> {
   const result = await db
     .select({ count: sql<number>`count(*)::int` })
@@ -36,14 +37,14 @@ async function calculateCustomerOrderNumberPerUserPerOrg(
         eq(order.organizationId, organizationId),
         or(
           lt(order.createdAt, orderCreatedAt),
-          and(eq(order.createdAt, orderCreatedAt)),
-        ),
-      ),
+          and(eq(order.createdAt, orderCreatedAt))
+        )
+      )
     );
   return result[0]?.count || 0;
 }
 
-export async function getOrdersByOrganization(organizationId: string) {
+export const getOrdersByOrganization = cache(async (organizationId: string) => {
   const orders = await db.query.order.findMany({
     where: eq(order.organizationId, organizationId),
     with: {
@@ -75,19 +76,19 @@ export async function getOrdersByOrganization(organizationId: string) {
     orders.map(async (ord) => {
       const merchantOrderNumber = await calculateMerchantOrderNumberPerOrg(
         organizationId,
-        ord.createdAt,
+        ord.createdAt
       );
       return {
         ...ord,
         merchantOrderNumber,
       };
-    }),
+    })
   );
 
   return ordersWithNumbers;
-}
+});
 
-export async function getOrderById(orderId: string) {
+export const getOrderById = cache(async (orderId: string) => {
   const orderData = await db.query.order.findFirst({
     where: eq(order.id, orderId),
     with: {
@@ -128,12 +129,12 @@ export async function getOrderById(orderId: string) {
   const [merchantOrderNumber, customerOrderNumber] = await Promise.all([
     calculateMerchantOrderNumberPerOrg(
       orderData.organizationId,
-      orderData.createdAt,
+      orderData.createdAt
     ),
     calculateCustomerOrderNumberPerUserPerOrg(
       orderData.userId,
       orderData.organizationId,
-      orderData.createdAt,
+      orderData.createdAt
     ),
   ]);
 
@@ -142,9 +143,9 @@ export async function getOrderById(orderId: string) {
     merchantOrderNumber,
     customerOrderNumber,
   };
-}
+});
 
-export async function getOrdersByUser(userId: string) {
+export const getOrdersByUser = cache(async (userId: string) => {
   const orders = await db.query.order.findMany({
     where: eq(order.userId, userId),
     with: {
@@ -178,71 +179,70 @@ export async function getOrdersByUser(userId: string) {
         await calculateCustomerOrderNumberPerUserPerOrg(
           userId,
           ord.organizationId,
-          ord.createdAt,
+          ord.createdAt
         );
       return {
         ...ord,
         customerOrderNumber,
       };
-    }),
+    })
   );
 
   return ordersWithNumbers;
-}
+});
 
-export async function getOrdersByStatus(
-  organizationId: string,
-  status: OrderStatus | OrderStatus[],
-) {
-  const statuses = Array.isArray(status) ? status : [status];
+export const getOrdersByStatus = cache(
+  async (organizationId: string, status: OrderStatus | OrderStatus[]) => {
+    const statuses = Array.isArray(status) ? status : [status];
 
-  const orders = await db.query.order.findMany({
-    where: and(
-      eq(order.organizationId, organizationId),
-      inArray(order.status, statuses),
-    ),
-    with: {
-      user: {
-        columns: {
-          id: true,
-          name: true,
-          email: true,
-          image: true,
+    const orders = await db.query.order.findMany({
+      where: and(
+        eq(order.organizationId, organizationId),
+        inArray(order.status, statuses)
+      ),
+      with: {
+        user: {
+          columns: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+          },
         },
-      },
-      orderItems: {
-        with: {
-          product: {
-            columns: {
-              id: true,
-              name: true,
-              imageUrl: true,
-              price: true,
+        orderItems: {
+          with: {
+            product: {
+              columns: {
+                id: true,
+                name: true,
+                imageUrl: true,
+                price: true,
+              },
             },
           },
         },
       },
-    },
-    orderBy: [desc(order.createdAt)],
-  });
+      orderBy: [desc(order.createdAt)],
+    });
 
-  const ordersWithNumbers = await Promise.all(
-    orders.map(async (ord) => {
-      const merchantOrderNumber = await calculateMerchantOrderNumberPerOrg(
-        organizationId,
-        ord.createdAt,
-      );
-      return {
-        ...ord,
-        merchantOrderNumber,
-      };
-    }),
-  );
+    const ordersWithNumbers = await Promise.all(
+      orders.map(async (ord) => {
+        const merchantOrderNumber = await calculateMerchantOrderNumberPerOrg(
+          organizationId,
+          ord.createdAt
+        );
+        return {
+          ...ord,
+          merchantOrderNumber,
+        };
+      })
+    );
 
-  return ordersWithNumbers;
-}
+    return ordersWithNumbers;
+  }
+);
 
-export async function getOrderStats(organizationId: string) {
+export const getOrderStats = cache(async (organizationId: string) => {
   const stats = await db
     .select({
       status: order.status,
@@ -254,49 +254,48 @@ export async function getOrderStats(organizationId: string) {
     .groupBy(order.status);
 
   return stats;
-}
+});
 
-export async function getRecentOrders(
-  organizationId: string,
-  limit: number = 10,
-) {
-  const orders = await db.query.order.findMany({
-    where: eq(order.organizationId, organizationId),
-    with: {
-      user: {
-        columns: {
-          id: true,
-          name: true,
-          email: true,
+export const getRecentOrders = cache(
+  async (organizationId: string, limit: number = 10) => {
+    const orders = await db.query.order.findMany({
+      where: eq(order.organizationId, organizationId),
+      with: {
+        user: {
+          columns: {
+            id: true,
+            name: true,
+            email: true,
+          },
         },
-      },
-      orderItems: {
-        with: {
-          product: {
-            columns: {
-              id: true,
-              name: true,
+        orderItems: {
+          with: {
+            product: {
+              columns: {
+                id: true,
+                name: true,
+              },
             },
           },
         },
       },
-    },
-    orderBy: [desc(order.createdAt)],
-    limit,
-  });
+      orderBy: [desc(order.createdAt)],
+      limit,
+    });
 
-  const ordersWithNumbers = await Promise.all(
-    orders.map(async (ord) => {
-      const merchantOrderNumber = await calculateMerchantOrderNumberPerOrg(
-        organizationId,
-        ord.createdAt,
-      );
-      return {
-        ...ord,
-        merchantOrderNumber,
-      };
-    }),
-  );
+    const ordersWithNumbers = await Promise.all(
+      orders.map(async (ord) => {
+        const merchantOrderNumber = await calculateMerchantOrderNumberPerOrg(
+          organizationId,
+          ord.createdAt
+        );
+        return {
+          ...ord,
+          merchantOrderNumber,
+        };
+      })
+    );
 
-  return ordersWithNumbers;
-}
+    return ordersWithNumbers;
+  }
+);

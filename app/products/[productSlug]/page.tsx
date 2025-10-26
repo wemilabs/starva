@@ -177,14 +177,17 @@ function ProductSlugSkeleton() {
   );
 }
 
+async function ProductContent({ params }: { params: Promise<{ productSlug: string }> }) {
+  const { productSlug } = await params;
+  return <ProductDisplay productSlug={productSlug} />;
+}
+
 export default async function ProductSlugPage(
   props: PageProps<"/products/[productSlug]">,
 ) {
-  const { productSlug } = await props.params;
-
   return (
     <Suspense fallback={<ProductSlugSkeleton />}>
-      <ProductDisplay productSlug={productSlug} />
+      <ProductContent params={props.params} />
     </Suspense>
   );
 }

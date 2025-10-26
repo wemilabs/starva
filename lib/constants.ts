@@ -90,7 +90,20 @@ export const feedbackStatusOptions: {
   { value: "rejected", label: "Rejected" },
 ];
 
-export const PRICING_PLANS = [
+export type PricingPlan = {
+  name: string;
+  description: string;
+  price: number | null;
+  originalPrice: number | null;
+  period: string;
+  orderLimit: number | null;
+  maxOrgs: number | null;
+  features: readonly string[];
+  highlighted: boolean;
+  cta: string;
+};
+
+export const PRICING_PLANS: PricingPlan[] = [
   {
     name: "Starter",
     description: "Perfect for food stalls & small kitchens",

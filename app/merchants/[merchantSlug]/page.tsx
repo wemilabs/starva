@@ -1,26 +1,31 @@
-import { Suspense } from "react";
+import { Clock } from "lucide-react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Clock } from "lucide-react";
+import { Suspense } from "react";
 
 import { ProductCatalogueControls } from "@/components/products/product-catalogue-controls";
 import { ProductCatalogueSection } from "@/components/products/product-catalogue-section";
 import { SkeletonProductCard } from "@/components/products/skeleton-product-card";
 import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
 } from "@/components/ui/accordion";
 import { getBusinessBySlug } from "@/data/businesses";
 import { getProductsPerBusinessWithoutAuth } from "@/data/products";
 import { DAYS, today } from "@/lib/constants";
 import { formatTime } from "@/lib/utils";
 
-async function ProductsList({ merchantId }: { merchantId: string }) {
-  const productsPerMerchant = await getProductsPerBusinessWithoutAuth(
-    merchantId,
-  );
+async function ProductsList({
+  merchantId,
+  defaultStatus,
+}: {
+  merchantId: string;
+  defaultStatus?: string;
+}) {
+  const productsPerMerchant =
+    await getProductsPerBusinessWithoutAuth(merchantId);
 
   if (!Array.isArray(productsPerMerchant) || productsPerMerchant.length === 0) {
     return (
@@ -33,7 +38,12 @@ async function ProductsList({ merchantId }: { merchantId: string }) {
     );
   }
 
-  return <ProductCatalogueSection data={productsPerMerchant} />;
+  return (
+    <ProductCatalogueSection
+      data={productsPerMerchant}
+      defaultStatus={defaultStatus}
+    />
+  );
 }
 
 export default async function MerchantSlugPage(
@@ -69,7 +79,7 @@ export default async function MerchantSlugPage(
               priority
             />
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500" />
+            <div className="absolute inset-0 bg-linear-to-br from-orange-500 via-amber-500 to-yellow-500" />
           )}
         </div>
         <div className="absolute inset-0 bg-black/50" />
@@ -176,7 +186,7 @@ export default async function MerchantSlugPage(
             </>
           }
         >
-          <ProductsList merchantId={merchant.id} />
+          <ProductsList merchantId={merchant.id} defaultStatus="in_stock" />
         </Suspense>
       </section>
     </div>

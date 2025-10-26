@@ -18,15 +18,19 @@ type ProductWithOrg = Product & {
 
 type FilteredProductsProps = {
   data: ProductWithOrg[];
+  defaultStatus?: string;
 };
 
-export function FilteredProducts({ data }: FilteredProductsProps) {
+export function FilteredProducts({
+  data,
+  defaultStatus = "all",
+}: FilteredProductsProps) {
   const [{ search, tags, sort, status }] = useQueryStates(
     {
       search: parseAsString.withDefault(""),
       tags: parseAsArrayOf(parseAsString).withDefault([]),
       sort: parseAsString.withDefault("newest"),
-      status: parseAsString.withDefault("all"),
+      status: parseAsString.withDefault(defaultStatus),
     },
     { shallow: false },
   );
@@ -41,9 +45,7 @@ export function FilteredProducts({ data }: FilteredProductsProps) {
       product.organization?.name.toLowerCase().includes(search.toLowerCase());
 
     const matchesStatus =
-      !status ||
-      status === "all" ||
-      product.status === status;
+      !status || status === "all" || product.status === status;
 
     const matchesTags =
       tags.length === 0 ||

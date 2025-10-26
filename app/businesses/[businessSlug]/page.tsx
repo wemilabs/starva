@@ -12,10 +12,10 @@ import { SkeletonProductCard } from "@/components/products/skeleton-product-card
 import { getBusinessBySlug } from "@/data/businesses";
 import { getProductsPerBusiness } from "@/data/products";
 import {
-    updateBusinessDescription,
-    updateBusinessLogo,
-    updateBusinessName,
-    updateBusinessPhone,
+  updateBusinessDescription,
+  updateBusinessLogo,
+  updateBusinessName,
+  updateBusinessPhone,
 } from "@/server/businesses";
 
 async function ProductsList({ businessId }: { businessId: string }) {
@@ -24,12 +24,8 @@ async function ProductsList({ businessId }: { businessId: string }) {
   if ("message" in productsPerBusiness) {
     return (
       <div className="text-center py-10">
-        <h2 className="text-lg font-semibold mb-2">
-          Unable to load products
-        </h2>
-        <p className="text-muted-foreground">
-          {productsPerBusiness.message}
-        </p>
+        <h2 className="text-lg font-semibold mb-2">Unable to load products</h2>
+        <p className="text-muted-foreground">{productsPerBusiness.message}</p>
       </div>
     );
   }
@@ -64,7 +60,7 @@ export default async function BusinessSlugPage(
               priority
             />
           ) : (
-            <div className="absolute inset-0 bg-gradient-to-br from-orange-500 via-amber-500 to-yellow-500" />
+            <div className="absolute inset-0 bg-linear-to-br from-orange-500 via-amber-500 to-yellow-500" />
           )}
         </div>
         <div className="absolute inset-0 bg-black/50" />

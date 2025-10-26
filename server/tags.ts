@@ -1,11 +1,11 @@
 "use server";
 
 import { db } from "@/db/drizzle";
-import { tag, productTag } from "@/db/schema";
+import { productTag, tag } from "@/db/schema";
 import { slugify } from "@/lib/utils";
-import { and, eq } from "drizzle-orm";
-import { randomUUID } from "node:crypto";
+import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { randomUUID } from "node:crypto";
 import { z } from "zod";
 
 const createTagSchema = z.object({
@@ -16,7 +16,11 @@ const createTagSchema = z.object({
 export async function createTag(input: z.infer<typeof createTagSchema>) {
   const parsed = createTagSchema.safeParse(input);
   if (!parsed.success) {
-    return { ok: false, error: z.treeifyError(parsed.error), tag: null } as const;
+    return {
+      ok: false,
+      error: z.treeifyError(parsed.error),
+      tag: null,
+    } as const;
   }
 
   try {
@@ -103,9 +107,7 @@ export async function deleteTag(input: z.infer<typeof deleteTagSchema>) {
   try {
     const { tagId, revalidateTargetPath } = parsed.data;
 
-    await db
-      .delete(tag)
-      .where(eq(tag.id, tagId));
+    await db.delete(tag).where(eq(tag.id, tagId));
 
     revalidatePath(revalidateTargetPath);
     return { ok: true } as const;
@@ -118,10 +120,7 @@ export async function deleteTag(input: z.infer<typeof deleteTagSchema>) {
 
 export async function getAllTags() {
   try {
-    const tags = await db
-      .select()
-      .from(tag)
-      .orderBy(tag.name);
+    const tags = await db.select().from(tag).orderBy(tag.name);
 
     return { ok: true, tags } as const;
   } catch (error: unknown) {

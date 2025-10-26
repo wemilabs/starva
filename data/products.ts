@@ -5,9 +5,9 @@ import "server-only";
 import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
 import {
+  type ProductStatus,
   product,
   productLike,
-  ProductStatus,
   productTag,
   tag,
 } from "@/db/schema";
@@ -93,7 +93,7 @@ export const getProductsPerBusiness = cache(async (organizationId: string) => {
     console.error(
       "Failed to fetch products for organization:",
       organizationId,
-      error
+      error,
     );
     return { message: "Failed to fetch products for organization" };
   }
@@ -123,11 +123,11 @@ export const getProductsPerBusinessWithoutAuth = cache(
       console.error(
         "Failed to fetch products for organization:",
         organizationId,
-        error
+        error,
       );
       return { message: "Failed to fetch products for organization" };
     }
-  }
+  },
 );
 
 export const getProductBySlug = cache(async (slug: string) => {
@@ -211,7 +211,7 @@ async function getFilteredCachedProductsBase(filters: ProductFilters = {}) {
         sql`(
           ${ilike(product.name, `%${search}%`)} OR 
           ${ilike(product.description, `%${search}%`)}
-        )`
+        )`,
       );
     }
 
@@ -228,16 +228,16 @@ async function getFilteredCachedProductsBase(filters: ProductFilters = {}) {
           .where(
             inArray(
               productTag.tagId,
-              tagIds.map((t) => t.id)
-            )
+              tagIds.map((t) => t.id),
+            ),
           );
 
         if (productIds.length > 0) {
           conditions.push(
             inArray(
               product.id,
-              productIds.map((p) => p.productId)
-            )
+              productIds.map((p) => p.productId),
+            ),
           );
         } else {
           return [];
@@ -285,5 +285,5 @@ export const getFilteredProducts = cache(
 
     const likedProductIds = await getUserLikedProductIds(session.user.id);
     return products.map((p) => ({ ...p, isLiked: likedProductIds.has(p.id) }));
-  }
+  },
 );

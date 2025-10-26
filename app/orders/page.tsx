@@ -24,32 +24,24 @@ async function OrdersContent() {
 
   if (!sessionData.success || !sessionData.session) {
     return (
-      <div className="container mx-auto max-w-7xl py-7 space-y-7">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Orders</h1>
-          <p className="text-muted-foreground mt-0.5 text-sm">
-            Manage and track all your orders
-          </p>
-        </div>
-        <Empty className="min-h-[400px]">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <ScrollText className="size-6" />
-            </EmptyMedia>
-            <EmptyTitle>You are not yet signed in</EmptyTitle>
-            <EmptyDescription>
-              Sign in first in order to access this service
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
-            <Button asChild size="sm" className="w-full">
-              <Link href="/sign-in">
-                <span>Sign In</span>
-              </Link>
-            </Button>
-          </EmptyContent>
-        </Empty>
-      </div>
+      <Empty className="min-h-[400px]">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <ScrollText className="size-6" />
+          </EmptyMedia>
+          <EmptyTitle>You are not yet signed in</EmptyTitle>
+          <EmptyDescription>
+            Sign in first in order to access this service
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <Button asChild size="sm" className="w-full">
+            <Link href="/sign-in">
+              <span>Sign In</span>
+            </Link>
+          </Button>
+        </EmptyContent>
+      </Empty>
     );
   }
 

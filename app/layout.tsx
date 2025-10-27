@@ -1,4 +1,5 @@
 import { AppSidebar } from "@/components/app-sidebar";
+import { BreadcrumbManager } from "@/components/breadcrumb-manager";
 import { Header } from "@/components/header";
 import { HeaderSkeleton } from "@/components/header-skeleton";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -82,8 +83,6 @@ export const metadata: Metadata = {
   },
 };
 
-const baseCrumbs = [{ label: "Home", href: "/" }];
-
 export default async function RootLayout({
   children,
   auth,
@@ -108,9 +107,12 @@ export default async function RootLayout({
               <AppSidebar />
               <SidebarInset>
                 <Suspense fallback={<HeaderSkeleton />}>
-                  <Header baseCrumbs={baseCrumbs} />
+                  <Header />
                 </Suspense>
                 <main className="flex flex-1 flex-col gap-4 p-4 pt-0">
+                  <Suspense fallback={null}>
+                    <BreadcrumbManager />
+                  </Suspense>
                   <NuqsAdapter>
                     <Suspense>
                       <UploadThingProvider />

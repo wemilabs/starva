@@ -21,6 +21,7 @@ import { EditProductForm } from "../forms/edit-product-form";
 import { AddToCartButton } from "./add-to-cart-button";
 import { ProductLikeButton } from "./product-like-button";
 import { ProductDetailsLink } from "./product-details-link";
+import type { Route } from "next";
 
 type Props = Product & {
   organization?: {
@@ -99,7 +100,7 @@ export function ProductCard({
 
         <div className="mt-4 flex items-center justify-between">
           <Link
-            href={`/merchants/${organization?.slug}`}
+            href={`/merchants/${organization?.slug}` as Route}
             className="inline-flex items-center gap-2 rounded-full bg-black/30 ring-1 ring-white/10 backdrop-blur-sm"
           >
             <Avatar className="size-9 ring-1 ring-white/20">
@@ -186,7 +187,7 @@ export function ProductCard({
             </div>
 
             <Activity mode={href ? "visible" : "hidden"}>
-              <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-3 mt-4 mb-5">
                 <AddToCartButton
                   product={{
                     id,

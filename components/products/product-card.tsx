@@ -2,7 +2,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogTitle,
   DialogTrigger,
@@ -11,16 +10,17 @@ import type { Product } from "@/db/schema";
 import {
   cn,
   formatPriceInRWF,
+  getInitials,
   removeUnderscoreAndCapitalizeOnlyTheFirstChar,
 } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
-
 import { Activity } from "react";
 import { DeleteProductForm } from "../forms/delete-product-form";
 import { EditProductForm } from "../forms/edit-product-form";
 import { AddToCartButton } from "./add-to-cart-button";
 import { ProductLikeButton } from "./product-like-button";
+import { ProductDetailsLink } from "./product-details-link";
 
 type Props = Product & {
   organization?: {
@@ -32,17 +32,6 @@ type Props = Product & {
   href?: string;
   isLiked?: boolean;
 };
-
-function getInitials(name?: string | null) {
-  if (!name) return "";
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
 
 export function ProductCard({
   id,
@@ -151,7 +140,10 @@ export function ProductCard({
             {customCardContent}
           </Card>
         </DialogTrigger>
-        <DialogContent className="flex h-[calc(100vh-12rem)] flex-col gap-0 p-0 md:flex-row border-none md:h-[calc(100vh-25rem)]">
+        <DialogContent
+          className="flex h-[calc(100vh-12rem)] flex-col gap-0 p-0 md:flex-row border-none md:h-[calc(100vh-25rem)]"
+          aria-describedby="product details"
+        >
           <div className="relative aspect-square overflow-hidden md:aspect-auto md:w-1/2">
             <Image
               src={
@@ -204,14 +196,7 @@ export function ProductCard({
                     imageUrl,
                   }}
                 />
-                <DialogClose asChild>
-                  <Link
-                    href={`/products/${href}`}
-                    className="text-center text-sm text-muted-foreground underline-offset-4 hover:underline"
-                  >
-                    View product details
-                  </Link>
-                </DialogClose>
+                <ProductDetailsLink href={href} />
               </div>
             </Activity>
           </div>

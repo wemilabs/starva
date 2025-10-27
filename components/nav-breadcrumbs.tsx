@@ -1,7 +1,5 @@
 "use client";
 
-import { Fragment } from "react";
-import { useBreadcrumbs, type Crumb } from "@/contexts/breadcrumbs-context";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,6 +8,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { type Crumb, useBreadcrumbs } from "@/contexts/breadcrumbs-context";
+import { Fragment } from "react";
 
 export function NavBreadcrumbs({ base }: { base: Crumb[] }) {
   const { crumbs } = useBreadcrumbs();
@@ -22,9 +22,16 @@ export function NavBreadcrumbs({ base }: { base: Crumb[] }) {
           <Fragment key={`${c.label}-${idx}`}>
             <BreadcrumbItem>
               {c.href ? (
-                <BreadcrumbLink href={c.href}>{c.label}</BreadcrumbLink>
+                <BreadcrumbLink
+                  href={c.href}
+                  className="hover:underline line-clamp-1"
+                >
+                  {c.label}
+                </BreadcrumbLink>
               ) : (
-                <BreadcrumbPage>{c.label}</BreadcrumbPage>
+                <BreadcrumbPage className="line-clamp-1">
+                  {c.label}
+                </BreadcrumbPage>
               )}
             </BreadcrumbItem>
             {idx !== all.length - 1 && <BreadcrumbSeparator />}

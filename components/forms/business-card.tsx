@@ -27,7 +27,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import type { Organization } from "@/db/schema";
-import { extractInitials } from "@/lib/utils";
+import { getInitials } from "@/lib/utils";
 import { deleteBusiness } from "@/server/businesses";
 import { Spinner } from "../ui/spinner";
 
@@ -65,7 +65,7 @@ export function BusinessCard({ business }: { business: Organization }) {
           <Avatar className="size-14 ring-2 ring-border transition-all group-hover:ring-primary/50">
             <AvatarImage alt={business.name} src={business.logo ?? ""} />
             <AvatarFallback className="bg-linear-to-br from-primary to-red-500 text-white text-base font-semibold">
-              {extractInitials(business.name)}
+              {getInitials(business.name)}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">

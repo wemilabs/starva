@@ -5,13 +5,15 @@ import { COUNTRIES } from "./constants";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
-export const extractInitials = (text: string) => {
-  return text
+export const getInitials = (name?: string | null) => {
+  if (!name) return "";
+  return name
     .split(" ")
+    .filter(Boolean)
     .map((word) => word[0])
     .join("")
-    .toUpperCase()
-    .slice(0, 2);
+    .slice(0, 2)
+    .toUpperCase();
 };
 
 export const slugify = (text: string): string => {

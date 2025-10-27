@@ -17,7 +17,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { signOut } from "@/lib/auth-client";
-import { extractInitials } from "@/lib/utils";
+import { getInitials } from "@/lib/utils";
 import {
   BadgeCheck,
   Bell,
@@ -89,7 +89,7 @@ export function NavUser({
     });
   };
 
-  const userInitials = user?.name ? extractInitials(user.name) : "?";
+  const userInitials = user?.name ? getInitials(user.name) : "?";
 
   return (
     <SidebarMenu>

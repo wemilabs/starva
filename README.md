@@ -26,7 +26,7 @@ A modern, multi-tenant food ordering platform built with Next.js. Starva enables
 
 ## Tech Stack
 
-- **Framework**: [Next.js 15](https://nextjs.org) with App Router
+- **Framework**: [Next.js 16](https://nextjs.org) with App Router
 - **Language**: TypeScript
 - **Database**: PostgreSQL with [Drizzle ORM](https://orm.drizzle.team) and [Neon](https://neon.tech)
 - **Authentication**: [Better Auth](https://better-auth.com)

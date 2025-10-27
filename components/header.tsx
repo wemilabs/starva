@@ -18,11 +18,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { getBusinessesPerUser } from "@/data/businesses";
 import { verifySession } from "@/data/user-session";
 
-export async function Header({
-  baseCrumbs,
-}: {
-  baseCrumbs: { label: string; href: string }[];
-}) {
+export async function Header() {
   const { success } = await verifySession();
   const businesses = success ? await getBusinessesPerUser() : [];
 
@@ -34,7 +30,7 @@ export async function Header({
           className="mr-2 data-[orientation=vertical]:h-4"
           orientation="vertical"
         />
-        <NavBreadcrumbs base={baseCrumbs} />
+        <NavBreadcrumbs base={[]} />
       </div>
 
       <div className="flex items-center gap-2 justify-between">

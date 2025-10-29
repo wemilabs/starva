@@ -1,11 +1,12 @@
 import { PricingGrid } from "@/components/pricing/pricing-grid";
 import { PRICING_PLANS } from "@/lib/constants";
-import { cacheLife } from "next/cache";
 import type { Metadata } from "next";
+import { cacheLife } from "next/cache";
 
 export const metadata: Metadata = {
-  title: "Pricing Plans | Starva",
-  description: "Choose the plan that best fits your needs. All plans include a 14-day free trial.",
+  title: "Pricing Plans - Starva",
+  description:
+    "Choose the plan that best fits your needs. All plans include a 14-day free trial.",
 };
 
 async function PricingHeader() {

@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import { usePathname } from "next/navigation";
 import { CalendarClock, Clock } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { parseAsString, useQueryState } from "nuqs";
+import { useState } from "react";
 
 import { AddProductForm } from "@/components/forms/add-product-form";
-import { EditBusinessTimetable, type TimetableData } from "@/components/forms/edit-business-timetable";
+import {
+  EditBusinessTimetable,
+  type TimetableData,
+} from "@/components/forms/edit-business-timetable";
 import { SearchForm } from "@/components/forms/search-form";
 import {
   Dialog,
@@ -25,11 +28,13 @@ import {
 } from "@/components/ui/select";
 import { PRODUCT_STATUS_VALUES } from "@/lib/constants";
 import { removeUnderscoreAndCapitalizeOnlyTheFirstChar } from "@/lib/utils";
+import { ShareDialog } from "../share-dialog";
 import { Button } from "../ui/button";
 
 type ProductCatalogueControlsProps = {
   businessId: string;
   businessSlug: string;
+  businessName?: string;
   timetable?: TimetableData;
   defaultStatus?: string;
 };
@@ -37,6 +42,7 @@ type ProductCatalogueControlsProps = {
 export function ProductCatalogueControls({
   businessId,
   businessSlug,
+  businessName,
   timetable,
   defaultStatus = "all",
 }: ProductCatalogueControlsProps) {
@@ -44,7 +50,7 @@ export function ProductCatalogueControls({
   const pathname = usePathname();
   const [status, setStatus] = useQueryState(
     "status",
-    parseAsString.withDefault(defaultStatus)
+    parseAsString.withDefault(defaultStatus),
   );
 
   const isBusinessPage = pathname === `/businesses/${businessSlug}`;
@@ -55,7 +61,9 @@ export function ProductCatalogueControls({
         <div className="flex flex-col gap-1">
           <h2 className="text-lg font-semibold">Catalogue</h2>
           <p className="text-muted-foreground text-sm">
-            {isBusinessPage ? "Manage your products here" : "View products here"}
+            {isBusinessPage
+              ? "Manage your products here"
+              : "View products here"}
           </p>
         </div>
         {isBusinessPage ? (
@@ -81,7 +89,7 @@ export function ProductCatalogueControls({
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle className="flex items-center gap-2">
+                  <DialogTitle className="flex items-center">
                     <Clock className="size-5" />
                     Business Hours
                   </DialogTitle>
@@ -97,6 +105,13 @@ export function ProductCatalogueControls({
                 />
               </DialogContent>
             </Dialog>
+
+            <ShareDialog
+              url={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/merchants/${businessSlug}`}
+              title={`Share ${businessName}`}
+              description={`Copy the link to share your business catalogue with others`}
+              className="border-none shadow-none bg-transparent hover:bg-muted"
+            />
           </div>
         ) : null}
       </div>
@@ -109,7 +124,7 @@ export function ProductCatalogueControls({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
-              {PRODUCT_STATUS_VALUES.map((statusValue) => (
+              {PRODUCT_STATUS_VALUES.map(statusValue => (
                 <SelectItem key={statusValue} value={statusValue}>
                   {removeUnderscoreAndCapitalizeOnlyTheFirstChar(statusValue)}
                 </SelectItem>

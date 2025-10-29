@@ -150,7 +150,7 @@ export const subscription = pgTable(
       .$defaultFn(() => new Date())
       .notNull(),
   },
-  (t) => [
+  t => [
     index("subscription_user_idx").on(t.userId),
     index("subscription_status_idx").on(t.status),
   ],
@@ -175,7 +175,7 @@ export const orderUsageTracking = pgTable(
       .$defaultFn(() => new Date())
       .notNull(),
   },
-  (t) => [
+  t => [
     index("order_usage_org_idx").on(t.organizationId),
     index("order_usage_month_idx").on(t.monthYear),
     unique("order_usage_org_month").on(t.organizationId, t.monthYear),
@@ -287,7 +287,7 @@ export const product = pgTable(
       .$defaultFn(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  (t) => [
+  t => [
     index("product_slug_idx").on(t.slug),
     index("product_org_idx").on(t.organizationId),
   ],
@@ -307,9 +307,7 @@ export const tag = pgTable(
       .$defaultFn(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  (t) => [
-    index("tag_slug_idx").on(t.slug),
-  ],
+  t => [index("tag_slug_idx").on(t.slug)],
 );
 
 export const productTag = pgTable(
@@ -325,7 +323,7 @@ export const productTag = pgTable(
       .notNull()
       .references(() => tag.id, { onDelete: "cascade" }),
   },
-  (t) => [
+  t => [
     index("product_tag_product_idx").on(t.productId),
     index("product_tag_tag_idx").on(t.tagId),
     unique("product_tag_unique").on(t.productId, t.tagId),
@@ -348,7 +346,7 @@ export const productLike = pgTable(
       .$defaultFn(() => new Date())
       .notNull(),
   },
-  (t) => [
+  t => [
     index("product_like_product_idx").on(t.productId),
     index("product_like_user_idx").on(t.userId),
     unique("product_like_unique").on(t.productId, t.userId),
@@ -399,7 +397,7 @@ export const order = pgTable(
       .$defaultFn(() => new Date())
       .notNull(),
   },
-  (t) => [
+  t => [
     index("order_user_idx").on(t.userId),
     index("order_org_idx").on(t.organizationId),
     index("order_status_idx").on(t.status),
@@ -430,7 +428,7 @@ export const orderItem = pgTable(
       .$defaultFn(() => new Date())
       .notNull(),
   },
-  (t) => [
+  t => [
     index("order_item_order_idx").on(t.orderId),
     index("order_item_product_idx").on(t.productId),
   ],
@@ -495,7 +493,7 @@ export const feedback = pgTable(
       .$defaultFn(() => new Date())
       .notNull(),
   },
-  (t) => [
+  t => [
     index("feedback_user_idx").on(t.userId),
     index("feedback_type_idx").on(t.type),
     index("feedback_status_idx").on(t.status),
@@ -529,22 +527,25 @@ export const feedbackHistory = pgTable(
       .notNull(),
     note: text("note"),
   },
-  (t) => [
+  t => [
     index("feedback_history_feedback_idx").on(t.feedbackId),
     index("feedback_history_changed_by_idx").on(t.changedBy),
   ],
 );
 
-export const feedbackHistoryRelations = relations(feedbackHistory, ({ one }) => ({
-  feedback: one(feedback, {
-    fields: [feedbackHistory.feedbackId],
-    references: [feedback.id],
+export const feedbackHistoryRelations = relations(
+  feedbackHistory,
+  ({ one }) => ({
+    feedback: one(feedback, {
+      fields: [feedbackHistory.feedbackId],
+      references: [feedback.id],
+    }),
+    changedByUser: one(user, {
+      fields: [feedbackHistory.changedBy],
+      references: [user.id],
+    }),
   }),
-  changedByUser: one(user, {
-    fields: [feedbackHistory.changedBy],
-    references: [user.id],
-  }),
-}));
+);
 
 export type Organization = typeof organization.$inferSelect;
 export type Role = (typeof role.enumValues)[number];

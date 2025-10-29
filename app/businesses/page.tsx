@@ -1,4 +1,5 @@
 import { Building2 } from "lucide-react";
+import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { BusinessCatalogueSection } from "@/components/businesses/business-catalogue section";
@@ -43,6 +44,45 @@ async function BusinessesList() {
   return <BusinessCatalogueSection data={businessesPerUser} />;
 }
 
+export async function generateMetadata(): Promise<Metadata> {
+  const title = "Businesses - Starva";
+  const description =
+    "Manage your businesses with Starva. Update products, track orders, and grow your business with powerful management tools.";
+
+  const imageUrl =
+    "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dacuUyMdwvZO8oJpYyFEwgT69CVIdltrHUQc7";
+  const businessesUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/businesses`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: businessesUrl,
+      type: "website",
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+        },
+      ],
+      siteName: "Starva",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [imageUrl],
+    },
+    alternates: {
+      canonical: businessesUrl,
+    },
+  };
+}
+
 export default async function BusinessesPage() {
   return (
     <div className="container mx-auto max-w-7xl py-7 space-y-7">
@@ -56,9 +96,11 @@ export default async function BusinessesPage() {
         <ExtractedRegisterBusinessDialog />
       </div>
 
-      <Suspense fallback={
-        <div className="w-full md:w-[380px] h-9 rounded-lg border shadow bg-background animate-pulse" />
-      }>
+      <Suspense
+        fallback={
+          <div className="w-full md:w-[380px] h-9 rounded-lg border shadow bg-background animate-pulse" />
+        }
+      >
         <SearchForm
           formProps={{ className: "w-full md:w-[380px]" }}
           inputFieldOnlyClassName="h-9"

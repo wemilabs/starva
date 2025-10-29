@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/accordion";
 import { getBusinessBySlug } from "@/data/businesses";
 import { getProductsPerBusinessWithoutAuth } from "@/data/products";
-import { DAYS, today } from "@/lib/constants";
+import { DAYS, DEFAULT_IMG_URL, today } from "@/lib/constants";
 import { formatTime } from "@/lib/utils";
 
 async function ProductsList({
@@ -242,7 +242,7 @@ export async function generateMetadata({
     });
   } else {
     images.push({
-      url: "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dacuUyMdwvZO8oJpYyFEwgT69CVIdltrHUQc7",
+      url: DEFAULT_IMG_URL,
       width: 1200,
       height: 630,
       alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",

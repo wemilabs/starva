@@ -1,5 +1,7 @@
 import type { FeedbackStatus, FeedbackType } from "@/db/schema";
 
+export const DEFAULT_IMG_URL = "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dacuUyMdwvZO8oJpYyFEwgT69CVIdltrHUQc7";
+
 export const PRODUCT_STATUS_VALUES = [
   "in_stock",
   "out_of_stock",

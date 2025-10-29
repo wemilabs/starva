@@ -7,6 +7,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { UploadThingProvider } from "@/components/uploadthing-provider";
 import { BreadcrumbsProvider } from "@/contexts/breadcrumbs-context";
+import { DEFAULT_IMG_URL } from "@/lib/constants";
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -64,7 +65,7 @@ export const metadata: Metadata = {
     siteName: "Starva",
     images: [
       {
-        url: "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dacuUyMdwvZO8oJpYyFEwgT69CVIdltrHUQc7",
+        url: DEFAULT_IMG_URL,
         width: 1200,
         height: 630,
         alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
@@ -77,7 +78,7 @@ export const metadata: Metadata = {
     description:
       "A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
     images: [
-      "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dacuUyMdwvZO8oJpYyFEwgT69CVIdltrHUQc7",
+      DEFAULT_IMG_URL,
     ],
     creator: "@DorianTho5",
   },

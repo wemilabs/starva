@@ -12,7 +12,7 @@ import { ProductCatalogueSection } from "@/components/products/product-catalogue
 import { SkeletonProductCard } from "@/components/products/skeleton-product-card";
 import { getBusinessBySlug } from "@/data/businesses";
 import { getProductsPerBusiness } from "@/data/products";
-import { DEFAULT_IMG_URL } from "@/lib/constants";
+import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
 import {
   updateBusinessDescription,
   updateBusinessLogo,
@@ -167,7 +167,7 @@ export async function generateMetadata({
     });
   } else {
     images.push({
-      url: DEFAULT_IMG_URL,
+      url: GENERAL_BRANDING_IMG_URL,
       width: 1200,
       height: 630,
       alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",

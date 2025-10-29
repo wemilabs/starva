@@ -1,6 +1,15 @@
 import type { FeedbackStatus, FeedbackType } from "@/db/schema";
 
-export const DEFAULT_IMG_URL = "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dacuUyMdwvZO8oJpYyFEwgT69CVIdltrHUQc7";
+export const GENERAL_BRANDING_IMG_URL =
+  "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dacuUyMdwvZO8oJpYyFEwgT69CVIdltrHUQc7";
+export const FALLBACK_PRODUCT_IMG_URL =
+  "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6d89s9BRYhvCEDrKcu2HNpfYQo7eR4FUT8wVgS";
+export const ERROR_PAGE_IMG_URL =
+  "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6db6Se9J5oPvMdz2Zcih1tWnNrgmwjYaRqfCuK";
+export const NOTFOUND_PAGE_IMG_URL =
+  "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dJdyQ7mebB6d1NpIUrVzHcsfFA7aEkjQ4oDvS";
+export const FALLBACK_HERO_IMG_URL =
+  "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dz7JnPyW2kz06ogjwmFnOXWGv2lN4VS7CTLua";
 
 export const PRODUCT_STATUS_VALUES = [
   "in_stock",

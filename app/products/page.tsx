@@ -1,12 +1,13 @@
+import { DynamicHeading } from "@/components/products/dynamic-heading";
 import { FilteredProducts } from "@/components/products/filtered-products";
 import { ProductFilters } from "@/components/products/product-filters";
 import { SkeletonProductCard } from "@/components/products/skeleton-product-card";
-import { DynamicHeading } from "@/components/products/dynamic-heading";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getInStockProducts } from "@/data/products";
+import { getAllTagsWithProducts } from "@/data/tags";
+import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { getAllTagsWithProducts } from "@/data/tags";
-import { getInStockProducts } from "@/data/products";
 
 // Helper function to get filtered products for metadata
 async function getFilteredProductsForMetadata(
@@ -145,7 +146,7 @@ export async function generateMetadata({
     });
   } else {
     images.push({
-      url: "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dacuUyMdwvZO8oJpYyFEwgT69CVIdltrHUQc7",
+      url: GENERAL_BRANDING_IMG_URL,
       width: 1200,
       height: 630,
       alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",

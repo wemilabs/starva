@@ -23,6 +23,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useSession } from "@/lib/auth-client";
 import { useCartStore } from "@/lib/cart-store";
+import { FALLBACK_PRODUCT_IMG_URL } from "@/lib/constants";
 import { formatPriceInRWF } from "@/lib/utils";
 import { placeOrder } from "@/server/orders";
 import { Separator } from "../ui/separator";
@@ -69,7 +70,7 @@ export function CartSheet() {
 
     startTransition(async () => {
       const result = await placeOrder({
-        items: items.map((item) => ({
+        items: items.map(item => ({
           productId: item.productId,
           quantity: item.quantity,
           notes: item.notes,
@@ -164,7 +165,7 @@ export function CartSheet() {
           <>
             <ScrollArea className="flex-1 h-[calc(100%-24rem)] px-4">
               <div className="space-y-4">
-                {items.map((item) => (
+                {items.map(item => (
                   <div
                     key={item.productId}
                     className="space-y-3 rounded-lg border p-3"
@@ -172,10 +173,7 @@ export function CartSheet() {
                     <div className="flex items-start gap-3">
                       <div className="relative size-16 overflow-hidden rounded-md bg-muted">
                         <Image
-                          src={
-                            item.productImage ||
-                            "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6d89s9BRYhvCEDrKcu2HNpfYQo7eR4FUT8wVgS"
-                          }
+                          src={item.productImage || FALLBACK_PRODUCT_IMG_URL}
                           alt={item.productName}
                           width={64}
                           height={64}
@@ -218,7 +216,7 @@ export function CartSheet() {
                           type="number"
                           min={1}
                           value={item.quantity}
-                          onChange={(e) =>
+                          onChange={e =>
                             updateQuantity(
                               item.productId,
                               Number.parseInt(e.target.value, 10) || 1,
@@ -252,7 +250,7 @@ export function CartSheet() {
                       <Textarea
                         id={`notes-${item.productId}`}
                         value={item.notes || ""}
-                        onChange={(e) =>
+                        onChange={e =>
                           updateNotes(item.productId, e.target.value)
                         }
                         placeholder="Special instructions..."
@@ -275,7 +273,7 @@ export function CartSheet() {
                 <Textarea
                   id="order-notes"
                   value={orderNotes}
-                  onChange={(e) => setOrderNotes(e.target.value)}
+                  onChange={e => setOrderNotes(e.target.value)}
                   placeholder="Any special instructions for the entire order..."
                   rows={3}
                   className="text-sm"

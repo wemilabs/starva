@@ -8,6 +8,7 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty";
+import { ERROR_PAGE_IMG_URL } from "@/lib/constants";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect } from "react";
@@ -27,7 +28,7 @@ export default function ErrorPage({
     <Empty>
       <EmptyHeader>
         <Image
-          src="https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6db6Se9J5oPvMdz2Zcih1tWnNrgmwjYaRqfCuK"
+          src={ERROR_PAGE_IMG_URL}
           alt="Error occurred"
           width={200}
           height={200}

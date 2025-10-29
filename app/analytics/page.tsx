@@ -1,3 +1,4 @@
+import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
 import { BarChart3, Sparkles } from "lucide-react";
 import type { Metadata } from "next";
 
@@ -6,8 +7,6 @@ export async function generateMetadata(): Promise<Metadata> {
   const description =
     "Powerful insights and analytics to help you make data-driven decisions. Track sales, monitor performance, and grow your business with detailed metrics and reports.";
 
-  const imageUrl =
-    "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dacuUyMdwvZO8oJpYyFEwgT69CVIdltrHUQc7";
   const analyticsUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/analytics`;
 
   return {
@@ -20,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       images: [
         {
-          url: imageUrl,
+          url: GENERAL_BRANDING_IMG_URL,
           width: 1200,
           height: 630,
           alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
@@ -32,7 +31,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: [imageUrl],
+      images: [GENERAL_BRANDING_IMG_URL],
     },
     alternates: {
       canonical: analyticsUrl,

@@ -103,7 +103,8 @@ async function MerchantContent({
               url={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/merchants/${resolvedSlug}`}
               buttonTitle="Share"
               title={`Share ${merchant.name}`}
-              description={`Copy the link to share this business catalogue with others`}
+              description={`Share this business catalogue with others`}
+              shareText={`Check out ${merchant.name}! 🍽️\n\n${description ? `${description}\n\n` : ''}${phone ? `📞 ${phone}\n\n` : ''}Order now: ${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/merchants/${resolvedSlug}`}
             />
           </div>
         </div>

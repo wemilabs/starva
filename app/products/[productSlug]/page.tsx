@@ -1,4 +1,3 @@
-import { CalendarClock } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -7,8 +6,8 @@ import { Suspense } from "react";
 import { AddToCartButton } from "@/components/products/add-to-cart-button";
 import { ProductLikeButton } from "@/components/products/product-like-button";
 import { ProductSlugSkeleton } from "@/components/products/product-slug-skeleton";
+import { ShareDialog } from "@/components/share-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { ProtectedImage } from "@/components/ui/protected-image";
 import { getProductBySlug } from "@/data/products";
 import { FALLBACK_PRODUCT_IMG_URL } from "@/lib/constants";
@@ -96,10 +95,18 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
               }}
             />
 
-            <Button variant="outline" disabled>
+            {/* <Button variant="outline" disabled>
               <CalendarClock className="size-4" />
               <span className="hidden sm:block">Schedule delivery</span>
-            </Button>
+            </Button> */}
+
+            <ShareDialog
+              url={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/products/${product.slug}`}
+              buttonTitle="Share"
+              title={`Share ${product.name}`}
+              description={`Share this product with others`}
+              shareText={`Check out this amazing product! 🍽️\n\n${product.name}\n${formatPriceInRWF(product.price)}\n\nOrder now: ${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/products/${product.slug}`}
+            />
           </div>
         </div>
       </div>

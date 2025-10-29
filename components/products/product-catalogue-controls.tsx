@@ -109,7 +109,8 @@ export function ProductCatalogueControls({
             <ShareDialog
               url={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/merchants/${businessSlug}`}
               title={`Share ${businessName}`}
-              description={`Copy the link to share your business catalogue with others`}
+              description={`Share your business catalogue with others`}
+              shareText={`Check out ${businessName || 'this amazing business'}! 🍽️\n\n${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/merchants/${businessSlug}`}
               className="border-none shadow-none bg-transparent hover:bg-muted"
             />
           </div>

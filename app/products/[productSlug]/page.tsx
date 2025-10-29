@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ProtectedImage } from "@/components/ui/protected-image";
 import { getProductBySlug } from "@/data/products";
+import { DEFAULT_IMG_URL } from "@/lib/constants";
 import {
   formatPriceInRWF,
   removeUnderscoreAndCapitalizeOnlyTheFirstChar,
@@ -184,6 +185,7 @@ export async function generateMetadata({
     };
   }
 
+  const resolvedSlug = result.slug ?? productSlug;
   const title = `${result.name} - Starva`;
   const description = `${result.name}${result.description ? ` - ${result.description}` : ""}. Price: ${formatPriceInRWF(result.price)}. Available from ${result.organization.name}. Order now for delivery.`;
 
@@ -197,14 +199,14 @@ export async function generateMetadata({
     });
   } else {
     images.push({
-      url: "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6d89s9BRYhvCEDrKcu2HNpfYQo7eR4FUT8wVgS",
+      url:  DEFAULT_IMG_URL,
       width: 1200,
       height: 630,
       alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
     });
   }
 
-  const productUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/products/${result.slug}`;
+  const productUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/products/${resolvedSlug}`;
 
   return {
     title,

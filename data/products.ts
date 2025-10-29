@@ -17,7 +17,7 @@ const getUserLikedProductIds = async (userId: string): Promise<Set<string>> => {
     .select({ productId: productLike.productId })
     .from(productLike)
     .where(eq(productLike.userId, userId));
-  return new Set(likes.map((like) => like.productId));
+  return new Set(likes.map(like => like.productId));
 };
 
 export const getInStockProducts = cache(async () => {
@@ -50,17 +50,17 @@ export const getInStockProducts = cache(async () => {
     orderBy: (product, { desc }) => [desc(product.createdAt)],
   });
 
-  const productsWithTags = products.map((p) => ({
+  const productsWithTags = products.map(p => ({
     ...p,
-    tags: p.productTags.map((pt) => pt.tag),
+    tags: p.productTags.map(pt => pt.tag),
   }));
 
   if (!success || !session) {
-    return productsWithTags.map((p) => ({ ...p, isLiked: false }));
+    return productsWithTags.map(p => ({ ...p, isLiked: false }));
   }
 
   const likedProductIds = await getUserLikedProductIds(session.user.id);
-  return productsWithTags.map((p) => ({
+  return productsWithTags.map(p => ({
     ...p,
     isLiked: likedProductIds.has(p.id),
   }));
@@ -88,7 +88,7 @@ export const getProductsPerBusiness = cache(async (organizationId: string) => {
       orderBy: (product, { desc }) => [desc(product.createdAt)],
     });
     const likedProductIds = await getUserLikedProductIds(session.user.id);
-    return products.map((p) => ({ ...p, isLiked: likedProductIds.has(p.id) }));
+    return products.map(p => ({ ...p, isLiked: likedProductIds.has(p.id) }));
   } catch (error) {
     console.error(
       "Failed to fetch products for organization:",
@@ -118,7 +118,7 @@ export const getProductsPerBusinessWithoutAuth = cache(
         },
         orderBy: (product, { desc }) => [desc(product.createdAt)],
       });
-      return products.map((p) => ({ ...p, isLiked: false }));
+      return products.map(p => ({ ...p, isLiked: false }));
     } catch (error) {
       console.error(
         "Failed to fetch products for organization:",
@@ -131,10 +131,6 @@ export const getProductsPerBusinessWithoutAuth = cache(
 );
 
 export const getProductBySlug = cache(async (slug: string) => {
-  const { success, session } = await verifySession();
-  if (!success || !session)
-    return { message: "Please sign in to purchase this product" };
-
   try {
     const specificProduct = await db.query.product.findFirst({
       where: eq(product.slug, slug),
@@ -154,6 +150,14 @@ export const getProductBySlug = cache(async (slug: string) => {
 
     if (!specificProduct) return undefined;
 
+    const { success, session } = await verifySession();
+    if (!success || !session) {
+      return {
+        ...specificProduct,
+        isLiked: false,
+      };
+    }
+
     const likedProductIds = await getUserLikedProductIds(session.user.id);
     return {
       ...specificProduct,
@@ -161,7 +165,7 @@ export const getProductBySlug = cache(async (slug: string) => {
     };
   } catch (error) {
     console.error("Failed to fetch product by slug:", slug, error);
-    return { message: "Failed to fetch product by slug" };
+    return undefined;
   }
 });
 
@@ -228,7 +232,7 @@ async function getFilteredCachedProductsBase(filters: ProductFilters = {}) {
           .where(
             inArray(
               productTag.tagId,
-              tagIds.map((t) => t.id),
+              tagIds.map(t => t.id),
             ),
           );
 
@@ -236,7 +240,7 @@ async function getFilteredCachedProductsBase(filters: ProductFilters = {}) {
           conditions.push(
             inArray(
               product.id,
-              productIds.map((p) => p.productId),
+              productIds.map(p => p.productId),
             ),
           );
         } else {
@@ -260,7 +264,6 @@ async function getFilteredCachedProductsBase(filters: ProductFilters = {}) {
       case "popular":
         query = query.orderBy(sql`${product.likesCount} DESC`);
         break;
-      case "newest":
       default:
         query = query.orderBy(sql`${product.createdAt} DESC`);
     }
@@ -280,10 +283,10 @@ export const getFilteredProducts = cache(
     const products = await getFilteredCachedProductsBase(filters);
 
     if (!success || !session) {
-      return products.map((p) => ({ ...p, isLiked: false }));
+      return products.map(p => ({ ...p, isLiked: false }));
     }
 
     const likedProductIds = await getUserLikedProductIds(session.user.id);
-    return products.map((p) => ({ ...p, isLiked: likedProductIds.has(p.id) }));
+    return products.map(p => ({ ...p, isLiked: likedProductIds.has(p.id) }));
   },
 );

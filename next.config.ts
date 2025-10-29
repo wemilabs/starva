@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   devIndicators: {
     position: "top-left",
   },
-  experimental:{
+  experimental: {
     turbopackFileSystemCacheForDev: true,
   },
   images: {
@@ -16,7 +16,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  reactCompiler:true,
+  reactCompiler: true,
   typedRoutes: true,
 };
 

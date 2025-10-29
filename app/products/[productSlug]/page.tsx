@@ -1,17 +1,21 @@
 import { CalendarClock, LogIn } from "lucide-react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { AddToCartButton } from "@/components/products/add-to-cart-button";
 import { ProductLikeButton } from "@/components/products/product-like-button";
+import { ProductSlugSkeleton } from "@/components/products/product-slug-skeleton";
 import { Badge } from "@/components/ui/badge";
-import { ProtectedImage } from "@/components/ui/protected-image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ProtectedImage } from "@/components/ui/protected-image";
 import { getProductBySlug } from "@/data/products";
-import { formatPriceInRWF, removeUnderscoreAndCapitalizeOnlyTheFirstChar } from "@/lib/utils";
+import {
+  formatPriceInRWF,
+  removeUnderscoreAndCapitalizeOnlyTheFirstChar,
+} from "@/lib/utils";
 
 async function ProductDisplay({ productSlug }: { productSlug: string }) {
   const result = await getProductBySlug(productSlug);
@@ -83,7 +87,9 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
             {result.name}
           </h1>
 
-          <div className="text-2xl font-bold">{formatPriceInRWF(result.price)}</div>
+          <div className="text-2xl font-bold">
+            {formatPriceInRWF(result.price)}
+          </div>
 
           <div className="prose max-w-none text-sm text-muted-foreground">
             <p>{result.description}</p>
@@ -145,41 +151,82 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
   );
 }
 
-function ProductSlugSkeleton() {
-  return (
-    <div className="container mx-auto px-4 py-8 space-y-12">
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <Skeleton className="aspect-square w-full rounded-lg" />
-        
-        <div className="flex flex-col gap-6">
-          <Skeleton className="h-10 w-3/4" />
-          <Skeleton className="h-8 w-32" />
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-full" />
-            <Skeleton className="h-4 w-2/3" />
-          </div>
-          
-          <div className="grid grid-cols-2 gap-4">
-            <Skeleton className="h-24 rounded-md" />
-            <Skeleton className="h-24 rounded-md" />
-            <Skeleton className="h-24 rounded-md" />
-            <Skeleton className="h-24 rounded-md" />
-          </div>
-          
-          <div className="flex gap-3">
-            <Skeleton className="h-10 w-40" />
-            <Skeleton className="h-10 w-40" />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-async function ProductContent({ params }: { params: Promise<{ productSlug: string }> }) {
+async function ProductContent({
+  params,
+}: {
+  params: Promise<{ productSlug: string }>;
+}) {
   const { productSlug } = await params;
   return <ProductDisplay productSlug={productSlug} />;
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ productSlug: string }>;
+}): Promise<Metadata> {
+  const { productSlug } = await params;
+
+  const result = await getProductBySlug(productSlug);
+  if (!result) {
+    return {
+      title: "Product Not Found - Starva",
+      description: "The requested product could not be found.",
+    };
+  }
+
+  // Handle case where user needs to sign in
+  if ("message" in result) {
+    return {
+      title: "Sign In Required - Starva",
+      description:
+        "You need to be signed in to view this product and make a purchase.",
+    };
+  }
+
+  const title = `${result.name} - Starva`;
+  const description = `${result.name}${result.description ? ` - ${result.description}` : ""}. Price: ${formatPriceInRWF(result.price)}. Available from ${result.organization.name}. Order now for delivery.`;
+
+  const images = [];
+  if (result.imageUrl) {
+    images.push({
+      url: result.imageUrl,
+      width: 1200,
+      height: 630,
+      alt: result.name,
+    });
+  } else {
+    images.push({
+      url: "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6d89s9BRYhvCEDrKcu2HNpfYQo7eR4FUT8wVgS",
+      width: 1200,
+      height: 630,
+      alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+    });
+  }
+
+  const productUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/products/${result.slug}`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: productUrl,
+      type: "website",
+      images,
+      siteName: "Starva",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: images.map(img => img.url),
+    },
+    alternates: {
+      canonical: productUrl,
+    },
+  };
 }
 
 export default async function ProductSlugPage(

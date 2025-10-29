@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ProtectedImage } from "@/components/ui/protected-image";
 import { getProductBySlug } from "@/data/products";
-import { DEFAULT_IMG_URL } from "@/lib/constants";
+import { FALLBACK_PRODUCT_IMG_URL } from "@/lib/constants";
 import {
   formatPriceInRWF,
   removeUnderscoreAndCapitalizeOnlyTheFirstChar,
@@ -71,10 +71,7 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div className="aspect-square w-full overflow-hidden rounded-lg bg-muted">
           <ProtectedImage
-            src={
-              result.imageUrl ??
-              "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6d89s9BRYhvCEDrKcu2HNpfYQo7eR4FUT8wVgS"
-            }
+            src={result.imageUrl ?? FALLBACK_PRODUCT_IMG_URL}
             alt={result.name}
             className="h-full w-full object-cover"
             width={500}
@@ -199,7 +196,7 @@ export async function generateMetadata({
     });
   } else {
     images.push({
-      url:  DEFAULT_IMG_URL,
+      url: FALLBACK_PRODUCT_IMG_URL,
       width: 1200,
       height: 630,
       alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",

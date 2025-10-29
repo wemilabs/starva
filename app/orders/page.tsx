@@ -15,9 +15,10 @@ import {
   getOrdersByUser,
 } from "@/data/orders";
 import { verifySession } from "@/data/user-session";
+import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
 import { ScrollText } from "lucide-react";
-import Link from "next/link";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
 
 async function OrdersContent() {
@@ -87,8 +88,6 @@ export async function generateMetadata(): Promise<Metadata> {
   const description =
     "Manage and track all your orders in one place. View order status, track deliveries, and manage customer orders with Starva's powerful order management system.";
 
-  const imageUrl =
-    "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dacuUyMdwvZO8oJpYyFEwgT69CVIdltrHUQc7";
   const ordersUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/orders`;
 
   return {
@@ -101,7 +100,7 @@ export async function generateMetadata(): Promise<Metadata> {
       type: "website",
       images: [
         {
-          url: imageUrl,
+          url: GENERAL_BRANDING_IMG_URL,
           width: 1200,
           height: 630,
           alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
@@ -113,7 +112,7 @@ export async function generateMetadata(): Promise<Metadata> {
       card: "summary_large_image",
       title,
       description,
-      images: [imageUrl],
+      images: [GENERAL_BRANDING_IMG_URL],
     },
     alternates: {
       canonical: ordersUrl,

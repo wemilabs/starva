@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getOrderById } from "@/data/orders";
 import { verifySession } from "@/data/user-session";
+import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
 import { formatDate, formatPriceInRWF } from "@/lib/utils";
 import { ArrowLeft, Calendar, Package } from "lucide-react";
 import type { Metadata } from "next";
@@ -292,7 +293,7 @@ export async function generateMetadata({
     });
   } else {
     images.push({
-      url: "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dacuUyMdwvZO8oJpYyFEwgT69CVIdltrHUQc7",
+      url: GENERAL_BRANDING_IMG_URL,
       width: 1200,
       height: 630,
       alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",

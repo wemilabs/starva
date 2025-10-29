@@ -1,4 +1,4 @@
-import { CalendarClock, LogIn } from "lucide-react";
+import { CalendarClock } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -9,7 +9,6 @@ import { ProductLikeButton } from "@/components/products/product-like-button";
 import { ProductSlugSkeleton } from "@/components/products/product-slug-skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { ProtectedImage } from "@/components/ui/protected-image";
 import { getProductBySlug } from "@/data/products";
 import { FALLBACK_PRODUCT_IMG_URL } from "@/lib/constants";
@@ -19,60 +18,19 @@ import {
 } from "@/lib/utils";
 
 async function ProductDisplay({ productSlug }: { productSlug: string }) {
-  const result = await getProductBySlug(productSlug);
+  const product = await getProductBySlug(productSlug);
 
-  if (!result) return notFound();
+  if (!product) return notFound();
 
-  if ("message" in result) {
-    return (
-      <div className="container mx-auto px-4 py-16">
-        <div className="flex min-h-[60vh] items-center justify-center">
-          <Card className="w-full max-w-md border-2 shadow-lg">
-            <CardContent className="flex flex-col items-center gap-6 p-8">
-              <div className="rounded-full bg-primary/10 p-4">
-                <LogIn className="size-8 text-primary" />
-              </div>
-
-              <div className="space-y-2 text-center">
-                <h2 className="text-lg font-semibold">Sign in required</h2>
-                <p className="text-sm text-muted-foreground max-w-sm">
-                  You need to be signed in to view this product and make a
-                  purchase
-                </p>
-              </div>
-
-              <Button asChild size="lg" className="w-full">
-                <Link href="/sign-in" className="flex items-center gap-2">
-                  <LogIn className="size-4" />
-                  <span>Sign in to continue</span>
-                </Link>
-              </Button>
-
-              <p className="text-xs text-muted-foreground">
-                Don't have an account?{" "}
-                <Link
-                  href="/sign-in"
-                  className="font-medium text-primary underline-offset-4 hover:underline"
-                >
-                  Sign up
-                </Link>
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
-  //  const relatedProducts = await getRelatedProducts(result.organizationId, result.id, 10);
+  //  const relatedProducts = await getRelatedProducts(product.organizationId, product.id, 10);
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-12">
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div className="aspect-square w-full overflow-hidden rounded-lg bg-muted">
           <ProtectedImage
-            src={result.imageUrl ?? FALLBACK_PRODUCT_IMG_URL}
-            alt={result.name}
+            src={product.imageUrl ?? FALLBACK_PRODUCT_IMG_URL}
+            alt={product.name}
             className="h-full w-full object-cover"
             width={500}
             height={500}
@@ -82,35 +40,35 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
 
         <div className="flex flex-col gap-6">
           <h1 className="text-3xl font-semibold tracking-tight">
-            {result.name}
+            {product.name}
           </h1>
 
           <div className="text-2xl font-bold">
-            {formatPriceInRWF(result.price)}
+            {formatPriceInRWF(product.price)}
           </div>
 
           <div className="prose max-w-none text-sm text-muted-foreground">
-            <p>{result.description}</p>
+            <p>{product.description}</p>
           </div>
 
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div className="rounded-md border p-4">
               <p className="text-muted-foreground">Status</p>
               <Badge variant="available" className="mt-1">
-                {removeUnderscoreAndCapitalizeOnlyTheFirstChar(result.status)}
+                {removeUnderscoreAndCapitalizeOnlyTheFirstChar(product.status)}
               </Badge>
             </div>
             <div className="rounded-md border p-4">
               <p className="text-muted-foreground">Calories</p>
-              <p className="mt-1 font-medium">{result.calories ?? "N/A"}</p>
+              <p className="mt-1 font-medium">{product.calories ?? "N/A"}</p>
             </div>
             <div className="rounded-md border p-4">
               <p className="text-muted-foreground mb-2">Likes</p>
               <ProductLikeButton
-                productId={result.id}
-                initialIsLiked={result.isLiked ?? false}
-                initialLikesCount={result.likesCount ?? 0}
-                revalidateTargetPath={`/products/${result.slug}`}
+                productId={product.id}
+                initialIsLiked={product.isLiked ?? false}
+                initialLikesCount={product.likesCount ?? 0}
+                revalidateTargetPath={`/products/${product.slug}`}
                 variant="default"
               />
             </div>
@@ -119,9 +77,9 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
               <p className="mt-1 font-medium">
                 <Link
                   className="underline underline-offset-4 hover:no-underline"
-                  href={`/merchants/${result.organization.slug}`}
+                  href={`/merchants/${product.organization.slug}`}
                 >
-                  {result.organization.name}
+                  {product.organization.name}
                 </Link>
               </p>
             </div>
@@ -130,11 +88,11 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
           <div className="mt-2 flex flex-wrap gap-3">
             <AddToCartButton
               product={{
-                id: result.id,
-                name: result.name,
-                slug: result.slug,
-                price: result.price,
-                imageUrl: result.imageUrl,
+                id: product.id,
+                name: product.name,
+                slug: product.slug,
+                price: product.price,
+                imageUrl: product.imageUrl,
               }}
             />
 
@@ -165,34 +123,25 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { productSlug } = await params;
 
-  const result = await getProductBySlug(productSlug);
-  if (!result) {
+  const product = await getProductBySlug(productSlug);
+  if (!product) {
     return {
       title: "Product Not Found - Starva",
       description: "The requested product could not be found.",
     };
   }
 
-  // Handle case where user needs to sign in
-  if ("message" in result) {
-    return {
-      title: "Sign In Required - Starva",
-      description:
-        "You need to be signed in to view this product and make a purchase.",
-    };
-  }
-
-  const resolvedSlug = result.slug ?? productSlug;
-  const title = `${result.name} - Starva`;
-  const description = `${result.name}${result.description ? ` - ${result.description}` : ""}. Price: ${formatPriceInRWF(result.price)}. Available from ${result.organization.name}. Order now for delivery.`;
+  const resolvedSlug = product.slug ?? productSlug;
+  const title = `${product.name} - Starva`;
+  const description = `${product.name}${product.description ? ` - ${product.description}` : ""}. Price: ${formatPriceInRWF(product.price)}. Available from ${product.organization.name}. Order now for delivery.`;
 
   const images = [];
-  if (result.imageUrl) {
+  if (product.imageUrl) {
     images.push({
-      url: result.imageUrl,
+      url: product.imageUrl,
       width: 1200,
       height: 630,
-      alt: result.name,
+      alt: product.name,
     });
   } else {
     images.push({

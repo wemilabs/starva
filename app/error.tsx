@@ -1,8 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import {
   Empty,
   EmptyContent,
@@ -10,7 +8,9 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect } from "react";
 
 export default function ErrorPage({
   error,
@@ -45,7 +45,7 @@ export default function ErrorPage({
             Try again
           </Button>
           <Button asChild variant="outline">
-            <Link href="/dashboard">Go to Dashboard</Link>
+            <Link href="/">Let&apos;s go Home buddy</Link>
           </Button>
         </div>
         <EmptyDescription className="text-xs">

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -33,7 +34,11 @@ async function ProductsList({ businessId }: { businessId: string }) {
   return <ProductCatalogueSection data={productsPerBusiness} />;
 }
 
-async function BusinessContent({ params }: { params: Promise<{ businessSlug: string }> }) {
+async function BusinessContent({
+  params,
+}: {
+  params: Promise<{ businessSlug: string }>;
+}) {
   const { businessSlug } = await params;
 
   const business = await getBusinessBySlug(businessSlug);
@@ -101,6 +106,7 @@ async function BusinessContent({ params }: { params: Promise<{ businessSlug: str
           <ProductCatalogueControls
             businessId={business.id}
             businessSlug={resolvedSlug}
+            businessName={business.name}
             timetable={metadata.timetable}
             defaultStatus="all"
           />
@@ -127,6 +133,69 @@ async function BusinessContent({ params }: { params: Promise<{ businessSlug: str
       </section>
     </div>
   );
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ businessSlug: string }>;
+}): Promise<Metadata> {
+  const { businessSlug } = await params;
+
+  const business = await getBusinessBySlug(businessSlug);
+  if (!business) {
+    return {
+      title: "Business Not Found - Starva",
+      description: "The requested business could not be found.",
+    };
+  }
+
+  const resolvedSlug = business.slug ?? businessSlug;
+  const metadata = business.metadata ? JSON.parse(business.metadata) : {};
+  const description =
+    metadata.description ??
+    `Manage your business ${business.name}. Update products, track orders, and grow your business with Starva.`;
+
+  const images = [];
+  if (business.logo) {
+    images.push({
+      url: business.logo,
+      width: 1200,
+      height: 630,
+      alt: `${business.name} logo`,
+    });
+  } else {
+    images.push({
+      url: "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dacuUyMdwvZO8oJpYyFEwgT69CVIdltrHUQc7",
+      width: 1200,
+      height: 630,
+      alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+    });
+  }
+
+  const businessUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/businesses/${resolvedSlug}`;
+
+  return {
+    title: `${business.name} - Starva`,
+    description,
+    openGraph: {
+      title: `${business.name} - Starva`,
+      description,
+      url: businessUrl,
+      type: "website",
+      images,
+      siteName: "Starva",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${business.name} - Starva`,
+      description,
+      images: images.map(img => img.url),
+    },
+    alternates: {
+      canonical: businessUrl,
+    },
+  };
 }
 
 export default async function BusinessSlugPage(

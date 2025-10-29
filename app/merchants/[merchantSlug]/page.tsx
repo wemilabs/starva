@@ -1,4 +1,5 @@
 import { Clock } from "lucide-react";
+import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
@@ -6,6 +7,7 @@ import { Suspense } from "react";
 import { ProductCatalogueControls } from "@/components/products/product-catalogue-controls";
 import { ProductCatalogueSection } from "@/components/products/product-catalogue-section";
 import { SkeletonProductCard } from "@/components/products/skeleton-product-card";
+import { ShareDialog } from "@/components/share-dialog";
 import {
   Accordion,
   AccordionContent,
@@ -47,14 +49,17 @@ async function ProductsList({
   );
 }
 
-async function MerchantContent({ params }: { params: Promise<{ merchantSlug: string }> }) {
+async function MerchantContent({
+  params,
+}: {
+  params: Promise<{ merchantSlug: string }>;
+}) {
   const { merchantSlug } = await params;
 
   const merchant = await getBusinessBySlug(merchantSlug);
   if (!merchant) return notFound();
 
   const resolvedSlug = merchant.slug || merchantSlug;
-
   const metadata = merchant.metadata ? JSON.parse(merchant.metadata) : {};
   const description = metadata.description || "";
   const phone = metadata.phone || "";
@@ -93,6 +98,14 @@ async function MerchantContent({ params }: { params: Promise<{ merchantSlug: str
             </p>
             <p className="text-white/80 text-sm leading-relaxed">{phone}</p>
           </div>
+          <div className="flex items-center gap-3 justify-end">
+            <ShareDialog
+              url={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/merchants/${resolvedSlug}`}
+              buttonTitle="Share"
+              title={`Share ${merchant.name}`}
+              description={`Copy the link to share this business catalogue with others`}
+            />
+          </div>
         </div>
       </section>
 
@@ -108,7 +121,7 @@ async function MerchantContent({ params }: { params: Promise<{ merchantSlug: str
               </AccordionTrigger>
               <AccordionContent>
                 <div className="space-y-3 pb-4">
-                  {DAYS.map((day) => {
+                  {DAYS.map(day => {
                     const dayData = timetable[day.key];
                     const isToday = day.key === today;
                     const isClosed = !dayData || dayData.closed;
@@ -162,9 +175,11 @@ async function MerchantContent({ params }: { params: Promise<{ merchantSlug: str
       )}
 
       <section className="grid gap-x-6">
-        <Suspense fallback={
-          <div className="h-20 rounded-lg border bg-background animate-pulse mb-6" />
-        }>
+        <Suspense
+          fallback={
+            <div className="h-20 rounded-lg border bg-background animate-pulse mb-6" />
+          }
+        >
           <ProductCatalogueControls
             businessId={merchant.id}
             businessSlug={resolvedSlug}
@@ -194,6 +209,69 @@ async function MerchantContent({ params }: { params: Promise<{ merchantSlug: str
       </section>
     </div>
   );
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ merchantSlug: string }>;
+}): Promise<Metadata> {
+  const { merchantSlug } = await params;
+
+  const merchant = await getBusinessBySlug(merchantSlug);
+  if (!merchant) {
+    return {
+      title: "Merchant Not Found - Starva",
+      description: "The requested merchant could not be found.",
+    };
+  }
+
+  const resolvedSlug = merchant.slug ?? merchantSlug;
+  const metadata = merchant.metadata ? JSON.parse(merchant.metadata) : {};
+  const description =
+    metadata.description ??
+    `Browse products and menu items from ${merchant.name}. Order delicious food from local kitchens.`;
+
+  const images = [];
+  if (merchant.logo) {
+    images.push({
+      url: merchant.logo,
+      width: 1200,
+      height: 630,
+      alt: `${merchant.name} logo`,
+    });
+  } else {
+    images.push({
+      url: "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dacuUyMdwvZO8oJpYyFEwgT69CVIdltrHUQc7",
+      width: 1200,
+      height: 630,
+      alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+    });
+  }
+
+  const merchantUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/merchants/${resolvedSlug}`;
+
+  return {
+    title: `${merchant.name} - Starva`,
+    description,
+    openGraph: {
+      title: `${merchant.name} - Starva`,
+      description,
+      url: merchantUrl,
+      type: "website",
+      images,
+      siteName: "Starva",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${merchant.name} - Starva`,
+      description,
+      images: images.map(img => img.url),
+    },
+    alternates: {
+      canonical: merchantUrl,
+    },
+  };
 }
 
 export default async function MerchantSlugPage(

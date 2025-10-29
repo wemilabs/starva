@@ -1,4 +1,5 @@
 import { Building2 } from "lucide-react";
+import type { Metadata } from "next";
 import { Suspense } from "react";
 
 import { BusinessCatalogueSection } from "@/components/businesses/business-catalogue section";
@@ -41,6 +42,45 @@ async function MerchantsList() {
   return <BusinessCatalogueSection data={merchants} />;
 }
 
+export async function generateMetadata(): Promise<Metadata> {
+  const title = "Merchants - Starva";
+  const description =
+    "Discover and order from local merchants. Browse menus, find your favorite restaurants, and order delicious food from local kitchens.";
+
+  const imageUrl =
+    "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dacuUyMdwvZO8oJpYyFEwgT69CVIdltrHUQc7";
+  const merchantsUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/merchants`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: merchantsUrl,
+      type: "website",
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+        },
+      ],
+      siteName: "Starva",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [imageUrl],
+    },
+    alternates: {
+      canonical: merchantsUrl,
+    },
+  };
+}
+
 export default async function MerchantsPage() {
   return (
     <div className="container max-w-7xl py-7 space-y-7">
@@ -53,9 +93,11 @@ export default async function MerchantsPage() {
         </div>
       </div>
 
-      <Suspense fallback={
-        <div className="w-full md:w-[380px] h-9 rounded-lg border shadow bg-background animate-pulse" />
-      }>
+      <Suspense
+        fallback={
+          <div className="w-full md:w-[380px] h-9 rounded-lg border shadow bg-background animate-pulse" />
+        }
+      >
         <SearchForm
           formProps={{ className: "w-full md:w-[380px]" }}
           inputFieldOnlyClassName="h-9"

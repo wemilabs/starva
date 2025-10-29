@@ -1,8 +1,9 @@
 "use client";
 
-import { SearchForm } from "@/components/forms/search-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -11,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Tag } from "@/db/schema";
-import { Filter, X } from "lucide-react";
+import { Filter, Search, X } from "lucide-react";
 import { parseAsArrayOf, parseAsString, useQueryStates } from "nuqs";
 
 type ProductFiltersProps = {
@@ -25,12 +26,15 @@ export function ProductFilters({ availableTags }: ProductFiltersProps) {
       tags: parseAsArrayOf(parseAsString).withDefault([]),
       sort: parseAsString.withDefault("newest"),
     },
-    { shallow: false }
+    {
+      shallow: false,
+      throttleMs: 300,
+    },
   );
 
   const toggleTag = (tagSlug: string) => {
     const newTags = tags.includes(tagSlug)
-      ? tags.filter((t) => t !== tagSlug)
+      ? tags.filter(t => t !== tagSlug)
       : [...tags, tagSlug];
 
     setFilters({ tags: newTags.length > 0 ? newTags : null });
@@ -45,53 +49,74 @@ export function ProductFilters({ availableTags }: ProductFiltersProps) {
   return (
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row justify-between gap-4">
-      <SearchForm
-        formProps={{ className: "w-full md:w-[380px]" }}
-        inputFieldOnlyClassName="h-9"
-        placeholder="Search products..."
-      />
+        <div className="w-full md:w-[380px]">
+          <div className="bg-background has-[input:focus]:ring-muted relative grid grid-cols-[1fr_auto] items-center rounded-lg border shadow shadow-zinc-950/5 has-[input:focus]:ring-2 transition duration-300 ease-in-out">
+            <Label htmlFor="product-search" className="sr-only">
+              Search products
+            </Label>
+            <Input
+              id="product-search"
+              type="search"
+              placeholder="Search products..."
+              className="w-full bg-transparent pl-10 focus:outline-none rounded-lg placeholder:text-xs md:placeholder:text-sm text-xs md:text-sm transition duration-300 ease-in-out h-9"
+              value={search}
+              onChange={e => setFilters({ search: e.target.value || null })}
+            />
 
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2">
-          <Filter className="size-4 text-muted-foreground" />
-          <span className="text-sm font-medium">Filters:</span>
+            {search ? (
+              <button
+                type="reset"
+                onClick={() => setFilters({ search: null })}
+                className="absolute top-1/2 right-3.5 -translate-y-1/2 transition duration-300 ease-in-out"
+              >
+                <X className="size-4 opacity-50" />
+              </button>
+            ) : null}
+            <Search className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 opacity-50 select-none" />
+          </div>
         </div>
 
-        <Select
-          value={sort}
-          onValueChange={(value) => setFilters({ sort: value })}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="newest">Newest First</SelectItem>
-            <SelectItem value="oldest">Oldest First</SelectItem>
-            <SelectItem value="price_low">Price: Low to High</SelectItem>
-            <SelectItem value="price_high">Price: High to Low</SelectItem>
-            <SelectItem value="popular">Most Popular</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Filter className="size-4 text-muted-foreground" />
+            <span className="text-sm font-medium">Filters:</span>
+          </div>
 
-        {hasActiveFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={clearAllFilters}
-            className="h-8"
+          <Select
+            value={sort}
+            onValueChange={value => setFilters({ sort: value })}
           >
-            <X className="size-4" />
-            Clear all
-          </Button>
-        )}
-      </div>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest First</SelectItem>
+              <SelectItem value="oldest">Oldest First</SelectItem>
+              <SelectItem value="price_low">Price: Low to High</SelectItem>
+              <SelectItem value="price_high">Price: High to Low</SelectItem>
+              <SelectItem value="popular">Most Popular</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={clearAllFilters}
+              className="h-8"
+            >
+              <X className="size-4" />
+              Clear all
+            </Button>
+          )}
+        </div>
       </div>
 
       {availableTags.length > 0 && (
         <div>
           <p className="text-sm font-medium mb-2">Tags:</p>
           <div className="flex flex-wrap gap-2">
-            {availableTags.map((tag) => (
+            {availableTags.map(tag => (
               <Badge
                 key={tag.id}
                 variant={tags.includes(tag.slug) ? "default" : "outline"}
@@ -112,8 +137,8 @@ export function ProductFilters({ availableTags }: ProductFiltersProps) {
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">Active tags:</span>
           <div className="flex flex-wrap gap-2">
-            {tags.map((tagSlug) => {
-              const tag = availableTags.find((t) => t.slug === tagSlug);
+            {tags.map(tagSlug => {
+              const tag = availableTags.find(t => t.slug === tagSlug);
               return tag ? (
                 <Badge key={tagSlug} variant="secondary" className="gap-1">
                   {tag.name}

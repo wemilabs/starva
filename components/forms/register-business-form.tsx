@@ -156,10 +156,15 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Description</FormLabel>
+                <FormLabel>
+                  Description{" "}
+                  <span className="text-muted-foreground text-xs">
+                    (optional)
+                  </span>
+                </FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Welcome to my business. Here is what we offer."
+                    placeholder="Could simply be the slogan of your business."
                     className="placeholder:text-sm"
                     {...field}
                   />
@@ -184,7 +189,7 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {COUNTRIES.map((country) => (
+                        {COUNTRIES.map(country => (
                           <SelectItem key={country.code} value={country.code}>
                             <span className="flex items-center gap-2">
                               <span>{country.flag}</span>

@@ -20,6 +20,7 @@ import Link from "next/link";
 import { Activity } from "react";
 import { DeleteProductForm } from "../forms/delete-product-form";
 import { EditProductForm } from "../forms/edit-product-form";
+// import { ShareDialog } from "../share-dialog";
 import { AddToCartButton } from "./add-to-cart-button";
 import { ProductDetailsLink } from "./product-details-link";
 import { ProductLikeButton } from "./product-like-button";
@@ -113,19 +114,28 @@ export function ProductCard({
             </Avatar>
           </Link>
 
-          {href ? (
-            <ProductLikeButton
-              productId={id}
-              initialIsLiked={isLiked}
-              initialLikesCount={likesCount ?? 0}
-              revalidateTargetPath="/"
-              variant="compact"
-            />
-          ) : (
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-2.5 py-1 text-white/90 ring-1 ring-white/10 backdrop-blur-sm">
-              <span className="text-[11px]">{likesCount ?? 0}</span>
-            </div>
-          )}
+          <div className="inline-flex items-center gap-1">
+            {href ? (
+              <ProductLikeButton
+                productId={id}
+                initialIsLiked={isLiked}
+                initialLikesCount={likesCount ?? 0}
+                revalidateTargetPath="/"
+                variant="compact"
+              />
+            ) : (
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-2.5 py-1 text-white/90 ring-1 ring-white/10 backdrop-blur-sm">
+                <span className="text-[11px]">{likesCount ?? 0}</span>
+              </div>
+            )}
+            {/* <ShareDialog
+              url={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/products/${slug}`}
+              title={`Share ${name}`}
+              description={`Share this product with others`}
+              className="py-[17px]"
+              variant={{ variant: "ghost", size: "icon" }}
+            /> */}
+          </div>
         </div>
       </div>
     </>
@@ -134,7 +144,10 @@ export function ProductCard({
   return (
     <div className="relative">
       <Dialog>
-        <DialogTrigger asChild>
+        <DialogTrigger
+          asChild
+          // onClick={e => e.stopPropagation()}
+        >
           <Card className="group relative overflow-hidden p-0">
             {customCardContent}
           </Card>
@@ -182,7 +195,7 @@ export function ProductCard({
             </div>
 
             <Activity mode={href ? "visible" : "hidden"}>
-              <div className="flex flex-col gap-3 mt-4 mb-5">
+              <div className="flex flex-col gap-1.5 mt-4 mb-5">
                 <AddToCartButton
                   product={{
                     id,

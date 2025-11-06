@@ -117,7 +117,7 @@ export const subscriptionStatus = pgEnum("subscription_status", [
 
 export const organization = pgTable("organization", {
   id: text("id").primaryKey(),
-  name: text("name").notNull(),
+  name: text("name").unique().notNull(),
   slug: text("slug").unique().notNull(),
   logo: text("logo"),
   createdAt: timestamp("created_at").notNull(),

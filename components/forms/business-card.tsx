@@ -114,7 +114,7 @@ export function BusinessCard({ business }: { business: Organization }) {
                   <AlertDialogAction
                     className="bg-destructive hover:bg-destructive/90"
                     disabled={isPending}
-                    onClick={(e) => {
+                    onClick={e => {
                       e.preventDefault();
                       handleDelete();
                     }}

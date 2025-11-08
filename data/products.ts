@@ -5,13 +5,14 @@ import "server-only";
 import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
 import {
-  type ProductStatus,
   type ProductCategory,
+  type ProductStatus,
   product,
   productLike,
   productTag,
   tag,
 } from "@/db/schema";
+import { CATEGORY_CONFIG } from "@/lib/constants";
 
 const getUserLikedProductIds = async (userId: string): Promise<Set<string>> => {
   const likes = await db
@@ -277,14 +278,77 @@ async function getFilteredCachedProductsBase(filters: ProductFilters = {}) {
   }
 }
 
-export const getProductsByCategorySlug = cache(async (categorySlug: ProductCategory) => {
+export const getProductsByCategorySlug = cache(
+  async (categorySlug: ProductCategory) => {
+    const { success, session } = await verifySession();
+
+    const products = await db.query.product.findMany({
+      where: and(
+        eq(product.status, "in_stock"),
+        eq(product.category, categorySlug),
+      ),
+      with: {
+        organization: {
+          columns: {
+            id: true,
+            name: true,
+            logo: true,
+            slug: true,
+            metadata: true,
+          },
+        },
+        productTags: {
+          with: {
+            tag: {
+              columns: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: (product, { desc }) => [desc(product.createdAt)],
+    });
+
+    const productsWithTags = products.map(p => ({
+      ...p,
+      tags: p.productTags.map(pt => pt.tag),
+    }));
+
+    if (!success || !session) {
+      return productsWithTags.map(p => ({ ...p, isLiked: false }));
+    }
+
+    const likedProductIds = await getUserLikedProductIds(session.user.id);
+    return productsWithTags.map(p => ({
+      ...p,
+      isLiked: likedProductIds.has(p.id),
+    }));
+  },
+);
+
+export const getFilteredProducts = cache(
+  async (filters: ProductFilters = {}) => {
+    const { success, session } = await verifySession();
+
+    const products = await getFilteredCachedProductsBase(filters);
+
+    if (!success || !session) {
+      return products.map(p => ({ ...p, isLiked: false }));
+    }
+
+    const likedProductIds = await getUserLikedProductIds(session.user.id);
+    return products.map(p => ({ ...p, isLiked: likedProductIds.has(p.id) }));
+  },
+);
+
+export const getLatestProductsByCategory = cache(async () => {
   const { success, session } = await verifySession();
 
   const products = await db.query.product.findMany({
-    where: and(
-      eq(product.status, "in_stock"),
-      eq(product.category, categorySlug)
-    ),
+    where: eq(product.status, "in_stock"),
     with: {
       organization: {
         columns: {
@@ -315,28 +379,39 @@ export const getProductsByCategorySlug = cache(async (categorySlug: ProductCateg
     tags: p.productTags.map(pt => pt.tag),
   }));
 
-  if (!success || !session) {
-    return productsWithTags.map(p => ({ ...p, isLiked: false }));
+  // Add isLiked status if user is authenticated
+  let productsWithLikes = productsWithTags;
+  if (success && session) {
+    const likedProductIds = await getUserLikedProductIds(session.user.id);
+    productsWithLikes = productsWithTags.map(p => ({
+      ...p,
+      isLiked: likedProductIds.has(p.id),
+    }));
+  } else {
+    productsWithLikes = productsWithTags.map(p => ({ ...p, isLiked: false }));
   }
 
-  const likedProductIds = await getUserLikedProductIds(session.user.id);
-  return productsWithTags.map(p => ({
-    ...p,
-    isLiked: likedProductIds.has(p.id),
-  }));
+  const groupedByCategory = productsWithLikes.reduce(
+    (acc, product) => {
+      const category = product.category;
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(product);
+      return acc;
+    },
+    {} as Record<ProductCategory, typeof productsWithLikes>,
+  );
+
+  const categoriesWithProducts = Object.entries(groupedByCategory)
+    .map(([category, categoryProducts]) => ({
+      category: category as ProductCategory,
+      products: categoryProducts.slice(0, 5),
+      totalCount: categoryProducts.length,
+      config: CATEGORY_CONFIG[category as keyof typeof CATEGORY_CONFIG],
+    }))
+    .filter(({ config }) => config)
+    .sort((a, b) => a.config.priority - b.config.priority);
+
+  return categoriesWithProducts;
 });
-
-export const getFilteredProducts = cache(
-  async (filters: ProductFilters = {}) => {
-    const { success, session } = await verifySession();
-
-    const products = await getFilteredCachedProductsBase(filters);
-
-    if (!success || !session) {
-      return products.map(p => ({ ...p, isLiked: false }));
-    }
-
-    const likedProductIds = await getUserLikedProductIds(session.user.id);
-    return products.map(p => ({ ...p, isLiked: likedProductIds.has(p.id) }));
-  },
-);

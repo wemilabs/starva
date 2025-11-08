@@ -353,3 +353,71 @@ export const CATEGORY_CONTENT: Record<
     ],
   },
 } as const;
+
+export const CATEGORY_CONFIG = {
+  "food-groceries": {
+    label: "Food & Groceries",
+    icon: "ShoppingCart",
+    priority: 1,
+  },
+  "health-wellness": {
+    label: "Health & Wellness",
+    icon: "Heart",
+    priority: 2,
+  },
+  electronics: {
+    label: "Electronics",
+    icon: "Smartphone",
+    priority: 3,
+  },
+  clothing: {
+    label: "Clothing",
+    icon: "Shirt",
+    priority: 4,
+  },
+  footwear: {
+    label: "Footwear",
+    icon: "Footprints",
+    priority: 5,
+  },
+  "beauty-personal-care": {
+    label: "Beauty & Personal Care",
+    icon: "Sparkles",
+    priority: 6,
+  },
+  "jewelry-accessories": {
+    label: "Jewelry & Accessories",
+    icon: "Gem",
+    priority: 7,
+  },
+  appliances: {
+    label: "Appliances",
+    icon: "Home",
+    priority: 8,
+  },
+  furniture: {
+    label: "Furniture",
+    icon: "Sofa",
+    priority: 9,
+  },
+  "books-media": {
+    label: "Books & Media",
+    icon: "BookOpen",
+    priority: 10,
+  },
+  automotive: {
+    label: "Automotive",
+    icon: "Car",
+    priority: 11,
+  },
+  "toys-games": {
+    label: "Toys & Games",
+    icon: "Gamepad2",
+    priority: 12,
+  },
+  others: {
+    label: "Others",
+    icon: "MoreHorizontal",
+    priority: 13,
+  },
+} as const;

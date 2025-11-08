@@ -124,8 +124,8 @@ export default async function OrdersPage() {
   return (
     <div className="container mx-auto max-w-7xl py-7 space-y-7">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Orders</h1>
-        <p className="text-muted-foreground mt-0.5 text-sm">
+        <h1 className="text-2xl font-medium tracking-tight">Orders</h1>
+        <p className="text-muted-foreground mt-0.5 text-sm text-pretty">
           Manage and track all your orders
         </p>
       </div>

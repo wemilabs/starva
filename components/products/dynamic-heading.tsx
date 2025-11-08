@@ -58,8 +58,8 @@ export function DynamicHeading({
 
   return (
     <div className="mb-8">
-      <h1 className="text-2xl font-bold mb-2">{heading}</h1>
-      <p className="text-sm text-muted-foreground">{subheading}</p>
+      <h1 className="font-medium tracking-tight text-2xl">{heading}</h1>
+      <p className="text-sm text-pretty text-muted-foreground">{subheading}</p>
     </div>
   );
 }

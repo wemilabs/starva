@@ -1,7 +1,7 @@
-import { EnVogue } from "@/components/en-vogue";
 import { Hero } from "@/components/hero";
-import { Suspense } from "react";
+import { LatestProducts } from "@/components/latest-products";
 import { SkeletonProductCard } from "@/components/products/skeleton-product-card";
+import { Suspense } from "react";
 
 export default async function Home() {
   return (
@@ -11,9 +11,9 @@ export default async function Home() {
         fallback={
           <section className="mx-auto flex w-full max-w-[1264px] flex-1 flex-col gap-4 mt-8">
             <div className="flex flex-col gap-1 py-2">
-              <h2 className="font-medium tracking-tight">En Vogue</h2>
+              <h2 className="font-medium tracking-tight text-xl">Latest Products</h2>
               <p className="text-xs text-pretty text-muted-foreground">
-                Loading trending products...
+                Loading latest products...
               </p>
             </div>
             <div className="flex w-full flex-col gap-6 flex-1">
@@ -31,7 +31,7 @@ export default async function Home() {
           </section>
         }
       >
-        <EnVogue />
+        <LatestProducts />
       </Suspense>
     </div>
   );

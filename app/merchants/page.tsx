@@ -85,8 +85,8 @@ export default async function MerchantsPage() {
     <div className="container max-w-7xl py-7 space-y-7">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">All Merchants</h1>
-          <p className="text-muted-foreground mt-0.5 text-sm">
+          <h1 className="text-2xl font-medium tracking-tight">All Merchants</h1>
+          <p className="text-muted-foreground mt-0.5 text-sm text-pretty">
             Engage with all current available merchants
           </p>
         </div>

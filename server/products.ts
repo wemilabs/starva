@@ -15,6 +15,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { z } from "zod";
+import type { ProductCategory } from "@/db/schema";
 
 const productSchema = z.object({
   organizationId: z.string().min(1),
@@ -24,6 +25,7 @@ const productSchema = z.object({
   description: z.string().optional().default(""),
   imageUrl: z.url().optional().or(z.literal("")),
   status: z.enum(PRODUCT_STATUS_VALUES),
+  category: z.string().min(1),
   tagNames: z.array(z.string()).optional().default([]),
   revalidateTargetPath: z.string().min(1),
 });
@@ -43,6 +45,7 @@ export async function createProduct(input: z.infer<typeof productSchema>) {
       description,
       imageUrl,
       status,
+      category,
       tagNames,
       revalidateTargetPath,
     } = parsed.data;
@@ -57,6 +60,7 @@ export async function createProduct(input: z.infer<typeof productSchema>) {
         organizationId,
         imageUrl: imageUrl || null,
         status,
+        category: category as ProductCategory,
       })
       .returning();
 
@@ -126,6 +130,7 @@ export async function updateProduct(
       description,
       imageUrl,
       status,
+      category,
       tagNames,
       revalidateTargetPath,
     } = parsed.data;
@@ -157,6 +162,7 @@ export async function updateProduct(
         price,
         imageUrl: newImageUrl,
         status,
+        category: category as ProductCategory,
       })
       .where(
         and(

@@ -2,12 +2,16 @@
 
 import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
-import { productLike, product as productTable, tag, productTag } from "@/db/schema";
+import {
+  productLike,
+  product as productTable,
+  productTag,
+  tag,
+} from "@/db/schema";
 import { PRODUCT_STATUS_VALUES } from "@/lib/constants";
 import { extractFileKeyFromUrl, utapi } from "@/lib/uploadthing-server";
 import { slugify } from "@/lib/utils";
 import { and, eq, sql } from "drizzle-orm";
-import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { after } from "next/server";
 import { z } from "zod";
@@ -43,22 +47,25 @@ export async function createProduct(input: z.infer<typeof productSchema>) {
       revalidateTargetPath,
     } = parsed.data;
 
-    const [newProduct] = await db.insert(productTable).values({
-      name,
-      slug,
-      description: description || "",
-      price,
-      organizationId,
-      imageUrl: imageUrl || null,
-      status,
-    }).returning();
+    const [newProduct] = await db
+      .insert(productTable)
+      .values({
+        name,
+        slug,
+        description: description || "",
+        price,
+        organizationId,
+        imageUrl: imageUrl || null,
+        status,
+      })
+      .returning();
 
     if (tagNames && tagNames.length > 0) {
       const tagIds: string[] = [];
-      
+
       for (const tagName of tagNames) {
         const tagSlug = slugify(tagName);
-        
+
         const existingTag = await db
           .select()
           .from(tag)
@@ -68,18 +75,19 @@ export async function createProduct(input: z.infer<typeof productSchema>) {
         if (existingTag.length > 0) {
           tagIds.push(existingTag[0].id);
         } else {
-          const [newTag] = await db.insert(tag).values({
-            id: randomUUID(),
-            name: tagName,
-            slug: tagSlug,
-          }).returning();
+          const [newTag] = await db
+            .insert(tag)
+            .values({
+              name: tagName,
+              slug: tagSlug,
+            })
+            .returning();
           tagIds.push(newTag.id);
         }
       }
 
       if (tagIds.length > 0) {
-        const productTagValues = tagIds.map((tagId) => ({
-          id: randomUUID(),
+        const productTagValues = tagIds.map(tagId => ({
           productId: newProduct.id,
           tagId,
         }));
@@ -162,10 +170,10 @@ export async function updateProduct(
 
       if (tagNames.length > 0) {
         const tagIds: string[] = [];
-        
+
         for (const tagName of tagNames) {
           const tagSlug = slugify(tagName);
-          
+
           const existingTag = await db
             .select()
             .from(tag)
@@ -175,18 +183,19 @@ export async function updateProduct(
           if (existingTag.length > 0) {
             tagIds.push(existingTag[0].id);
           } else {
-            const [newTag] = await db.insert(tag).values({
-              id: randomUUID(),
-              name: tagName,
-              slug: tagSlug,
-            }).returning();
+            const [newTag] = await db
+              .insert(tag)
+              .values({
+                name: tagName,
+                slug: tagSlug,
+              })
+              .returning();
             tagIds.push(newTag.id);
           }
         }
 
         if (tagIds.length > 0) {
-          const productTagValues = tagIds.map((tagId) => ({
-            id: randomUUID(),
+          const productTagValues = tagIds.map(tagId => ({
             productId,
             tagId,
           }));

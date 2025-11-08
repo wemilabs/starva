@@ -25,7 +25,7 @@ import { AddToCartButton } from "./add-to-cart-button";
 import { ProductDetailsLink } from "./product-details-link";
 import { ProductLikeButton } from "./product-like-button";
 
-type Props = Product & {
+type ProductCardProps = Product & {
   organization?: {
     id: string;
     name: string;
@@ -45,6 +45,7 @@ export function ProductCard({
   description,
   likesCount,
   status,
+  category,
   organization,
   createdAt,
   updatedAt,
@@ -53,8 +54,8 @@ export function ProductCard({
   organizationId,
   href,
   isLiked = false,
-}: Props) {
-  const priceNumber = Number(price) || 0;
+}: ProductCardProps) {
+  const priceNumber = Number(price) ?? 0;
 
   const orgName = organization?.name ?? null;
   const orgLogo = organization?.logo ?? null;
@@ -223,6 +224,7 @@ export function ProductCard({
               imageUrl,
               description,
               status,
+              category,
               likesCount,
               createdAt,
               organizationId,

@@ -10,11 +10,43 @@ import { ShareDialog } from "@/components/share-dialog";
 import { Badge } from "@/components/ui/badge";
 import { ProtectedImage } from "@/components/ui/protected-image";
 import { getProductBySlug } from "@/data/products";
+import type { Product } from "@/db/schema";
 import { FALLBACK_PRODUCT_IMG_URL } from "@/lib/constants";
 import {
   formatPriceInRWF,
+  getCategoryLabel,
   removeUnderscoreAndCapitalizeOnlyTheFirstChar,
 } from "@/lib/utils";
+
+function getCategorySpecificInfo(product: Product) {
+  switch (product.category) {
+    case "clothing":
+      return {
+        label: "Sizes",
+        value: "S, M, L, XL, XXL",
+      };
+    case "electronics":
+      return {
+        label: "State",
+        value: "New, Used, Refurbished",
+      };
+    case "books-media":
+      return {
+        label: "Pages",
+        value: "200-300 pages",
+      };
+    case "food-groceries":
+      return {
+        label: "Calories",
+        value: product.calories ?? "N/A",
+      };
+    default:
+      return {
+        label: "Specifications",
+        value: "See details below",
+      };
+  }
+}
 
 async function ProductDisplay({ productSlug }: { productSlug: string }) {
   const product = await getProductBySlug(productSlug);
@@ -46,6 +78,15 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
             {formatPriceInRWF(product.price)}
           </div>
 
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="text-xs">
+              {getCategoryLabel(product.category)}
+            </Badge>
+            <Badge variant="available" className="text-xs">
+              {removeUnderscoreAndCapitalizeOnlyTheFirstChar(product.status)}
+            </Badge>
+          </div>
+
           <div className="prose max-w-none text-sm text-muted-foreground">
             <p>{product.description}</p>
           </div>
@@ -58,8 +99,12 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
               </Badge>
             </div>
             <div className="rounded-md border p-4">
-              <p className="text-muted-foreground">Calories</p>
-              <p className="mt-1 font-medium">{product.calories ?? "N/A"}</p>
+              <p className="text-muted-foreground">
+                {getCategorySpecificInfo(product).label}
+              </p>
+              <p className="mt-1 font-medium">
+                {getCategorySpecificInfo(product).value}
+              </p>
             </div>
             <div className="rounded-md border p-4">
               <p className="text-muted-foreground mb-2">Likes</p>

@@ -115,6 +115,23 @@ export const subscriptionStatus = pgEnum("subscription_status", [
   "trial",
 ]);
 
+export const productCategory = pgEnum("product_category", [
+  "health-wellness",
+  "food-groceries",
+  "clothing",
+  "real-estate",
+  "footwear",
+  "beauty-personal-care",
+  "jewelry-accessories",
+  "electronics",
+  "appliances",
+  "furniture",
+  "books-media",
+  "automotive",
+  "toys-games",
+  "others",
+]);
+
 export const organization = pgTable("organization", {
   id: text("id").primaryKey(),
   name: text("name").unique().notNull(),
@@ -274,6 +291,7 @@ export const product = pgTable(
     price: decimal("price", { precision: 10, scale: 2 }).notNull(),
     likesCount: integer("likes_count").default(0),
     status: productStatus("status").default("in_stock").notNull(),
+    category: productCategory("category").notNull().default("others"),
     organizationId: text("organization_id")
       .notNull()
       .references(() => organization.id, { onDelete: "cascade" }),
@@ -296,7 +314,9 @@ export const product = pgTable(
 export const tag = pgTable(
   "tag",
   {
-    id: text("id").primaryKey(),
+    id: text("id")
+      .$defaultFn(() => randomUUID())
+      .primaryKey(),
     name: text("name").notNull(),
     slug: text("slug").unique().notNull(),
     description: text("description"),
@@ -313,7 +333,9 @@ export const tag = pgTable(
 export const productTag = pgTable(
   "product_tag",
   {
-    id: text("id").primaryKey(),
+    id: text("id")
+      .$defaultFn(() => randomUUID())
+      .primaryKey(),
     productId: text("product_id")
       .notNull()
       .references(() => product.id, {
@@ -554,6 +576,7 @@ export type Member = typeof member.$inferSelect & {
 };
 export type User = typeof user.$inferSelect;
 export type Product = typeof product.$inferSelect;
+export type ProductCategory = (typeof productCategory.enumValues)[number];
 export type ProductLike = typeof productLike.$inferSelect;
 export type Tag = typeof tag.$inferSelect;
 export type ProductStatus = (typeof productStatus.enumValues)[number];

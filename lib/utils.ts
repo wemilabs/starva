@@ -1,3 +1,4 @@
+import { productCategory } from "@/db/schema";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { COUNTRIES } from "./constants";
@@ -10,7 +11,7 @@ export const getInitials = (name?: string | null) => {
   return name
     .split(" ")
     .filter(Boolean)
-    .map((word) => word[0])
+    .map(word => word[0])
     .join("")
     .slice(0, 2)
     .toUpperCase();
@@ -35,7 +36,7 @@ export const removeUnderscoreAndCapitalizeOnlyTheFirstChar = (
 
 export const parsePhoneNumber = (fullPhone: string) => {
   if (!fullPhone) return { countryCode: COUNTRIES[0].code, phoneNumber: "" };
-  const country = COUNTRIES.find((c) => fullPhone.startsWith(c.code));
+  const country = COUNTRIES.find(c => fullPhone.startsWith(c.code));
   if (country) {
     return {
       countryCode: country.code,
@@ -106,3 +107,32 @@ export const formatPriceInRWF = (price: string | number) => {
     maximumFractionDigits: 0,
   }).format(numPrice);
 };
+
+export const PRODUCT_CATEGORIES = productCategory.enumValues;
+
+export function getCategoryLabel(key: string): string {
+  const categoryMap: Record<string, string> = {
+    "health-wellness": "Health & Wellness",
+    "food-groceries": "Food & Groceries",
+    clothing: "Clothing",
+    "real-estate": "Real Estate",
+    footwear: "Footwear",
+    "beauty-personal-care": "Beauty & Personal Care",
+    "jewelry-accessories": "Jewelry & Accessories",
+    electronics: "Electronics",
+    appliances: "Appliances",
+    furniture: "Furniture",
+    "books-media": "Books & Media",
+    automotive: "Automotive",
+    "toys-games": "Toys & Games",
+    others: "Others",
+  };
+  return categoryMap[key] || key;
+}
+
+export function getCategoryOptions() {
+  return PRODUCT_CATEGORIES.map(key => ({
+    value: key,
+    label: getCategoryLabel(key),
+  }));
+}

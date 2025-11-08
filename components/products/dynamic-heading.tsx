@@ -1,15 +1,18 @@
 "use client";
 
+import { CATEGORY_CONTENT } from "@/lib/constants";
 import { parseAsArrayOf, parseAsString, useQueryStates } from "nuqs";
 
 interface DynamicHeadingProps {
   initialSearch?: string;
   initialTags?: string[];
+  categorySlug?: string;
 }
 
 export function DynamicHeading({
   initialSearch,
   initialTags,
+  categorySlug,
 }: DynamicHeadingProps) {
   const [{ search, tags }] = useQueryStates(
     {
@@ -22,10 +25,16 @@ export function DynamicHeading({
     },
   );
 
-  // Dynamic heading based on filters
-  let heading = "Browse Products";
-  let subheading =
-    "Discover a wide range of meals, fast-foods, and drinks from our local partners";
+  const headingInfo = categorySlug
+    ? CATEGORY_CONTENT[categorySlug]
+    : {
+        title: "All",
+        description:
+          "Discover a wide range of diverse kind of products from our local partners",
+      };
+
+  let heading = `Browse ${headingInfo.title}`;
+  let subheading = headingInfo.description;
 
   // Use client-side values if available, otherwise fall back to initial values
   const currentSearch = search || initialSearch || "";

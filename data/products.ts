@@ -6,6 +6,7 @@ import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
 import {
   type ProductStatus,
+  type ProductCategory,
   product,
   productLike,
   productTag,
@@ -275,6 +276,55 @@ async function getFilteredCachedProductsBase(filters: ProductFilters = {}) {
     return [];
   }
 }
+
+export const getProductsByCategorySlug = cache(async (categorySlug: ProductCategory) => {
+  const { success, session } = await verifySession();
+
+  const products = await db.query.product.findMany({
+    where: and(
+      eq(product.status, "in_stock"),
+      eq(product.category, categorySlug)
+    ),
+    with: {
+      organization: {
+        columns: {
+          id: true,
+          name: true,
+          logo: true,
+          slug: true,
+          metadata: true,
+        },
+      },
+      productTags: {
+        with: {
+          tag: {
+            columns: {
+              id: true,
+              name: true,
+              slug: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: (product, { desc }) => [desc(product.createdAt)],
+  });
+
+  const productsWithTags = products.map(p => ({
+    ...p,
+    tags: p.productTags.map(pt => pt.tag),
+  }));
+
+  if (!success || !session) {
+    return productsWithTags.map(p => ({ ...p, isLiked: false }));
+  }
+
+  const likedProductIds = await getUserLikedProductIds(session.user.id);
+  return productsWithTags.map(p => ({
+    ...p,
+    isLiked: likedProductIds.has(p.id),
+  }));
+});
 
 export const getFilteredProducts = cache(
   async (filters: ProductFilters = {}) => {

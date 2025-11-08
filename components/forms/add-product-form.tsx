@@ -33,6 +33,8 @@ import { PRODUCT_STATUS_VALUES } from "@/lib/constants";
 import { UploadButton } from "@/lib/uploadthing";
 import {
   getCategoryOptions,
+  getCategorySpecificationLabel,
+  getCategorySpecificationPlaceholder,
   removeUnderscoreAndCapitalizeOnlyTheFirstChar,
   slugify,
 } from "@/lib/utils";
@@ -60,6 +62,7 @@ const schema = z.object({
   description: z.string().max(500).optional().or(z.literal("")),
   status: z.enum(PRODUCT_STATUS_VALUES),
   category: z.string().min(1, "Category is required"),
+  specifications: z.string().optional().or(z.literal("")),
   tags: z.array(z.custom<Tag>()),
 });
 
@@ -84,6 +87,7 @@ export function AddProductForm({
       description: "",
       status: PRODUCT_STATUS_VALUES[0],
       category: "",
+      specifications: "",
       tags: [],
     },
   });
@@ -120,6 +124,7 @@ export function AddProductForm({
           imageUrl: values.imageUrl || "",
           status: values.status,
           category: values.category,
+          specifications: values.specifications ?? "",
           tagNames: values.tags.map(t => t.name),
           revalidateTargetPath: `/businesses/${businessSlug}`,
         });
@@ -246,6 +251,28 @@ export function AddProductForm({
                   )}
                 />
               </div>
+
+              <FormField
+                control={form.control}
+                name="specifications"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      {getCategorySpecificationLabel(form.watch("category"))}
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={getCategorySpecificationPlaceholder(
+                          form.watch("category"),
+                        )}
+                        className="placeholder:text-sm"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <FormField
                 control={form.control}

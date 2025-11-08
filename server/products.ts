@@ -26,6 +26,7 @@ const productSchema = z.object({
   imageUrl: z.url().optional().or(z.literal("")),
   status: z.enum(PRODUCT_STATUS_VALUES),
   category: z.string().min(1),
+  specifications: z.string().optional().default(""),
   tagNames: z.array(z.string()).optional().default([]),
   revalidateTargetPath: z.string().min(1),
 });
@@ -46,6 +47,7 @@ export async function createProduct(input: z.infer<typeof productSchema>) {
       imageUrl,
       status,
       category,
+      specifications,
       tagNames,
       revalidateTargetPath,
     } = parsed.data;
@@ -61,6 +63,7 @@ export async function createProduct(input: z.infer<typeof productSchema>) {
         imageUrl: imageUrl || null,
         status,
         category: category as ProductCategory,
+        specifications: specifications || null,
       })
       .returning();
 
@@ -131,6 +134,7 @@ export async function updateProduct(
       imageUrl,
       status,
       category,
+      specifications,
       tagNames,
       revalidateTargetPath,
     } = parsed.data;
@@ -163,6 +167,7 @@ export async function updateProduct(
         imageUrl: newImageUrl,
         status,
         category: category as ProductCategory,
+        specifications: specifications || null,
       })
       .where(
         and(

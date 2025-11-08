@@ -46,6 +46,7 @@ export function ProductCard({
   likesCount,
   status,
   category,
+  specifications,
   organization,
   createdAt,
   updatedAt,
@@ -145,10 +146,7 @@ export function ProductCard({
   return (
     <div className="relative">
       <Dialog>
-        <DialogTrigger
-          asChild
-          // onClick={e => e.stopPropagation()}
-        >
+        <DialogTrigger asChild>
           <Card className="group relative overflow-hidden p-0">
             {customCardContent}
           </Card>
@@ -230,6 +228,7 @@ export function ProductCard({
               organizationId,
               calories,
               updatedAt,
+              specifications,
               brand,
             }}
             organizationId={organization?.id || ""}

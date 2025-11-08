@@ -136,3 +136,69 @@ export function getCategoryOptions() {
     label: getCategoryLabel(key),
   }));
 }
+
+export function getCategorySpecificationLabel(category: string): string {
+  switch (category) {
+    case "health-wellness":
+      return "Dosage/Size";
+    case "food-groceries":
+      return "Calories";
+    case "clothing":
+      return "Sizes";
+    case "real-estate":
+      return "Area";
+    case "footwear":
+      return "Sizes";
+    case "beauty-personal-care":
+      return "Volume";
+    case "jewelry-accessories":
+      return "Material";
+    case "electronics":
+      return "Condition";
+    case "appliances":
+      return "Capacity";
+    case "furniture":
+      return "Dimensions";
+    case "books-media":
+      return "Pages";
+    case "automotive":
+      return "Year";
+    case "toys-games":
+      return "Age Range";
+    default:
+      return "Specifications";
+  }
+}
+
+export function getCategorySpecificationPlaceholder(category: string): string {
+  switch (category) {
+    case "health-wellness":
+      return "e.g., 500mg, 100ml";
+    case "food-groceries":
+      return "e.g., 250";
+    case "clothing":
+      return "S, M, L, XL, XXL";
+    case "real-estate":
+      return "e.g., 150 sqm, 3 bedrooms";
+    case "footwear":
+      return "e.g., 38, 39, 40, 41, 42";
+    case "beauty-personal-care":
+      return "e.g., 50ml, For dry skin";
+    case "jewelry-accessories":
+      return "e.g., Gold, Silver, 18K";
+    case "electronics":
+      return "New, Used, Refurbished";
+    case "appliances":
+      return "e.g., 10L, 1 year warranty";
+    case "furniture":
+      return "e.g., 200x150x80cm, Wood";
+    case "books-media":
+      return "e.g., 200-300 pages";
+    case "automotive":
+      return "e.g., 2020, 50,000 km";
+    case "toys-games":
+      return "e.g., 3-8 years";
+    default:
+      return "e.g., Key features or details";
+  }
+}

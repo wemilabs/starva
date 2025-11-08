@@ -10,43 +10,13 @@ import { ShareDialog } from "@/components/share-dialog";
 import { Badge } from "@/components/ui/badge";
 import { ProtectedImage } from "@/components/ui/protected-image";
 import { getProductBySlug } from "@/data/products";
-import type { Product } from "@/db/schema";
 import { FALLBACK_PRODUCT_IMG_URL } from "@/lib/constants";
 import {
   formatPriceInRWF,
   getCategoryLabel,
+  getCategorySpecificationLabel,
   removeUnderscoreAndCapitalizeOnlyTheFirstChar,
 } from "@/lib/utils";
-
-function getCategorySpecificInfo(product: Product) {
-  switch (product.category) {
-    case "clothing":
-      return {
-        label: "Sizes",
-        value: "S, M, L, XL, XXL",
-      };
-    case "electronics":
-      return {
-        label: "State",
-        value: "New, Used, Refurbished",
-      };
-    case "books-media":
-      return {
-        label: "Pages",
-        value: "200-300 pages",
-      };
-    case "food-groceries":
-      return {
-        label: "Calories",
-        value: product.calories ?? "N/A",
-      };
-    default:
-      return {
-        label: "Specifications",
-        value: "See details below",
-      };
-  }
-}
 
 async function ProductDisplay({ productSlug }: { productSlug: string }) {
   const product = await getProductBySlug(productSlug);
@@ -100,10 +70,10 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
             </div>
             <div className="rounded-md border p-4">
               <p className="text-muted-foreground">
-                {getCategorySpecificInfo(product).label}
+                {getCategorySpecificationLabel(product.category)}
               </p>
               <p className="mt-1 font-medium">
-                {getCategorySpecificInfo(product).value}
+                {product.specifications || "N/A"}
               </p>
             </div>
             <div className="rounded-md border p-4">

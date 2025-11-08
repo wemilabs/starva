@@ -298,6 +298,7 @@ export const product = pgTable(
     calories: integer("calories"),
     imageUrl: text("image_url"),
     brand: text("brand"),
+    specifications: text("specifications"),
     createdAt: timestamp("created_at")
       .$defaultFn(() => /* @__PURE__ */ new Date())
       .notNull(),

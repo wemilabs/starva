@@ -1,8 +1,8 @@
-import { FALLBACK_HERO_IMG_URL } from "@/lib/constants";
-import Image from "next/image";
+import { HERO_IMAGES } from "@/lib/constants";
 import { Suspense } from "react";
 import { AnimatedGroup } from "./animated-group";
 import { SearchForm } from "./forms/search-form";
+import { HeroCarousel } from "./hero-carousel";
 import { TextEffect } from "./text-effect";
 
 const transitionVariants = {
@@ -27,17 +27,11 @@ const transitionVariants = {
 
 export async function Hero() {
   "use cache";
+
   return (
     <section className="overflow-hidden [--color-primary-foreground:var(--color-white)] [--color-primary:var(--color-orange-600)] rounded-lg">
       <div className="relative mx-auto max-w-full px-6 py-20 lg:pt-30">
-        <Image
-          src={FALLBACK_HERO_IMG_URL}
-          alt="Pre-prepared food showcasing ready-eat delicious meals"
-          width={1000}
-          height={1000}
-          className="absolute top-0 left-0 w-full h-full object-cover"
-          priority
-        />
+        <HeroCarousel images={[...HERO_IMAGES]} interval={4000} />
         <div className="absolute top-0 left-0 w-full h-full bg-black/50" />
         <div className="relative z-10 mx-auto max-w-4xl text-center">
           <TextEffect
@@ -45,11 +39,9 @@ export async function Hero() {
             speedSegment={0.3}
             as="h1"
             per="word"
-            className="text-balance text-2xl sm:text-4xl font-semibold md:text-5xl tracking-tight text-primary-foreground"
-            highlightWords={["Bon", "appétit"]}
-            highlightWrapperAs="span"
+            className="mx-auto text-balance text-4xl font-semibold md:text-5xl lg:text-7xl tracking-wide lg:tracking-wider text-primary-foreground"
           >
-            Search. Order. Bon appétit 😋
+            Search. Shop. Smile.
           </TextEffect>
           <TextEffect
             per="line"
@@ -57,11 +49,10 @@ export async function Hero() {
             speedSegment={0.3}
             delay={0.5}
             as="p"
-            className="mx-auto mt-6 max-w-2xl text-pretty text-xs md:text-sm text-primary-foreground"
+            className="mx-auto mt-2 max-w-2xl text-sm sm:text-base text-pretty text-primary-foreground font-mono tracking-tighter"
           >
-            WhatsApp groups and their hellish notifications: such a maddening
-            experience. Either looking for something to eat or promote your
-            restaurant business. Fortunately, enters Starva solving it.
+            Say goodbye to WhatsApp madness. Whether discovering local gems or
+            expanding your business reach, Starva makes it simple.
           </TextEffect>
 
           <AnimatedGroup
@@ -76,7 +67,7 @@ export async function Hero() {
               },
               ...transitionVariants,
             }}
-            className="mt-12"
+            className="mt-6"
           >
             <Suspense fallback={<div className="h-10 md:h-12" />}>
               <SearchForm

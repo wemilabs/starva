@@ -8,8 +8,6 @@ export const ERROR_PAGE_IMG_URL =
   "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6db6Se9J5oPvMdz2Zcih1tWnNrgmwjYaRqfCuK";
 export const NOTFOUND_PAGE_IMG_URL =
   "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dJdyQ7mebB6d1NpIUrVzHcsfFA7aEkjQ4oDvS";
-export const FALLBACK_HERO_IMG_URL =
-  "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dz7JnPyW2kz06ogjwmFnOXWGv2lN4VS7CTLua";
 
 export const PRODUCT_STATUS_VALUES = [
   "in_stock",
@@ -421,3 +419,54 @@ export const CATEGORY_CONFIG = {
     priority: 13,
   },
 } as const;
+
+export const HERO_IMAGES = [
+  {
+    src: "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dWgCq0iLAZB6Qo3FrkqV8SYhsv4eu9Oi2jMPf",
+    alt: "Healthy nigerian food showcasing ready-eat delicious meals",
+  },
+  {
+    src: "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dbJAZ4ZX5oPvMdz2Zcih1tWnNrgmwjYaRqfCu",
+    alt: "A set of diverse colored shirts showcasing clothing",
+  },
+  {
+    src: "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dvbJOADIQPkhj1f2AYaXbVmvCu3Row6eDlJxE",
+    alt: "Antique Golden Jewelery from Ancient Egypt",
+  },
+  {
+    src: "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dschy7bxjUQJANPlGO1ZFogVMpIn4Y05zyWDr",
+    alt: "House with a beautiful garden showcasing real estate",
+  },
+  {
+    src: "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dAKKAPiDqbEWlKLtN1oeBTCR4PGIhX0O2m6VU",
+    alt: "A mix of diverse shoes showcasing footwear",
+  },
+  {
+    src: "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dXSKPW7FrDwsIL6SElt8PgWAcRu57BaQqbkjo",
+    alt: "Beauty and personal care products",
+  },
+  {
+    src: "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dKhhdT3F4pzfmF7e8cGUbILY2sRTlaynxgkZV",
+    alt: "Phones and gadgets showcasing electronics",
+  },
+  {
+    src: "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6d5p1u7dHQDYgawe3pLMcSzA2BRrmUC7In0yNG",
+    alt: "Appliances",
+  },
+  {
+    src: "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dGKinkxQ39wuqkW71FtJiLjgBns5eZO2mM8hT",
+    alt: "Books and media",
+  },
+  {
+    src: "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6du6Y0vA8lTLMJtliDeN9nXqzs57GUH6RgZbry",
+    alt: "Beautiful home furnitures",
+  },
+  {
+    src: "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dSIZ3mZ4MCDtSP4O75M2BIcxXKWVmwyqoRTHd",
+    alt: "Games and toys",
+  },
+  {
+    src: "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dcbh1MBmIArhnvfDRX0Z6MmjGTiPByVkcOxHe",
+    alt: "Cars and automotive",
+  },
+] as const;

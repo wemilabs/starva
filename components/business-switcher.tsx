@@ -110,7 +110,7 @@ export function BusinessSwitcher() {
                       </AvatarFallback>
                     </Avatar>
                     <span className="truncate group-data-[collapsible=icon]:hidden">
-                      {activeBusiness?.name ?? "Select business..."}
+                      {activeBusiness?.name ?? "Activate business..."}
                     </span>
                     <ChevronsUpDown className="ml-auto opacity-50 group-data-[collapsible=icon]:hidden size-4" />
                   </div>
@@ -134,7 +134,7 @@ export function BusinessSwitcher() {
                       <Link
                         href={`/businesses/${business.slug}`}
                         key={business.id}
-                        onClick={(e) =>
+                        onClick={e =>
                           handleBusinessChange(e, business.id, business.slug)
                         }
                       >

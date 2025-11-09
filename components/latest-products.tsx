@@ -82,21 +82,11 @@ function CategorySection({
 
       <div className="flex w-full flex-col gap-6 flex-1">
         <div className="flex-1 pt-4">
-          <div className="grid grid-cols-1 justify-center gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {/* <ScrollArea className="w-full whitespace-nowrap"> */}
-            <FilteredProducts data={products} />
-            {/* <ScrollBar orientation="horizontal" /> */}
-            {/* </ScrollArea> */}
+          <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 overflow-x-auto scrollbar-hide sm:overflow-visible">
+            <FilteredProducts data={products} layout="horizontal-scroll" />
           </div>
         </div>
       </div>
-
-      {/* <ScrollArea className="w-full whitespace-nowrap">
-        <div className="grid grid-flow-col auto-cols-[320px] gap-4 pb-4">
-          <FilteredProducts data={products} />
-        </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea> */}
     </div>
   );
 }

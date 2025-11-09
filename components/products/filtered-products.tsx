@@ -19,11 +19,13 @@ type ProductWithOrg = Product & {
 type FilteredProductsProps = {
   data: ProductWithOrg[];
   defaultStatus?: string;
+  layout?: "grid" | "horizontal-scroll";
 };
 
 export function FilteredProducts({
   data,
   defaultStatus = "all",
+  layout = "grid",
 }: FilteredProductsProps) {
   const [{ search, tags, sort, status }] = useQueryStates(
     {
@@ -103,11 +105,15 @@ export function FilteredProducts({
         </div>
       )}
       {filteredProducts?.map((product) => (
-        <ProductCard
+        <div 
           key={product.id}
-          {...product}
-          href={!isBusinessesPage ? product.slug : undefined}
-        />
+          className={layout === "horizontal-scroll" ? "shrink-0 w-72 sm:shrink sm:w-auto" : ""}
+        >
+          <ProductCard
+            {...product}
+            href={!isBusinessesPage ? product.slug : undefined}
+          />
+        </div>
       ))}
     </>
   );

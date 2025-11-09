@@ -30,11 +30,11 @@ export function SearchForm({
           type="search"
           placeholder={placeholder}
           className={cn(
-            "w-full bg-transparent pl-10 focus:outline-none rounded-lg placeholder:text-xs md:placeholder:text-sm text-xs md:text-sm transition duration-300 ease-in-out",
+            "w-full bg-transparent pl-10 focus:outline-none rounded-lg placeholder:text-sm transition duration-300 ease-in-out",
             inputFieldOnlyClassName,
           )}
           value={search}
-          onChange={(e) => setSearch(e.target.value || null)}
+          onChange={e => setSearch(e.target.value || null)}
           autoFocus={controlledAutoFocus}
         />
 

@@ -48,8 +48,8 @@ export function ProductFilters({ availableTags }: ProductFiltersProps) {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col md:flex-row justify-between gap-4">
-        <div className="w-full md:w-[380px]">
+      <div className="flex flex-col lg:flex-row justify-between gap-4">
+        <div className="w-full sm:w-[460px] lg:w-[380px]">
           <div className="bg-background has-[input:focus]:ring-muted relative grid grid-cols-[1fr_auto] items-center rounded-lg border shadow shadow-zinc-950/5 has-[input:focus]:ring-2 transition duration-300 ease-in-out">
             <Label htmlFor="product-search" className="sr-only">
               Search products
@@ -113,7 +113,7 @@ export function ProductFilters({ availableTags }: ProductFiltersProps) {
       </div>
 
       {availableTags.length > 0 && (
-        <div>
+        <>
           <p className="text-sm font-medium mb-2">Tags:</p>
           <div className="flex flex-wrap gap-2">
             {availableTags.map(tag => (
@@ -130,7 +130,7 @@ export function ProductFilters({ availableTags }: ProductFiltersProps) {
               </Badge>
             ))}
           </div>
-        </div>
+        </>
       )}
 
       {tags.length > 0 && (

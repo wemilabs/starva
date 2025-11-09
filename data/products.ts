@@ -406,7 +406,7 @@ export const getLatestProductsByCategory = cache(async () => {
   const categoriesWithProducts = Object.entries(groupedByCategory)
     .map(([category, categoryProducts]) => ({
       category: category as ProductCategory,
-      products: categoryProducts.slice(0, 5),
+      products: categoryProducts.slice(0, 6),
       totalCount: categoryProducts.length,
       config: CATEGORY_CONFIG[category as keyof typeof CATEGORY_CONFIG],
     }))

@@ -1,3 +1,8 @@
+import { Analytics } from "@vercel/analytics/next";
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
+import { Suspense } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { BreadcrumbManager } from "@/components/breadcrumb-manager";
 import { Header } from "@/components/header";
@@ -8,11 +13,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { UploadThingProvider } from "@/components/uploadthing-provider";
 import { BreadcrumbsProvider } from "@/contexts/breadcrumbs-context";
 import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
-import { Analytics } from "@vercel/analytics/next";
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { Suspense } from "react";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -26,9 +26,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "starva - The Right Place for Local Commerce",
-  description:
-    "A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+  title: "The Right Place for Local Commerce - Starva",
+  description: "Search. Shop. Smile.",
   metadataBase: new URL("https://starva.vercel.app/"),
   keywords: [
     "starva",
@@ -47,6 +46,8 @@ export const metadata: Metadata = {
     "real-estate",
     "rental",
     "rental property",
+    "jewelry",
+    "cars",
   ],
   authors: [
     {
@@ -59,24 +60,22 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://starva.vercel.app/",
-    title: "starva - The Right Place for Local Commerce",
-    description:
-      "A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+    title: "The Right Place for Local Commerce - Starva",
+    description: "Search. Shop. Smile.",
     siteName: "Starva",
     images: [
       {
         url: GENERAL_BRANDING_IMG_URL,
         width: 1200,
         height: 630,
-        alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+        alt: "Starva app - Search. Shop. Smile.",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "starva - The Right Place for Local Commerce",
-    description:
-      "A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+    title: "The Right Place for Local Commerce - Starva",
+    description: "Search. Shop. Smile.",
     images: [GENERAL_BRANDING_IMG_URL],
     creator: "@DorianTho5",
   },

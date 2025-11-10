@@ -1,3 +1,7 @@
+import type { Route } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { Activity } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import {
@@ -14,10 +18,6 @@ import {
   getInitials,
   removeUnderscoreAndCapitalizeOnlyTheFirstChar,
 } from "@/lib/utils";
-import type { Route } from "next";
-import Image from "next/image";
-import Link from "next/link";
-import { Activity } from "react";
 import { DeleteProductForm } from "../forms/delete-product-form";
 import { EditProductForm } from "../forms/edit-product-form";
 // import { ShareDialog } from "../share-dialog";
@@ -34,6 +34,7 @@ type ProductCardProps = Product & {
   } | null;
   href?: string;
   isLiked?: boolean;
+  className?: string;
 };
 
 export function ProductCard({
@@ -55,6 +56,7 @@ export function ProductCard({
   organizationId,
   href,
   isLiked = false,
+  className,
 }: ProductCardProps) {
   const priceNumber = Number(price) ?? 0;
 
@@ -147,7 +149,7 @@ export function ProductCard({
     <div className="relative">
       <Dialog>
         <DialogTrigger asChild>
-          <Card className="group relative overflow-hidden p-0">
+          <Card className={cn("group relative overflow-hidden p-0", className)}>
             {customCardContent}
           </Card>
         </DialogTrigger>
@@ -162,7 +164,7 @@ export function ProductCard({
               fill
               priority
               className="object-cover rounded-t-lg md:rounded-l-lg md:rounded-r-none"
-              onContextMenu={e => e.preventDefault()}
+              onContextMenu={(e) => e.preventDefault()}
             />
           </div>
           <div className="flex flex-1 flex-col gap-5 p-6 md:py-8">

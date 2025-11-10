@@ -20,7 +20,7 @@ export default function SignInModal() {
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && router.back()}>
       <DialogContent
-        className="sm:max-w-[425px]"
+        className="sm:max-w-[425px] z-70"
         aria-description="Sign in to your account"
       >
         <DialogHeader className="hidden">

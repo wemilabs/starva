@@ -1,5 +1,12 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Plus } from "lucide-react";
+import Image from "next/image";
+import { useEffect, useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 import { TagInput } from "@/components/forms/tag-input";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,13 +47,7 @@ import {
 } from "@/lib/utils";
 import { createProduct } from "@/server/products";
 import { getAllTags } from "@/server/tags";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, Plus } from "lucide-react";
-import Image from "next/image";
-import { useEffect, useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
+import { Spinner } from "../ui/spinner";
 
 const schema = z.object({
   name: z.string().min(2, "Name is too short").max(100),
@@ -55,8 +56,8 @@ const schema = z.object({
     .string()
     .min(1, "Price is required")
     .refine(
-      v => !Number.isNaN(Number(v)) && Number(v) >= 0,
-      "Enter a valid price",
+      (v) => !Number.isNaN(Number(v)) && Number(v) >= 0,
+      "Enter a valid price"
     ),
   imageUrl: z.url("Provide a valid URL").optional().or(z.literal("")),
   description: z.string().max(500).optional().or(z.literal("")),
@@ -94,7 +95,7 @@ export function AddProductForm({
 
   useEffect(() => {
     if (dialogOpen) {
-      getAllTags().then(result => {
+      getAllTags().then((result) => {
         if (result.ok) {
           setAvailableTags(result.tags);
         }
@@ -125,7 +126,7 @@ export function AddProductForm({
           status: values.status,
           category: values.category,
           specifications: values.specifications ?? "",
-          tagNames: values.tags.map(t => t.name),
+          tagNames: values.tags.map((t) => t.name),
           revalidateTargetPath: `/businesses/${businessSlug}`,
         });
         form.reset();
@@ -236,7 +237,7 @@ export function AddProductForm({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {getCategoryOptions().map(category => (
+                          {getCategoryOptions().map((category) => (
                             <SelectItem
                               key={category.value}
                               value={category.value}
@@ -263,7 +264,7 @@ export function AddProductForm({
                     <FormControl>
                       <Input
                         placeholder={getCategorySpecificationPlaceholder(
-                          form.watch("category"),
+                          form.watch("category")
                         )}
                         className="placeholder:text-sm"
                         {...field}
@@ -310,18 +311,17 @@ export function AddProductForm({
                         <UploadButton
                           endpoint="productImage"
                           className="ut-button:bg-primary ut-button:ut-readying:bg-primary/50"
-                          onClientUploadComplete={res => {
+                          onClientUploadComplete={(res) => {
                             const url = res?.[0]?.ufsUrl || "";
                             if (url)
                               form.setValue("imageUrl", url, {
                                 shouldValidate: true,
                               });
                           }}
-                          onUploadError={err => {
+                          onUploadError={(err) => {
                             console.error(err);
                             toast.error(
-                              err?.message ||
-                                "Upload failed. Please try again.",
+                              err?.message || "Upload failed. Please try again."
                             );
                           }}
                         />
@@ -363,7 +363,7 @@ export function AddProductForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {PRODUCT_STATUS_VALUES.map(v => (
+                        {PRODUCT_STATUS_VALUES.map((v) => (
                           <SelectItem key={v} value={v}>
                             {removeUnderscoreAndCapitalizeOnlyTheFirstChar(v)}
                           </SelectItem>
@@ -398,7 +398,7 @@ export function AddProductForm({
                 <Button type="submit" disabled={isPending}>
                   {isPending ? (
                     <span className="inline-flex items-center gap-2">
-                      <Loader2 className="size-4 animate-spin" />
+                      <Spinner />
                       Saving...
                     </span>
                   ) : (

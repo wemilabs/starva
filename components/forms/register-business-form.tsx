@@ -1,5 +1,13 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { LogIn } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import {
@@ -21,15 +29,8 @@ import {
 import { organization, useSession } from "@/lib/auth-client";
 import { COUNTRIES } from "@/lib/constants";
 import { slugify } from "@/lib/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, LogIn } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useTransition } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
 import { Card, CardContent } from "../ui/card";
+import { Spinner } from "../ui/spinner";
 import { Textarea } from "../ui/textarea";
 
 const formSchema = z.object({
@@ -189,7 +190,7 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {COUNTRIES.map(country => (
+                        {COUNTRIES.map((country) => (
                           <SelectItem key={country.code} value={country.code}>
                             <span className="flex items-center gap-2">
                               <span>{country.flag}</span>
@@ -226,7 +227,7 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
           <Button disabled={isPending} type="submit">
             {isPending ? (
               <div className="flex items-center gap-2">
-                <Loader2 className="size-4 animate-spin" />
+                <Spinner />
                 <p>Registering Business...</p>
               </div>
             ) : (

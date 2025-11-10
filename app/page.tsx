@@ -1,7 +1,7 @@
-import { Hero } from "@/components/hero";
-import { LatestProducts } from "@/components/latest-products";
-import { SkeletonProductCard } from "@/components/products/skeleton-product-card";
 import { Suspense } from "react";
+import { Hero } from "@/components/hero";
+import { LatestProducts } from "@/components/products/latest-products";
+import { SkeletonProductCard } from "@/components/products/skeleton-product-card";
 
 export default async function Home() {
   return (
@@ -11,7 +11,9 @@ export default async function Home() {
         fallback={
           <section className="mx-auto flex w-full max-w-[1264px] flex-1 flex-col gap-4 mt-8">
             <div className="flex flex-col gap-1 py-2">
-              <h2 className="font-medium tracking-tight text-xl">Latest Products</h2>
+              <h2 className="font-medium tracking-tight text-xl">
+                Latest Products
+              </h2>
               <p className="text-xs text-pretty text-muted-foreground">
                 Loading latest products...
               </p>

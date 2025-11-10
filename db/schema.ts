@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { relations } from "drizzle-orm";
 import {
   boolean,
@@ -10,7 +11,6 @@ import {
   timestamp,
   unique,
 } from "drizzle-orm/pg-core";
-import { randomUUID } from "node:crypto";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -42,7 +42,7 @@ export const session = pgTable("session", {
     .references(() => user.id, { onDelete: "cascade" }),
   activeOrganizationId: text("active_organization_id").references(
     () => organization.id,
-    { onDelete: "set null" },
+    { onDelete: "set null" }
   ),
 });
 
@@ -70,10 +70,10 @@ export const verification = pgTable("verification", {
   value: text("value").notNull(),
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").$defaultFn(
-    () => /* @__PURE__ */ new Date(),
+    () => /* @__PURE__ */ new Date()
   ),
   updatedAt: timestamp("updated_at").$defaultFn(
-    () => /* @__PURE__ */ new Date(),
+    () => /* @__PURE__ */ new Date()
   ),
 });
 
@@ -167,10 +167,10 @@ export const subscription = pgTable(
       .$defaultFn(() => new Date())
       .notNull(),
   },
-  t => [
+  (t) => [
     index("subscription_user_idx").on(t.userId),
     index("subscription_status_idx").on(t.status),
-  ],
+  ]
 );
 
 export const orderUsageTracking = pgTable(
@@ -192,11 +192,11 @@ export const orderUsageTracking = pgTable(
       .$defaultFn(() => new Date())
       .notNull(),
   },
-  t => [
+  (t) => [
     index("order_usage_org_idx").on(t.organizationId),
     index("order_usage_month_idx").on(t.monthYear),
     unique("order_usage_org_month").on(t.organizationId, t.monthYear),
-  ],
+  ]
 );
 
 export const userRelations = relations(user, ({ one }) => ({
@@ -228,7 +228,7 @@ export const orderUsageTrackingRelations = relations(
       fields: [orderUsageTracking.organizationId],
       references: [organization.id],
     }),
-  }),
+  })
 );
 
 export const member = pgTable("member", {
@@ -306,10 +306,10 @@ export const product = pgTable(
       .$defaultFn(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  t => [
+  (t) => [
     index("product_slug_idx").on(t.slug),
     index("product_org_idx").on(t.organizationId),
-  ],
+  ]
 );
 
 export const tag = pgTable(
@@ -328,7 +328,7 @@ export const tag = pgTable(
       .$defaultFn(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  t => [index("tag_slug_idx").on(t.slug)],
+  (t) => [index("tag_slug_idx").on(t.slug)]
 );
 
 export const productTag = pgTable(
@@ -346,11 +346,11 @@ export const productTag = pgTable(
       .notNull()
       .references(() => tag.id, { onDelete: "cascade" }),
   },
-  t => [
+  (t) => [
     index("product_tag_product_idx").on(t.productId),
     index("product_tag_tag_idx").on(t.tagId),
     unique("product_tag_unique").on(t.productId, t.tagId),
-  ],
+  ]
 );
 
 export const productLike = pgTable(
@@ -369,11 +369,11 @@ export const productLike = pgTable(
       .$defaultFn(() => new Date())
       .notNull(),
   },
-  t => [
+  (t) => [
     index("product_like_product_idx").on(t.productId),
     index("product_like_user_idx").on(t.userId),
     unique("product_like_unique").on(t.productId, t.userId),
-  ],
+  ]
 );
 
 export const productLikeRelations = relations(productLike, ({ one }) => ({
@@ -420,13 +420,13 @@ export const order = pgTable(
       .$defaultFn(() => new Date())
       .notNull(),
   },
-  t => [
+  (t) => [
     index("order_user_idx").on(t.userId),
     index("order_org_idx").on(t.organizationId),
     index("order_status_idx").on(t.status),
     index("order_number_idx").on(t.orderNumber),
     unique("order_number_per_org").on(t.organizationId, t.orderNumber),
-  ],
+  ]
 );
 
 export const orderItem = pgTable(
@@ -451,10 +451,10 @@ export const orderItem = pgTable(
       .$defaultFn(() => new Date())
       .notNull(),
   },
-  t => [
+  (t) => [
     index("order_item_order_idx").on(t.orderId),
     index("order_item_product_idx").on(t.productId),
-  ],
+  ]
 );
 
 export const orderRelations = relations(order, ({ one, many }) => ({
@@ -516,11 +516,11 @@ export const feedback = pgTable(
       .$defaultFn(() => new Date())
       .notNull(),
   },
-  t => [
+  (t) => [
     index("feedback_user_idx").on(t.userId),
     index("feedback_type_idx").on(t.type),
     index("feedback_status_idx").on(t.status),
-  ],
+  ]
 );
 
 export const feedbackRelations = relations(feedback, ({ one, many }) => ({
@@ -550,10 +550,10 @@ export const feedbackHistory = pgTable(
       .notNull(),
     note: text("note"),
   },
-  t => [
+  (t) => [
     index("feedback_history_feedback_idx").on(t.feedbackId),
     index("feedback_history_changed_by_idx").on(t.changedBy),
-  ],
+  ]
 );
 
 export const feedbackHistoryRelations = relations(
@@ -567,7 +567,7 @@ export const feedbackHistoryRelations = relations(
       fields: [feedbackHistory.changedBy],
       references: [user.id],
     }),
-  }),
+  })
 );
 
 export type Organization = typeof organization.$inferSelect;

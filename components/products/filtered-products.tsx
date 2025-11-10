@@ -1,8 +1,8 @@
 "use client";
 
-import type { Product } from "@/db/schema";
 import { usePathname } from "next/navigation";
 import { parseAsArrayOf, parseAsString, useQueryStates } from "nuqs";
+import type { Product } from "@/db/schema";
 import { ProductCard } from "./product-card";
 
 type ProductWithOrg = Product & {
@@ -20,12 +20,16 @@ type FilteredProductsProps = {
   data: ProductWithOrg[];
   defaultStatus?: string;
   layout?: "grid" | "horizontal-scroll";
+  searchQuery?: string;
+  highlightMatches?: boolean;
 };
 
 export function FilteredProducts({
   data,
   defaultStatus = "all",
   layout = "grid",
+  searchQuery,
+  highlightMatches = false,
 }: FilteredProductsProps) {
   const [{ search, tags, sort, status }] = useQueryStates(
     {
@@ -34,17 +38,27 @@ export function FilteredProducts({
       sort: parseAsString.withDefault("newest"),
       status: parseAsString.withDefault(defaultStatus),
     },
-    { shallow: false },
+    { shallow: false }
   );
 
   const pathname = usePathname();
 
+  const effectiveSearch = searchQuery !== undefined ? searchQuery : search;
+
   let filteredProducts = data?.filter((product) => {
     const matchesSearch =
-      !search ||
-      product.name.toLowerCase().includes(search.toLowerCase()) ||
-      product.description?.toLowerCase().includes(search.toLowerCase()) ||
-      product.organization?.name.toLowerCase().includes(search.toLowerCase());
+      !effectiveSearch ||
+      product.name.toLowerCase().includes(effectiveSearch.toLowerCase()) ||
+      product.description
+        ?.toLowerCase()
+        .includes(effectiveSearch.toLowerCase()) ||
+      product.organization?.name
+        .toLowerCase()
+        .includes(effectiveSearch.toLowerCase()) ||
+      product.tags?.some((tag) =>
+        tag.name.toLowerCase().includes(effectiveSearch.toLowerCase())
+      ) ||
+      product.brand?.toLowerCase().includes(effectiveSearch.toLowerCase());
 
     const matchesStatus =
       !status || status === "all" || product.status === status;
@@ -88,7 +102,7 @@ export function FilteredProducts({
             Showing 0 product
           </p>
         )}
-        <div className="col-span-full flex items-center justify-center min-h-[200px] border border-dashed border-muted-foreground/50 rounded-lg">
+        <div className="w-full sm:col-span-full flex items-center justify-center min-h-[200px] border border-dashed border-muted-foreground/50 rounded-lg">
           <div className="text-muted-foreground text-center">
             <p className="text-sm">No products found</p>
           </div>
@@ -105,13 +119,29 @@ export function FilteredProducts({
         </div>
       )}
       {filteredProducts?.map((product) => (
-        <div 
+        <div
           key={product.id}
-          className={layout === "horizontal-scroll" ? "shrink-0 w-72 sm:shrink sm:w-auto" : ""}
+          className={`
+            ${
+              layout === "horizontal-scroll"
+                ? "shrink-0 w-72 sm:shrink sm:w-auto"
+                : ""
+            }
+            ${
+              highlightMatches && effectiveSearch
+                ? "animate-in fade-in-0 slide-in-from-4 duration-300"
+                : ""
+            }
+          `}
         >
           <ProductCard
             {...product}
             href={!isBusinessesPage ? product.slug : undefined}
+            className={
+              highlightMatches && effectiveSearch
+                ? "ring-2 ring-primary/40 hover:ring-primary/80 transition-all duration-300"
+                : ""
+            }
           />
         </div>
       ))}

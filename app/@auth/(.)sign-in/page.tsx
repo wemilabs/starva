@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import { SignInForm } from "@/components/forms/signin-form";
 import { Logo } from "@/components/logo";
@@ -13,8 +13,12 @@ import {
 
 export default function SignInModal() {
   const router = useRouter();
+  const pathname = usePathname();
+
+  const isOpen = pathname === "/sign-in";
+
   return (
-    <Dialog defaultOpen onOpenChange={() => router.back()}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && router.back()}>
       <DialogContent
         className="sm:max-w-[425px]"
         aria-description="Sign in to your account"

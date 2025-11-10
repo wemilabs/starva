@@ -1,18 +1,18 @@
 "use client";
 
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import type { OrderStatus } from "@/db/schema";
 import { ORDER_STATUS_VALUES } from "@/lib/constants";
 import { updateOrderStatus } from "@/server/orders";
-import { Loader2 } from "lucide-react";
-import { useState, useTransition } from "react";
-import { toast } from "sonner";
+import { Spinner } from "../ui/spinner";
 
 interface OrderStatusSelectProps {
   orderId: string;
@@ -69,9 +69,7 @@ export function OrderStatusSelect({
           ))}
         </SelectContent>
       </Select>
-      {isPending && (
-        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-      )}
+      {isPending && <Spinner />}
     </div>
   );
 }

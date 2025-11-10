@@ -1,5 +1,13 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import type { Route } from "next";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,16 +28,8 @@ import { Input } from "@/components/ui/input";
 import { getLastUsedLoginMethod, signIn } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { signInUser } from "@/server/users";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
-import type { Route } from "next";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useTransition } from "react";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
 import { Badge } from "../ui/badge";
+import { Spinner } from "../ui/spinner";
 
 const formSchema = z.object({
   email: z.email(),
@@ -98,7 +98,7 @@ export const SignInForm = ({
                         const e = error as Error;
                         console.error(e.message);
                         toast.error(
-                          "Something went wrong. Please try again later.",
+                          "Something went wrong. Please try again later."
                         );
                       }
                     })
@@ -108,7 +108,7 @@ export const SignInForm = ({
                 >
                   {isGooglePending ? (
                     <div className="flex items-center gap-2">
-                      <Loader2 className="size-4 animate-spin" />
+                      <Spinner />
                       Signing in...
                     </div>
                   ) : (
@@ -201,15 +201,11 @@ export const SignInForm = ({
                 </div>
 
                 <div className="flex flex-col gap-3">
-                  <Button
-                    type="submit"
-                    // disabled={form.formState.isSubmitting}
-                    disabled
-                  >
+                  <Button type="submit" disabled>
                     {form.formState.isSubmitting ? (
                       <div className="flex items-center gap-2">
-                        <Loader2 className="size-4 animate-spin" /> Signing
-                        in...
+                        <Spinner />
+                        Signing in...
                       </div>
                     ) : (
                       "Sign in"

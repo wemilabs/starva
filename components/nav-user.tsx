@@ -1,5 +1,16 @@
 "use client";
 
+import {
+  BadgeCheck,
+  Bell,
+  ChevronsUpDown,
+  CreditCard,
+  LogOut,
+  Sparkles,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -19,18 +30,6 @@ import {
 import { signOut } from "@/lib/auth-client";
 import { getInitials } from "@/lib/utils";
 import {
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
-  Loader2,
-  LogOut,
-  Sparkles,
-} from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { toast } from "sonner";
-import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -41,6 +40,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "./ui/alert-dialog";
+import { Spinner } from "./ui/spinner";
 
 export function NavUser({
   user,
@@ -186,7 +186,7 @@ export function NavUser({
                   >
                     {isSigningOutPending ? (
                       <div className="flex items-center gap-2">
-                        <Loader2 className="size-4 animate-spin" />
+                        <Spinner />
                         Signing out...
                       </div>
                     ) : (

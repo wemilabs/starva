@@ -141,7 +141,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ) : (
           <Card className="border border-dashed border-muted-foreground/50 bg-sidebar">
             <CardContent className="flex flex-col gap-2">
-              <p className="text-xs text-muted-foreground text-center">
+              <p className="text-xs text-muted-foreground text-center font-mono tracking-tighter">
                 Start this pleasant and better experience
               </p>
               <Button

@@ -75,9 +75,9 @@ export function ProductCard({
         />
         <div className="absolute inset-0 bg-linear-to-tr from-black/70 via-black/30 to-transparent" />
       </div>
-      <div className="absolute inset-0 flex flex-col justify-end p-6 text-white">
-        <div className="mb-2 flex items-center justify-between gap-2">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[10px] font-medium tracking-wide text-white/90 ring-1 ring-white/15 backdrop-blur-sm">
+      <div className="absolute inset-0 flex flex-col p-6 text-white">
+        <div className="flex items-center justify-between gap-2 mb-auto">
+          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium tracking-wide text-white/90 ring-1 ring-white/15 backdrop-blur-sm">
             <span
               className={cn("size-1.5 rounded-full", {
                 "bg-green-600": status === "in_stock",
@@ -88,57 +88,60 @@ export function ProductCard({
             {removeUnderscoreAndCapitalizeOnlyTheFirstChar(status)}
           </div>
 
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[10px] font-medium tracking-wide text-white/90 ring-1 ring-white/15 backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium font-mono tracking-wide text-white/90 ring-1 ring-white/15 backdrop-blur-sm">
             {formatPriceInRWF(priceNumber)}
           </div>
         </div>
-        <h3 className="text-balance text-xl font-semibold leading-tight">
-          {name}
-        </h3>
-        <Activity mode={description ? "visible" : "hidden"}>
-          <p className="mt-2 max-w-[46ch] text-xs text-white/80">
-            {description}
-          </p>
-        </Activity>
 
-        <div className="mt-4 flex items-center justify-between">
-          <Link
-            href={`/merchants/${organization?.slug}` as Route}
-            className="inline-flex items-center gap-2 rounded-full bg-black/30 ring-1 ring-white/10 backdrop-blur-sm"
-          >
-            <Avatar className="size-9 ring-1 ring-white/20">
-              <AvatarImage
-                src={orgLogo ?? ""}
-                alt={orgName ?? ""}
-                className="object-cover"
-              />
-              <AvatarFallback className="text-muted-foreground text-xs">
-                {getInitials(orgName)}
-              </AvatarFallback>
-            </Avatar>
-          </Link>
+        <div className="flex flex-col justify-end">
+          <h3 className="text-balance text-xl font-semibold leading-tight line-clamp-1">
+            {name}
+          </h3>
+          <Activity mode={description ? "visible" : "hidden"}>
+            <p className="mt-2 max-w-[46ch] text-xs text-white/80 font-mono tracking-tighter line-clamp-1">
+              {description}
+            </p>
+          </Activity>
 
-          <div className="inline-flex items-center gap-1">
-            {href ? (
-              <ProductLikeButton
-                productId={id}
-                initialIsLiked={isLiked}
-                initialLikesCount={likesCount ?? 0}
-                revalidateTargetPath="/"
-                variant="compact"
-              />
-            ) : (
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-2.5 py-1 text-white/90 ring-1 ring-white/10 backdrop-blur-sm">
-                <span className="text-[11px]">{likesCount ?? 0}</span>
-              </div>
-            )}
-            {/* <ShareDialog
-              url={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/products/${slug}`}
-              title={`Share ${name}`}
-              description={`Share this product with others`}
-              className="py-[17px]"
-              variant={{ variant: "ghost", size: "icon" }}
-            /> */}
+          <div className="mt-4 flex items-center justify-between">
+            <Link
+              href={`/merchants/${organization?.slug}` as Route}
+              className="inline-flex items-center gap-2 rounded-full bg-black/30 ring-1 ring-white/10 backdrop-blur-sm"
+            >
+              <Avatar className="size-9 ring-1 ring-white/20">
+                <AvatarImage
+                  src={orgLogo ?? ""}
+                  alt={orgName ?? ""}
+                  className="object-cover"
+                />
+                <AvatarFallback className="text-muted-foreground text-xs">
+                  {getInitials(orgName)}
+                </AvatarFallback>
+              </Avatar>
+            </Link>
+
+            <div className="inline-flex items-center gap-1">
+              {href ? (
+                <ProductLikeButton
+                  productId={id}
+                  initialIsLiked={isLiked}
+                  initialLikesCount={likesCount ?? 0}
+                  revalidateTargetPath="/"
+                  variant="compact"
+                />
+              ) : (
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-black/30 px-2.5 py-1 text-white/90 ring-1 ring-white/10 backdrop-blur-sm">
+                  <span className="text-[11px]">{likesCount ?? 0}</span>
+                </div>
+              )}
+              {/* <ShareDialog
+                url={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/products/${slug}`}
+                title={`Share ${name}`}
+                description={`Share this product with others`}
+                className="py-[17px]"
+                variant={{ variant: "ghost", size: "icon" }}
+              /> */}
+            </div>
           </div>
         </div>
       </div>
@@ -174,18 +177,18 @@ export function ProductCard({
                   {organization.name}
                 </p>
               )}
-              <DialogTitle className="text-balance text-2xl font-bold leading-tight tracking-tight line-clamp-2">
+              <DialogTitle className="text-balance text-2xl font-medium leading-tight tracking-tight line-clamp-2">
                 {name}
               </DialogTitle>
               {description && (
-                <p className="text-sm leading-relaxed text-muted-foreground line-clamp-1">
+                <p className="text-sm leading-relaxed text-muted-foreground line-clamp-1 font-mono tracking-tighter">
                   {description}
                 </p>
               )}
             </div>
 
             <div className="flex items-center gap-4">
-              <p className="text-3xl font-bold text-primary/90">
+              <p className="text-3xl font-medium text-primary/90">
                 {formatPriceInRWF(priceNumber)}
               </p>
               {/* {priceNumber > 0 && (

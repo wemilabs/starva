@@ -1,3 +1,4 @@
+import { Check, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,7 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { cn, formatPriceInRWF } from "@/lib/utils";
-import { Check, Sparkles } from "lucide-react";
 import { Spinner } from "../ui/spinner";
 
 interface PricingCardProps {
@@ -39,15 +39,16 @@ export function PricingCard({
   isLoading = false,
   isCurrentPlan = false,
 }: PricingCardProps) {
-  const discountPercentage = originalPrice && price
-    ? Math.round(((originalPrice - price) / originalPrice) * 100)
-    : 0;
+  const discountPercentage =
+    originalPrice && price
+      ? Math.round(((originalPrice - price) / originalPrice) * 100)
+      : 0;
 
   return (
     <Card
       className={cn(
         "relative flex flex-col h-full transition-all duration-300 hover:shadow-lg",
-        highlighted && "border-primary shadow-lg ring-2 ring-primary/20",
+        highlighted && "border-primary shadow-lg ring-2 ring-primary/20"
       )}
     >
       {highlighted && (
@@ -71,8 +72,10 @@ export function PricingCard({
       )}
 
       <CardHeader className="text-center pb-6">
-        <CardTitle className="text-xl md:text-2xl font-bold">{name}</CardTitle>
-        <CardDescription className="md:text-base">
+        <CardTitle className="text-xl md:text-2xl font-medium">
+          {name}
+        </CardTitle>
+        <CardDescription className="md:text-base font-mono tracking-tighter">
           {description}
         </CardDescription>
 
@@ -83,11 +86,13 @@ export function PricingCard({
             </p>
           )}
           <div className="flex items-baseline gap-1">
-            <span className="text-3xl md:text-3xl lg:text-4xl font-bold tracking-tight">
-              {price === null ? "Custom"  : formatPriceInRWF(price)}
+            <span className="text-3xl lg:text-4xl font-medium tracking-tight">
+              {price === null ? "Custom" : formatPriceInRWF(price)}
             </span>
             {price !== null && price > 0 && (
-              <span className="text-muted-foreground">/{period}</span>
+              <span className="text-muted-foreground font-mono tracking-tighter">
+                /{period}
+              </span>
             )}
           </div>
         </div>
@@ -100,7 +105,7 @@ export function PricingCard({
               <Check
                 className={cn(
                   "size-5 shrink-0 mt-0.5",
-                  highlighted ? "text-primary" : "text-muted-foreground",
+                  highlighted ? "text-primary" : "text-muted-foreground"
                 )}
               />
               <span
@@ -108,7 +113,7 @@ export function PricingCard({
                   "text-sm",
                   feature.includes("Everything in")
                     ? "font-semibold"
-                    : "text-muted-foreground",
+                    : "text-muted-foreground font-mono tracking-tighter"
                 )}
               >
                 {feature}

@@ -157,12 +157,7 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
             name="description"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>
-                  Description{" "}
-                  <span className="text-muted-foreground text-xs">
-                    (optional)
-                  </span>
-                </FormLabel>
+                <FormLabel>Description</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Could simply be the slogan of your business."
@@ -176,7 +171,12 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
           />
 
           <div className="space-y-2">
-            <FormLabel>Phone Number</FormLabel>
+            <FormLabel>
+              Phone Number{" "}
+              <span className="text-muted-foreground text-xs font-mono tracking-tighter">
+                (for Payments and Notifications)
+              </span>
+            </FormLabel>
             <ButtonGroup>
               <FormField
                 control={form.control}
@@ -192,10 +192,10 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
                       <SelectContent>
                         {COUNTRIES.map((country) => (
                           <SelectItem key={country.code} value={country.code}>
-                            <span className="flex items-center gap-2">
+                            <div className="flex items-center gap-2">
                               <span>{country.flag}</span>
                               <span>{country.code}</span>
-                            </span>
+                            </div>
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -224,7 +224,7 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
             </ButtonGroup>
           </div>
 
-          <Button disabled={isPending} type="submit">
+          <Button disabled={isPending} type="submit" className="w-full mt-2">
             {isPending ? (
               <div className="flex items-center gap-2">
                 <Spinner />
@@ -238,7 +238,7 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
       ) : (
         <Card className="border border-dashed bg-sidebar">
           <CardContent className="flex flex-col gap-2">
-            <p className="text-sm text-muted-foreground text-center">
+            <p className="text-sm text-muted-foreground text-center font-mono tracking-tighter">
               First, you need to sign in to register your business
             </p>
             <Button

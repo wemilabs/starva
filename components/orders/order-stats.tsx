@@ -14,10 +14,7 @@ export function OrderStats({ stats }: OrderStatsProps) {
   const totalOrders = stats.reduce((sum, stat) => sum + stat.count, 0);
   const totalRevenue = stats
     .filter((stat) => stat.status !== "cancelled" && stat.status !== "pending")
-    .reduce(
-      (sum, stat) => sum + parseFloat(stat.totalRevenue || "0"),
-      0
-    );
+    .reduce((sum, stat) => sum + parseFloat(stat.totalRevenue || "0"), 0);
   const pendingOrders = stats.find((s) => s.status === "pending")?.count || 0;
   const deliveredOrders =
     stats.find((s) => s.status === "delivered")?.count || 0;
@@ -54,7 +51,7 @@ export function OrderStats({ stats }: OrderStatsProps) {
             {icon}
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{count}</div>
+            <div className="text-2xl font-medium">{count}</div>
           </CardContent>
         </Card>
       ))}

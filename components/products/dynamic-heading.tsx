@@ -1,7 +1,7 @@
 "use client";
 
-import { CATEGORY_CONTENT } from "@/lib/constants";
 import { parseAsArrayOf, parseAsString, useQueryStates } from "nuqs";
+import { CATEGORY_CONTENT } from "@/lib/constants";
 
 interface DynamicHeadingProps {
   initialSearch?: string;
@@ -22,7 +22,7 @@ export function DynamicHeading({
     {
       shallow: false,
       throttleMs: 300,
-    },
+    }
   );
 
   const headingInfo = categorySlug
@@ -59,7 +59,9 @@ export function DynamicHeading({
   return (
     <div className="mb-8">
       <h1 className="font-medium tracking-tight text-2xl">{heading}</h1>
-      <p className="text-sm text-pretty text-muted-foreground">{subheading}</p>
+      <p className="text-sm text-pretty text-muted-foreground font-mono tracking-tighter">
+        {subheading}
+      </p>
     </div>
   );
 }

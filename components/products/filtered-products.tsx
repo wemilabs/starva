@@ -98,7 +98,7 @@ export function FilteredProducts({
     return (
       <>
         {isProductsPage && (
-          <p className="col-span-full text-sm text-muted-foreground mb-4">
+          <p className="col-span-full text-sm text-muted-foreground mb-4 font-mono tracking-tighter">
             Showing 0 product
           </p>
         )}
@@ -113,7 +113,7 @@ export function FilteredProducts({
   return (
     <>
       {isProductsPage && (
-        <div className="col-span-full text-sm text-pretty text-muted-foreground">
+        <div className="col-span-full text-sm text-pretty text-muted-foreground font-mono tracking-tighter">
           Showing {filteredProducts.length} product
           {filteredProducts.length <= 1 ? "" : "s"}
         </div>

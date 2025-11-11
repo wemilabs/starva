@@ -99,7 +99,7 @@ function CategorySection({
               </span>
             )}
           </div>
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm text-muted-foreground font-mono tracking-tighter">
             {displayCount} of {totalCount}
           </span>
         </div>
@@ -107,7 +107,7 @@ function CategorySection({
           href={`/products/category/${category}`}
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary focus-visible:ring-primary transition-colors"
         >
-          <span>Browse all</span>
+          <span className="font-mono tracking-tighter">Browse all</span>
           <ChevronRight className="size-4" />
         </Link>
       </div>
@@ -156,12 +156,12 @@ export function LatestProductsContent({
             Latest Products
           </h2>
           {hasSearchQuery && (
-            <span className="text-sm text-muted-foreground animate-in fade-in-0 slide-in-from-2 duration-300">
+            <span className="text-sm text-muted-foreground animate-in fade-in-0 slide-in-from-2 duration-300 font-mono tracking-tighter">
               {totalMatches} result{totalMatches !== 1 ? "s" : ""}
             </span>
           )}
         </div>
-        <p className="text-xs text-pretty text-muted-foreground">
+        <p className="text-xs text-pretty text-muted-foreground font-mono tracking-tighter">
           {hasSearchQuery
             ? `Showing matching products for "${searchQuery}"`
             : "Discover the newest additions across all categories"}

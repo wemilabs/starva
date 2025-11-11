@@ -1,13 +1,13 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 import { PricingCard } from "@/components/pricing/pricing-card";
 import { useUserSubscription } from "@/hooks/use-user-subscription";
 import { useSession } from "@/lib/auth-client";
 import type { PricingPlan } from "@/lib/constants";
 import { createSubscription, updateSubscription } from "@/server/subscription";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
 
 interface PricingGridProps {
   plans: readonly PricingPlan[];
@@ -44,7 +44,7 @@ export function PricingGrid({ plans }: PricingGridProps) {
       } else {
         await createSubscription(session.user.id, planName);
         toast.success(
-          `Welcome to ${planName} plan! Your 14-day free trial has started.`,
+          `Welcome to ${planName} plan! Your 14-day free trial has started.`
         );
       }
       refetch();

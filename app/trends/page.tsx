@@ -1,13 +1,15 @@
-import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
-import { TrendingUp, Sparkles } from "lucide-react";
+import { Sparkles, TrendingUp } from "lucide-react";
 import type { Metadata } from "next";
+import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
 
 export async function generateMetadata(): Promise<Metadata> {
   const title = "Trends & Insights - Starva";
   const description =
     "Discover what's trending in your area and gain valuable insights into customer preferences and market patterns.";
 
-  const trendsUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/trends`;
+  const trendsUrl = `${
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+  }/trends`;
 
   return {
     title,
@@ -58,12 +60,12 @@ export default function TrendsPage() {
                 </span>
               </div>
 
-              <h1 className="text-3xl font-bold tracking-tight">
+              <h1 className="text-3xl font-medium tracking-tight">
                 Trends & Insights
               </h1>
 
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                Discover what's trending in your area and gain valuable insights 
+              <p className="text-muted-foreground text-sm leading-relaxed font-mono tracking-tighter">
+                Discover what's trending in your area and gain valuable insights
                 into customer preferences and market patterns coming soon.
               </p>
             </div>

@@ -48,7 +48,9 @@ export async function generateMetadata(): Promise<Metadata> {
   const description =
     "Discover and order from local merchants. Browse menus, find your favorite restaurants, and order delicious food from local kitchens.";
 
-  const merchantsUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/merchants`;
+  const merchantsUrl = `${
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+  }/merchants`;
 
   return {
     title,
@@ -86,7 +88,7 @@ export default async function MerchantsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-medium tracking-tight">All Merchants</h1>
-          <p className="text-muted-foreground mt-0.5 text-sm text-pretty">
+          <p className="text-muted-foreground mt-0.5 text-sm text-pretty font-mono tracking-tighter">
             Engage with all current available merchants
           </p>
         </div>
@@ -107,7 +109,7 @@ export default async function MerchantsPage() {
       <Suspense
         fallback={
           <>
-            <div className="col-span-full text-sm text-pretty text-muted-foreground">
+            <div className="col-span-full text-sm text-pretty text-muted-foreground font-mono tracking-tighter">
               Loading merchants...
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

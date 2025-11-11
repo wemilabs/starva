@@ -27,15 +27,16 @@ async function ProductsList({
   defaultStatus?: string;
 }) {
   "use cache";
-  const productsPerMerchant =
-    await getProductsPerBusinessWithoutAuth(merchantId);
+  const productsPerMerchant = await getProductsPerBusinessWithoutAuth(
+    merchantId
+  );
 
   if (!Array.isArray(productsPerMerchant) || productsPerMerchant.length === 0) {
     return (
       <div className="text-center py-10 border border-dashed border-muted-foreground/50 rounded-lg">
         <h2 className="font-semibold">No products available</h2>
-        <p className="text-muted-foreground text-sm">
-          This merchant has no products yet.
+        <p className="text-muted-foreground text-sm font-mono tracking-tighter">
+          This merchant has no product yet.
         </p>
       </div>
     );
@@ -92,15 +93,19 @@ async function MerchantContent({
             <h1 className="text-3xl md:text-5xl font-semibold tracking-tight">
               {merchant.name}
             </h1>
-            <p className="mt-2 text-white/80">@{resolvedSlug}</p>
-            <p className="text-white/80 text-sm leading-relaxed">
+            <p className="mt-2 text-white/80 text-sm font-mono tracking-tighter">
+              @{resolvedSlug}
+            </p>
+            <p className="text-white/80 text-sm font-mono tracking-tighter">
               {description}
             </p>
             <p className="text-white/80 text-sm leading-relaxed">{phone}</p>
           </div>
           <div className="flex items-center gap-3 justify-end">
             <ShareDialog
-              url={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/merchants/${resolvedSlug}`}
+              url={`${
+                process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+              }/merchants/${resolvedSlug}`}
               buttonTitle="Share"
               title={`Share ${merchant.name}`}
               description={`Share this merchant catalogue with others`}
@@ -122,7 +127,7 @@ async function MerchantContent({
               </AccordionTrigger>
               <AccordionContent>
                 <div className="space-y-3 pb-4">
-                  {DAYS.map(day => {
+                  {DAYS.map((day) => {
                     const dayData = timetable[day.key];
                     const isToday = day.key === today;
                     const isClosed = !dayData || dayData.closed;
@@ -158,7 +163,7 @@ async function MerchantContent({
                           {isClosed
                             ? "Closed"
                             : `${formatTime(dayData.open)} - ${formatTime(
-                                dayData.close,
+                                dayData.close
                               )}`}
                         </span>
                       </div>
@@ -250,7 +255,9 @@ export async function generateMetadata({
     });
   }
 
-  const merchantUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/merchants/${resolvedSlug}`;
+  const merchantUrl = `${
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+  }/merchants/${resolvedSlug}`;
 
   return {
     title: `${merchant.name} - Starva`,
@@ -267,7 +274,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: `${merchant.name} - Starva`,
       description,
-      images: images.map(img => img.url),
+      images: images.map((img) => img.url),
     },
     alternates: {
       canonical: merchantUrl,
@@ -276,7 +283,7 @@ export async function generateMetadata({
 }
 
 export default async function MerchantSlugPage(
-  props: PageProps<"/merchants/[merchantSlug]">,
+  props: PageProps<"/merchants/[merchantSlug]">
 ) {
   return (
     <Suspense

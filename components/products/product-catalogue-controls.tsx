@@ -50,7 +50,7 @@ export function ProductCatalogueControls({
   const pathname = usePathname();
   const [status, setStatus] = useQueryState(
     "status",
-    parseAsString.withDefault(defaultStatus),
+    parseAsString.withDefault(defaultStatus)
   );
 
   const isBusinessPage = pathname === `/businesses/${businessSlug}`;
@@ -60,7 +60,7 @@ export function ProductCatalogueControls({
       <div className="flex items-center justify-between mb-2">
         <div className="flex flex-col gap-1">
           <h2 className="text-lg font-semibold">Catalogue</h2>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-muted-foreground text-sm font-mono tracking-tighter">
             {isBusinessPage
               ? "Manage your products here"
               : "View products here"}
@@ -93,7 +93,7 @@ export function ProductCatalogueControls({
                     <Clock className="size-5" />
                     Business Hours
                   </DialogTitle>
-                  <DialogDescription>
+                  <DialogDescription className="font-mono tracking-tighter">
                     Set your business operating hours for each day of the week
                   </DialogDescription>
                 </DialogHeader>
@@ -107,7 +107,9 @@ export function ProductCatalogueControls({
             </Dialog>
 
             <ShareDialog
-              url={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/merchants/${businessSlug}`}
+              url={`${
+                process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+              }/merchants/${businessSlug}`}
               title={`Share ${businessName}`}
               description={`Share your business catalogue with others`}
               variant={{ variant: "ghost", size: "icon" }}
@@ -125,7 +127,7 @@ export function ProductCatalogueControls({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All</SelectItem>
-              {PRODUCT_STATUS_VALUES.map(statusValue => (
+              {PRODUCT_STATUS_VALUES.map((statusValue) => (
                 <SelectItem key={statusValue} value={statusValue}>
                   {removeUnderscoreAndCapitalizeOnlyTheFirstChar(statusValue)}
                 </SelectItem>

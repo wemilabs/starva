@@ -1,13 +1,15 @@
-import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
 import { BarChart3, Sparkles } from "lucide-react";
 import type { Metadata } from "next";
+import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
 
 export async function generateMetadata(): Promise<Metadata> {
   const title = "Analytics Dashboard - Starva";
   const description =
     "Powerful insights and analytics to help you make data-driven decisions. Track sales, monitor performance, and grow your business with detailed metrics and reports.";
 
-  const analyticsUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/analytics`;
+  const analyticsUrl = `${
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+  }/analytics`;
 
   return {
     title,
@@ -58,11 +60,11 @@ export default function AnalyticsPage() {
                 </span>
               </div>
 
-              <h1 className="text-3xl font-bold tracking-tight">
+              <h1 className="text-3xl font-medium tracking-tight">
                 Analytics Dashboard
               </h1>
 
-              <p className="text-muted-foreground text-sm leading-relaxed">
+              <p className="text-muted-foreground text-sm leading-relaxed font-mono tracking-tighter">
                 We're building powerful insights and analytics to help you make
                 data-driven decisions. Stay tuned for detailed metrics, charts,
                 and reports.

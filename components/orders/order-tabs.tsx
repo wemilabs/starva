@@ -1,11 +1,11 @@
 "use client";
 
+import { ShoppingBag, Store } from "lucide-react";
+import { Suspense } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Order, OrderItem } from "@/db/schema";
 import { ORDER_STATUS_VALUES } from "@/lib/constants";
-import { ShoppingBag, Store } from "lucide-react";
-import { Suspense } from "react";
 import { OrderList } from "./order-list";
 import { OrderStats } from "./order-stats";
 
@@ -81,25 +81,27 @@ export function OrderTabs({
           <ShoppingBag className="size-4" />
           Mine
           {myOrders.length > 0 && (
-            <Badge variant="secondary">
-              {myOrders.length}
-            </Badge>
+            <Badge variant="secondary">{myOrders.length}</Badge>
           )}
         </TabsTrigger>
         <TabsTrigger value="customer-orders" className="gap-1.5">
           <Store className="size-4" />
           From Customers
           {customerOrders.length > 0 && (
-            <Badge variant="secondary">
-              {customerOrders.length}
-            </Badge>
+            <Badge variant="secondary">{customerOrders.length}</Badge>
           )}
         </TabsTrigger>
       </TabsList>
 
       <TabsContent value="my-orders" className="space-y-6 mt-6">
         <OrderStats stats={myOrdersStats} />
-        <Suspense fallback={<div className="text-center text-muted-foreground">Loading orders...</div>}>
+        <Suspense
+          fallback={
+            <div className="text-center text-muted-foreground font-mono tracking-tighter">
+              Loading orders...
+            </div>
+          }
+        >
           <OrderList orders={myOrders} variant="customer" />
         </Suspense>
       </TabsContent>
@@ -108,7 +110,13 @@ export function OrderTabs({
         {hasActiveBusiness ? (
           <>
             <OrderStats stats={merchantStats} />
-            <Suspense fallback={<div className="text-center text-muted-foreground">Loading orders...</div>}>
+            <Suspense
+              fallback={
+                <div className="text-center text-muted-foreground font-mono tracking-tighter">
+                  Loading orders...
+                </div>
+              }
+            >
               <OrderList orders={customerOrders} variant="merchant" />
             </Suspense>
           </>
@@ -116,7 +124,7 @@ export function OrderTabs({
           <div className="text-center py-12 flex flex-col items-center justify-center border border-dashed rounded-md">
             <Store className="size-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-semibold mb-2">No Business Selected</h3>
-            <p className="text-sm text-muted-foreground max-w-md">
+            <p className="text-sm text-muted-foreground max-w-md font-mono tracking-tighter">
               Please select a business to view and manage orders from your
               customers
             </p>
@@ -128,13 +136,10 @@ export function OrderTabs({
 }
 
 function calculateOrderStats(orders: OrderWithOrganization[]) {
-  const statusCounts = orders.reduce(
-    (acc, order) => {
-      acc[order.status] = (acc[order.status] || 0) + 1;
-      return acc;
-    },
-    {} as Record<string, number>
-  );
+  const statusCounts = orders.reduce((acc, order) => {
+    acc[order.status] = (acc[order.status] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
 
   return ORDER_STATUS_VALUES.map((status) => ({
     status,

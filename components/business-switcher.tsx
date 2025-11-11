@@ -7,7 +7,6 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import {
   Command,
   CommandEmpty,
@@ -60,7 +59,7 @@ export function BusinessSwitcher() {
   const handleBusinessChange = async (
     e: React.MouseEvent<HTMLAnchorElement>,
     organizationId: string,
-    organizationSlug: string,
+    organizationSlug: string
   ) => {
     e.preventDefault();
     try {
@@ -134,7 +133,7 @@ export function BusinessSwitcher() {
                       <Link
                         href={`/businesses/${business.slug}`}
                         key={business.id}
-                        onClick={e =>
+                        onClick={(e) =>
                           handleBusinessChange(e, business.id, business.slug)
                         }
                       >
@@ -161,7 +160,7 @@ export function BusinessSwitcher() {
                                 "ml-auto",
                                 activeBusiness?.id === business.id
                                   ? "opacity-100"
-                                  : "opacity-0",
+                                  : "opacity-0"
                               )}
                             />
 
@@ -177,23 +176,19 @@ export function BusinessSwitcher() {
                 <CommandGroup>
                   <CommandItem className="pt-1.5 pb-0 px-0">
                     <Dialog onOpenChange={setDialogOpen} open={dialogOpen}>
-                      <DialogTrigger asChild>
-                        <Button
-                          className="text-muted-foreground hover:text-muted-foreground"
-                          onClick={() => setDialogOpen(true)}
-                          size="sm"
-                          variant="ghost"
-                        >
-                          <div className="border rounded-md p-1">
-                            <Plus className="size-4" />
-                          </div>
-                          Add business
-                        </Button>
+                      <DialogTrigger
+                        className="flex items-start gap-2 px-2 py-1.5"
+                        onClick={() => setDialogOpen(true)}
+                      >
+                        <div className="border rounded-md p-1 -mt-0.5">
+                          <Plus className="size-4" />
+                        </div>
+                        Add business
                       </DialogTrigger>
                       <DialogContent>
-                        <DialogHeader>
+                        <DialogHeader className="mb-2">
                           <DialogTitle>Register Business</DialogTitle>
-                          <DialogDescription>
+                          <DialogDescription className="font-mono tracking-tighter">
                             Register a new business to get started.
                           </DialogDescription>
                         </DialogHeader>

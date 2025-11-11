@@ -20,11 +20,11 @@ async function getFilteredProductsForMetadata(
   categorySlug: ProductCategory,
   search?: string,
   tags?: string[],
-  sort?: string,
+  sort?: string
 ) {
   const products = await getProductsByCategorySlug(categorySlug);
 
-  let filteredProducts = products.filter(product => {
+  let filteredProducts = products.filter((product) => {
     const matchesSearch =
       !search ||
       product.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -34,7 +34,7 @@ async function getFilteredProductsForMetadata(
     const matchesTags =
       !tags ||
       tags.length === 0 ||
-      (product.tags?.some(tag => tags.includes(tag.slug)) ?? false);
+      (product.tags?.some((tag) => tags.includes(tag.slug)) ?? false);
 
     return matchesSearch && matchesTags;
   });
@@ -108,14 +108,14 @@ export async function generateMetadata({
   const parsedTags = Array.isArray(tags)
     ? tags
     : tags
-      ? tags.split(",").filter(Boolean)
-      : [];
+    ? tags.split(",").filter(Boolean)
+    : [];
 
   const filteredProducts = await getFilteredProductsForMetadata(
     categorySlug,
     search,
     parsedTags,
-    sort,
+    sort
   );
   const firstProduct = filteredProducts[0];
 
@@ -153,9 +153,15 @@ export async function generateMetadata({
 
   // Update description with product count and first product info
   if (filteredProducts.length > 0) {
-    description = `${filteredProducts.length} ${categoryLabel.toLowerCase()} product${filteredProducts.length > 1 ? "s" : ""} found`;
+    description = `${
+      filteredProducts.length
+    } ${categoryLabel.toLowerCase()} product${
+      filteredProducts.length > 1 ? "s" : ""
+    } found`;
     if (firstProduct) {
-      description += `. Featuring: ${firstProduct.name} from ${firstProduct.organization?.name || "local partner"}`;
+      description += `. Featuring: ${firstProduct.name} from ${
+        firstProduct.organization?.name || "local partner"
+      }`;
     }
   } else {
     description = `No ${categoryLabel.toLowerCase()} products found matching your criteria`;
@@ -168,7 +174,9 @@ export async function generateMetadata({
       url: firstProduct.imageUrl,
       width: 1200,
       height: 630,
-      alt: `${firstProduct.name} from ${firstProduct.organization?.name || "local partner"}`,
+      alt: `${firstProduct.name} from ${
+        firstProduct.organization?.name || "local partner"
+      }`,
     });
   } else {
     images.push({
@@ -195,7 +203,17 @@ export async function generateMetadata({
     openGraph: {
       title: `${title} - Starva`,
       description,
-      url: `https://starva.vercel.app/products/category/${categorySlug}${search ? `?search=${encodeURIComponent(search)}` : ""}${parsedTags && parsedTags.length > 0 ? `${search ? "&" : "?"}tags=${parsedTags.join(",")}` : ""}${sort && sort !== "newest" ? `${search || parsedTags?.length ? "&" : "?"}sort=${sort}` : ""}`,
+      url: `https://starva.vercel.app/products/category/${categorySlug}${
+        search ? `?search=${encodeURIComponent(search)}` : ""
+      }${
+        parsedTags && parsedTags.length > 0
+          ? `${search ? "&" : "?"}tags=${parsedTags.join(",")}`
+          : ""
+      }${
+        sort && sort !== "newest"
+          ? `${search || parsedTags?.length ? "&" : "?"}sort=${sort}`
+          : ""
+      }`,
       type: "website",
       images,
     },
@@ -203,7 +221,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: `${title} - Starva`,
       description,
-      images: images.map(img => img.url),
+      images: images.map((img) => img.url),
     },
   };
 }
@@ -228,8 +246,8 @@ async function ProductsPageContent({
   const parsedTags = Array.isArray(tags)
     ? tags
     : tags
-      ? tags.split(",").filter(Boolean)
-      : [];
+    ? tags.split(",").filter(Boolean)
+    : [];
 
   return (
     <>
@@ -253,7 +271,7 @@ async function ProductsPageContent({
         <Suspense
           fallback={
             <>
-              <div className="col-span-full text-sm text-pretty text-muted-foreground">
+              <div className="col-span-full text-sm text-pretty text-muted-foreground font-mono tracking-tighter">
                 Loading products...
               </div>
               <SkeletonProductCard />
@@ -289,7 +307,7 @@ export default async function ProductCategorySlugPage({
               <Skeleton className="h-32 w-full" />
             </div>
             <div className="grid grid-cols-1 justify-center gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <div className="col-span-full text-sm text-pretty text-muted-foreground">
+              <div className="col-span-full text-sm text-pretty text-muted-foreground font-mono tracking-tighter">
                 Loading products...
               </div>
               <SkeletonProductCard />

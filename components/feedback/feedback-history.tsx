@@ -1,4 +1,5 @@
-import { getFeedbackByUser } from "@/data/feedback";
+import { MessageSquare } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -6,12 +7,20 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Empty,  EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
+import { getFeedbackByUser } from "@/data/feedback";
+import {
+  FEEDBACK_STATUS_VARIANTS,
+  FEEDBACK_TYPE_LABELS,
+} from "@/lib/constants";
 import { formatDateShort } from "@/lib/utils";
-import { FEEDBACK_STATUS_VARIANTS, FEEDBACK_TYPE_LABELS } from "@/lib/constants";
-import { MessageSquare } from "lucide-react";
 
 export async function FeedbackHistory({ userId }: { userId: string }) {
   const previousFeedback = await getFeedbackByUser(userId);
@@ -20,7 +29,7 @@ export async function FeedbackHistory({ userId }: { userId: string }) {
     <Card>
       <CardHeader>
         <CardTitle>Your Feedback History</CardTitle>
-        <CardDescription>
+        <CardDescription className="font-mono tracking-tighter">
           Track the status of your previous submissions
         </CardDescription>
       </CardHeader>
@@ -32,7 +41,7 @@ export async function FeedbackHistory({ userId }: { userId: string }) {
                 <MessageSquare className="size-5" />
               </EmptyMedia>
               <EmptyTitle className="text-base">No feedback yet</EmptyTitle>
-              <EmptyDescription className="text-sm">
+              <EmptyDescription className="text-sm font-mono tracking-tighter">
                 Your submitted feedback will appear here
               </EmptyDescription>
             </EmptyHeader>
@@ -64,7 +73,7 @@ export async function FeedbackHistory({ userId }: { userId: string }) {
                       {formatDateShort(item.createdAt)}
                     </p>
                   </div>
-                  <p className="text-sm text-muted-foreground line-clamp-2">
+                  <p className="text-sm text-muted-foreground line-clamp-2 font-mono tracking-tighter">
                     {item.message}
                   </p>
                 </div>

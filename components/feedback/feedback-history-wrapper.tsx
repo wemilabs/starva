@@ -1,8 +1,15 @@
-import { verifySession } from "@/data/user-session";
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "../ui/empty";
-import { Button } from "../ui/button";
-import  Link  from "next/link";
 import { MessageSquare } from "lucide-react";
+import Link from "next/link";
+import { verifySession } from "@/data/user-session";
+import { Button } from "../ui/button";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "../ui/empty";
 import { FeedbackHistory } from "./feedback-history";
 
 export async function FeedbackHistoryWrapper() {
@@ -16,7 +23,7 @@ export async function FeedbackHistoryWrapper() {
             <MessageSquare className="size-6" />
           </EmptyMedia>
           <EmptyTitle>Sign in to submit feedback</EmptyTitle>
-          <EmptyDescription>
+          <EmptyDescription className="font-mono tracking-tighter">
             You need to be signed in to submit feedback or view your previous
             submissions
           </EmptyDescription>

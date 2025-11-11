@@ -11,12 +11,12 @@ function LatestProductsSkeleton() {
         <div className="flex items-center justify-between">
           <h2 className="font-medium tracking-tight text-xl">
             Latest Products
-            <span className="sr-only">
+            <span className="sr-only font-mono tracking-tighter">
               Browse the newest products across all categories
             </span>
           </h2>
         </div>
-        <p className="text-xs text-pretty text-muted-foreground">
+        <p className="text-xs text-pretty text-muted-foreground font-mono tracking-tighter">
           Discover the newest additions across all categories
         </p>
 

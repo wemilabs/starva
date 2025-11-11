@@ -1,9 +1,9 @@
+import { Clock, Package, Wallet2 } from "lucide-react";
+import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import type { Order, OrderItem } from "@/db/schema";
 import { formatPriceInRWF, formatRelativeTime } from "@/lib/utils";
-import { Clock, Package, Wallet2 } from "lucide-react";
-import Link from "next/link";
 import { OrderStatusBadge } from "./order-status-badge";
 
 interface OrderCardProps {
@@ -37,7 +37,7 @@ interface OrderCardProps {
 export function OrderCard({ order, variant = "merchant" }: OrderCardProps) {
   const itemCount = order.orderItems.reduce(
     (sum, item) => sum + item.quantity,
-    0,
+    0
   );
 
   const orderNumber =
@@ -48,33 +48,30 @@ export function OrderCard({ order, variant = "merchant" }: OrderCardProps) {
   return (
     <Card className="hover:shadow-md transition-shadow cursor-pointer">
       <Link href={`/orders/${order.id}`}>
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-lg">#{orderNumber}</h3>
-                <OrderStatusBadge status={order.status} />
-              </div>
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <Clock className="size-3" />
-                  {formatRelativeTime(order.createdAt)}
-                </div>
-                <div className="flex items-center gap-1">
-                  <Package className="size-3" />
-                  {itemCount} item{itemCount <= 1 ? "" : "s"}
-                </div>
-              </div>
+        <CardHeader className="-mt-1">
+          <div className="flex items-center justify-between space-y-1">
+            <div className="flex items-center gap-2">
+              <h3 className="font-medium text-lg">#{orderNumber}</h3>
+              <OrderStatusBadge status={order.status} />
             </div>
-            <div className="text-right">
-              <div className="flex items-center gap-1 font-semibold text-lg">
-                <Wallet2 className="size-4" />
-                {formatPriceInRWF(order.totalPrice)}
-              </div>
+            <div className="flex items-center gap-1 font-medium text-lg">
+              <Wallet2 className="size-4" />
+              {formatPriceInRWF(order.totalPrice)}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 text-sm text-muted-foreground justify-between">
+            <div className="flex items-center gap-1">
+              <Clock className="size-3" />
+              {formatRelativeTime(order.createdAt)}
+            </div>
+            <div className="flex items-center gap-1">
+              <Package className="size-3" />
+              {itemCount} item{itemCount <= 1 ? "" : "s"}
             </div>
           </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6 -mb-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               {variant === "merchant" && order.user ? (

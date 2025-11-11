@@ -1,3 +1,7 @@
+import { ScrollText } from "lucide-react";
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Suspense } from "react";
 import { OrdersPageSkeleton } from "@/components/orders/order-skeleton";
 import { OrderTabs } from "@/components/orders/order-tabs";
 import { Button } from "@/components/ui/button";
@@ -16,10 +20,6 @@ import {
 } from "@/data/orders";
 import { verifySession } from "@/data/user-session";
 import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
-import { ScrollText } from "lucide-react";
-import type { Metadata } from "next";
-import Link from "next/link";
-import { Suspense } from "react";
 
 async function OrdersContent() {
   const sessionData = await verifySession();
@@ -32,7 +32,7 @@ async function OrdersContent() {
             <ScrollText className="size-6" />
           </EmptyMedia>
           <EmptyTitle>You are not yet signed in</EmptyTitle>
-          <EmptyDescription>
+          <EmptyDescription className="font-mono tracking-tighter">
             Sign in first in order to access this service
           </EmptyDescription>
         </EmptyHeader>
@@ -65,7 +65,7 @@ async function OrdersContent() {
               <ScrollText className="size-6" />
             </EmptyMedia>
             <EmptyTitle>No orders yet</EmptyTitle>
-            <EmptyDescription>
+            <EmptyDescription className="font-mono tracking-tighter">
               Start shopping from businesses to place your first order. Your
               order history will appear here.
             </EmptyDescription>
@@ -88,7 +88,9 @@ export async function generateMetadata(): Promise<Metadata> {
   const description =
     "Manage and track all your orders in one place. View order status, track deliveries, and manage customer orders with Starva's powerful order management system.";
 
-  const ordersUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/orders`;
+  const ordersUrl = `${
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+  }/orders`;
 
   return {
     title,
@@ -125,7 +127,7 @@ export default async function OrdersPage() {
     <div className="container mx-auto max-w-7xl py-7 space-y-7">
       <div>
         <h1 className="text-2xl font-medium tracking-tight">Orders</h1>
-        <p className="text-muted-foreground mt-0.5 text-sm text-pretty">
+        <p className="text-muted-foreground mt-0.5 text-sm text-pretty font-mono tracking-tighter">
           Manage and track all your orders
         </p>
       </div>

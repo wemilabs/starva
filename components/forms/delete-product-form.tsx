@@ -1,5 +1,9 @@
 "use client";
 
+import { Trash2 } from "lucide-react";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
+import { z } from "zod";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,10 +16,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { deleteProduct } from "@/server/products";
-import { Trash2 } from "lucide-react";
-import { useState, useTransition } from "react";
-import { toast } from "sonner";
-import { z } from "zod";
 import { Spinner } from "../ui/spinner";
 
 const schema = z.object({
@@ -74,7 +74,7 @@ export function DeleteProductForm({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Absolutely sure?</AlertDialogTitle>
-          <AlertDialogDescription>
+          <AlertDialogDescription className="font-mono tracking-tighter">
             This action cannot be undone. It will delete the product.
           </AlertDialogDescription>
         </AlertDialogHeader>

@@ -27,7 +27,9 @@ async function ProductsList({ businessId }: { businessId: string }) {
     return (
       <div className="text-center py-10">
         <h2 className="text-lg font-semibold mb-2">Unable to load products</h2>
-        <p className="text-muted-foreground">{productsPerBusiness.message}</p>
+        <p className="text-muted-foreground font-mono tracking-tighter">
+          {productsPerBusiness.message}
+        </p>
       </div>
     );
   }
@@ -76,7 +78,9 @@ async function BusinessContent({
               initialName={business.name}
               updateAction={updateBusinessName}
             />
-            <p className="text-white/80 text-sm">@{resolvedSlug}</p>
+            <p className="text-white/80 text-sm font-mono tracking-tighter">
+              @{resolvedSlug}
+            </p>
             <EditableBusinessDescription
               businessId={business.id}
               businessSlug={resolvedSlug}
@@ -174,7 +178,9 @@ export async function generateMetadata({
     });
   }
 
-  const businessUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/businesses/${resolvedSlug}`;
+  const businessUrl = `${
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+  }/businesses/${resolvedSlug}`;
 
   return {
     title: `${business.name} - Starva`,
@@ -191,7 +197,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: `${business.name} - Starva`,
       description,
-      images: images.map(img => img.url),
+      images: images.map((img) => img.url),
     },
     alternates: {
       canonical: businessUrl,
@@ -200,7 +206,7 @@ export async function generateMetadata({
 }
 
 export default async function BusinessSlugPage(
-  props: PageProps<"/businesses/[businessSlug]">,
+  props: PageProps<"/businesses/[businessSlug]">
 ) {
   return (
     <Suspense

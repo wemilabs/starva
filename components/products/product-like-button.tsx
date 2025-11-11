@@ -1,13 +1,13 @@
 "use client";
 
-import type { buttonVariants } from "@/components/ui/button";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { toggleProductLike } from "@/server/products";
 import type { VariantProps } from "class-variance-authority";
 import { Heart } from "lucide-react";
 import { useOptimistic, useTransition } from "react";
 import { toast } from "sonner";
+import type { buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { toggleProductLike } from "@/server/products";
 
 type ProductLikeButtonProps = {
   productId: string;
@@ -35,7 +35,7 @@ export function ProductLikeButton({
     OptimisticState
   >(
     { isLiked: initialIsLiked, likesCount: initialLikesCount },
-    (_, newState) => newState,
+    (_, newState) => newState
   );
 
   const handleLike = (e: React.MouseEvent) => {
@@ -79,7 +79,7 @@ export function ProductLikeButton({
       <Heart
         className={cn(
           "transition-colors",
-          variant === "compact" ? "size-3.5" : "size-4",
+          variant === "compact" ? "size-3.5" : "size-4"
         )}
         fill={optimisticState.isLiked ? "currentColor" : "none"}
         aria-hidden="true"

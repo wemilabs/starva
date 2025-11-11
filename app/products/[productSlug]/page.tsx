@@ -44,7 +44,7 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
             {product.name}
           </h1>
 
-          <div className="text-2xl font-bold">
+          <div className="text-2xl font-medium">
             {formatPriceInRWF(product.price)}
           </div>
 
@@ -57,19 +57,21 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
             </Badge>
           </div>
 
-          <div className="prose max-w-none text-sm text-muted-foreground">
+          <div className="prose max-w-none text-sm text-muted-foreground font-mono tracking-tighter">
             <p>{product.description}</p>
           </div>
 
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div className="rounded-md border p-4">
-              <p className="text-muted-foreground">Status</p>
+              <p className="text-muted-foreground font-mono tracking-tighter">
+                Status
+              </p>
               <Badge variant="available" className="mt-1">
                 {removeUnderscoreAndCapitalizeOnlyTheFirstChar(product.status)}
               </Badge>
             </div>
             <div className="rounded-md border p-4">
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground font-mono tracking-tighter">
                 {getCategorySpecificationLabel(product.category)}
               </p>
               <p className="mt-1 font-medium">
@@ -77,7 +79,9 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
               </p>
             </div>
             <div className="rounded-md border p-4">
-              <p className="text-muted-foreground mb-2">Likes</p>
+              <p className="text-muted-foreground font-mono tracking-tighter mb-2">
+                Likes
+              </p>
               <ProductLikeButton
                 productId={product.id}
                 initialIsLiked={product.isLiked ?? false}
@@ -87,7 +91,9 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
               />
             </div>
             <div className="rounded-md border p-4">
-              <p className="text-muted-foreground">From</p>
+              <p className="text-muted-foreground font-mono tracking-tighter">
+                From
+              </p>
               <p className="mt-1 font-medium">
                 <Link
                   className="underline underline-offset-4 hover:no-underline"
@@ -116,7 +122,9 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
             </Button> */}
 
             <ShareDialog
-              url={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/products/${product.slug}`}
+              url={`${
+                process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+              }/products/${product.slug}`}
               buttonTitle="Share"
               title={`Share ${product.name}`}
               description={`Share this product with others`}
@@ -155,7 +163,11 @@ export async function generateMetadata({
 
   const resolvedSlug = product.slug ?? productSlug;
   const title = `${product.name} - Starva`;
-  const description = `${product.name}${product.description ? ` - ${product.description}` : ""}. Price: ${formatPriceInRWF(product.price)}. Available from ${product.organization.name}. Order now for delivery.`;
+  const description = `${product.name}${
+    product.description ? ` - ${product.description}` : ""
+  }. Price: ${formatPriceInRWF(product.price)}. Available from ${
+    product.organization.name
+  }. Order now for delivery.`;
 
   const images = [];
   if (product.imageUrl) {
@@ -174,7 +186,9 @@ export async function generateMetadata({
     });
   }
 
-  const productUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/products/${resolvedSlug}`;
+  const productUrl = `${
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+  }/products/${resolvedSlug}`;
 
   return {
     title,
@@ -191,7 +205,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: images.map(img => img.url),
+      images: images.map((img) => img.url),
     },
     alternates: {
       canonical: productUrl,
@@ -200,7 +214,7 @@ export async function generateMetadata({
 }
 
 export default async function ProductSlugPage(
-  props: PageProps<"/products/[productSlug]">,
+  props: PageProps<"/products/[productSlug]">
 ) {
   return (
     <Suspense fallback={<ProductSlugSkeleton />}>

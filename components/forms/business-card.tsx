@@ -80,7 +80,7 @@ export function BusinessCard({ business }: { business: Organization }) {
               <CardTitle className="truncate md:text-lg mb-2">
                 {business.name}
               </CardTitle>
-              <CardDescription className="line-clamp-2 text-xs sm:text-sm">
+              <CardDescription className="line-clamp-2 text-xs sm:text-sm font-mono tracking-tighter">
                 {metadata?.description || "No description provided"}
               </CardDescription>
             </Link>
@@ -114,7 +114,7 @@ export function BusinessCard({ business }: { business: Organization }) {
                   <AlertDialogAction
                     className="bg-destructive hover:bg-destructive/90"
                     disabled={isPending}
-                    onClick={e => {
+                    onClick={(e) => {
                       e.preventDefault();
                       handleDelete();
                     }}

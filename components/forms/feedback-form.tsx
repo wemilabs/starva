@@ -1,37 +1,37 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
-import {
-	Form,
-	FormControl,
-	FormDescription,
-	FormField,
-	FormItem,
-	FormLabel,
-	FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { submitFeedback } from "@/server/feedback";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { submitFeedback } from "@/server/feedback";
 import { Spinner } from "../ui/spinner";
 
 const formSchema = z.object({
@@ -78,7 +78,7 @@ export function FeedbackForm() {
     <Card className="max-w-2xl">
       <CardHeader>
         <CardTitle>Submit Feedback</CardTitle>
-        <CardDescription>
+        <CardDescription className="font-mono tracking-tighter">
           We value your input! Share your thoughts, report bugs, or suggest new
           features.
         </CardDescription>
@@ -103,14 +103,18 @@ export function FeedbackForm() {
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="bug">🐛 Bug Report</SelectItem>
-                      <SelectItem value="feature">✨ Feature Request</SelectItem>
+                      <SelectItem value="feature">
+                        ✨ Feature Request
+                      </SelectItem>
                       <SelectItem value="improvement">
                         📈 Improvement
                       </SelectItem>
-                      <SelectItem value="general">💬 General Feedback</SelectItem>
+                      <SelectItem value="general">
+                        💬 General Feedback
+                      </SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormDescription>
+                  <FormDescription className="font-mono tracking-tighter">
                     Choose the category that best fits your feedback
                   </FormDescription>
                   <FormMessage />
@@ -127,7 +131,7 @@ export function FeedbackForm() {
                   <FormControl>
                     <Input
                       placeholder="Brief summary of your feedback"
-											className="placeholder:text-sm"
+                      className="placeholder:text-sm"
                       {...field}
                     />
                   </FormControl>
@@ -149,9 +153,9 @@ export function FeedbackForm() {
                       {...field}
                     />
                   </FormControl>
-                  <FormDescription>
+                  <FormDescription className="font-mono tracking-tighter">
                     Provide as much detail as possible to help us understand
-                    your feedback
+                    your concern
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -164,17 +168,20 @@ export function FeedbackForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Email <span className="text-muted-foreground">(optional)</span>
+                    Email{" "}
+                    <span className="text-muted-foreground font-mono tracking-tighter text-xs">
+                      (optional)
+                    </span>
                   </FormLabel>
                   <FormControl>
                     <Input
                       type="email"
                       placeholder="your@email.com"
-											className="placeholder:text-sm"
-	                      {...field}
+                      className="placeholder:text-sm"
+                      {...field}
                     />
                   </FormControl>
-                  <FormDescription>
+                  <FormDescription className="font-mono tracking-tighter">
                     Leave blank to use your account email
                   </FormDescription>
                   <FormMessage />

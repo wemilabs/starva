@@ -1,13 +1,15 @@
-import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
 import { Receipt, Sparkles } from "lucide-react";
 import type { Metadata } from "next";
+import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
 
 export async function generateMetadata(): Promise<Metadata> {
   const title = "Transaction History - Starva";
   const description =
     "Track all your payments and financial activity in one place. Detailed transaction records and payment history for complete financial oversight.";
 
-  const transactionsUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/transactions`;
+  const transactionsUrl = `${
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+  }/transactions`;
 
   return {
     title,
@@ -58,11 +60,11 @@ export default function TransactionsPage() {
                 </span>
               </div>
 
-              <h1 className="text-3xl font-bold tracking-tight">
+              <h1 className="text-3xl font-medium tracking-tight">
                 Transaction History
               </h1>
 
-              <p className="text-muted-foreground text-sm leading-relaxed">
+              <p className="text-muted-foreground text-sm leading-relaxed font-mono tracking-tighter">
                 Track all your payments and financial activity in one place.
                 Detailed transaction records and payment history coming soon.
               </p>

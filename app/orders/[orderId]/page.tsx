@@ -1,3 +1,9 @@
+import { ArrowLeft, Calendar, Package } from "lucide-react";
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+import { Suspense } from "react";
 import { CancelOrderButton } from "@/components/orders/cancel-order-button";
 import { OrderStatusBadge } from "@/components/orders/order-status-badge";
 import { OrderStatusSelect } from "@/components/orders/order-status-select";
@@ -16,12 +22,6 @@ import { getOrderById } from "@/data/orders";
 import { verifySession } from "@/data/user-session";
 import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
 import { formatDate, formatPriceInRWF } from "@/lib/utils";
-import { ArrowLeft, Calendar, Package } from "lucide-react";
-import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
-import { notFound, redirect } from "next/navigation";
-import { Suspense } from "react";
 
 async function OrderContent({
   params,
@@ -44,7 +44,7 @@ async function OrderContent({
 
   const totalItems = order.orderItems.reduce(
     (sum, item) => sum + item.quantity,
-    0,
+    0
   );
 
   const orderNumber = isMerchant
@@ -60,10 +60,10 @@ async function OrderContent({
           </Link>
         </Button>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold tracking-tight">
+          <h1 className="text-2xl font-medium tracking-tight">
             Order #{orderNumber}
           </h1>
-          <p className="text-muted-foreground mt-0.5 text-sm">
+          <p className="text-muted-foreground mt-0.5 text-sm font-mono tracking-tighter">
             Placed on {formatDate(order.createdAt)}
           </p>
         </div>
@@ -75,9 +75,9 @@ async function OrderContent({
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <div>
+                <div className="flex flex-col space-y-1">
                   <CardTitle>Order Items</CardTitle>
-                  <CardDescription>
+                  <CardDescription className="font-mono tracking-tighter">
                     {totalItems} {totalItems === 1 ? "item" : "items"} in this
                     order
                   </CardDescription>
@@ -96,7 +96,7 @@ async function OrderContent({
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {order.orderItems.map(item => (
+                {order.orderItems.map((item) => (
                   <div
                     key={item.id}
                     className="flex items-center gap-4 p-3 rounded-lg border"
@@ -115,19 +115,19 @@ async function OrderContent({
                         </div>
                       )}
                     </div>
-                    <div className="flex-1">
+                    <div className="flex-1 space-y-1">
                       <h4 className="font-medium text-sm md:text-base">
                         {item.product.name}
                       </h4>
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <span>
+                        <span className="font-mono tracking-tighter">
                           {formatPriceInRWF(item.priceAtOrder)} ×{" "}
                           {item.quantity}
                         </span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-semibold text-sm">
+                      <p className="font-medium text-sm font-mono tracking-tighter">
                         {formatPriceInRWF(item.subtotal)}
                       </p>
                     </div>
@@ -138,7 +138,7 @@ async function OrderContent({
               <Separator className="my-4" />
 
               <div className="space-y-2">
-                <div className="flex justify-between font-semibold">
+                <div className="flex justify-between font-medium">
                   <span>Total</span>
                   <span>{formatPriceInRWF(order.totalPrice)}</span>
                 </div>
@@ -152,7 +152,9 @@ async function OrderContent({
                 <CardTitle>Order Notes</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground text-sm">{order.notes}</p>
+                <p className="text-muted-foreground text-sm font-mono tracking-tighter">
+                  {order.notes}
+                </p>
               </CardContent>
             </Card>
           )}
@@ -173,7 +175,7 @@ async function OrderContent({
                 </Avatar>
                 <div>
                   <p className="font-medium">{order.user.name}</p>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground font-mono tracking-tighter">
                     {order.user.email}
                   </p>
                 </div>
@@ -205,7 +207,7 @@ async function OrderContent({
                   )}
                   <div>
                     <p className="font-medium">{order.organization.name}</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground font-mono tracking-tighter">
                       @{order.organization.slug}
                     </p>
                   </div>
@@ -221,14 +223,18 @@ async function OrderContent({
             <CardContent className="space-y-3">
               <div className="flex items-center gap-2 text-sm">
                 <Calendar className="size-4 text-muted-foreground" />
-                <span className="text-muted-foreground">Created:</span>
+                <span className="text-muted-foreground font-mono tracking-tighter">
+                  Created:
+                </span>
                 <span className="font-medium">
                   {formatDate(order.createdAt)}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <Calendar className="size-4 text-muted-foreground" />
-                <span className="text-muted-foreground">Updated:</span>
+                <span className="text-muted-foreground font-mono tracking-tighter">
+                  Updated:
+                </span>
                 <span className="font-medium">
                   {formatDate(order.updatedAt)}
                 </span>
@@ -272,7 +278,7 @@ export async function generateMetadata({
 
   const totalItems = order.orderItems.reduce(
     (sum, item) => sum + item.quantity,
-    0,
+    0
   );
 
   const firstItem = order.orderItems[0];
@@ -280,8 +286,14 @@ export async function generateMetadata({
 
   const title = `Order #${orderNumber} - Starva`;
   const description = hasMultipleItems
-    ? `Order #${orderNumber} with ${totalItems} items. Total: ${formatPriceInRWF(order.totalPrice)}. Placed on ${formatDate(order.createdAt)}. Status: ${order.status}.`
-    : `Order #${orderNumber} for ${firstItem?.product.name || "items"}. Total: ${formatPriceInRWF(order.totalPrice)}. Placed on ${formatDate(order.createdAt)}. Status: ${order.status}.`;
+    ? `Order #${orderNumber} with ${totalItems} items. Total: ${formatPriceInRWF(
+        order.totalPrice
+      )}. Placed on ${formatDate(order.createdAt)}. Status: ${order.status}.`
+    : `Order #${orderNumber} for ${
+        firstItem?.product.name || "items"
+      }. Total: ${formatPriceInRWF(order.totalPrice)}. Placed on ${formatDate(
+        order.createdAt
+      )}. Status: ${order.status}.`;
 
   const images = [];
   if (firstItem?.product.imageUrl) {
@@ -300,7 +312,9 @@ export async function generateMetadata({
     });
   }
 
-  const orderUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/orders/${orderId}`;
+  const orderUrl = `${
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+  }/orders/${orderId}`;
 
   return {
     title,
@@ -317,7 +331,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: images.map(img => img.url),
+      images: images.map((img) => img.url),
     },
     alternates: {
       canonical: orderUrl,
@@ -351,7 +365,7 @@ export default async function OrderPage(props: PageProps<"/orders/[orderId]">) {
                 </div>
 
                 <div className="space-y-4">
-                  {[1, 2].map(i => (
+                  {[1, 2].map((i) => (
                     <div
                       key={i}
                       className="flex items-center gap-4 p-3 rounded-lg border"

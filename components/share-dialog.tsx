@@ -1,5 +1,8 @@
 "use client";
 
+import type { VariantProps } from "class-variance-authority";
+import { Check, Copy, MessageCircle, Share2, Smartphone } from "lucide-react";
+import { useState } from "react";
 import { Button, type buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,9 +14,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import type { VariantProps } from "class-variance-authority";
-import { Check, Copy, MessageCircle, Share2, Smartphone } from "lucide-react";
-import { useState } from "react";
 
 interface ShareDialogProps {
   url: string;
@@ -72,16 +72,17 @@ export function ShareDialog({
           variant={variant?.variant}
           size={variant?.size}
           className={cn("gap-2", className)}
-          // onClick={e => e.stopPropagation()}
         >
           <Share2 className="size-4" />
           {buttonTitle}
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <DialogHeader>
+        <DialogHeader className="mb-1">
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
+          <DialogDescription className="font-mono tracking-tighter">
+            {description}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -96,7 +97,7 @@ export function ShareDialog({
               <MessageCircle className="size-5 text-green-600" />
               <div className="text-left">
                 <div className="font-medium">Share on WhatsApp</div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-sm text-muted-foreground font-mono tracking-tighter">
                   Send directly to WhatsApp contacts
                 </div>
               </div>
@@ -112,7 +113,7 @@ export function ShareDialog({
                 <Smartphone className="size-5 text-blue-600" />
                 <div className="text-left">
                   <div className="font-medium">Share via device</div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-sm text-muted-foreground font-mono tracking-tighter">
                     Use your device's share options
                   </div>
                 </div>
@@ -134,7 +135,7 @@ export function ShareDialog({
                 <div className="font-medium">
                   {copied ? "Link copied!" : "Copy link"}
                 </div>
-                <div className="text-sm text-muted-foreground">
+                <div className="text-sm text-muted-foreground font-mono tracking-tighter">
                   {copied ? "Ready to paste anywhere" : "Copy URL to clipboard"}
                 </div>
               </div>
@@ -143,14 +144,14 @@ export function ShareDialog({
 
           {/* URL Display */}
           <div className="border-t pt-4">
-            <div className="text-sm text-muted-foreground mb-2">
+            <div className="text-sm text-muted-foreground mb-2 font-mono tracking-tighter">
               Link preview:
             </div>
             <Input
               value={url}
               readOnly
               className="font-mono text-sm"
-              onClick={e => e.currentTarget.select()}
+              onClick={(e) => e.currentTarget.select()}
             />
           </div>
         </div>

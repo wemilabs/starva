@@ -77,7 +77,9 @@ export const SignInForm = ({
       <Card className="border-none shadow-none">
         <CardHeader className="text-center">
           <CardTitle className="text-xl">Welcome back</CardTitle>
-          <CardDescription>Sign in with your Google account</CardDescription>
+          <CardDescription className="font-mono tracking-tighter">
+            Sign in with your Google account
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -137,7 +139,7 @@ export const SignInForm = ({
                 </Button>
 
                 <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
-                  <span className="bg-card text-muted-foreground relative z-10 px-2">
+                  <span className="bg-card text-muted-foreground relative z-10 px-2 font-mono tracking-tighter">
                     Or continue with
                   </span>
                 </div>

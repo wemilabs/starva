@@ -70,7 +70,7 @@ export function CartSheet() {
 
     startTransition(async () => {
       const result = await placeOrder({
-        items: items.map(item => ({
+        items: items.map((item) => ({
           productId: item.productId,
           quantity: item.quantity,
           notes: item.notes,
@@ -95,7 +95,7 @@ export function CartSheet() {
         setOrderNotes("");
 
         const isSafari = /^((?!chrome|android).)*safari/i.test(
-          navigator.userAgent,
+          navigator.userAgent
         );
 
         if (isSafari) {
@@ -147,7 +147,7 @@ export function CartSheet() {
       <SheetContent className="flex h-full flex-col">
         <SheetHeader className="text-left">
           <SheetTitle>Shopping Cart</SheetTitle>
-          <SheetDescription>
+          <SheetDescription className="font-mono tracking-tighter">
             {itemCount === 0
               ? "Your cart is empty"
               : `${itemCount} item${itemCount > 1 ? "s" : ""} in your cart`}
@@ -157,7 +157,7 @@ export function CartSheet() {
         {items.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center">
             <ShoppingBag className="size-6 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground font-mono tracking-tighter">
               Your cart is empty. Start adding products!
             </p>
           </div>
@@ -165,7 +165,7 @@ export function CartSheet() {
           <>
             <ScrollArea className="flex-1 h-[calc(100%-24rem)] px-4">
               <div className="space-y-4">
-                {items.map(item => (
+                {items.map((item) => (
                   <div
                     key={item.productId}
                     className="space-y-3 rounded-lg border p-3"
@@ -194,7 +194,7 @@ export function CartSheet() {
                             <Trash2 className="size-4" />
                           </Button>
                         </div>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground font-mono tracking-tighter">
                           {formatPriceInRWF(item.price)}
                         </p>
                       </div>
@@ -216,10 +216,10 @@ export function CartSheet() {
                           type="number"
                           min={1}
                           value={item.quantity}
-                          onChange={e =>
+                          onChange={(e) =>
                             updateQuantity(
                               item.productId,
-                              Number.parseInt(e.target.value, 10) || 1,
+                              Number.parseInt(e.target.value, 10) || 1
                             )
                           }
                           className="w-16 text-center"
@@ -235,7 +235,7 @@ export function CartSheet() {
                           +
                         </Button>
                       </div>
-                      <p className="ml-auto text-sm font-medium">
+                      <p className="ml-auto text-sm font-medium font-mono tracking-tighter">
                         {formatPriceInRWF(Number(item.price) * item.quantity)}
                       </p>
                     </div>
@@ -245,12 +245,15 @@ export function CartSheet() {
                         htmlFor={`notes-${item.productId}`}
                         className="text-xs"
                       >
-                        Item note (optional)
+                        Item note{" "}
+                        <span className="text-muted-foreground font-mono tracking-tighter">
+                          (optional)
+                        </span>
                       </Label>
                       <Textarea
                         id={`notes-${item.productId}`}
                         value={item.notes || ""}
-                        onChange={e =>
+                        onChange={(e) =>
                           updateNotes(item.productId, e.target.value)
                         }
                         placeholder="Special instructions..."
@@ -268,12 +271,15 @@ export function CartSheet() {
             <div className="space-y-2 px-4">
               <div className="space-y-2">
                 <Label htmlFor="order-notes" className="text-sm">
-                  Order notes (optional)
+                  Order notes{" "}
+                  <span className="text-muted-foreground font-mono tracking-tighter text-xs">
+                    (optional)
+                  </span>
                 </Label>
                 <Textarea
                   id="order-notes"
                   value={orderNotes}
-                  onChange={e => setOrderNotes(e.target.value)}
+                  onChange={(e) => setOrderNotes(e.target.value)}
                   placeholder="Any special instructions for the entire order..."
                   rows={3}
                   className="text-sm"
@@ -281,7 +287,7 @@ export function CartSheet() {
               </div>
               <div className="flex items-center justify-between rounded-lg bg-muted px-3 py-2">
                 <span className="font-medium">Total</span>
-                <span className="text-lg font-bold">
+                <span className="text-lg font-medium font-mono tracking-tighter">
                   {formatPriceInRWF(totalPrice)}
                 </span>
               </div>

@@ -50,7 +50,9 @@ export async function generateMetadata(): Promise<Metadata> {
   const description =
     "Manage your businesses with Starva. Update products, track orders, and grow your business with powerful management tools.";
 
-  const businessesUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"}/businesses`;
+  const businessesUrl = `${
+    process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
+  }/businesses`;
 
   return {
     title,
@@ -88,7 +90,7 @@ export default async function BusinessesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-medium tracking-tight">Businesses</h1>
-          <p className="text-muted-foreground mt-0.5 text-sm text-pretty">
+          <p className="text-muted-foreground mt-0.5 text-sm text-pretty font-mono tracking-tighter">
             Manage and monitor all your businesses in one place
           </p>
         </div>
@@ -110,7 +112,7 @@ export default async function BusinessesPage() {
       <Suspense
         fallback={
           <>
-            <div className="col-span-full text-sm text-pretty text-muted-foreground">
+            <div className="col-span-full text-sm text-pretty text-muted-foreground font-mono tracking-tighter">
               Loading businesses...
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

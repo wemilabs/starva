@@ -1,7 +1,7 @@
 import { and, eq, ilike, inArray, sql } from "drizzle-orm";
+import { cacheLife } from "next/cache";
 import { cache } from "react";
 import "server-only";
-
 import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
 import {
@@ -19,7 +19,7 @@ const getUserLikedProductIds = async (userId: string): Promise<Set<string>> => {
     .select({ productId: productLike.productId })
     .from(productLike)
     .where(eq(productLike.userId, userId));
-  return new Set(likes.map(like => like.productId));
+  return new Set(likes.map((like) => like.productId));
 };
 
 export const getInStockProducts = cache(async () => {
@@ -52,17 +52,17 @@ export const getInStockProducts = cache(async () => {
     orderBy: (product, { desc }) => [desc(product.createdAt)],
   });
 
-  const productsWithTags = products.map(p => ({
+  const productsWithTags = products.map((p) => ({
     ...p,
-    tags: p.productTags.map(pt => pt.tag),
+    tags: p.productTags.map((pt) => pt.tag),
   }));
 
   if (!success || !session) {
-    return productsWithTags.map(p => ({ ...p, isLiked: false }));
+    return productsWithTags.map((p) => ({ ...p, isLiked: false }));
   }
 
   const likedProductIds = await getUserLikedProductIds(session.user.id);
-  return productsWithTags.map(p => ({
+  return productsWithTags.map((p) => ({
     ...p,
     isLiked: likedProductIds.has(p.id),
   }));
@@ -90,12 +90,12 @@ export const getProductsPerBusiness = cache(async (organizationId: string) => {
       orderBy: (product, { desc }) => [desc(product.createdAt)],
     });
     const likedProductIds = await getUserLikedProductIds(session.user.id);
-    return products.map(p => ({ ...p, isLiked: likedProductIds.has(p.id) }));
+    return products.map((p) => ({ ...p, isLiked: likedProductIds.has(p.id) }));
   } catch (error) {
     console.error(
       "Failed to fetch products for organization:",
       organizationId,
-      error,
+      error
     );
     return { message: "Failed to fetch products for organization" };
   }
@@ -104,6 +104,8 @@ export const getProductsPerBusiness = cache(async (organizationId: string) => {
 export const getProductsPerBusinessWithoutAuth = cache(
   async (organizationId: string) => {
     "use cache";
+    cacheLife("minutes");
+
     try {
       const products = await db.query.product.findMany({
         where: and(eq(product.organizationId, organizationId)),
@@ -120,16 +122,16 @@ export const getProductsPerBusinessWithoutAuth = cache(
         },
         orderBy: (product, { desc }) => [desc(product.createdAt)],
       });
-      return products.map(p => ({ ...p, isLiked: false }));
+      return products.map((p) => ({ ...p, isLiked: false }));
     } catch (error) {
       console.error(
         "Failed to fetch products for organization:",
         organizationId,
-        error,
+        error
       );
       return { message: "Failed to fetch products for organization" };
     }
-  },
+  }
 );
 
 export const getProductBySlug = cache(async (slug: string) => {
@@ -180,6 +182,8 @@ type ProductFilters = {
 
 async function getFilteredCachedProductsBase(filters: ProductFilters = {}) {
   "use cache";
+  cacheLife("minutes");
+
   const { search, tagSlugs, status = "in_stock", sortBy = "newest" } = filters;
 
   try {
@@ -217,7 +221,7 @@ async function getFilteredCachedProductsBase(filters: ProductFilters = {}) {
         sql`(
           ${ilike(product.name, `%${search}%`)} OR 
           ${ilike(product.description, `%${search}%`)}
-        )`,
+        )`
       );
     }
 
@@ -234,16 +238,16 @@ async function getFilteredCachedProductsBase(filters: ProductFilters = {}) {
           .where(
             inArray(
               productTag.tagId,
-              tagIds.map(t => t.id),
-            ),
+              tagIds.map((t) => t.id)
+            )
           );
 
         if (productIds.length > 0) {
           conditions.push(
             inArray(
               product.id,
-              productIds.map(p => p.productId),
-            ),
+              productIds.map((p) => p.productId)
+            )
           );
         } else {
           return [];
@@ -285,7 +289,7 @@ export const getProductsByCategorySlug = cache(
     const products = await db.query.product.findMany({
       where: and(
         eq(product.status, "in_stock"),
-        eq(product.category, categorySlug),
+        eq(product.category, categorySlug)
       ),
       with: {
         organization: {
@@ -312,21 +316,21 @@ export const getProductsByCategorySlug = cache(
       orderBy: (product, { desc }) => [desc(product.createdAt)],
     });
 
-    const productsWithTags = products.map(p => ({
+    const productsWithTags = products.map((p) => ({
       ...p,
-      tags: p.productTags.map(pt => pt.tag),
+      tags: p.productTags.map((pt) => pt.tag),
     }));
 
     if (!success || !session) {
-      return productsWithTags.map(p => ({ ...p, isLiked: false }));
+      return productsWithTags.map((p) => ({ ...p, isLiked: false }));
     }
 
     const likedProductIds = await getUserLikedProductIds(session.user.id);
-    return productsWithTags.map(p => ({
+    return productsWithTags.map((p) => ({
       ...p,
       isLiked: likedProductIds.has(p.id),
     }));
-  },
+  }
 );
 
 export const getFilteredProducts = cache(
@@ -336,12 +340,12 @@ export const getFilteredProducts = cache(
     const products = await getFilteredCachedProductsBase(filters);
 
     if (!success || !session) {
-      return products.map(p => ({ ...p, isLiked: false }));
+      return products.map((p) => ({ ...p, isLiked: false }));
     }
 
     const likedProductIds = await getUserLikedProductIds(session.user.id);
-    return products.map(p => ({ ...p, isLiked: likedProductIds.has(p.id) }));
-  },
+    return products.map((p) => ({ ...p, isLiked: likedProductIds.has(p.id) }));
+  }
 );
 
 export const getLatestProductsByCategory = cache(async () => {
@@ -374,34 +378,31 @@ export const getLatestProductsByCategory = cache(async () => {
     orderBy: (product, { desc }) => [desc(product.createdAt)],
   });
 
-  const productsWithTags = products.map(p => ({
+  const productsWithTags = products.map((p) => ({
     ...p,
-    tags: p.productTags.map(pt => pt.tag),
+    tags: p.productTags.map((pt) => pt.tag),
   }));
 
   // Add isLiked status if user is authenticated
   let productsWithLikes = productsWithTags;
   if (success && session) {
     const likedProductIds = await getUserLikedProductIds(session.user.id);
-    productsWithLikes = productsWithTags.map(p => ({
+    productsWithLikes = productsWithTags.map((p) => ({
       ...p,
       isLiked: likedProductIds.has(p.id),
     }));
   } else {
-    productsWithLikes = productsWithTags.map(p => ({ ...p, isLiked: false }));
+    productsWithLikes = productsWithTags.map((p) => ({ ...p, isLiked: false }));
   }
 
-  const groupedByCategory = productsWithLikes.reduce(
-    (acc, product) => {
-      const category = product.category;
-      if (!acc[category]) {
-        acc[category] = [];
-      }
-      acc[category].push(product);
-      return acc;
-    },
-    {} as Record<ProductCategory, typeof productsWithLikes>,
-  );
+  const groupedByCategory = productsWithLikes.reduce((acc, product) => {
+    const category = product.category;
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(product);
+    return acc;
+  }, {} as Record<ProductCategory, typeof productsWithLikes>);
 
   const categoriesWithProducts = Object.entries(groupedByCategory)
     .map(([category, categoryProducts]) => ({

@@ -1,13 +1,15 @@
 import { eq, sql } from "drizzle-orm";
+import { cacheLife } from "next/cache";
 import { cache } from "react";
 import "server-only";
-
 import { db } from "@/db/drizzle";
-import { product, productTag, tag } from "@/db/schema";
 import type { ProductCategory } from "@/db/schema";
+import { product, productTag, tag } from "@/db/schema";
 
 export const getAllTags = cache(async () => {
   "use cache";
+  cacheLife("hours");
+
   try {
     const tags = await db
       .select({
@@ -31,6 +33,8 @@ export const getAllTags = cache(async () => {
 
 export const getProductTags = cache(async (productId: string) => {
   "use cache";
+  cacheLife("minutes");
+
   try {
     const tags = await db
       .select({
@@ -53,6 +57,8 @@ export const getProductTags = cache(async (productId: string) => {
 
 export const getAllTagsWithProducts = cache(async () => {
   "use cache";
+  cacheLife("minutes");
+
   try {
     const tags = await db
       .select({
@@ -68,7 +74,14 @@ export const getAllTagsWithProducts = cache(async () => {
       .leftJoin(productTag, eq(productTag.tagId, tag.id))
       .leftJoin(product, eq(product.id, productTag.productId))
       .where(eq(product.status, "in_stock"))
-      .groupBy(tag.id, tag.name, tag.slug, tag.description, tag.createdAt, tag.updatedAt)
+      .groupBy(
+        tag.id,
+        tag.name,
+        tag.slug,
+        tag.description,
+        tag.createdAt,
+        tag.updatedAt
+      )
       .orderBy(tag.name);
 
     return tags;
@@ -78,31 +91,42 @@ export const getAllTagsWithProducts = cache(async () => {
   }
 });
 
-export const getTagsByCategory = cache(async (categorySlug: ProductCategory) => {
-  "use cache";
-  try {
-    const tags = await db
-      .select({
-        id: tag.id,
-        name: tag.name,
-        slug: tag.slug,
-        description: tag.description,
-        createdAt: tag.createdAt,
-        updatedAt: tag.updatedAt,
-        productCount: sql<number>`cast(count(distinct ${productTag.productId}) as int)`,
-      })
-      .from(tag)
-      .innerJoin(productTag, eq(productTag.tagId, tag.id))
-      .innerJoin(product, eq(product.id, productTag.productId))
-      .where(
-        sql`${product.category} = ${categorySlug} AND ${product.status} = 'in_stock'`
-      )
-      .groupBy(tag.id, tag.name, tag.slug, tag.description, tag.createdAt, tag.updatedAt)
-      .orderBy(tag.name);
+export const getTagsByCategory = cache(
+  async (categorySlug: ProductCategory) => {
+    "use cache";
+    cacheLife("minutes");
 
-    return tags;
-  } catch (error) {
-    console.error("Failed to fetch tags for category:", categorySlug, error);
-    return [];
+    try {
+      const tags = await db
+        .select({
+          id: tag.id,
+          name: tag.name,
+          slug: tag.slug,
+          description: tag.description,
+          createdAt: tag.createdAt,
+          updatedAt: tag.updatedAt,
+          productCount: sql<number>`cast(count(distinct ${productTag.productId}) as int)`,
+        })
+        .from(tag)
+        .innerJoin(productTag, eq(productTag.tagId, tag.id))
+        .innerJoin(product, eq(product.id, productTag.productId))
+        .where(
+          sql`${product.category} = ${categorySlug} AND ${product.status} = 'in_stock'`
+        )
+        .groupBy(
+          tag.id,
+          tag.name,
+          tag.slug,
+          tag.description,
+          tag.createdAt,
+          tag.updatedAt
+        )
+        .orderBy(tag.name);
+
+      return tags;
+    } catch (error) {
+      console.error("Failed to fetch tags for category:", categorySlug, error);
+      return [];
+    }
   }
-});
+);

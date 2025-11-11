@@ -119,7 +119,7 @@ async function BusinessContent({
         <Suspense
           fallback={
             <>
-              <div className="col-span-full text-sm text-pretty text-muted-foreground mb-4">
+              <div className="col-span-full text-sm text-pretty text-muted-foreground mb-4 font-mono tracking-tighter">
                 Loading products...
               </div>
               <div className="grid grid-cols-1 justify-center gap-4 sm:grid-cols-2 lg:grid-cols-3">

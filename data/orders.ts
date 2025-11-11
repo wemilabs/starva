@@ -1,7 +1,8 @@
+import { and, desc, eq, inArray, lt, or, sql } from "drizzle-orm";
+import { cacheLife } from "next/cache";
+import { cache } from "react";
 import { db } from "@/db/drizzle";
 import { type OrderStatus, order } from "@/db/schema";
-import { and, desc, eq, inArray, lt, or, sql } from "drizzle-orm";
-import { cache } from "react";
 import "server-only";
 
 async function calculateMerchantOrderNumberPerOrg(
@@ -243,6 +244,9 @@ export const getOrdersByStatus = cache(
 );
 
 export const getOrderStats = cache(async (organizationId: string) => {
+  "use cache";
+  cacheLife("minutes");
+
   const stats = await db
     .select({
       status: order.status,
@@ -258,6 +262,9 @@ export const getOrderStats = cache(async (organizationId: string) => {
 
 export const getRecentOrders = cache(
   async (organizationId: string, limit: number = 10) => {
+    "use cache";
+    cacheLife("seconds");
+
     const orders = await db.query.order.findMany({
       where: eq(order.organizationId, organizationId),
       with: {

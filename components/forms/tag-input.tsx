@@ -1,5 +1,7 @@
 "use client";
 
+import { Check, Plus, X } from "lucide-react";
+import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,8 +19,6 @@ import {
 } from "@/components/ui/popover";
 import type { Tag } from "@/db/schema";
 import { slugify } from "@/lib/utils";
-import { Check, Plus, X } from "lucide-react";
-import { useState } from "react";
 
 type TagInputProps = {
   availableTags: Tag[];
@@ -36,30 +36,30 @@ export function TagInput({
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
-  const filteredTags = availableTags.filter(tag =>
-    tag.name.toLowerCase().includes(search.toLowerCase()),
+  const filteredTags = availableTags.filter((tag) =>
+    tag.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const isTagSelected = (tagId: string) =>
-    selectedTags.some(t => t.id === tagId);
+    selectedTags.some((t) => t.id === tagId);
 
   const toggleTag = (tag: Tag) => {
     if (isTagSelected(tag.id)) {
-      onTagsChangeAction(selectedTags.filter(t => t.id !== tag.id));
+      onTagsChangeAction(selectedTags.filter((t) => t.id !== tag.id));
     } else {
       onTagsChangeAction([...selectedTags, tag]);
     }
   };
 
   const removeTag = (tagId: string) => {
-    onTagsChangeAction(selectedTags.filter(t => t.id !== tagId));
+    onTagsChangeAction(selectedTags.filter((t) => t.id !== tagId));
   };
 
   const createNewTag = () => {
     if (!search.trim()) return;
 
     const slug = slugify(search.trim());
-    const existingTag = availableTags.find(t => t.slug === slug);
+    const existingTag = availableTags.find((t) => t.slug === slug);
 
     if (existingTag) {
       if (!isTagSelected(existingTag.id)) {
@@ -122,7 +122,7 @@ export function TagInput({
                 </div>
               </CommandEmpty>
               <CommandGroup>
-                {filteredTags.map(tag => (
+                {filteredTags.map((tag) => (
                   <CommandItem
                     key={tag.id}
                     value={tag.name}
@@ -152,7 +152,7 @@ export function TagInput({
 
       {selectedTags.length > 0 && (
         <div className="flex flex-wrap gap-2">
-          {selectedTags.map(tag => (
+          {selectedTags.map((tag) => (
             <Badge key={tag.id} variant="secondary" className="gap-1">
               {tag.name}
               <button

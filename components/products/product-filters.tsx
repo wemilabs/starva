@@ -1,5 +1,7 @@
 "use client";
 
+import { Filter, Search, X } from "lucide-react";
+import { parseAsArrayOf, parseAsString, useQueryStates } from "nuqs";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,8 +14,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { Tag } from "@/db/schema";
-import { Filter, Search, X } from "lucide-react";
-import { parseAsArrayOf, parseAsString, useQueryStates } from "nuqs";
 
 type ProductFiltersProps = {
   availableTags: Array<Tag & { productCount: number }>;
@@ -29,12 +29,12 @@ export function ProductFilters({ availableTags }: ProductFiltersProps) {
     {
       shallow: false,
       throttleMs: 300,
-    },
+    }
   );
 
   const toggleTag = (tagSlug: string) => {
     const newTags = tags.includes(tagSlug)
-      ? tags.filter(t => t !== tagSlug)
+      ? tags.filter((t) => t !== tagSlug)
       : [...tags, tagSlug];
 
     setFilters({ tags: newTags.length > 0 ? newTags : null });
@@ -60,7 +60,7 @@ export function ProductFilters({ availableTags }: ProductFiltersProps) {
               placeholder="Search products..."
               className="w-full bg-transparent pl-10 focus:outline-none rounded-lg placeholder:text-xs md:placeholder:text-sm text-xs md:text-sm transition duration-300 ease-in-out h-9"
               value={search}
-              onChange={e => setFilters({ search: e.target.value || null })}
+              onChange={(e) => setFilters({ search: e.target.value || null })}
             />
 
             {search ? (
@@ -84,7 +84,7 @@ export function ProductFilters({ availableTags }: ProductFiltersProps) {
 
           <Select
             value={sort}
-            onValueChange={value => setFilters({ sort: value })}
+            onValueChange={(value) => setFilters({ sort: value })}
           >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Sort by" />
@@ -116,7 +116,7 @@ export function ProductFilters({ availableTags }: ProductFiltersProps) {
         <>
           <p className="text-sm font-medium mb-2">Tags:</p>
           <div className="flex flex-wrap gap-2">
-            {availableTags.map(tag => (
+            {availableTags.map((tag) => (
               <Badge
                 key={tag.id}
                 variant={tags.includes(tag.slug) ? "default" : "outline"}
@@ -135,10 +135,12 @@ export function ProductFilters({ availableTags }: ProductFiltersProps) {
 
       {tags.length > 0 && (
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Active tags:</span>
+          <span className="text-sm text-muted-foreground font-mono tracking-tighter">
+            Active tags:
+          </span>
           <div className="flex flex-wrap gap-2">
-            {tags.map(tagSlug => {
-              const tag = availableTags.find(t => t.slug === tagSlug);
+            {tags.map((tagSlug) => {
+              const tag = availableTags.find((t) => t.slug === tagSlug);
               return tag ? (
                 <Badge key={tagSlug} variant="secondary" className="gap-1">
                   {tag.name}

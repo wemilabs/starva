@@ -175,7 +175,7 @@ async function MerchantContent({
           </Accordion>
         </section>
       ) : (
-        <div className="text-muted-foreground text-sm text-center py-10 border border-dashed border-muted-foreground/50 rounded-lg max-w-2xl mx-auto">
+        <div className="text-muted-foreground text-sm text-center py-10 border border-dashed border-muted-foreground/50 rounded-lg max-w-2xl mx-auto font-mono tracking-tighter">
           This merchant has not yet set a timetable
         </div>
       )}
@@ -292,7 +292,7 @@ export default async function MerchantSlugPage(
           <div className="relative overflow-hidden rounded-xl border">
             <div className="h-64 bg-linear-to-br from-orange-500 via-amber-500 to-yellow-500 animate-pulse" />
           </div>
-          <div className="text-muted-foreground text-sm text-center py-10 border border-dashed border-muted-foreground/50 rounded-lg max-w-2xl mx-auto">
+          <div className="text-muted-foreground text-sm text-center py-10 border border-dashed border-muted-foreground/50 rounded-lg max-w-2xl mx-auto font-mono tracking-tighter">
             Loading merchant details...
           </div>
           <div className="h-20 rounded-lg border bg-background animate-pulse mb-6" />

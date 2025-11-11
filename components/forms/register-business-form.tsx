@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LogIn } from "lucide-react";
+import { ChevronDownIcon, LogIn } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useTransition } from "react";
@@ -9,7 +9,6 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
 import {
   Form,
   FormControl,
@@ -19,13 +18,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { organization, useSession } from "@/lib/auth-client";
 import { COUNTRIES } from "@/lib/constants";
 import { slugify } from "@/lib/utils";
@@ -170,59 +162,47 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
             )}
           />
 
-          <div className="space-y-2">
-            <FormLabel>
-              Phone Number{" "}
-              <span className="text-muted-foreground text-xs font-mono tracking-tighter">
-                (for Payments and Notifications)
-              </span>
-            </FormLabel>
-            <ButtonGroup>
-              <FormField
-                control={form.control}
-                name="countryCode"
-                render={({ field }) => (
-                  <FormItem>
-                    <Select value={field.value} onValueChange={field.onChange}>
-                      <FormControl>
-                        <SelectTrigger className="min-w-[100px] rounded-r-none">
-                          <SelectValue />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {COUNTRIES.map((country) => (
-                          <SelectItem key={country.code} value={country.code}>
-                            <div className="flex items-center gap-2">
-                              <span>{country.flag}</span>
-                              <span>{country.code}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="phoneNumber"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormControl>
-                      <Input
-                        className="rounded-l-none placeholder:text-sm"
-                        placeholder="123456789"
-                        type="tel"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </ButtonGroup>
-          </div>
+          <FormField
+            control={form.control}
+            name="phoneNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>
+                  Phone Number{" "}
+                  <span className="text-muted-foreground text-xs font-mono tracking-tighter">
+                    (for payments and notifications)
+                  </span>
+                </FormLabel>
+
+                <div className="flex">
+                  <div className="relative">
+                    <select
+                      {...form.register("countryCode")}
+                      disabled={isPending}
+                      className="border-input data-placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex h-9 w-fit items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 min-w-[100px] rounded-r-none appearance-none pr-10"
+                    >
+                      {COUNTRIES.map((country) => (
+                        <option key={country.code} value={country.code}>
+                          {`${country.flag} ${country.code}`}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDownIcon className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 opacity-50" />
+                  </div>
+
+                  <FormControl>
+                    <Input
+                      className="rounded-l-none placeholder:text-sm"
+                      placeholder="123456789"
+                      type="tel"
+                      {...field}
+                    />
+                  </FormControl>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <Button disabled={isPending} type="submit" className="w-full mt-2">
             {isPending ? (

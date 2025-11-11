@@ -14,7 +14,7 @@ export default async function Home() {
               <h2 className="font-medium tracking-tight text-xl">
                 Latest Products
               </h2>
-              <p className="text-xs text-pretty text-muted-foreground">
+              <p className="text-xs text-pretty text-muted-foreground font-mono tracking-tighter">
                 Loading latest products...
               </p>
             </div>

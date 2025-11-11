@@ -1,10 +1,10 @@
 "use client";
 
+import { Search, X } from "lucide-react";
+import { useQueryState } from "nuqs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { Search, X } from "lucide-react";
-import { useQueryState } from "nuqs";
 
 export function SearchForm({
   formProps,
@@ -31,10 +31,10 @@ export function SearchForm({
           placeholder={placeholder}
           className={cn(
             "w-full bg-transparent pl-10 focus:outline-none rounded-lg placeholder:text-sm transition duration-300 ease-in-out",
-            inputFieldOnlyClassName,
+            inputFieldOnlyClassName
           )}
           value={search}
-          onChange={e => setSearch(e.target.value || null)}
+          onChange={(e) => setSearch(e.target.value || null)}
           autoFocus={controlledAutoFocus}
         />
 

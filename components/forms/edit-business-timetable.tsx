@@ -1,14 +1,14 @@
 "use client";
 
+import { Save } from "lucide-react";
+import { useActionState, useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { DAYS, DEFAULT_HOURS } from "@/lib/constants";
 import { updateBusinessTimetable } from "@/server/businesses";
-import { Save } from "lucide-react";
-import { useActionState, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 import { ScrollArea } from "../ui/scroll-area";
 import { Spinner } from "../ui/spinner";
 
@@ -54,7 +54,7 @@ export function EditBusinessTimetable({
         await updateBusinessTimetable(
           businessId,
           businessSlug,
-          timetableRef.current,
+          timetableRef.current
         );
         toast.success("Done!", {
           description: "Timetable updated successfully",
@@ -65,7 +65,7 @@ export function EditBusinessTimetable({
         return { success: false, message: "Failed to update timetable" };
       }
     },
-    null,
+    null
   );
 
   useEffect(() => {
@@ -90,7 +90,7 @@ export function EditBusinessTimetable({
   const handleTimeChange = (
     dayKey: string,
     field: "open" | "close",
-    value: string,
+    value: string
   ) => {
     setTimetable((prev) => ({
       ...prev,

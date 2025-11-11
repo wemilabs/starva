@@ -30,7 +30,7 @@ async function BusinessesList() {
             <Building2 className="size-6" />
           </EmptyMedia>
           <EmptyTitle>No businesses yet</EmptyTitle>
-          <EmptyDescription>
+          <EmptyDescription className="font-mono tracking-tighter">
             Get started by creating your first business. You'll be able to
             manage products, team members, and more.
           </EmptyDescription>

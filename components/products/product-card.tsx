@@ -212,6 +212,8 @@ export function ProductCard({
                     slug,
                     price,
                     imageUrl,
+                    currentStock,
+                    inventoryEnabled,
                   }}
                 />
                 <ProductDetailsLink href={href} />

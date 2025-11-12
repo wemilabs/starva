@@ -14,6 +14,8 @@ interface AddToCartButtonProps {
     slug: string;
     price: string;
     imageUrl: string | null;
+    currentStock?: number | null;
+    inventoryEnabled?: boolean;
   };
   quantity?: number;
   variant?: "default" | "outline" | "ghost";
@@ -32,20 +34,29 @@ export function AddToCartButton({
   const handleAddToCart = () => {
     setIsAdding(true);
 
-    addItem({
-      productId: product.id,
-      productName: product.name,
-      productSlug: product.slug,
-      productImage: product.imageUrl,
-      price: product.price,
-      quantity,
-    });
+    try {
+      addItem({
+        productId: product.id,
+        productName: product.name,
+        productSlug: product.slug,
+        productImage: product.imageUrl,
+        price: product.price,
+        currentStock: product.currentStock ?? undefined,
+        inventoryEnabled: product.inventoryEnabled,
+        quantity,
+      });
 
-    toast.success(`${product.name} added to cart`, {
-      description: `Quantity: ${quantity}`,
-    });
-
-    setTimeout(() => setIsAdding(false), 500);
+      toast.success(`${product.name} added to cart`, {
+        description: `Quantity: ${quantity}`,
+      });
+    } catch (error: unknown) {
+      const e = error as Error;
+      toast.error("Cannot add to cart", {
+        description: e.message || "Failed to add item to cart",
+      });
+    } finally {
+      setTimeout(() => setIsAdding(false), 500);
+    }
   };
 
   return (

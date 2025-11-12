@@ -9,6 +9,7 @@ import { orderItem, order as orderTable, user } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { ORDER_STATUS_VALUES } from "@/lib/constants";
 import { formatPriceInRWF } from "@/lib/utils";
+import { updateStock } from "./inventory";
 
 const orderItemSchema = z.object({
   productId: z.string().min(1),
@@ -224,6 +225,8 @@ export async function updateOrderStatus(
       return { ok: false, error: "Unauthorized to update this order" };
     }
 
+    const oldStatus = existingOrder.status;
+
     await db
       .update(orderTable)
       .set({
@@ -232,8 +235,38 @@ export async function updateOrderStatus(
       })
       .where(eq(orderTable.id, orderId));
 
+    // Deduct stock when order is confirmed (if status changed to confirmed)
+    if (status === "confirmed" && oldStatus !== "confirmed") {
+      const orderItems = await db.query.orderItem.findMany({
+        where: eq(orderItem.orderId, orderId),
+        with: {
+          product: {
+            columns: {
+              id: true,
+              inventoryEnabled: true,
+            },
+          },
+        },
+      });
+
+      // Deduct stock for each item with inventory tracking
+      for (const item of orderItems) {
+        if (item.product.inventoryEnabled) {
+          await updateStock({
+            productId: item.productId,
+            organizationId: existingOrder.organizationId,
+            quantityChange: -item.quantity,
+            changeType: "sale",
+            reason: `Order ${orderId} confirmed`,
+            revalidateTargetPath: "/inventory",
+          });
+        }
+      }
+    }
+
     revalidatePath("/orders");
     revalidatePath(`/orders/${orderId}`);
+    revalidatePath("/inventory");
 
     return { ok: true };
   } catch (error) {
@@ -289,6 +322,35 @@ export async function cancelOrder(orderId: string) {
       return { ok: false, error: "Order is already cancelled" };
     }
 
+    // Get order items with product inventory info
+    const orderItems = await db.query.orderItem.findMany({
+      where: eq(orderItem.orderId, orderId),
+      with: {
+        product: {
+          columns: {
+            id: true,
+            inventoryEnabled: true,
+          },
+        },
+      },
+    });
+
+    // Restore stock for each item if order was confirmed
+    if (existingOrder.status === "confirmed") {
+      for (const item of orderItems) {
+        if (item.product.inventoryEnabled) {
+          await updateStock({
+            productId: item.productId,
+            organizationId: existingOrder.organizationId,
+            quantityChange: item.quantity, // Add stock back
+            changeType: "return",
+            reason: `Order ${orderId} cancelled`,
+            revalidateTargetPath: "/inventory",
+          });
+        }
+      }
+    }
+
     await db
       .update(orderTable)
       .set({
@@ -299,6 +361,7 @@ export async function cancelOrder(orderId: string) {
 
     revalidatePath("/orders");
     revalidatePath(`/orders/${orderId}`);
+    revalidatePath("/inventory");
 
     return { ok: true };
   } catch (error) {

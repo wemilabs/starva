@@ -5,7 +5,6 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { toast } from "sonner";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +24,7 @@ import { useSession } from "@/lib/auth-client";
 import { useCartStore } from "@/lib/cart-store";
 import { FALLBACK_PRODUCT_IMG_URL } from "@/lib/constants";
 import { formatPriceInRWF } from "@/lib/utils";
+import { getProductsStock } from "@/server/inventory";
 import { placeOrder } from "@/server/orders";
 import { Separator } from "../ui/separator";
 import { Spinner } from "../ui/spinner";
@@ -45,14 +45,41 @@ export function CartSheet() {
     clearCart,
     getTotalPrice,
     getItemCount,
+    refreshStock,
   } = useCartStore();
 
   const totalPrice = getTotalPrice();
   const itemCount = getItemCount();
 
+  const handleQuantityChange = (productId: string, newQuantity: number) => {
+    try {
+      updateQuantity(productId, newQuantity);
+    } catch (error: unknown) {
+      const e = error as Error;
+      toast.error("Cannot update quantity", {
+        description: e.message || "Failed to update quantity",
+      });
+    }
+  };
+
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Refresh stock levels when cart opens
+  useEffect(() => {
+    if (isOpen && items.length > 0 && session?.session?.activeOrganizationId) {
+      const productIds = items.map((item) => item.productId);
+      getProductsStock({
+        productIds,
+        organizationId: session.session.activeOrganizationId,
+      }).then((result) => {
+        if (result.ok) {
+          refreshStock([...result.stocks]);
+        }
+      });
+    }
+  }, [isOpen, items, session?.session?.activeOrganizationId, refreshStock]);
 
   const handlePlaceOrder = () => {
     if (items.length === 0) {
@@ -197,6 +224,12 @@ export function CartSheet() {
                         <p className="text-sm text-muted-foreground font-mono tracking-tighter">
                           {formatPriceInRWF(item.price)}
                         </p>
+                        {item.inventoryEnabled &&
+                          item.currentStock !== undefined && (
+                            <p className="text-xs text-muted-foreground">
+                              {item.currentStock} in stock
+                            </p>
+                          )}
                       </div>
                     </div>
 
@@ -207,7 +240,10 @@ export function CartSheet() {
                           size="icon"
                           className="size-8"
                           onClick={() =>
-                            updateQuantity(item.productId, item.quantity - 1)
+                            handleQuantityChange(
+                              item.productId,
+                              item.quantity - 1
+                            )
                           }
                         >
                           -
@@ -215,9 +251,14 @@ export function CartSheet() {
                         <Input
                           type="number"
                           min={1}
+                          max={
+                            item.inventoryEnabled && item.currentStock !== undefined
+                              ? item.currentStock
+                              : undefined
+                          }
                           value={item.quantity}
                           onChange={(e) =>
-                            updateQuantity(
+                            handleQuantityChange(
                               item.productId,
                               Number.parseInt(e.target.value, 10) || 1
                             )
@@ -229,7 +270,10 @@ export function CartSheet() {
                           size="icon"
                           className="size-8"
                           onClick={() =>
-                            updateQuantity(item.productId, item.quantity + 1)
+                            handleQuantityChange(
+                              item.productId,
+                              item.quantity + 1
+                            )
                           }
                         >
                           +

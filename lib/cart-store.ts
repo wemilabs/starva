@@ -8,6 +8,8 @@ export interface CartItem {
   productImage: string | null;
   price: string;
   quantity: number;
+  currentStock?: number;
+  inventoryEnabled?: boolean;
   notes?: string;
 }
 
@@ -23,6 +25,7 @@ type CartActions = {
   clearCart: () => void;
   getTotalPrice: () => number;
   getItemCount: () => number;
+  refreshStock: (stocks: Array<{ id: string; currentStock: number; inventoryEnabled: boolean }>) => void;
 };
 
 type CartStore = CartState & CartActions;
@@ -37,11 +40,26 @@ export const useCartStore = create<CartStore>()(
           (i) => i.productId === item.productId,
         );
 
+        // Check stock availability if inventory is enabled
+        if (item.inventoryEnabled && item.currentStock !== undefined) {
+          const currentCartQty = existingItem?.quantity || 0;
+          const requestedQty = (item.quantity || 1) + currentCartQty;
+          
+          if (requestedQty > item.currentStock) {
+            throw new Error(`Only ${item.currentStock} units available in stock`);
+          }
+        }
+
         if (existingItem) {
           set({
             items: get().items.map((i) =>
               i.productId === item.productId
-                ? { ...i, quantity: i.quantity + (item.quantity || 1) }
+                ? { 
+                    ...i, 
+                    quantity: i.quantity + (item.quantity || 1),
+                    currentStock: item.currentStock ?? i.currentStock,
+                    inventoryEnabled: item.inventoryEnabled ?? i.inventoryEnabled,
+                  }
                 : i,
             ),
           });
@@ -62,6 +80,14 @@ export const useCartStore = create<CartStore>()(
         if (quantity <= 0) {
           get().removeItem(productId);
           return;
+        }
+
+        // Check stock availability if inventory is enabled
+        const item = get().items.find((i) => i.productId === productId);
+        if (item?.inventoryEnabled && item.currentStock !== undefined) {
+          if (quantity > item.currentStock) {
+            throw new Error(`Only ${item.currentStock} units available in stock`);
+          }
         }
 
         set({
@@ -92,6 +118,28 @@ export const useCartStore = create<CartStore>()(
 
       getItemCount: () => {
         return get().items.reduce((count, item) => count + item.quantity, 0);
+      },
+
+      refreshStock: (stocks) => {
+        set({
+          items: get().items.map((item) => {
+            const stockInfo = stocks.find((s) => s.id === item.productId);
+            if (stockInfo) {
+              // If quantity exceeds new stock, adjust it down
+              const newQuantity = stockInfo.inventoryEnabled
+                ? Math.min(item.quantity, stockInfo.currentStock)
+                : item.quantity;
+              
+              return {
+                ...item,
+                currentStock: stockInfo.currentStock,
+                inventoryEnabled: stockInfo.inventoryEnabled,
+                quantity: newQuantity,
+              };
+            }
+            return item;
+          }),
+        });
       },
     }),
     {

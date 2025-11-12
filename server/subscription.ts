@@ -1,10 +1,10 @@
 "use server";
 
+import { desc, eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 import { db } from "@/db/drizzle";
 import { subscription } from "@/db/schema";
 import { PRICING_PLANS } from "@/lib/constants";
-import { desc, eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 
 export async function getUserSubscription(userId: string) {
   const [currentSubscription] = await db
@@ -16,7 +16,9 @@ export async function getUserSubscription(userId: string) {
 
   if (!currentSubscription) return null;
 
-  const plan = PRICING_PLANS.find((p) => p.name === currentSubscription.planName);
+  const plan = PRICING_PLANS.find(
+    (p) => p.name === currentSubscription.planName
+  );
 
   return {
     ...currentSubscription,
@@ -106,7 +108,11 @@ export async function checkOrganizationLimit(userId: string) {
 
   const totalOrgs = userOrgs.length;
 
-  if (!userSub || userSub.status === "cancelled" || userSub.status === "expired") {
+  if (
+    !userSub ||
+    userSub.status === "cancelled" ||
+    userSub.status === "expired"
+  ) {
     return {
       canCreate: false,
       maxOrgs: 0,
@@ -120,10 +126,10 @@ export async function checkOrganizationLimit(userId: string) {
     plan?.name === "Starter"
       ? 1
       : plan?.name === "Growth"
-        ? 3
-        : plan?.name === "Pro"
-          ? 10
-          : -1;
+      ? 3
+      : plan?.name === "Pro"
+      ? 10
+      : -1;
 
   return {
     canCreate: maxOrgs === -1 || totalOrgs < maxOrgs,

@@ -1,10 +1,10 @@
 "use client";
 
+import { Check, Pencil, X } from "lucide-react";
 import { useRef, useState, useTransition } from "react";
-import { Pencil, Check, X } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
 import { Spinner } from "../ui/spinner";
 
 interface EditableBusinessNameProps {
@@ -14,7 +14,7 @@ interface EditableBusinessNameProps {
   updateAction: (
     businessId: string,
     businessSlug: string,
-    name: string,
+    name: string
   ) => Promise<void>;
 }
 
@@ -93,13 +93,9 @@ export function EditableBusinessName({
             className="size-9 hover:bg-white/10"
           >
             {isPending ? (
-              <>
-                <Spinner />
-              </>
+              <Spinner />
             ) : (
-              <>
-                <Check className="size-4 text-green-300" />
-              </>
+              <Check className="size-4 text-green-300" />
             )}
           </Button>
           <Button

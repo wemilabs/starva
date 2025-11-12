@@ -1,5 +1,7 @@
 "use client";
 
+import { MessageSquare } from "lucide-react";
+import { parseAsStringLiteral, useQueryState } from "nuqs";
 import { FeedbackCardAdmin } from "@/components/admin/feedback-card-admin";
 import { SearchForm } from "@/components/forms/search-form";
 import { Button } from "@/components/ui/button";
@@ -26,8 +28,6 @@ import {
   feedbackTypeOptions,
 } from "@/lib/constants";
 import { cn } from "@/lib/utils";
-import { MessageSquare } from "lucide-react";
-import { parseAsStringLiteral, useQueryState } from "nuqs";
 
 interface FeedbackItem {
   id: string;
@@ -53,8 +53,8 @@ export function FeedbackList({ feedback }: FeedbackListClientProps) {
   const [selectedType, setSelectedType] = useQueryState(
     "type",
     parseAsStringLiteral(["all", ...FEEDBACK_TYPE_VALUES] as const).withDefault(
-      "all",
-    ),
+      "all"
+    )
   );
 
   const [selectedStatus, setSelectedStatus] = useQueryState(
@@ -62,7 +62,7 @@ export function FeedbackList({ feedback }: FeedbackListClientProps) {
     parseAsStringLiteral([
       "all",
       ...FEEDBACK_STATUS_VALUES,
-    ] as const).withDefault("all"),
+    ] as const).withDefault("all")
   );
 
   const [search] = useQueryState("search", { defaultValue: "" });
@@ -97,7 +97,7 @@ export function FeedbackList({ feedback }: FeedbackListClientProps) {
                   onClick={() => setSelectedType(option.value)}
                   className={cn(
                     "transition-colors border",
-                    selectedType === option.value && "border-primary shadow-md",
+                    selectedType === option.value && "border-primary shadow-md"
                   )}
                 >
                   {option.label}

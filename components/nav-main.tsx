@@ -1,6 +1,21 @@
 "use client";
 
 import {
+  Building2,
+  ChartColumn,
+  ChevronRight,
+  Globe,
+  Home,
+  type LucideIcon,
+  Package,
+  Receipt,
+  ScrollText,
+  SquaresExclude,
+  Store,
+} from "lucide-react";
+import type { Route } from "next";
+import Link from "next/link";
+import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
@@ -16,20 +31,6 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { getCategoryOptions } from "@/lib/utils";
-import {
-  Building2,
-  ChartColumn,
-  ChevronRight,
-  Globe,
-  Home,
-  type LucideIcon,
-  Package,
-  Receipt,
-  ScrollText,
-  Store,
-} from "lucide-react";
-import type { Route } from "next";
-import Link from "next/link";
 
 export function NavMain({
   items,
@@ -74,7 +75,7 @@ export function NavMain({
                     </Link>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>
-                {getCategoryOptions().map(category => (
+                {getCategoryOptions().map((category) => (
                   <SidebarMenuSubItem key={category.value}>
                     <SidebarMenuSubButton asChild>
                       <Link href={`/products/category/${category.value}`}>
@@ -125,6 +126,14 @@ export function NavMain({
           </SidebarMenuButton>
         </SidebarMenuItem>
         <SidebarMenuItem>
+          <SidebarMenuButton asChild tooltip="Inventory">
+            <Link href="/inventory">
+              <SquaresExclude />
+              <span>Inventory</span>
+            </Link>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+        <SidebarMenuItem>
           <SidebarMenuButton asChild tooltip="Transactions">
             <Link href="/transactions">
               <Receipt />
@@ -140,7 +149,7 @@ export function NavMain({
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
-        {items.map(item => (
+        {items.map((item) => (
           <Collapsible
             key={item.title}
             asChild
@@ -157,7 +166,7 @@ export function NavMain({
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <SidebarMenuSub>
-                  {item.items?.map(subItem => (
+                  {item.items?.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.title}>
                       <SidebarMenuSubButton asChild>
                         <Link href={subItem.url as Route}>

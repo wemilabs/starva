@@ -54,6 +54,10 @@ export function ProductCard({
   calories,
   brand,
   organizationId,
+  unitFormatId,
+  inventoryEnabled,
+  currentStock,
+  lowStockThreshold,
   href,
   isLiked = false,
   className,
@@ -80,6 +84,7 @@ export function ProductCard({
           <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium tracking-wide text-white/90 ring-1 ring-white/15 backdrop-blur-sm">
             <span
               className={cn("size-1.5 rounded-full", {
+                "bg-blue-500": status === "draft",
                 "bg-green-600": status === "in_stock",
                 "bg-red-600": status === "out_of_stock",
                 "bg-gray-600": status === "archived",
@@ -235,6 +240,10 @@ export function ProductCard({
               updatedAt,
               specifications,
               brand,
+              unitFormatId,
+              inventoryEnabled,
+              currentStock,
+              lowStockThreshold,
             }}
             organizationId={organization?.id || ""}
             businessSlug={organization?.slug || ""}

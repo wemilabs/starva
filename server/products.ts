@@ -1,21 +1,21 @@
 "use server";
 
+import { and, eq, sql } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { after } from "next/server";
+import { z } from "zod";
 import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
+import type { ProductCategory } from "@/db/schema";
 import {
   productLike,
   product as productTable,
   productTag,
   tag,
+  unitFormat,
 } from "@/db/schema";
-import { PRODUCT_STATUS_VALUES } from "@/lib/constants";
 import { extractFileKeyFromUrl, utapi } from "@/lib/uploadthing-server";
 import { slugify } from "@/lib/utils";
-import { and, eq, sql } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
-import { after } from "next/server";
-import { z } from "zod";
-import type { ProductCategory } from "@/db/schema";
 
 const productSchema = z.object({
   organizationId: z.string().min(1),
@@ -24,10 +24,13 @@ const productSchema = z.object({
   price: z.string().min(1),
   description: z.string().optional().default(""),
   imageUrl: z.url().optional().or(z.literal("")),
-  status: z.enum(PRODUCT_STATUS_VALUES),
   category: z.string().min(1),
   specifications: z.string().optional().default(""),
   tagNames: z.array(z.string()).optional().default([]),
+  unitFormatId: z.string().nullable().optional(),
+  unitFormatName: z.string().optional(),
+  inventoryEnabled: z.boolean(),
+  lowStockThreshold: z.number().min(0),
   revalidateTargetPath: z.string().min(1),
 });
 
@@ -45,12 +48,39 @@ export async function createProduct(input: z.infer<typeof productSchema>) {
       price,
       description,
       imageUrl,
-      status,
       category,
       specifications,
       tagNames,
+      unitFormatId,
+      unitFormatName,
+      inventoryEnabled,
+      lowStockThreshold,
       revalidateTargetPath,
     } = parsed.data;
+
+    // Handle unit format creation if needed
+    let finalUnitFormatId = unitFormatId;
+    if (!unitFormatId && unitFormatName) {
+      const unitSlug = slugify(unitFormatName);
+      const existingUnit = await db
+        .select()
+        .from(unitFormat)
+        .where(eq(unitFormat.slug, unitSlug))
+        .limit(1);
+
+      if (existingUnit.length > 0) {
+        finalUnitFormatId = existingUnit[0].id;
+      } else {
+        const [newUnit] = await db
+          .insert(unitFormat)
+          .values({
+            name: unitFormatName,
+            slug: unitSlug,
+          })
+          .returning();
+        finalUnitFormatId = newUnit.id;
+      }
+    }
 
     const [newProduct] = await db
       .insert(productTable)
@@ -61,9 +91,13 @@ export async function createProduct(input: z.infer<typeof productSchema>) {
         price,
         organizationId,
         imageUrl: imageUrl || null,
-        status,
+        status: "draft",
         category: category as ProductCategory,
         specifications: specifications || null,
+        unitFormatId: finalUnitFormatId || null,
+        inventoryEnabled,
+        currentStock: 0,
+        lowStockThreshold,
       })
       .returning();
 
@@ -94,7 +128,7 @@ export async function createProduct(input: z.infer<typeof productSchema>) {
       }
 
       if (tagIds.length > 0) {
-        const productTagValues = tagIds.map(tagId => ({
+        const productTagValues = tagIds.map((tagId) => ({
           productId: newProduct.id,
           tagId,
         }));
@@ -116,7 +150,7 @@ const updateProductSchema = productSchema.extend({
 });
 
 export async function updateProduct(
-  input: z.infer<typeof updateProductSchema>,
+  input: z.infer<typeof updateProductSchema>
 ) {
   const parsed = updateProductSchema.safeParse(input);
   if (!parsed.success) {
@@ -132,10 +166,13 @@ export async function updateProduct(
       price,
       description,
       imageUrl,
-      status,
       category,
       specifications,
       tagNames,
+      unitFormatId,
+      unitFormatName,
+      inventoryEnabled,
+      lowStockThreshold,
       revalidateTargetPath,
     } = parsed.data;
 
@@ -145,8 +182,8 @@ export async function updateProduct(
       .where(
         and(
           eq(productTable.id, productId),
-          eq(productTable.organizationId, organizationId),
-        ),
+          eq(productTable.organizationId, organizationId)
+        )
       )
       .limit(1);
 
@@ -157,6 +194,30 @@ export async function updateProduct(
     const oldImageUrl = existingProduct[0].imageUrl;
     const newImageUrl = imageUrl || null;
 
+    // Handle unit format creation/update if needed
+    let finalUnitFormatId = unitFormatId;
+    if (!unitFormatId && unitFormatName) {
+      const unitSlug = slugify(unitFormatName);
+      const existingUnit = await db
+        .select()
+        .from(unitFormat)
+        .where(eq(unitFormat.slug, unitSlug))
+        .limit(1);
+
+      if (existingUnit.length > 0) {
+        finalUnitFormatId = existingUnit[0].id;
+      } else {
+        const [newUnit] = await db
+          .insert(unitFormat)
+          .values({
+            name: unitFormatName,
+            slug: unitSlug,
+          })
+          .returning();
+        finalUnitFormatId = newUnit.id;
+      }
+    }
+
     await db
       .update(productTable)
       .set({
@@ -165,15 +226,17 @@ export async function updateProduct(
         description: description || "",
         price,
         imageUrl: newImageUrl,
-        status,
         category: category as ProductCategory,
         specifications: specifications || null,
+        unitFormatId: finalUnitFormatId || null,
+        inventoryEnabled,
+        lowStockThreshold,
       })
       .where(
         and(
           eq(productTable.id, productId),
-          eq(productTable.organizationId, organizationId),
-        ),
+          eq(productTable.organizationId, organizationId)
+        )
       );
 
     if (tagNames) {
@@ -206,7 +269,7 @@ export async function updateProduct(
         }
 
         if (tagIds.length > 0) {
-          const productTagValues = tagIds.map(tagId => ({
+          const productTagValues = tagIds.map((tagId) => ({
             productId,
             tagId,
           }));
@@ -226,7 +289,7 @@ export async function updateProduct(
         } catch (error: unknown) {
           const e = error as Error;
           console.error(
-            `Failed to delete old image from UploadThing: ${e.message}`,
+            `Failed to delete old image from UploadThing: ${e.message}`
           );
         }
       }
@@ -248,7 +311,7 @@ const deleteProductSchema = z.object({
 });
 
 export async function deleteProduct(
-  input: z.infer<typeof deleteProductSchema>,
+  input: z.infer<typeof deleteProductSchema>
 ) {
   const parsed = deleteProductSchema.safeParse(input);
   if (!parsed.success) {
@@ -264,8 +327,8 @@ export async function deleteProduct(
       .where(
         and(
           eq(productTable.id, productId),
-          eq(productTable.organizationId, organizationId),
-        ),
+          eq(productTable.organizationId, organizationId)
+        )
       )
       .limit(1);
 
@@ -280,8 +343,8 @@ export async function deleteProduct(
       .where(
         and(
           eq(productTable.id, productId),
-          eq(productTable.organizationId, organizationId),
-        ),
+          eq(productTable.organizationId, organizationId)
+        )
       );
 
     after(async () => {
@@ -295,7 +358,7 @@ export async function deleteProduct(
         } catch (error: unknown) {
           const e = error as Error;
           console.error(
-            `Failed to delete image from UploadThing: ${e.message}`,
+            `Failed to delete image from UploadThing: ${e.message}`
           );
         }
       }
@@ -316,7 +379,7 @@ const toggleProductLikeSchema = z.object({
 });
 
 export async function toggleProductLike(
-  input: z.infer<typeof toggleProductLikeSchema>,
+  input: z.infer<typeof toggleProductLikeSchema>
 ) {
   const parsed = toggleProductLikeSchema.safeParse(input);
   if (!parsed.success) {
@@ -348,8 +411,8 @@ export async function toggleProductLike(
       .where(
         and(
           eq(productLike.productId, productId),
-          eq(productLike.userId, userId),
-        ),
+          eq(productLike.userId, userId)
+        )
       )
       .limit(1);
 
@@ -361,8 +424,8 @@ export async function toggleProductLike(
         .where(
           and(
             eq(productLike.productId, productId),
-            eq(productLike.userId, userId),
-          ),
+            eq(productLike.userId, userId)
+          )
         );
 
       await db

@@ -1,5 +1,8 @@
 "use client";
 
+import { Mail, User } from "lucide-react";
+import { useState, useTransition } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,9 +30,6 @@ import {
 } from "@/lib/constants";
 import { formatDateShort } from "@/lib/utils";
 import { updateFeedbackStatus } from "@/server/feedback";
-import { Mail, User } from "lucide-react";
-import { useState, useTransition } from "react";
-import { toast } from "sonner";
 
 type FeedbackCardProps = {
   feedback: {
@@ -53,7 +53,7 @@ export function FeedbackCardAdmin({ feedback }: FeedbackCardProps) {
   const [isPending, startTransition] = useTransition();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<FeedbackStatus | null>(
-    null,
+    null
   );
   const [note, setNote] = useState("");
 
@@ -70,7 +70,7 @@ export function FeedbackCardAdmin({ feedback }: FeedbackCardProps) {
       const result = await updateFeedbackStatus(
         feedback.id,
         pendingStatus,
-        note.trim() || undefined,
+        note.trim() || undefined
       );
 
       if (result.success) {

@@ -80,6 +80,7 @@ export const verification = pgTable("verification", {
 export const role = pgEnum("role", ["member", "admin", "owner"]);
 
 export const productStatus = pgEnum("status", [
+  "draft",
   "in_stock",
   "out_of_stock",
   "archived",
@@ -139,6 +140,21 @@ export const organization = pgTable("organization", {
   logo: text("logo"),
   createdAt: timestamp("created_at").notNull(),
   metadata: text("metadata"),
+});
+
+export const unitFormat = pgTable("unit_format", {
+  id: text("id")
+    .$defaultFn(() => randomUUID())
+    .primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").unique().notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
+  updatedAt: timestamp("updated_at")
+    .$defaultFn(() => new Date())
+    .notNull(),
 });
 
 export const subscription = pgTable(
@@ -290,11 +306,15 @@ export const product = pgTable(
     description: text("description").notNull(),
     price: decimal("price", { precision: 10, scale: 2 }).notNull(),
     likesCount: integer("likes_count").default(0),
-    status: productStatus("status").default("in_stock").notNull(),
+    status: productStatus("status").default("draft").notNull(),
     category: productCategory("category").notNull().default("others"),
     organizationId: text("organization_id")
       .notNull()
       .references(() => organization.id, { onDelete: "cascade" }),
+    unitFormatId: text("unit_format_id").references(() => unitFormat.id),
+    inventoryEnabled: boolean("inventory_enabled").default(false).notNull(),
+    currentStock: integer("current_stock").default(0).notNull(),
+    lowStockThreshold: integer("low_stock_threshold").default(5).notNull(),
     calories: integer("calories"),
     imageUrl: text("image_url"),
     brand: text("brand"),
@@ -392,9 +412,14 @@ export const productRelations = relations(product, ({ one, many }) => ({
     fields: [product.organizationId],
     references: [organization.id],
   }),
+  unitFormat: one(unitFormat, {
+    fields: [product.unitFormatId],
+    references: [unitFormat.id],
+  }),
   productTags: many(productTag),
   orderItems: many(orderItem),
   productLikes: many(productLike),
+  inventoryHistory: many(inventoryHistory),
 }));
 
 export const order = pgTable(
@@ -495,6 +520,62 @@ export const productTagRelations = relations(productTag, ({ one }) => ({
   }),
 }));
 
+export const unitFormatRelations = relations(unitFormat, ({ many }) => ({
+  products: many(product),
+}));
+
+export const inventoryHistory = pgTable(
+  "inventory_history",
+  {
+    id: text("id")
+      .$defaultFn(() => randomUUID())
+      .primaryKey(),
+    productId: text("product_id")
+      .notNull()
+      .references(() => product.id, { onDelete: "cascade" }),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    changeType: text("change_type").notNull(), // 'sale', 'restock', 'adjustment'
+    quantityChange: integer("quantity_change").notNull(),
+    previousStock: integer("previous_stock").notNull(),
+    newStock: integer("new_stock").notNull(),
+    reason: text("reason"),
+    orderId: text("order_id").references(() => order.id),
+    userId: text("user_id").references(() => user.id),
+    createdAt: timestamp("created_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (t) => [
+    index("inventory_history_product_idx").on(t.productId),
+    index("inventory_history_org_idx").on(t.organizationId),
+    index("inventory_history_order_idx").on(t.orderId),
+  ]
+);
+
+export const inventoryHistoryRelations = relations(
+  inventoryHistory,
+  ({ one }) => ({
+    product: one(product, {
+      fields: [inventoryHistory.productId],
+      references: [product.id],
+    }),
+    organization: one(organization, {
+      fields: [inventoryHistory.organizationId],
+      references: [organization.id],
+    }),
+    order: one(order, {
+      fields: [inventoryHistory.orderId],
+      references: [order.id],
+    }),
+    user: one(user, {
+      fields: [inventoryHistory.userId],
+      references: [user.id],
+    }),
+  })
+);
+
 export const feedback = pgTable(
   "feedback",
   {
@@ -591,6 +672,8 @@ export type FeedbackHistory = typeof feedbackHistory.$inferSelect;
 export type Subscription = typeof subscription.$inferSelect;
 export type SubscriptionStatus = (typeof subscriptionStatus.enumValues)[number];
 export type OrderUsageTracking = typeof orderUsageTracking.$inferSelect;
+export type UnitFormat = typeof unitFormat.$inferSelect;
+export type InventoryHistory = typeof inventoryHistory.$inferSelect;
 
 export const schema = {
   user,
@@ -602,12 +685,14 @@ export const schema = {
   invitation,
   subscription,
   orderUsageTracking,
+  unitFormat,
   product,
   productLike,
   tag,
   productTag,
   order,
   orderItem,
+  inventoryHistory,
   feedback,
   userRelations,
   organizationRelations,
@@ -615,12 +700,14 @@ export const schema = {
   invitationRelations,
   subscriptionRelations,
   orderUsageTrackingRelations,
+  unitFormatRelations,
   productRelations,
   productLikeRelations,
   tagRelations,
   productTagRelations,
   orderRelations,
   orderItemRelations,
+  inventoryHistoryRelations,
   feedbackRelations,
   feedbackHistory,
   feedbackHistoryRelations,

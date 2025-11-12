@@ -1,5 +1,7 @@
 "use server";
 
+import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
 import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
 import {
@@ -8,8 +10,6 @@ import {
   feedback,
   feedbackHistory,
 } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
 
 type SubmitFeedbackInput = {
   type: FeedbackType;
@@ -56,7 +56,7 @@ export async function submitFeedback(data: SubmitFeedbackInput) {
 export async function updateFeedbackStatus(
   feedbackId: string,
   newStatus: FeedbackStatus,
-  note?: string,
+  note?: string
 ) {
   const sessionData = await verifySession();
 

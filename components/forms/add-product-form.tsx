@@ -8,7 +8,9 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { TagInput } from "@/components/forms/tag-input";
+import { UnitFormatInput } from "@/components/forms/unit-format-input";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -35,18 +37,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Tag } from "@/db/schema";
-import { PRODUCT_STATUS_VALUES } from "@/lib/constants";
+import type { Tag, UnitFormat } from "@/db/schema";
 import { UploadButton } from "@/lib/uploadthing";
 import {
   getCategoryOptions,
   getCategorySpecificationLabel,
   getCategorySpecificationPlaceholder,
-  removeUnderscoreAndCapitalizeOnlyTheFirstChar,
   slugify,
 } from "@/lib/utils";
 import { createProduct } from "@/server/products";
 import { getAllTags } from "@/server/tags";
+import { getAllUnitFormats } from "@/server/unit-formats";
 import { Spinner } from "../ui/spinner";
 
 const schema = z.object({
@@ -61,10 +62,12 @@ const schema = z.object({
     ),
   imageUrl: z.url("Provide a valid URL").optional().or(z.literal("")),
   description: z.string().max(500).optional().or(z.literal("")),
-  status: z.enum(PRODUCT_STATUS_VALUES),
   category: z.string().min(1, "Category is required"),
   specifications: z.string().optional().or(z.literal("")),
   tags: z.array(z.custom<Tag>()),
+  unitFormat: z.custom<UnitFormat>().nullable(),
+  inventoryEnabled: z.boolean(),
+  lowStockThreshold: z.number().min(0),
 });
 
 export function AddProductForm({
@@ -77,6 +80,9 @@ export function AddProductForm({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
+  const [availableUnitFormats, setAvailableUnitFormats] = useState<
+    UnitFormat[]
+  >([]);
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
@@ -86,10 +92,12 @@ export function AddProductForm({
       price: "",
       imageUrl: "",
       description: "",
-      status: PRODUCT_STATUS_VALUES[0],
       category: "",
       specifications: "",
       tags: [],
+      unitFormat: null,
+      inventoryEnabled: false,
+      lowStockThreshold: 5,
     },
   });
 
@@ -98,6 +106,11 @@ export function AddProductForm({
       getAllTags().then((result) => {
         if (result.ok) {
           setAvailableTags(result.tags);
+        }
+      });
+      getAllUnitFormats().then((result) => {
+        if (result.ok) {
+          setAvailableUnitFormats(result.unitFormats);
         }
       });
     }
@@ -123,15 +136,19 @@ export function AddProductForm({
           price: values.price,
           description: values.description || "",
           imageUrl: values.imageUrl || "",
-          status: values.status,
           category: values.category,
           specifications: values.specifications ?? "",
           tagNames: values.tags.map((t) => t.name),
+          unitFormatId: values.unitFormat?.id || null,
+          unitFormatName: values.unitFormat?.name,
+          inventoryEnabled: values.inventoryEnabled,
+          lowStockThreshold: values.lowStockThreshold,
           revalidateTargetPath: `/businesses/${businessSlug}`,
         });
         form.reset();
         toast.success("Success", {
-          description: "A new product has successfully been added",
+          description:
+            "Product created in draft status. Set stock in inventory to make it available.",
         });
         setDialogOpen(false);
       } catch (error: unknown) {
@@ -352,28 +369,70 @@ export function AddProductForm({
 
               <FormField
                 control={form.control}
-                name="status"
+                name="unitFormat"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Status of the product" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {PRODUCT_STATUS_VALUES.map((v) => (
-                          <SelectItem key={v} value={v}>
-                            {removeUnderscoreAndCapitalizeOnlyTheFirstChar(v)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormLabel>Unit Format</FormLabel>
+                    <FormControl>
+                      <UnitFormatInput
+                        availableUnitFormats={availableUnitFormats}
+                        selectedUnitFormat={field.value}
+                        onUnitFormatChangeAction={field.onChange}
+                        disabled={isPending}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="inventoryEnabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Enable inventory tracking</FormLabel>
+                      <p className="text-sm text-muted-foreground">
+                        Track stock levels and get low stock alerts
+                      </p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              {form.watch("inventoryEnabled") && (
+                <FormField
+                  control={form.control}
+                  name="lowStockThreshold"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Low Stock Alert Threshold</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min="0"
+                          placeholder="5"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <p className="text-sm text-muted-foreground">
+                        Get notified when stock reaches this level
+                      </p>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
               <FormField
                 control={form.control}

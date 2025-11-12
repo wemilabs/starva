@@ -1,5 +1,8 @@
 "use client";
 
+import { Check, Pencil, Phone, X } from "lucide-react";
+import { useRef, useState, useTransition } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Input } from "@/components/ui/input";
@@ -12,9 +15,6 @@ import {
 } from "@/components/ui/select";
 import { COUNTRIES } from "@/lib/constants";
 import { parsePhoneNumber } from "@/lib/utils";
-import { Check, Pencil, Phone, X } from "lucide-react";
-import { useRef, useState, useTransition } from "react";
-import { toast } from "sonner";
 import { Spinner } from "../ui/spinner";
 
 interface EditableBusinessPhoneProps {
@@ -24,7 +24,7 @@ interface EditableBusinessPhoneProps {
   updateAction: (
     businessId: string,
     businessSlug: string,
-    phone: string,
+    phone: string
   ) => Promise<void>;
 }
 

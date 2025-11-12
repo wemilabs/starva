@@ -10,6 +10,7 @@ export const NOTFOUND_PAGE_IMG_URL =
   "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dJdyQ7mebB6d1NpIUrVzHcsfFA7aEkjQ4oDvS";
 
 export const PRODUCT_STATUS_VALUES = [
+  "draft",
   "in_stock",
   "out_of_stock",
   "archived",

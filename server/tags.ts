@@ -1,12 +1,11 @@
 "use server";
 
+import { eq } from "drizzle-orm";
+import { revalidatePath } from "next/cache";
+import { z } from "zod";
 import { db } from "@/db/drizzle";
 import { productTag, tag } from "@/db/schema";
 import { slugify } from "@/lib/utils";
-import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
-import { randomUUID } from "node:crypto";
-import { z } from "zod";
 
 const createTagSchema = z.object({
   name: z.string().min(1).max(50),
@@ -40,7 +39,6 @@ export async function createTag(input: z.infer<typeof createTagSchema>) {
     const [newTag] = await db
       .insert(tag)
       .values({
-        id: randomUUID(),
         name,
         slug,
         description: description || null,
@@ -63,7 +61,7 @@ const linkProductTagsSchema = z.object({
 });
 
 export async function linkProductTags(
-  input: z.infer<typeof linkProductTagsSchema>,
+  input: z.infer<typeof linkProductTagsSchema>
 ) {
   const parsed = linkProductTagsSchema.safeParse(input);
   if (!parsed.success) {
@@ -77,7 +75,6 @@ export async function linkProductTags(
 
     if (tagIds.length > 0) {
       const values = tagIds.map((tagId) => ({
-        id: randomUUID(),
         productId,
         tagId,
       }));

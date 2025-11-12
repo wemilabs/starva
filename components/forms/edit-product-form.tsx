@@ -8,7 +8,9 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { TagInput } from "@/components/forms/tag-input";
+import { UnitFormatInput } from "@/components/forms/unit-format-input";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -34,18 +36,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import type { Product, Tag } from "@/db/schema";
-import { PRODUCT_STATUS_VALUES } from "@/lib/constants";
+import type { Product, Tag, UnitFormat } from "@/db/schema";
 import { UploadButton } from "@/lib/uploadthing";
 import {
   getCategoryOptions,
   getCategorySpecificationLabel,
   getCategorySpecificationPlaceholder,
-  removeUnderscoreAndCapitalizeOnlyTheFirstChar,
   slugify,
 } from "@/lib/utils";
 import { updateProduct } from "@/server/products";
 import { getAllTags, getProductTags } from "@/server/tags";
+import { getAllUnitFormats } from "@/server/unit-formats";
 import { ScrollArea } from "../ui/scroll-area";
 import { Spinner } from "../ui/spinner";
 
@@ -61,10 +62,12 @@ const schema = z.object({
     ),
   imageUrl: z.url("Provide a valid URL").optional().or(z.literal("")),
   description: z.string().max(500).optional().or(z.literal("")),
-  status: z.enum(PRODUCT_STATUS_VALUES),
   category: z.string().min(1, "Category is required"),
   specifications: z.string().optional().or(z.literal("")),
   tags: z.array(z.custom<Tag>()),
+  unitFormat: z.custom<UnitFormat>().nullable(),
+  inventoryEnabled: z.boolean(),
+  lowStockThreshold: z.number().min(0),
 });
 
 export function EditProductForm({
@@ -83,6 +86,11 @@ export function EditProductForm({
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
+  const [availableUnitFormats, setAvailableUnitFormats] = useState<
+    UnitFormat[]
+  >([]);
+  const [_selectedUnitFormat, setSelectedUnitFormat] =
+    useState<UnitFormat | null>(null);
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
@@ -92,12 +100,12 @@ export function EditProductForm({
       price: product.price || "",
       imageUrl: product.imageUrl || "",
       description: product.description || "",
-      status:
-        (product.status as (typeof PRODUCT_STATUS_VALUES)[number]) ||
-        PRODUCT_STATUS_VALUES[0],
       category: product.category || "",
       specifications: product.specifications || "",
       tags: productTags,
+      unitFormat: null,
+      inventoryEnabled: product.inventoryEnabled || false,
+      lowStockThreshold: product.lowStockThreshold || 5,
     },
   });
 
@@ -105,28 +113,45 @@ export function EditProductForm({
     setDialogOpen(open);
 
     if (open) {
-      Promise.all([getAllTags(), getProductTags(product.id)]).then(
-        ([allTagsResult, productTagsResult]) => {
-          if (allTagsResult.ok) {
-            setAvailableTags(allTagsResult.tags);
-          }
-          if (productTagsResult.ok) {
-            form.reset({
-              name: product.name || "",
-              slug: product.slug || "",
-              price: product.price || "",
-              imageUrl: product.imageUrl || "",
-              description: product.description || "",
-              status:
-                (product.status as (typeof PRODUCT_STATUS_VALUES)[number]) ||
-                PRODUCT_STATUS_VALUES[0],
-              category: product.category || "",
-              tags: productTagsResult.tags,
-              specifications: product.specifications || "",
-            });
+      Promise.all([
+        getAllTags(),
+        getProductTags(product.id),
+        getAllUnitFormats(),
+      ]).then(([allTagsResult, productTagsResult, unitFormatsResult]) => {
+        if (allTagsResult.ok) {
+          setAvailableTags(allTagsResult.tags);
+        }
+        if (unitFormatsResult.ok) {
+          setAvailableUnitFormats(unitFormatsResult.unitFormats);
+          // Find and set the product's current unit format
+          if (product.unitFormatId) {
+            const currentFormat = unitFormatsResult.unitFormats.find(
+              (f) => f.id === product.unitFormatId
+            );
+            setSelectedUnitFormat(currentFormat || null);
           }
         }
-      );
+        if (productTagsResult.ok) {
+          form.reset({
+            name: product.name || "",
+            slug: product.slug || "",
+            price: product.price || "",
+            imageUrl: product.imageUrl || "",
+            description: product.description || "",
+            category: product.category || "",
+            tags: productTagsResult.tags,
+            specifications: product.specifications || "",
+            unitFormat:
+              unitFormatsResult.ok && product.unitFormatId
+                ? unitFormatsResult.unitFormats.find(
+                    (f) => f.id === product.unitFormatId
+                  ) || null
+                : null,
+            inventoryEnabled: product.inventoryEnabled || false,
+            lowStockThreshold: product.lowStockThreshold || 5,
+          });
+        }
+      });
     }
   };
 
@@ -151,10 +176,13 @@ export function EditProductForm({
           price: values.price,
           description: values.description || "",
           imageUrl: values.imageUrl || "",
-          status: values.status,
           category: values.category,
           specifications: values.specifications ?? "",
           tagNames: values.tags.map((t) => t.name),
+          unitFormatId: values.unitFormat?.id || null,
+          unitFormatName: values.unitFormat?.name,
+          inventoryEnabled: values.inventoryEnabled,
+          lowStockThreshold: values.lowStockThreshold,
           revalidateTargetPath: `/businesses/${businessSlug}`,
         });
         toast.success("Success", {
@@ -377,28 +405,70 @@ export function EditProductForm({
 
               <FormField
                 control={form.control}
-                name="status"
+                name="unitFormat"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Status of the product" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {PRODUCT_STATUS_VALUES.map((v) => (
-                          <SelectItem key={v} value={v}>
-                            {removeUnderscoreAndCapitalizeOnlyTheFirstChar(v)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <FormLabel>Unit Format</FormLabel>
+                    <FormControl>
+                      <UnitFormatInput
+                        availableUnitFormats={availableUnitFormats}
+                        selectedUnitFormat={field.value}
+                        onUnitFormatChangeAction={field.onChange}
+                        disabled={isPending}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="inventoryEnabled"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      <FormLabel>Enable inventory tracking</FormLabel>
+                      <p className="text-sm text-muted-foreground">
+                        Track stock levels and get low stock alerts
+                      </p>
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              {form.watch("inventoryEnabled") && (
+                <FormField
+                  control={form.control}
+                  name="lowStockThreshold"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Low Stock Alert Threshold</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min="0"
+                          placeholder="5"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <p className="text-sm text-muted-foreground">
+                        Get notified when stock reaches this level
+                      </p>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
 
               <FormField
                 control={form.control}

@@ -253,7 +253,7 @@ export function AddProductForm({
                             <SelectValue placeholder="Select a category" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="z-64">
                           {getCategoryOptions().map((category) => (
                             <SelectItem
                               key={category.value}

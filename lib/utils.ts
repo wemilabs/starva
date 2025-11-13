@@ -1,6 +1,6 @@
-import { productCategory } from "@/db/schema";
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { productCategory } from "@/db/schema";
 import { COUNTRIES } from "./constants";
 
 export function cn(...inputs: ClassValue[]) {
@@ -11,7 +11,7 @@ export const getInitials = (name?: string | null) => {
   return name
     .split(" ")
     .filter(Boolean)
-    .map(word => word[0])
+    .map((word) => word[0])
     .join("")
     .slice(0, 2)
     .toUpperCase();
@@ -28,7 +28,7 @@ export const slugify = (text: string): string => {
 };
 
 export const removeUnderscoreAndCapitalizeOnlyTheFirstChar = (
-  text: string,
+  text: string
 ): string => {
   const withSpaces = text.replace(/_/g, " ");
   return withSpaces.charAt(0).toUpperCase() + withSpaces.slice(1);
@@ -36,7 +36,7 @@ export const removeUnderscoreAndCapitalizeOnlyTheFirstChar = (
 
 export const parsePhoneNumber = (fullPhone: string) => {
   if (!fullPhone) return { countryCode: COUNTRIES[0].code, phoneNumber: "" };
-  const country = COUNTRIES.find(c => fullPhone.startsWith(c.code));
+  const country = COUNTRIES.find((c) => fullPhone.startsWith(c.code));
   if (country) {
     return {
       countryCode: country.code,
@@ -131,7 +131,7 @@ export function getCategoryLabel(key: string): string {
 }
 
 export function getCategoryOptions() {
-  return PRODUCT_CATEGORIES.map(key => ({
+  return PRODUCT_CATEGORIES.map((key) => ({
     value: key,
     label: getCategoryLabel(key),
   }));

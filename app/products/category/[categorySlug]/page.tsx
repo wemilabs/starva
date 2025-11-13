@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { Suspense } from "react";
 import { DynamicHeading } from "@/components/products/dynamic-heading";
 import { FilteredProducts } from "@/components/products/filtered-products";
 import { ProductFilters } from "@/components/products/product-filters";
@@ -8,9 +11,6 @@ import { getTagsByCategory } from "@/data/tags";
 import type { ProductCategory } from "@/db/schema";
 import { CATEGORY_CONTENT, GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
 import { getCategoryLabel, PRODUCT_CATEGORIES } from "@/lib/utils";
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { Suspense } from "react";
 
 const isValidCategorySlug = (slug: string): slug is ProductCategory =>
   PRODUCT_CATEGORIES.includes(slug as ProductCategory);

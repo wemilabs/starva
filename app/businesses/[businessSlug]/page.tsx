@@ -217,7 +217,7 @@ export default async function BusinessSlugPage(
           </div>
           <div className="grid gap-6 mt-10">
             <div className="h-20 rounded-lg border bg-background animate-pulse mb-6" />
-            <div className="col-span-full text-sm text-pretty text-muted-foreground mb-4">
+            <div className="col-span-full text-sm text-pretty text-muted-foreground mb-4 font-mono tracking-tighter">
               Loading business details...
             </div>
           </div>

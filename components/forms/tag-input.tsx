@@ -97,7 +97,7 @@ export function TagInput({
             <Plus className="ml-2 size-4 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0" align="start">
+        <PopoverContent className="p-0 w-full z-64" align="start">
           <Command shouldFilter={false}>
             <CommandInput
               placeholder="Search or create tags..."

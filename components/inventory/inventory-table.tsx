@@ -4,6 +4,8 @@ import {
   AlertTriangle,
   ArrowUpDown,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Ellipsis,
 } from "lucide-react";
 import Image from "next/image";
@@ -204,7 +206,7 @@ export function InventoryTable({
                   <Button
                     variant="ghost"
                     onClick={() => handleSort("name")}
-                    className="h-auto p-0 hover:bg-transparent"
+                    className="h-8"
                   >
                     Product
                     <ArrowUpDown className="size-4" />
@@ -222,7 +224,7 @@ export function InventoryTable({
                   <Button
                     variant="ghost"
                     onClick={() => handleSort("currentStock")}
-                    className="h-auto p-0 hover:bg-transparent float-right"
+                    className="h-8"
                   >
                     Current Stock
                     <ArrowUpDown className="size-4" />
@@ -234,7 +236,7 @@ export function InventoryTable({
                   <Button
                     variant="ghost"
                     onClick={() => handleSort("lowStockThreshold")}
-                    className="h-auto p-0 hover:bg-transparent float-right"
+                    className="h-8"
                   >
                     Threshold
                     <ArrowUpDown className="size-4" />
@@ -246,7 +248,7 @@ export function InventoryTable({
                   <Button
                     variant="ghost"
                     onClick={() => handleSort("price")}
-                    className="h-auto p-0 hover:bg-transparent float-right"
+                    className="h-8"
                   >
                     Unit Price
                     <ArrowUpDown className="size-4" />
@@ -410,9 +412,8 @@ export function InventoryTable({
 
       {/* Pagination */}
       <div className="flex items-center justify-end gap-2 py-4 px-4">
-        <div className="flex-1 text-sm text-muted-foreground">
-          Showing {paginatedProducts.length} of{" "}
-          {filteredAndSortedProducts.length} products
+        <div className="flex-1 text-sm text-muted-foreground font-mono tracking-tighter">
+          {paginatedProducts.length} of {filteredAndSortedProducts.length}
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -420,8 +421,9 @@ export function InventoryTable({
             size="sm"
             onClick={handlePreviousPage}
             disabled={currentPage === 1}
+            title="Previous page"
           >
-            Previous
+            <ChevronLeft className="size-4" />
           </Button>
           <div className="text-sm">
             Page {currentPage} of {totalPages || 1}
@@ -431,8 +433,9 @@ export function InventoryTable({
             size="sm"
             onClick={handleNextPage}
             disabled={currentPage >= totalPages}
+            title="Next page"
           >
-            Next
+            <ChevronRight className="size-4" />
           </Button>
         </div>
       </div>

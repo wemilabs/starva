@@ -104,6 +104,9 @@ export async function InventoryContent({ activeOrgId }: InventoryContentProps) {
       <div className="rounded-lg border bg-card">
         <div className="px-4 py-6 border-b">
           <h2 className="text-xl font-medium">Products</h2>
+          <p className="text-sm text-muted-foreground font-mono tracking-tighter">
+            These are all products with inventory tracking enabled
+          </p>
         </div>
 
         {products.length === 0 ? (

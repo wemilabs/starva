@@ -1,11 +1,12 @@
-import { Building2 } from "lucide-react";
+import { Building2, Lock } from "lucide-react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
-
 import { BusinessCatalogueSection } from "@/components/businesses/business-catalogue section";
 import { SkeletonBusinessCard } from "@/components/businesses/skeleton-business-card";
 import { ExtractedRegisterBusinessDialog } from "@/components/forms/extracted-register-business-dialog";
 import { SearchForm } from "@/components/forms/search-form";
+import { Button } from "@/components/ui/button";
 import {
   Empty,
   EmptyContent,
@@ -19,10 +20,35 @@ import { verifySession } from "@/data/user-session";
 import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
 
 async function BusinessesList() {
-  const { success } = await verifySession();
-  const businessesPerUser = success ? await getBusinessesPerUser() : [];
+  const sessionData = await verifySession();
 
-  if (businessesPerUser.length === 0) {
+  if (!sessionData.success || !sessionData.session)
+    return (
+      <Empty className="min-h-[400px]">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <Lock className="size-6" />
+          </EmptyMedia>
+          <EmptyTitle>You are not yet signed in</EmptyTitle>
+          <EmptyDescription className="font-mono tracking-tighter">
+            Sign in first to access this service
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <Button asChild size="sm" className="w-full">
+            <Link href="/sign-in">
+              <span>Sign In</span>
+            </Link>
+          </Button>
+        </EmptyContent>
+      </Empty>
+    );
+
+  const businessesPerUser = sessionData.success
+    ? await getBusinessesPerUser()
+    : [];
+
+  if (businessesPerUser.length === 0)
     return (
       <Empty className="min-h-[400px]">
         <EmptyHeader>
@@ -40,7 +66,6 @@ async function BusinessesList() {
         </EmptyContent>
       </Empty>
     );
-  }
 
   return <BusinessCatalogueSection data={businessesPerUser} />;
 }

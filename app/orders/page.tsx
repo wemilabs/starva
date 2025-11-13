@@ -1,4 +1,4 @@
-import { ScrollText } from "lucide-react";
+import { Lock, ScrollText } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -24,16 +24,16 @@ import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
 async function OrdersContent() {
   const sessionData = await verifySession();
 
-  if (!sessionData.success || !sessionData.session) {
+  if (!sessionData.success || !sessionData.session)
     return (
       <Empty className="min-h-[400px]">
         <EmptyHeader>
           <EmptyMedia variant="icon">
-            <ScrollText className="size-6" />
+            <Lock className="size-6" />
           </EmptyMedia>
           <EmptyTitle>You are not yet signed in</EmptyTitle>
           <EmptyDescription className="font-mono tracking-tighter">
-            Sign in first in order to access this service
+            Sign in first to access this service
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
@@ -45,7 +45,6 @@ async function OrdersContent() {
         </EmptyContent>
       </Empty>
     );
-  }
 
   const userId = sessionData.session.user?.id;
   const activeOrgId = sessionData.session.session?.activeOrganizationId;

@@ -15,8 +15,8 @@ export function HeaderSkeleton() {
       </div>
 
       <div className="flex items-center gap-2">
-        <Skeleton className="h-9 w-9 rounded-full" />
-        <Skeleton className="h-9 w-9 rounded-full" />
+        <Skeleton className="size-9 rounded-full" />
+        <Skeleton className="size-9 rounded-full" />
       </div>
     </header>
   );

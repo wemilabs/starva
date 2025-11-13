@@ -1,5 +1,8 @@
 "use client";
 
+import Image from "next/image";
+import Link from "next/link";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -9,9 +12,6 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { ERROR_PAGE_IMG_URL } from "@/lib/constants";
-import Image from "next/image";
-import Link from "next/link";
-import { useEffect } from "react";
 
 export default function ErrorPage({
   error,

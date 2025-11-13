@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
 import { NotFoundRouteForm } from "@/components/forms/notfound-route-form";
 import {
   Empty,
@@ -7,9 +10,6 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { NOTFOUND_PAGE_IMG_URL } from "@/lib/constants";
-import type { Metadata } from "next";
-import Image from "next/image";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "404 Not Found | Starva",

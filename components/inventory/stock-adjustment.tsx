@@ -119,9 +119,9 @@ export function StockAdjustment({
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
+        <Button variant="ghost" size="sm" className="gap-2 justify-start">
           <Package className="size-4" />
-          Adjust Stock
+          <span>Adjust Stock</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[500px]">

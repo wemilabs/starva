@@ -19,14 +19,12 @@ type InventoryHistoryProps = {
   productId: string;
   productName: string;
   organizationId: string;
-  inventoryHistoryButtonText?: string;
 };
 
 export function InventoryHistoryContent({
   productId,
   productName,
   organizationId,
-  inventoryHistoryButtonText,
 }: InventoryHistoryProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [history, setHistory] = useState<InventoryHistory[]>([]);
@@ -68,9 +66,9 @@ export function InventoryHistoryContent({
   return (
     <Dialog open={dialogOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="sm">
+        <Button variant="ghost" size="sm" className="gap-2 justify-start">
           <History className="size-4" />
-          {inventoryHistoryButtonText}
+          <span>View History</span>
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px]">

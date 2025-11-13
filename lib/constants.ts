@@ -359,65 +359,70 @@ export const CATEGORY_CONFIG = {
     icon: "ShoppingCart",
     priority: 1,
   },
-  "health-wellness": {
-    label: "Health & Wellness",
-    icon: "Heart",
+  clothing: {
+    label: "Clothing",
+    icon: "Shirt",
     priority: 2,
+  },
+  "real-estate": {
+    label: "Real Estate",
+    icon: "Home",
+    priority: 3,
   },
   electronics: {
     label: "Electronics",
     icon: "Smartphone",
-    priority: 3,
-  },
-  clothing: {
-    label: "Clothing",
-    icon: "Shirt",
     priority: 4,
+  },
+  "health-wellness": {
+    label: "Health & Wellness",
+    icon: "Heart",
+    priority: 5,
   },
   footwear: {
     label: "Footwear",
     icon: "Footprints",
-    priority: 5,
+    priority: 6,
   },
   "beauty-personal-care": {
     label: "Beauty & Personal Care",
     icon: "Sparkles",
-    priority: 6,
+    priority: 7,
   },
   "jewelry-accessories": {
     label: "Jewelry & Accessories",
     icon: "Gem",
-    priority: 7,
+    priority: 8,
   },
   appliances: {
     label: "Appliances",
-    icon: "Home",
-    priority: 8,
+    icon: "Refrigerator",
+    priority: 9,
   },
   furniture: {
     label: "Furniture",
     icon: "Sofa",
-    priority: 9,
+    priority: 10,
   },
   "books-media": {
     label: "Books & Media",
     icon: "BookOpen",
-    priority: 10,
+    priority: 11,
   },
   automotive: {
     label: "Automotive",
     icon: "Car",
-    priority: 11,
+    priority: 12,
   },
   "toys-games": {
     label: "Toys & Games",
     icon: "Gamepad2",
-    priority: 12,
+    priority: 13,
   },
   others: {
     label: "Others",
     icon: "MoreHorizontal",
-    priority: 13,
+    priority: 14,
   },
 } as const;
 

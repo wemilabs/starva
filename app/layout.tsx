@@ -81,13 +81,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function RootLayout({
-  children,
-  auth,
-}: Readonly<{
-  children: React.ReactNode;
-  auth: React.ReactNode;
-}>) {
+export default async function RootLayout(props: LayoutProps<"/">) {
+  const { children, auth } = props;
   return (
     <html lang="en" suppressHydrationWarning>
       <body

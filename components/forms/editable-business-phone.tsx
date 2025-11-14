@@ -13,17 +13,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Spinner } from "@/components/ui/spinner";
 import { COUNTRIES } from "@/lib/constants";
 import { parsePhoneNumber } from "@/lib/utils";
-import { Spinner } from "../ui/spinner";
 
 interface EditableBusinessPhoneProps {
   businessId: string;
   businessSlug: string;
+  phoneType: "notifications" | "payments";
   initialPhone?: string;
   updateAction: (
     businessId: string,
     businessSlug: string,
+    phoneType: "notifications" | "payments",
     phone: string
   ) => Promise<void>;
 }
@@ -31,6 +33,7 @@ interface EditableBusinessPhoneProps {
 export function EditableBusinessPhone({
   businessId,
   businessSlug,
+  phoneType,
   initialPhone = "",
   updateAction,
 }: EditableBusinessPhoneProps) {
@@ -66,11 +69,10 @@ export function EditableBusinessPhone({
 
     startTransition(async () => {
       try {
-        await updateAction(businessId, businessSlug, fullPhone);
+        await updateAction(businessId, businessSlug, phoneType, fullPhone);
         setIsEditing(false);
         toast.success("Phone number updated", {
-          description:
-            "Your business phone number has been updated successfully.",
+          description: "Business phone number successfully updated",
         });
       } catch (error) {
         console.error("Failed to update phone number:", error);
@@ -78,7 +80,7 @@ export function EditableBusinessPhone({
         setCountryCode(parsed.countryCode);
         setPhoneNumber(parsed.phoneNumber);
         toast.error("Failed to update phone number", {
-          description: "Your business phone number could not be updated.",
+          description: "Business phone number could not be updated.",
         });
       }
     });
@@ -164,17 +166,22 @@ export function EditableBusinessPhone({
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <Phone className="size-4 text-white/80" />
-      <span className="text-white/80 text-sm">{initialPhone}</span>
-      <Button
-        onClick={handleEdit}
-        size="icon"
-        variant="ghost"
-        className="size-7 hover:bg-white/10"
-      >
-        <Pencil className="size-3" />
-      </Button>
+    <div className="space-y-2">
+      <p className="text-white/60 text-xs font-medium uppercase tracking-wider">
+        {phoneType === "notifications" ? "WhatsApp Notifications" : "Payments"}
+      </p>
+      <div className="flex items-center gap-2">
+        <Phone className="size-4 text-white/80" />
+        <span className="text-white/80 text-sm">{initialPhone}</span>
+        <Button
+          onClick={handleEdit}
+          size="icon"
+          variant="ghost"
+          className="size-7 hover:bg-white/10"
+        >
+          <Pencil className="size-3" />
+        </Button>
+      </div>
     </div>
   );
 }

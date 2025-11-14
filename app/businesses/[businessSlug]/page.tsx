@@ -51,7 +51,8 @@ async function BusinessContent({
 
   const metadata = business.metadata ? JSON.parse(business.metadata) : {};
   const description = metadata.description || "";
-  const phone = metadata.phone || "";
+  const phoneForNotifications = metadata.phoneForNotifications || "";
+  const phoneForPayments = metadata.phoneForPayments || "";
 
   return (
     <div className="space-y-8">
@@ -90,7 +91,15 @@ async function BusinessContent({
             <EditableBusinessPhone
               businessId={business.id}
               businessSlug={resolvedSlug}
-              initialPhone={phone}
+              phoneType="notifications"
+              initialPhone={phoneForNotifications}
+              updateAction={updateBusinessPhone}
+            />
+            <EditableBusinessPhone
+              businessId={business.id}
+              businessSlug={resolvedSlug}
+              phoneType="payments"
+              initialPhone={phoneForPayments}
               updateAction={updateBusinessPhone}
             />
           </div>

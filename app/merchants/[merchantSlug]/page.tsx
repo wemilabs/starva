@@ -33,7 +33,7 @@ async function ProductsList({
 
   if (!Array.isArray(productsPerMerchant) || productsPerMerchant.length === 0) {
     return (
-      <div className="text-center py-10 border border-dashed border-muted-foreground/50 rounded-lg">
+      <div className="text-center py-10 border border-dashed border-muted-foreground/50 rounded-lg mt-6">
         <h2 className="font-semibold">No products available</h2>
         <p className="text-muted-foreground text-sm font-mono tracking-tighter">
           This merchant has no product yet.
@@ -63,7 +63,8 @@ async function MerchantContent({
   const resolvedSlug = merchant.slug || merchantSlug;
   const metadata = merchant.metadata ? JSON.parse(merchant.metadata) : {};
   const description = metadata.description || "";
-  const phone = metadata.phone || "";
+  const phoneForNotifications = metadata.phoneForNotifications || "";
+  const phoneForPayments = metadata.phoneForPayments || "";
   const timetable = metadata.timetable || {};
 
   const hasTimetable =
@@ -99,7 +100,22 @@ async function MerchantContent({
             <p className="text-white/80 text-sm font-mono tracking-tighter">
               {description}
             </p>
-            <p className="text-white/80 text-sm leading-relaxed">{phone}</p>
+            <div className="space-y-2">
+              <p className="text-white/60 text-xs font-medium uppercase tracking-wider">
+                WhatsApp Notifications
+              </p>
+              <p className="text-white/80 text-sm leading-relaxed">
+                {phoneForNotifications}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-white/60 text-xs font-medium uppercase tracking-wider">
+                Payments
+              </p>
+              <p className="text-white/80 text-sm leading-relaxed">
+                {phoneForPayments}
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-3 justify-end">
             <ShareDialog

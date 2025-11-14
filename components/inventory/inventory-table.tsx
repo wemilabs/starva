@@ -265,7 +265,7 @@ export function InventoryTable({
                   colSpan={
                     Object.values(columnVisibility).filter(Boolean).length + 1
                   }
-                  className="p-8 text-center text-muted-foreground"
+                  className="p-8 text-center text-muted-foreground font-mono tracking-tighter"
                 >
                   No products found.
                 </td>

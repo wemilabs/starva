@@ -3,10 +3,9 @@
 import { eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-
+import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
 import { orderItem, order as orderTable, user } from "@/db/schema";
-import { auth } from "@/lib/auth";
 import { ORDER_STATUS_VALUES } from "@/lib/constants";
 import { formatPriceInRWF } from "@/lib/utils";
 import { updateStock } from "./inventory";
@@ -24,20 +23,14 @@ const orderSchema = z.object({
 
 export async function placeOrder(input: z.infer<typeof orderSchema>) {
   const parsed = orderSchema.safeParse(input);
-  if (!parsed.success) {
+  if (!parsed.success)
     return { ok: false, error: z.treeifyError(parsed.error) };
-  }
 
-  const session = await auth.api.getSession({
-    headers: await (async () => {
-      const { headers } = await import("next/headers");
-      return headers();
-    })(),
-  });
-
-  if (!session?.user) {
+  const verified = await verifySession();
+  if (!verified.success || !verified.session)
     return { ok: false, error: "Unauthorized" };
-  }
+
+  const session = verified.session;
 
   const { items, notes } = parsed.data;
 
@@ -50,18 +43,16 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       },
     });
 
-    if (products.length !== items.length) {
+    if (products.length !== items.length)
       return { ok: false, error: "One or more products not found" };
-    }
 
     // Ensure all products belong to the same organization
     const organizationIds = [...new Set(products.map((p) => p.organizationId))];
-    if (organizationIds.length > 1) {
+    if (organizationIds.length > 1)
       return {
         ok: false,
         error: "All products must belong to the same organization",
       };
-    }
 
     const organizationId = organizationIds[0];
     const organization = products[0].organization;
@@ -112,7 +103,7 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
         quantity: item.quantity,
         priceAtOrder: item.priceAtOrder,
         subtotal: item.subtotal,
-      })),
+      }))
     );
 
     const userData = await db.query.user.findFirst({
@@ -139,8 +130,10 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       .map(
         (item) =>
           `📦 *${item.productName}*\n` +
-          `   Qty: ${item.quantity} × ${formatPriceInRWF(Number(item.priceAtOrder))} = ${formatPriceInRWF(Number(item.subtotal))}` +
-          (item.notes ? `\n   _Note: ${item.notes}_` : ""),
+          `   Qty: ${item.quantity} × ${formatPriceInRWF(
+            Number(item.priceAtOrder)
+          )} = ${formatPriceInRWF(Number(item.subtotal))}` +
+          (item.notes ? `\n   _Note: ${item.notes}_` : "")
       )
       .join("\n\n");
 
@@ -161,7 +154,10 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       `\n👤 *Customer: ${userData?.name || session.user.name}*\n\n` +
       "_*Powered by Starva*_";
 
-    const whatsappUrl = `https://wa.me/${whatsappPhone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/${whatsappPhone.replace(
+      /[^0-9]/g,
+      ""
+    )}?text=${encodeURIComponent(message)}`;
 
     revalidatePath("/");
 
@@ -182,23 +178,18 @@ const updateOrderStatusSchema = z.object({
 });
 
 export async function updateOrderStatus(
-  input: z.infer<typeof updateOrderStatusSchema>,
+  input: z.infer<typeof updateOrderStatusSchema>
 ) {
   const parsed = updateOrderStatusSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: "Invalid input" };
   }
 
-  const session = await auth.api.getSession({
-    headers: await (async () => {
-      const { headers } = await import("next/headers");
-      return headers();
-    })(),
-  });
-
-  if (!session?.user) {
+  const verified = await verifySession();
+  if (!verified.success || !verified.session)
     return { ok: false, error: "Unauthorized" };
-  }
+
+  const session = verified.session;
 
   const { orderId, status } = parsed.data;
 
@@ -276,16 +267,11 @@ export async function updateOrderStatus(
 }
 
 export async function cancelOrder(orderId: string) {
-  const session = await auth.api.getSession({
-    headers: await (async () => {
-      const { headers } = await import("next/headers");
-      return headers();
-    })(),
-  });
-
-  if (!session?.user) {
+  const verified = await verifySession();
+  if (!verified.success || !verified.session)
     return { ok: false, error: "Unauthorized" };
-  }
+
+  const session = verified.session;
 
   try {
     const existingOrder = await db.query.order.findFirst({
@@ -301,7 +287,7 @@ export async function cancelOrder(orderId: string) {
         where: (member, { and, eq }) =>
           and(
             eq(member.organizationId, existingOrder.organizationId),
-            eq(member.userId, session.user.id),
+            eq(member.userId, session.user.id)
           ),
       });
 
@@ -342,7 +328,7 @@ export async function cancelOrder(orderId: string) {
           await updateStock({
             productId: item.productId,
             organizationId: existingOrder.organizationId,
-            quantityChange: item.quantity, // Add stock back
+            quantityChange: item.quantity,
             changeType: "return",
             reason: `Order ${orderId} cancelled`,
             revalidateTargetPath: "/inventory",
@@ -367,5 +353,67 @@ export async function cancelOrder(orderId: string) {
   } catch (error) {
     console.error("Order cancellation error:", error);
     return { ok: false, error: "Failed to cancel order" };
+  }
+}
+
+const markOrderAsDeliveredSchema = z.object({
+  orderId: z.string().min(1),
+});
+
+export async function markOrderAsDelivered(
+  input: z.infer<typeof markOrderAsDeliveredSchema>
+) {
+  const parsed = markOrderAsDeliveredSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: "Invalid input" };
+  }
+
+  const verified = await verifySession();
+  if (!verified.success || !verified.session)
+    return { ok: false, error: "Unauthorized" };
+
+  const session = verified.session;
+
+  const { orderId } = parsed.data;
+
+  try {
+    const existingOrder = await db.query.order.findFirst({
+      where: (order, { eq }) => eq(order.id, orderId),
+    });
+
+    if (!existingOrder) {
+      return { ok: false, error: "Order not found" };
+    }
+
+    if (existingOrder.userId !== session.user.id) {
+      return {
+        ok: false,
+        error: "Only the customer can mark this as delivered",
+      };
+    }
+
+    if (existingOrder.status === "delivered") {
+      return { ok: false, error: "Order is already delivered" };
+    }
+
+    if (existingOrder.status === "cancelled") {
+      return { ok: false, error: "Cannot mark a cancelled order as delivered" };
+    }
+
+    await db
+      .update(orderTable)
+      .set({
+        status: "delivered",
+        updatedAt: new Date(),
+      })
+      .where(eq(orderTable.id, orderId));
+
+    revalidatePath("/orders");
+    revalidatePath(`/orders/${orderId}`);
+
+    return { ok: true };
+  } catch (error) {
+    console.error("Mark order as delivered error:", error);
+    return { ok: false, error: "Failed to mark order as delivered" };
   }
 }

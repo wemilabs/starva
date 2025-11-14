@@ -1,17 +1,13 @@
-import { Badge } from "@/components/ui/badge";
-import type { OrderStatus } from "@/db/schema";
 import {
-  Clock,
+  CheckCheck,
   CheckCircle2,
   ChefHat,
+  Clock,
   Package,
-  CheckCheck,
   XCircle,
 } from "lucide-react";
-
-interface OrderStatusBadgeProps {
-  status: OrderStatus;
-}
+import { Badge } from "@/components/ui/badge";
+import type { OrderStatus } from "@/db/schema";
 
 const statusConfig = {
   pending: {
@@ -56,13 +52,13 @@ const statusConfig = {
   },
 };
 
-export function OrderStatusBadge({ status }: OrderStatusBadgeProps) {
+export function OrderStatusBadge({ status }: { status: OrderStatus }) {
   const config = statusConfig[status];
   const Icon = config.icon;
 
   return (
     <Badge variant={config.variant} className={config.className}>
-      <Icon className="mr-1 h-3 w-3" />
+      <Icon className="mr-1 size-4" />
       {config.label}
     </Badge>
   );

@@ -103,7 +103,7 @@ export function BusinessCard({ business }: { business: Organization }) {
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete {business.name}?</AlertDialogTitle>
-                  <AlertDialogDescription>
+                  <AlertDialogDescription className="font-mono tracking-tighter">
                     This action cannot be undone. This will permanently delete
                     the business and remove all associated data including
                     products, members, and settings.

@@ -38,7 +38,7 @@ interface OrderListProps {
 export function OrderList({ orders, variant = "merchant" }: OrderListProps) {
   const [selectedStatus, setSelectedStatus] = useQueryState(
     "status",
-    parseAsStringLiteral(["all", ...ORDER_STATUS_VALUES]).withDefault("all"),
+    parseAsStringLiteral(["all", ...ORDER_STATUS_VALUES]).withDefault("all")
   );
   const [search] = useQueryState("search", { defaultValue: "" });
 
@@ -77,7 +77,9 @@ export function OrderList({ orders, variant = "merchant" }: OrderListProps) {
 
       {filteredOrders.length === 0 ? (
         <div className="text-center py-12 flex items-center justify-center border border-dashed rounded-md mt-6">
-          <p className="text-muted-foreground">No orders found</p>
+          <p className="text-muted-foreground font-mono tracking-tighter">
+            No order found matching your search
+          </p>
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

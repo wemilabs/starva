@@ -3,7 +3,7 @@
 import { XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,14 +17,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { cancelOrder } from "@/server/orders";
-import { toast } from "sonner";
 import { Spinner } from "../ui/spinner";
 
-interface CancelOrderButtonProps {
-  orderId: string;
-}
-
-export function CancelOrderButton({ orderId }: CancelOrderButtonProps) {
+export function CancelOrderButton({ orderId }: { orderId: string }) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const [alertDialogOpen, setAlertDialogOpen] = useState(false);
@@ -32,7 +27,7 @@ export function CancelOrderButton({ orderId }: CancelOrderButtonProps) {
   const handleCancel = () => {
     startTransition(async () => {
       try {
-         await cancelOrder(orderId);
+        await cancelOrder(orderId);
         toast.success("Done!", {
           description: "Order cancelled successfully",
         });

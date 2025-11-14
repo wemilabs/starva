@@ -33,7 +33,7 @@ async function ProductsList({
 
   if (!Array.isArray(productsPerMerchant) || productsPerMerchant.length === 0) {
     return (
-      <div className="text-center py-10 border border-dashed border-muted-foreground/50 rounded-lg mt-6">
+      <div className="text-center py-10 border border-dashed border-muted-foreground/50 rounded-lg mt-10">
         <h2 className="font-semibold">No products available</h2>
         <p className="text-muted-foreground text-sm font-mono tracking-tighter">
           This merchant has no product yet.

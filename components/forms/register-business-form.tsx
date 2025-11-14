@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronDownIcon, LogIn } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useTransition } from "react";
+import { Activity, useEffect, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -22,20 +22,43 @@ import { organization, useSession } from "@/lib/auth-client";
 import { COUNTRIES } from "@/lib/constants";
 import { slugify } from "@/lib/utils";
 import { Card, CardContent } from "../ui/card";
+import { Checkbox } from "../ui/checkbox";
 import { Spinner } from "../ui/spinner";
 import { Textarea } from "../ui/textarea";
 
-const formSchema = z.object({
-  name: z.string().min(2).max(50),
-  slug: z.string().min(2).max(50),
-  description: z.string().min(2).max(100).optional(),
-  countryCode: z.string(),
-  phoneNumber: z
-    .string()
-    .min(6, "Phone number must be at least 6 digits")
-    .max(15, "Phone number must be at most 15 digits")
-    .regex(/^[0-9]+$/, "Phone number must contain only digits"),
-});
+const formSchema = z
+  .object({
+    name: z.string().min(2).max(50),
+    slug: z.string().min(2).max(50),
+    description: z.string().min(2).max(100),
+    countryCodeForNotifications: z.string(),
+    phoneNumberForNotifications: z
+      .string()
+      .min(6, "Phone number must be at least 6 digits")
+      .max(15, "Phone number must be at most 15 digits")
+      .regex(/^[0-9]+$/, "Phone number must contain only digits"),
+    paymentPhoneSameAsContact: z.boolean(),
+    countryCodeForPayments: z.string().optional(),
+    phoneNumberForPayments: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      if (data.paymentPhoneSameAsContact) return true;
+
+      return (
+        !!data.phoneNumberForPayments &&
+        /^[0-9]+$/.test(data.phoneNumberForPayments) &&
+        data.phoneNumberForPayments.length >= 6 &&
+        data.phoneNumberForPayments.length <= 15 &&
+        !!data.countryCodeForPayments
+      );
+    },
+    {
+      path: ["phoneNumberForPayments"],
+      message:
+        "Payment phone number must contain only digits and be between 6-15 digits",
+    }
+  );
 
 interface RegisterBusinessFormProps {
   onSuccess?: () => void;
@@ -52,13 +75,17 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
       name: "",
       slug: "",
       description: "",
-      countryCode: "+250",
-      phoneNumber: "",
+      countryCodeForNotifications: "+250",
+      phoneNumberForNotifications: "",
+      paymentPhoneSameAsContact: false,
+      countryCodeForPayments: "+250",
+      phoneNumberForPayments: "",
     },
   });
   const ownerId = session?.user?.id;
 
   const watchedName = form.watch("name");
+  const paymentPhoneSameAsContact = form.watch("paymentPhoneSameAsContact");
 
   useEffect(() => {
     if (watchedName) {
@@ -80,12 +107,19 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
           return;
         }
 
+        const phoneForNotifications = `${values.countryCodeForNotifications} ${values.phoneNumberForNotifications}`;
+
+        const phoneForPayments = values.paymentPhoneSameAsContact
+          ? phoneForNotifications
+          : `${values.countryCodeForPayments} ${values.phoneNumberForPayments}`;
+
         await organization.create({
           name: values.name,
           slug: values.slug,
           metadata: {
             description: values.description,
-            phone: `${values.countryCode}${values.phoneNumber}`,
+            phoneForNotifications,
+            phoneForPayments,
           },
         });
         toast.success("Success", {
@@ -164,20 +198,20 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
 
           <FormField
             control={form.control}
-            name="phoneNumber"
+            name="phoneNumberForNotifications"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Phone Number{" "}
+                  Phone Number 1{" "}
                   <span className="text-muted-foreground text-xs font-mono tracking-tighter">
-                    (for payments and notifications)
+                    (for WhatsApp notifications)
                   </span>
                 </FormLabel>
 
                 <div className="flex">
                   <div className="relative">
                     <select
-                      {...form.register("countryCode")}
+                      {...form.register("countryCodeForNotifications")}
                       disabled={isPending}
                       className="border-input data-placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex h-9 w-fit items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 min-w-[100px] rounded-r-none appearance-none pr-10"
                     >
@@ -203,6 +237,70 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="paymentPhoneSameAsContact"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <FormLabel className="flex items-center gap-2 text-sm">
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={isPending}
+                    />
+                    <span>Use this same phone number for payments</span>
+                  </FormLabel>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Activity mode={paymentPhoneSameAsContact ? "hidden" : "visible"}>
+            <FormField
+              control={form.control}
+              name="phoneNumberForPayments"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Phone Number 2{" "}
+                    <span className="text-muted-foreground text-xs font-mono tracking-tighter">
+                      (for payments)
+                    </span>
+                  </FormLabel>
+
+                  <div className="flex">
+                    <div className="relative">
+                      <select
+                        {...form.register("countryCodeForPayments")}
+                        disabled={isPending}
+                        className="border-input data-placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex h-9 w-fit items-center justify-between gap-2 rounded-md border bg-transparent px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 min-w-[100px] rounded-r-none appearance-none pr-10"
+                      >
+                        {COUNTRIES.map((country) => (
+                          <option key={country.code} value={country.code}>
+                            {`${country.flag} ${country.code}`}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDownIcon className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 opacity-50" />
+                    </div>
+
+                    <FormControl>
+                      <Input
+                        className="rounded-l-none placeholder:text-sm"
+                        placeholder="123456789"
+                        type="tel"
+                        {...field}
+                      />
+                    </FormControl>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </Activity>
 
           <Button disabled={isPending} type="submit" className="w-full mt-2">
             {isPending ? (

@@ -103,9 +103,9 @@ export function FilteredProducts({
           </p>
         )}
         <div className="w-full sm:col-span-full flex items-center justify-center min-h-[200px] border border-dashed border-muted-foreground/50 rounded-lg">
-          <div className="text-muted-foreground text-center">
-            <p className="text-sm">No products found</p>
-          </div>
+          <p className="text-sm text-muted-foreground text-center font-mono tracking-tighter">
+            No products found
+          </p>
         </div>
       </>
     );

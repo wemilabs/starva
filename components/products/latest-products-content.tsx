@@ -214,7 +214,7 @@ export function LatestProductsContent({
             <Empty>
               <EmptyHeader>
                 <EmptyTitle>No products found</EmptyTitle>
-                <EmptyDescription>
+                <EmptyDescription className="font-mono tracking-tighter">
                   Try adjusting your search terms
                 </EmptyDescription>
               </EmptyHeader>

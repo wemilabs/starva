@@ -11,7 +11,7 @@ import { auth } from "@/lib/auth";
 export async function updateBusinessLogo(
   businessId: string,
   resolvedSlug: string,
-  formData: FormData,
+  formData: FormData
 ) {
   const logoUrl = String(formData.get("logoUrl") || "").trim();
   if (!logoUrl) return;
@@ -27,7 +27,7 @@ export async function updateBusinessLogo(
 export async function updateBusinessName(
   businessId: string,
   businessSlug: string,
-  name: string,
+  name: string
 ) {
   const trimmedName = name.trim();
   if (!trimmedName) return;
@@ -48,7 +48,7 @@ export async function updateBusinessName(
 export async function updateBusinessDescription(
   businessId: string,
   businessSlug: string,
-  description: string,
+  description: string
 ) {
   const trimmedDescription = description.trim();
 
@@ -84,9 +84,10 @@ export async function updateBusinessDescription(
 export async function updateBusinessPhone(
   businessId: string,
   businessSlug: string,
-  phone: string,
+  phoneType: "notifications" | "payments",
+  phoneNumber: string
 ) {
-  const trimmedPhone = phone.trim();
+  const trimmedPhone = phoneNumber.trim();
 
   const currentBusiness = await auth.api.getFullOrganization({
     query: {
@@ -101,14 +102,18 @@ export async function updateBusinessPhone(
       : currentBusiness.metadata
     : {};
 
+  const updatedMetadata = {
+    ...currentMetadata,
+    ...(phoneType === "notifications"
+      ? { phoneForNotifications: trimmedPhone }
+      : { phoneForPayments: trimmedPhone }),
+  };
+
   await auth.api.updateOrganization({
     body: {
       organizationId: businessId,
       data: {
-        metadata: {
-          ...currentMetadata,
-          phone: trimmedPhone,
-        },
+        metadata: updatedMetadata,
       },
     },
     headers: await headers(),
@@ -120,7 +125,7 @@ export async function updateBusinessPhone(
 export async function updateBusinessTimetable(
   businessId: string,
   businessSlug: string,
-  timetable: Record<string, { open: string; close: string; closed: boolean }>,
+  timetable: Record<string, { open: string; close: string; closed: boolean }>
 ) {
   const currentBusiness = await auth.api.getFullOrganization({
     query: {

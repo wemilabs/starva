@@ -1,6 +1,6 @@
+import { CheckCircle2, Clock, ShoppingCart, Wallet } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatPriceInRWF } from "@/lib/utils";
-import { CheckCircle2, Clock, ShoppingCart, Wallet } from "lucide-react";
 
 interface OrderStatsProps {
   stats: {

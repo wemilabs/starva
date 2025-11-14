@@ -3,8 +3,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { Suspense } from "react";
+import { Activity, Suspense } from "react";
 import { CancelOrderButton } from "@/components/orders/cancel-order-button";
+import { MarkAsDeliveredButton } from "@/components/orders/mark-as-delivered-button";
 import { OrderStatusBadge } from "@/components/orders/order-status-badge";
 import { OrderStatusSelect } from "@/components/orders/order-status-select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -242,11 +243,31 @@ async function OrderContent({
             </CardContent>
           </Card>
 
-          {(isOwner || isMerchant) &&
-            order.status !== "delivered" &&
-            order.status !== "cancelled" && (
+          <div className="flex flex-col gap-2">
+            <Activity
+              mode={
+                isOwner &&
+                !isMerchant &&
+                order.status !== "delivered" &&
+                order.status !== "cancelled"
+                  ? "visible"
+                  : "hidden"
+              }
+            >
+              <MarkAsDeliveredButton orderId={order.id} />
+            </Activity>
+            <Activity
+              mode={
+                (isOwner || isMerchant) &&
+                order.status !== "delivered" &&
+                order.status !== "cancelled"
+                  ? "visible"
+                  : "hidden"
+              }
+            >
               <CancelOrderButton orderId={order.id} />
-            )}
+            </Activity>
+          </div>
         </div>
       </div>
     </div>

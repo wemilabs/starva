@@ -35,7 +35,7 @@ export default function ErrorPage({
           className="rounded-md"
         />
         <EmptyTitle>Something went wrong!</EmptyTitle>
-        <EmptyDescription>
+        <EmptyDescription className="font-mono tracking-tighter">
           We encountered an unexpected error. Please try again or contact
           support if the problem persists.
         </EmptyDescription>
@@ -49,10 +49,10 @@ export default function ErrorPage({
             <Link href="/">Let&apos;s go Home buddy</Link>
           </Button>
         </div>
-        <EmptyDescription className="text-xs">
+        <EmptyDescription className="text-xs font-mono tracking-tighter">
           Error ID: {error.digest || "unknown"}
         </EmptyDescription>
-        <EmptyDescription>
+        <EmptyDescription className="font-mono tracking-tighter">
           Need help? <Link href="/support">Contact support</Link>
         </EmptyDescription>
       </EmptyContent>

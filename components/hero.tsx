@@ -1,5 +1,6 @@
-import { HERO_IMAGES } from "@/lib/constants";
+import { cacheLife } from "next/cache";
 import { Suspense } from "react";
+import { HERO_IMAGES } from "@/lib/constants";
 import { AnimatedGroup } from "./animated-group";
 import { SearchForm } from "./forms/search-form";
 import { HeroCarousel } from "./hero-carousel";
@@ -27,6 +28,7 @@ const transitionVariants = {
 
 export async function Hero() {
   "use cache";
+  cacheLife("max");
 
   return (
     <section className="overflow-hidden [--color-primary-foreground:var(--color-white)] [--color-primary:var(--color-orange-600)] rounded-lg">

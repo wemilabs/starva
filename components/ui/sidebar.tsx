@@ -81,6 +81,7 @@ function SidebarProvider({
         _setOpen(openState);
       }
 
+      // biome-ignore lint: Simple sidebar state persistence - no sensitive data stored
       document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
     },
     [setOpenProp, open]
@@ -604,10 +605,16 @@ function SidebarMenuSkeleton({
 }: React.ComponentProps<"div"> & {
   showIcon?: boolean;
 }) {
-  // Random width between 50 to 90%.
+  // Use useId to generate deterministic width values to prevent hydration mismatch
+  const id = React.useId();
   const width = React.useMemo(() => {
-    return `${Math.floor(Math.random() * 40) + 50}%`;
-  }, []);
+    const widths = ["60%", "70%", "80%", "65%", "75%", "85%", "90%", "55%"];
+    // Use the id to create a deterministic index
+    const index =
+      id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0) %
+      widths.length;
+    return widths[index];
+  }, [id]);
 
   return (
     <div

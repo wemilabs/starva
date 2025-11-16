@@ -1,8 +1,8 @@
 "use client";
 
+import { Crown, Sparkles, Zap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useUserSubscription } from "@/hooks/use-user-subscription";
-import { Crown, Zap, Sparkles } from "lucide-react";
 
 export function SubscriptionBadge() {
   const { planName, isTrial, daysUntilTrialEnd, isLoading } =
@@ -25,10 +25,10 @@ export function SubscriptionBadge() {
     planName === "Enterprise"
       ? "default"
       : planName === "Pro"
-        ? "default"
-        : planName === "Starter"
-          ? "secondary"
-          : "outline";
+      ? "default"
+      : planName === "Starter"
+      ? "secondary"
+      : "outline";
 
   return (
     <Badge variant={variant} className="gap-1">

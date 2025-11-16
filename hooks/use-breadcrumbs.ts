@@ -1,8 +1,8 @@
 "use client";
 
-import { type Crumb, useBreadcrumbs } from "@/contexts/breadcrumbs-context";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
+import { type Crumb, useBreadcrumbs } from "@/contexts/breadcrumbs-context";
 
 const routeConfig: Record<string, (params: string[]) => Crumb[]> = {
   // Static routes
@@ -66,7 +66,7 @@ function formatProductName(slug: string): string {
 
 // Find matching route configuration
 function findRouteConfig(
-  pathname: string,
+  pathname: string
 ): { config: (params: string[]) => Crumb[]; params: string[] } | null {
   // First try exact matches
   if (routeConfig[pathname]) {
@@ -128,27 +128,19 @@ function generateBreadcrumbsFromPath(pathname: string): Crumb[] {
 export function useAutoBreadcrumbs() {
   const pathname = usePathname();
   const { setCrumbs } = useBreadcrumbs();
-  
+
+  const routeMatch = findRouteConfig(pathname);
+
+  const computedCrumbs = routeMatch
+    ? pathname === "/"
+      ? [{ label: "Home" }]
+      : [{ label: "Home", href: "/" }, ...routeMatch.config(routeMatch.params)]
+    : pathname === "/"
+    ? [{ label: "Home" }]
+    : [{ label: "Home", href: "/" }, ...generateBreadcrumbsFromPath(pathname)];
+
+  // Update context with computed breadcrumbs
   useEffect(() => {
-    // Only run on client side
-    if (typeof window === 'undefined') return;
-    
-    const routeMatch = findRouteConfig(pathname);
-    
-    if (routeMatch) {
-      const crumbs = routeMatch.config(routeMatch.params);
-      const finalCrumbs =
-        pathname === "/"
-          ? [{ label: "Home" }]
-          : [{ label: "Home", href: "/" }, ...crumbs];
-      setCrumbs(finalCrumbs);
-    } else {
-      const crumbs = generateBreadcrumbsFromPath(pathname);
-      const finalCrumbs =
-        pathname === "/"
-          ? [{ label: "Home" }]
-          : [{ label: "Home", href: "/" }, ...crumbs];
-      setCrumbs(finalCrumbs);
-    }
-  }, [pathname, setCrumbs]);
+    setCrumbs(computedCrumbs);
+  }, [computedCrumbs, setCrumbs]);
 }

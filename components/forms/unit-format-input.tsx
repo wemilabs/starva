@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, Plus } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -34,6 +34,7 @@ export function UnitFormatInput({
 }: UnitFormatInputProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const id = useId();
 
   const filteredUnitFormats = availableUnitFormats.filter((format) =>
     format.name.toLowerCase().includes(search.toLowerCase())
@@ -55,7 +56,7 @@ export function UnitFormatInput({
       onUnitFormatChangeAction(existingFormat);
     } else {
       const newFormat: UnitFormat = {
-        id: `temp-${Date.now()}`,
+        id: `temp-${id}`,
         name: search.trim(),
         slug,
         description: null,

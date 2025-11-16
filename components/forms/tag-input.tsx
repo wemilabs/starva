@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, Plus, X } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -35,6 +35,7 @@ export function TagInput({
 }: TagInputProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
+  const id = useId();
 
   const filteredTags = availableTags.filter((tag) =>
     tag.name.toLowerCase().includes(search.toLowerCase())
@@ -67,7 +68,7 @@ export function TagInput({
       }
     } else {
       const newTag: Tag = {
-        id: `temp-${Date.now()}`,
+        id: `temp-${id}`,
         name: search.trim(),
         slug,
         description: null,

@@ -1,4 +1,5 @@
 import { Package, TrendingDown, TrendingUp } from "lucide-react";
+import { cacheLife } from "next/cache";
 import { InventoryTable } from "@/components/inventory/inventory-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatPriceInRWF } from "@/lib/utils";
@@ -11,11 +12,14 @@ import {
   EmptyTitle,
 } from "../ui/empty";
 
-type InventoryContentProps = {
+export async function InventoryContent({
+  activeOrgId,
+}: {
   activeOrgId: string;
-};
+}) {
+  "use cache: private";
+  cacheLife("seconds");
 
-export async function InventoryContent({ activeOrgId }: InventoryContentProps) {
   const result = await getInventoryList({ organizationId: activeOrgId });
 
   if (!result.ok) {

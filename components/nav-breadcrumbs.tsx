@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment } from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,7 +10,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { type Crumb, useBreadcrumbs } from "@/contexts/breadcrumbs-context";
-import { Fragment } from "react";
 
 export function NavBreadcrumbs({ base }: { base: Crumb[] }) {
   const { crumbs } = useBreadcrumbs();

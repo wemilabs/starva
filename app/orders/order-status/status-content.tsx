@@ -94,41 +94,41 @@ export function StatusContent() {
     : getStatusContent(status || "unknown");
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <div className="mx-auto mb-2">{content.icon}</div>
-          <CardTitle className={error ? "text-red-600" : "text-gray-900"}>
+          <CardTitle className={error ? "text-red-600" : ""}>
             {content.title}
           </CardTitle>
-          <CardDescription className="font-mono tracking-tighter">
+          <CardDescription className="text-muted-foreground font-mono tracking-tighter">
             {content.description}
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center space-y-4">
           <Activity mode={error === "expired-token" ? "visible" : "hidden"}>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               Please ask the customer to place a new order or contact them
               directly.
             </p>
           </Activity>
 
           <Activity mode={error === "invalid-token" ? "visible" : "hidden"}>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               Please check your WhatsApp messages for the correct link or
               contact support.
             </p>
           </Activity>
 
           <Activity mode={error === "server-error" ? "visible" : "hidden"}>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               Please try again in a few moments or contact support if the
               problem persists.
             </p>
           </Activity>
 
           <Activity mode={!status ? "hidden" : "visible"}>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-muted-foreground">
               You can check your dashboard for more order details.
             </p>
           </Activity>

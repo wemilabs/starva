@@ -1,5 +1,6 @@
 "use server";
 
+import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -85,6 +86,10 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       .where(eq(orderTable.organizationId, organizationId));
     const nextOrderNumber = (maxOrderResult[0]?.maxNum || 0) + 1;
 
+    // Generate confirmation token and set expiration (48 hours)
+    const confirmationToken = randomUUID();
+    const tokenExpiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
+
     const [newOrder] = await db
       .insert(orderTable)
       .values({
@@ -93,6 +98,8 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
         organizationId,
         notes: notes || null,
         totalPrice: totalPrice.toFixed(2),
+        confirmationToken,
+        tokenExpiresAt,
       })
       .returning();
 
@@ -144,6 +151,10 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       timeZone: orgTimezone,
     }).format(newOrder.createdAt);
 
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
+    const confirmUrl = `${baseUrl}/api/orders/confirm/${confirmationToken}`;
+    const rejectUrl = `${baseUrl}/api/orders/reject/${confirmationToken}`;
+
     const message =
       `🛒 *New Order #${newOrder.orderNumber}*\n` +
       `📅 ${orderDate}\n\n` +
@@ -152,6 +163,9 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       `\n\n💵 *Total: ${formatPriceInRWF(totalPrice)}*\n` +
       (notes ? `\n📝 *Order Note: ${notes}*\n` : "") +
       `\n👤 *Customer: ${userData?.name || session.user.name}*\n\n` +
+      `*Quick Actions:*\n` +
+      `✅ *Confirm:* ${confirmUrl}\n` +
+      `❌ *Reject:* ${rejectUrl}\n\n` +
       "_*Powered by Starva*_";
 
     const whatsappUrl = `https://wa.me/${whatsappPhone.replace(

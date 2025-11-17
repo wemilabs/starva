@@ -8,6 +8,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
+import { Activity } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -100,35 +101,37 @@ export function StatusContent() {
           <CardTitle className={error ? "text-red-600" : "text-gray-900"}>
             {content.title}
           </CardTitle>
-          <CardDescription>{content.description}</CardDescription>
+          <CardDescription className="font-mono tracking-tighter">
+            {content.description}
+          </CardDescription>
         </CardHeader>
         <CardContent className="text-center space-y-4">
-          {error === "expired-token" && (
+          <Activity mode={error === "expired-token" ? "visible" : "hidden"}>
             <p className="text-sm text-gray-600">
               Please ask the customer to place a new order or contact them
               directly.
             </p>
-          )}
+          </Activity>
 
-          {error === "invalid-token" && (
+          <Activity mode={error === "invalid-token" ? "visible" : "hidden"}>
             <p className="text-sm text-gray-600">
               Please check your WhatsApp messages for the correct link or
               contact support.
             </p>
-          )}
+          </Activity>
 
-          {error === "server-error" && (
+          <Activity mode={error === "server-error" ? "visible" : "hidden"}>
             <p className="text-sm text-gray-600">
               Please try again in a few moments or contact support if the
               problem persists.
             </p>
-          )}
+          </Activity>
 
-          {status && (
+          <Activity mode={!status ? "hidden" : "visible"}>
             <p className="text-sm text-gray-600">
               You can check your dashboard for more order details.
             </p>
-          )}
+          </Activity>
 
           <div className="flex gap-3">
             <Button
@@ -139,7 +142,7 @@ export function StatusContent() {
               Close Window
             </Button>
 
-            {error === "server-error" && (
+            <Activity mode={error === "server-error" ? "visible" : "hidden"}>
               <Button
                 onClick={() => window.location.reload()}
                 variant="default"
@@ -148,7 +151,7 @@ export function StatusContent() {
                 <RefreshCw className="size-4 mr-2" />
                 Try Again
               </Button>
-            )}
+            </Activity>
           </div>
         </CardContent>
       </Card>

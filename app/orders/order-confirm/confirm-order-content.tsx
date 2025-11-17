@@ -14,6 +14,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Spinner } from "@/components/ui/spinner";
 
 export function ConfirmOrderContent() {
   const searchParams = useSearchParams();
@@ -32,8 +33,6 @@ export function ConfirmOrderContent() {
         throw new Error(errorData.error || "Failed to fetch order");
       }
 
-      // The API redirects to this page, so we need to handle the redirect
-      // For now, we'll show a loading state and let the redirect happen
       return null;
     },
     enabled: !!token,
@@ -55,10 +54,8 @@ export function ConfirmOrderContent() {
 
       return response.json();
     },
-    onSuccess: () => {
-      // Invalidate the order query to trigger a refetch
-      queryClient.invalidateQueries({ queryKey: ["order", "confirm", token] });
-    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["order", "confirm", token] }),
     onError: (error) => {
       setError(
         error instanceof Error ? error.message : "Failed to confirm order"
@@ -72,10 +69,12 @@ export function ConfirmOrderContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="animate-spin rounded-full size-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading order details...</p>
+          <div className="animate-spin rounded-full size-12 border-b-2 border-blue-600 mx-auto mb-4" />
+          <p className="text-muted-foreground font-mono tracking-tighter">
+            Loading order details...
+          </p>
         </div>
       </div>
     );
@@ -83,12 +82,12 @@ export function ConfirmOrderContent() {
 
   if (queryError || error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <XCircle className="size-12 text-red-500 mx-auto mb-2" />
             <CardTitle className="text-red-600">Error</CardTitle>
-            <CardDescription>
+            <CardDescription className="font-mono tracking-tighter">
               {error ||
                 (queryError instanceof Error
                   ? queryError.message
@@ -96,7 +95,7 @@ export function ConfirmOrderContent() {
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-muted-foreground mb-4">
               Please contact support if you continue to experience issues.
             </p>
           </CardContent>
@@ -107,17 +106,17 @@ export function ConfirmOrderContent() {
 
   if (confirmMutation.isSuccess) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CheckCircle className="size-12 text-green-500 mx-auto mb-2" />
             <CardTitle className="text-green-600">Order Confirmed!</CardTitle>
-            <CardDescription>
+            <CardDescription className="font-mono tracking-tighter">
               Order has been confirmed successfully.
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center">
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-muted-foreground mb-4">
               The customer will be notified that their order is being prepared.
             </p>
             <Button
@@ -134,13 +133,11 @@ export function ConfirmOrderContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4">
+    <div className="min-h-screen p-4 pt-16">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Confirm Order
-          </h1>
-          <p className="text-gray-600">
+          <h1 className="text-2xl font-medium mb-2">Confirm Order</h1>
+          <p className="text-muted-foreground font-mono tracking-tighter">
             Review the order details below and confirm to start preparing
           </p>
         </div>
@@ -149,26 +146,26 @@ export function ConfirmOrderContent() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
-                <Clock className="size-5 text-orange-500" />
+                <Clock className="size-4 text-orange-500" />
                 Order Confirmation
               </CardTitle>
               <Badge variant="secondary">Pending</Badge>
             </div>
-            <CardDescription>
+            <CardDescription className="font-mono tracking-tighter">
               Confirm this order to start preparation
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center gap-2 text-sm text-gray-600">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Calendar className="size-4" />
               <span>{new Date().toLocaleString()}</span>
             </div>
 
             <Separator />
 
-            <div className="flex justify-between items-center text-lg font-semibold">
+            <div className="flex justify-between items-center text-sm font-medium">
               <div className="flex items-center gap-2">
-                <CheckCircle className="size-5" />
+                <CheckCircle className="size-4" />
                 Action Required
               </div>
               <span>Confirm Order</span>
@@ -180,12 +177,13 @@ export function ConfirmOrderContent() {
           <Button
             onClick={handleConfirm}
             disabled={confirmMutation.isPending}
-            className="flex-1 bg-green-600 hover:bg-green-700"
+            className="flex-1"
+            variant="success"
             size="lg"
           >
             {confirmMutation.isPending ? (
               <>
-                <div className="animate-spin rounded-full size-4 border-b-2 border-white mr-2"></div>
+                <Spinner />
                 Confirming...
               </>
             ) : (
@@ -201,7 +199,7 @@ export function ConfirmOrderContent() {
           </Button>
         </div>
 
-        <p className="text-center text-sm text-gray-500 mt-4">
+        <p className="text-center text-sm text-muted-foreground mt-4 font-mono tracking-tighter">
           By confirming, you agree to prepare this order for pickup/delivery.
         </p>
       </div>

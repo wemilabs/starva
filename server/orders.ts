@@ -116,7 +116,7 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
         : organization.metadata
       : {};
 
-    const whatsappPhone = metadata.phone;
+    const whatsappPhone = metadata.phoneForNotifications;
 
     if (!whatsappPhone) {
       return {

@@ -91,7 +91,7 @@ export function BusinessSwitcher() {
     <SidebarMenu className="group-data-[collapsible=icon]:mt-4">
       <SidebarMenuItem>
         {isLoading ? (
-          <Skeleton className="h-9 w-full" />
+          <Skeleton className="h-12 w-full" />
         ) : (
           <Popover onOpenChange={setOpen} open={open}>
             <PopoverTrigger asChild>

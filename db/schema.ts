@@ -175,6 +175,8 @@ export const subscription = pgTable(
     trialEndsAt: timestamp("trial_ends_at"),
     cancelledAt: timestamp("cancelled_at"),
     orderLimit: integer("order_limit"),
+    maxOrgs: integer("max_orgs"),
+    maxProductsPerOrg: integer("max_products_per_org"),
     ordersUsedThisMonth: integer("orders_used_this_month").default(0).notNull(),
     createdAt: timestamp("created_at")
       .$defaultFn(() => new Date())

@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState, useTransition } from "react";
@@ -46,9 +47,12 @@ import {
   slugify,
 } from "@/lib/utils";
 import { createProduct } from "@/server/products";
+import { checkProductLimit } from "@/server/subscription";
 import { getAllTags } from "@/server/tags";
 import { getAllUnitFormats } from "@/server/unit-formats";
+import { Card, CardContent } from "../ui/card";
 import { Spinner } from "../ui/spinner";
+import { useRouter } from "next/navigation";
 
 const schema = z.object({
   name: z.string().min(2, "Name is too short").max(100),
@@ -79,10 +83,23 @@ export function AddProductForm({
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
   const [availableTags, setAvailableTags] = useState<Tag[]>([]);
   const [availableUnitFormats, setAvailableUnitFormats] = useState<
     UnitFormat[]
   >([]);
+
+  const handleUpgradeClick = () => {
+    setDialogOpen(false);
+    router.push("/pricing");
+  };
+
+  const { data: productLimit, isLoading } = useQuery({
+    queryKey: ["productLimit", organizationId],
+    queryFn: () => checkProductLimit(organizationId),
+    enabled: dialogOpen,
+    gcTime: 0,
+  });
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
@@ -174,61 +191,60 @@ export function AddProductForm({
         <DialogHeader>
           <DialogTitle>Add a new product</DialogTitle>
           <DialogDescription>
-            Provide details below. Slug is auto-generated.
+            {isLoading
+              ? "Checking your product limits..."
+              : productLimit?.canCreate
+              ? "Provide details below. Slug is auto-generated."
+              : "Product limit reached"}
           </DialogDescription>
         </DialogHeader>
 
         <ScrollArea className="h-[calc(100vh-15rem)]">
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Grilled chicken"
-                        className="placeholder:text-sm"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="slug"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Slug</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="grilled-chicken"
-                        readOnly
-                        className="bg-muted cursor-not-allowed text-muted-foreground placeholder:text-sm"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:justify-items-end">
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center gap-2 py-8">
+              <Spinner />
+              <p className="text-sm text-muted-foreground font-mono tracking-tighter">
+                Checking your product limits...
+              </p>
+            </div>
+          ) : !productLimit?.canCreate ? (
+            <Card className="border border-dashed bg-sidebar">
+              <CardContent className="flex flex-col gap-4 py-6">
+                <div className="text-center space-y-2">
+                  <h3 className="font-medium">Product Limit Reached</h3>
+                  <p className="text-xs text-muted-foreground font-mono tracking-tighter">
+                    You've reached your limit of {productLimit?.maxProducts}{" "}
+                    products on the {productLimit?.planName} plan.
+                  </p>
+                  <p className="text-xs text-muted-foreground font-mono tracking-tighter">
+                    Current products: {productLimit?.currentProducts}/
+                    {productLimit?.maxProducts}
+                  </p>
+                </div>
+                <Button
+                  onClick={handleUpgradeClick}
+                  className="w-full"
+                  variant="outline"
+                >
+                  <span>Upgrade Plan</span>
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            <Form {...form}>
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-4"
+              >
                 <FormField
                   control={form.control}
-                  name="price"
+                  name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Price (RF)</FormLabel>
+                      <FormLabel>Name</FormLabel>
                       <FormControl>
                         <Input
-                          inputMode="decimal"
-                          placeholder="2500"
+                          placeholder="Grilled chicken"
                           className="placeholder:text-sm"
                           {...field}
                         />
@@ -240,233 +256,276 @@ export function AddProductForm({
 
                 <FormField
                   control={form.control}
-                  name="category"
+                  name="slug"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Category</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select a category" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent className="z-64">
-                          {getCategoryOptions().map((category) => (
-                            <SelectItem
-                              key={category.value}
-                              value={category.value}
-                            >
-                              {category.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="specifications"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      {getCategorySpecificationLabel(form.watch("category"))}
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={getCategorySpecificationPlaceholder(
-                          form.watch("category")
-                        )}
-                        className="placeholder:text-sm"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="imageUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Image</FormLabel>
-                    <FormControl>
-                      <div className="flex flex-col gap-3">
-                        {field.value ? (
-                          <div className="flex items-center gap-3">
-                            <div className="relative h-20 w-20 overflow-hidden rounded-md border">
-                              <Image
-                                src={field.value}
-                                alt={form.getValues("name") || "Product image"}
-                                fill
-                                className="object-cover"
-                              />
-                            </div>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                form.setValue("imageUrl", "", {
-                                  shouldValidate: true,
-                                })
-                              }
-                            >
-                              Remove
-                            </Button>
-                          </div>
-                        ) : null}
-
-                        <UploadButton
-                          endpoint="productImage"
-                          className="ut-button:bg-primary ut-button:ut-readying:bg-primary/50"
-                          onClientUploadComplete={(res) => {
-                            const url = res?.[0]?.ufsUrl || "";
-                            if (url)
-                              form.setValue("imageUrl", url, {
-                                shouldValidate: true,
-                              });
-                          }}
-                          onUploadError={(err) => {
-                            console.error(err);
-                            toast.error(
-                              err?.message || "Upload failed. Please try again."
-                            );
-                          }}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Short description"
-                        className="placeholder:text-sm"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="unitFormat"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Unit Format</FormLabel>
-                    <FormControl>
-                      <UnitFormatInput
-                        availableUnitFormats={availableUnitFormats}
-                        selectedUnitFormat={field.value}
-                        onUnitFormatChangeAction={field.onChange}
-                        disabled={isPending}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="inventoryEnabled"
-                render={({ field }) => (
-                  <FormItem className="flex items-start space-x-3 space-y-0 rounded-md border p-4">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Enable inventory tracking</FormLabel>
-                      <p className="text-sm text-muted-foreground">
-                        Track stock levels and get low stock alerts
-                      </p>
-                    </div>
-                  </FormItem>
-                )}
-              />
-
-              {form.watch("inventoryEnabled") && (
-                <FormField
-                  control={form.control}
-                  name="lowStockThreshold"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Low Stock Alert Threshold</FormLabel>
+                      <FormLabel>Slug</FormLabel>
                       <FormControl>
                         <Input
-                          type="number"
-                          min="0"
-                          placeholder="5"
+                          placeholder="grilled-chicken"
+                          readOnly
+                          className="bg-muted cursor-not-allowed text-muted-foreground placeholder:text-sm"
                           {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
                         />
                       </FormControl>
-                      <p className="text-sm text-muted-foreground">
-                        Get notified when stock reaches this level
-                      </p>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              )}
 
-              <FormField
-                control={form.control}
-                name="tags"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Tags</FormLabel>
-                    <FormControl>
-                      <TagInput
-                        availableTags={availableTags}
-                        selectedTags={field.value}
-                        onTagsChangeAction={field.onChange}
-                        disabled={isPending}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:justify-items-end">
+                  <FormField
+                    control={form.control}
+                    name="price"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Price (RF)</FormLabel>
+                        <FormControl>
+                          <Input
+                            inputMode="decimal"
+                            placeholder="2500"
+                            className="placeholder:text-sm"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <DialogFooter>
-                <Button type="submit" disabled={isPending}>
-                  {isPending ? (
-                    <span className="inline-flex items-center gap-2">
-                      <Spinner />
-                      Saving...
-                    </span>
-                  ) : (
-                    "Save product"
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Category</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          value={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select a category" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent className="z-64">
+                            {getCategoryOptions().map((category) => (
+                              <SelectItem
+                                key={category.value}
+                                value={category.value}
+                              >
+                                {category.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <FormField
+                  control={form.control}
+                  name="specifications"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        {getCategorySpecificationLabel(form.watch("category"))}
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={getCategorySpecificationPlaceholder(
+                            form.watch("category")
+                          )}
+                          className="placeholder:text-sm"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
                   )}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
+                />
+
+                <FormField
+                  control={form.control}
+                  name="imageUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Image</FormLabel>
+                      <FormControl>
+                        <div className="flex flex-col gap-3">
+                          {field.value ? (
+                            <div className="flex items-center gap-3">
+                              <div className="relative h-20 w-20 overflow-hidden rounded-md border">
+                                <Image
+                                  src={field.value}
+                                  alt={
+                                    form.getValues("name") || "Product image"
+                                  }
+                                  fill
+                                  className="object-cover"
+                                />
+                              </div>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="sm"
+                                onClick={() =>
+                                  form.setValue("imageUrl", "", {
+                                    shouldValidate: true,
+                                  })
+                                }
+                              >
+                                Remove
+                              </Button>
+                            </div>
+                          ) : null}
+
+                          <UploadButton
+                            endpoint="productImage"
+                            className="ut-button:bg-primary ut-button:ut-readying:bg-primary/50"
+                            onClientUploadComplete={(res) => {
+                              const url = res?.[0]?.ufsUrl || "";
+                              if (url)
+                                form.setValue("imageUrl", url, {
+                                  shouldValidate: true,
+                                });
+                            }}
+                            onUploadError={(err) => {
+                              console.error(err);
+                              toast.error(
+                                err?.message ||
+                                  "Upload failed. Please try again."
+                              );
+                            }}
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Short description"
+                          className="placeholder:text-sm"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="unitFormat"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Unit Format</FormLabel>
+                      <FormControl>
+                        <UnitFormatInput
+                          availableUnitFormats={availableUnitFormats}
+                          selectedUnitFormat={field.value}
+                          onUnitFormatChangeAction={field.onChange}
+                          disabled={isPending}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="inventoryEnabled"
+                  render={({ field }) => (
+                    <FormItem className="flex items-start space-x-3 space-y-0 rounded-md border p-4">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <div className="space-y-1 leading-none">
+                        <FormLabel>Enable inventory tracking</FormLabel>
+                        <p className="text-sm text-muted-foreground">
+                          Track stock levels and get low stock alerts
+                        </p>
+                      </div>
+                    </FormItem>
+                  )}
+                />
+
+                {form.watch("inventoryEnabled") && (
+                  <FormField
+                    control={form.control}
+                    name="lowStockThreshold"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Low Stock Alert Threshold</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            min="0"
+                            placeholder="5"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
+                          />
+                        </FormControl>
+                        <p className="text-sm text-muted-foreground">
+                          Get notified when stock reaches this level
+                        </p>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+
+                <FormField
+                  control={form.control}
+                  name="tags"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tags</FormLabel>
+                      <FormControl>
+                        <TagInput
+                          availableTags={availableTags}
+                          selectedTags={field.value}
+                          onTagsChangeAction={field.onChange}
+                          disabled={isPending}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <DialogFooter>
+                  <Button type="submit" disabled={isPending}>
+                    {isPending ? (
+                      <span className="inline-flex items-center gap-2">
+                        <Spinner />
+                        Saving...
+                      </span>
+                    ) : (
+                      "Save product"
+                    )}
+                  </Button>
+                </DialogFooter>
+              </form>
+            </Form>
+          )}
         </ScrollArea>
       </DialogContent>
     </Dialog>

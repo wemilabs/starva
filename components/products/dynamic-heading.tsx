@@ -30,7 +30,7 @@ export function DynamicHeading({
     : {
         title: "All",
         description:
-          "Discover a wide range of diverse kind of products from our local partners",
+          "Discover a wide range of products and services from our local partners",
       };
 
   let heading = `Browse ${headingInfo.title}`;

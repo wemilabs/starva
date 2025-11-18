@@ -27,7 +27,10 @@ export function ExtractedRegisterBusinessDialog() {
             Register a new business to get started.
           </DialogDescription>
         </DialogHeader>
-        <RegisterBusinessForm onSuccess={() => setDialogOpen(false)} />
+        <RegisterBusinessForm
+          onSuccess={() => setDialogOpen(false)}
+          onCloseDialog={() => setDialogOpen(false)}
+        />
       </DialogContent>
     </Dialog>
   );

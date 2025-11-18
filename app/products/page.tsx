@@ -96,7 +96,7 @@ export async function generateMetadata({
   // Build dynamic title based on filters
   let title = "Browse Products";
   let description =
-    "Discover a wide range of meals, fast-foods, and drinks from our local partners";
+    "Discover a wide range of products and services from our local partners";
 
   if (search) {
     title = `Search results for "${search}"`;

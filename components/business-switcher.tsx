@@ -207,6 +207,7 @@ export function BusinessSwitcher() {
                           </DialogHeader>
                           <RegisterBusinessForm
                             onSuccess={() => setDialogOpen(false)}
+                            onCloseDialog={() => setDialogOpen(false)}
                           />
                         </DialogContent>
                       </Dialog>

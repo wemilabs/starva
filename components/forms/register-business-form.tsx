@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 import { ChevronDownIcon, LogIn } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -21,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { organization, useSession } from "@/lib/auth-client";
 import { COUNTRIES } from "@/lib/constants";
 import { slugify } from "@/lib/utils";
+import { checkOrganizationLimit } from "@/server/subscription";
 import { Card, CardContent } from "../ui/card";
 import { Checkbox } from "../ui/checkbox";
 import { Spinner } from "../ui/spinner";
@@ -62,12 +64,30 @@ const formSchema = z
 
 interface RegisterBusinessFormProps {
   onSuccess?: () => void;
+  onCloseDialog?: () => void;
 }
 
-export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
+export function RegisterBusinessForm({
+  onSuccess,
+  onCloseDialog,
+}: RegisterBusinessFormProps) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const { data: session } = useSession();
+  const ownerId = session?.user?.id;
+
+  const handleUpgradeClick = () => {
+    onCloseDialog?.();
+    router.push("/pricing");
+  };
+
+  const { data: orgLimit, isLoading } = useQuery({
+    queryKey: ["orgLimit", ownerId],
+    queryFn: () =>
+      ownerId ? checkOrganizationLimit(ownerId) : Promise.resolve(null),
+    enabled: !!ownerId,
+    gcTime: 0,
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -82,7 +102,6 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
       phoneNumberForPayments: "",
     },
   });
-  const ownerId = session?.user?.id;
 
   const watchedName = form.watch("name");
   const paymentPhoneSameAsContact = form.watch("paymentPhoneSameAsContact");
@@ -137,9 +156,61 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
     });
   }
 
+  if (isLoading) {
+    return (
+      <Card className="border border-dashed bg-sidebar">
+        <CardContent className="flex flex-col items-center justify-center gap-2 py-8">
+          <Spinner />
+          <p className="text-sm text-muted-foreground font-mono tracking-tighter">
+            Checking your business limits...
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Form {...form}>
-      {ownerId ? (
+      {!ownerId ? (
+        <Card className="border border-dashed bg-sidebar">
+          <CardContent className="flex flex-col gap-2">
+            <p className="text-sm text-muted-foreground text-center font-mono tracking-tighter">
+              First, you need to sign in to register your business
+            </p>
+            <Button
+              asChild
+              className="w-full bg-primary text-primary-foreground"
+            >
+              <Link href="/sign-in" className="flex items-center gap-2">
+                <LogIn />
+                <span>Sign in</span>
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : !orgLimit?.canCreate ? (
+        <Card className="border border-dashed bg-sidebar">
+          <CardContent className="flex flex-col gap-4 py-6">
+            <div className="text-center space-y-2">
+              <h3 className="font-medium">Business Limit Reached</h3>
+              <p className="text-xs text-muted-foreground font-mono tracking-tighter">
+                You've reached your limit of {orgLimit?.maxOrgs} businesses on
+                the {orgLimit?.planName} plan.
+              </p>
+              <p className="text-xs text-muted-foreground font-mono tracking-tighter">
+                Current businesses: {orgLimit?.currentOrgs}/{orgLimit?.maxOrgs}
+              </p>
+            </div>
+            <Button
+              onClick={handleUpgradeClick}
+              className="w-full"
+              variant="outline"
+            >
+              <span>Upgrade Plan</span>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : (
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <FormField
             control={form.control}
@@ -313,23 +384,6 @@ export function RegisterBusinessForm({ onSuccess }: RegisterBusinessFormProps) {
             )}
           </Button>
         </form>
-      ) : (
-        <Card className="border border-dashed bg-sidebar">
-          <CardContent className="flex flex-col gap-2">
-            <p className="text-sm text-muted-foreground text-center font-mono tracking-tighter">
-              First, you need to sign in to register your business
-            </p>
-            <Button
-              asChild
-              className="w-full bg-primary text-primary-foreground"
-            >
-              <Link href="/sign-in" className="flex items-center gap-2">
-                <LogIn />
-                <span>Sign in</span>
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
       )}
     </Form>
   );

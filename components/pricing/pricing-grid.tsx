@@ -35,6 +35,14 @@ export function PricingGrid({ plans }: PricingGridProps) {
       return;
     }
 
+    // Don't allow selecting free plan if user already has any subscription
+    if (planName === "Free" && currentPlanName) {
+      toast.info(
+        "You already have a subscription. Use the account settings to downgrade."
+      );
+      return;
+    }
+
     setLoadingPlan(planName);
 
     try {
@@ -43,9 +51,14 @@ export function PricingGrid({ plans }: PricingGridProps) {
         toast.success(`Successfully switched to ${planName} plan!`);
       } else {
         await createSubscription(session.user.id, planName);
-        toast.success(
-          `Welcome to ${planName} plan! Your 14-day free trial has started.`
-        );
+        const plan = plans.find((p) => p.name === planName);
+        if (plan?.price === 0) {
+          toast.success(`Welcome to ${planName} plan! Get started right away.`);
+        } else {
+          toast.success(
+            `Welcome to ${planName} plan! Your 14-day free trial has started.`
+          );
+        }
       }
       refetch();
     } catch (error) {

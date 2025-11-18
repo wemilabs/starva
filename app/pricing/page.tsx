@@ -6,7 +6,7 @@ import { PRICING_PLANS } from "@/lib/constants";
 export const metadata: Metadata = {
   title: "Pricing Plans - Starva",
   description:
-    "Choose the plan that best fits your needs. All plans include a 14-day free trial.",
+    "Start free for students & side hustlers. Upgrade as your business grows.",
 };
 
 async function PricingHeader() {
@@ -19,8 +19,7 @@ async function PricingHeader() {
         Simple, Transparent Pricing
       </h1>
       <p className="text-muted-foreground text-sm md:text-base max-w-2xl mx-auto font-mono tracking-tighter">
-        Choose the plan that best fits your needs, all of them including a
-        14-day free trial.
+        Generously free to start. Paid plans include 14-day trials.
       </p>
     </div>
   );

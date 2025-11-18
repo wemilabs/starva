@@ -27,17 +27,27 @@ export async function getUserSubscription(userId: string) {
 }
 
 export async function createSubscription(userId: string, planName: string) {
-  const trialEndsAt = new Date();
-  trialEndsAt.setDate(trialEndsAt.getDate() + 14);
+  const plan = PRICING_PLANS.find((p) => p.name === planName);
+  if (!plan) {
+    throw new Error(`Invalid plan name: ${planName}`);
+  }
+
+  const trialEndsAt = plan.price === 0 ? null : new Date();
+  if (trialEndsAt) {
+    trialEndsAt.setDate(trialEndsAt.getDate() + 14);
+  }
 
   const [newSubscription] = await db
     .insert(subscription)
     .values({
       userId,
       planName,
-      status: "trial",
+      status: plan.price === 0 ? "active" : "trial",
       trialEndsAt,
       startDate: new Date(),
+      orderLimit: plan.orderLimit,
+      maxOrgs: plan.maxOrgs,
+      maxProductsPerOrg: plan.maxProductsPerOrg,
     })
     .returning();
 
@@ -48,6 +58,10 @@ export async function createSubscription(userId: string, planName: string) {
 
 export async function updateSubscription(userId: string, planName: string) {
   const existingSubscription = await getUserSubscription(userId);
+  const plan = PRICING_PLANS.find((p) => p.name === planName);
+  if (!plan) {
+    throw new Error(`Invalid plan name: ${planName}`);
+  }
 
   if (!existingSubscription) {
     return createSubscription(userId, planName);
@@ -57,6 +71,9 @@ export async function updateSubscription(userId: string, planName: string) {
     .update(subscription)
     .set({
       planName,
+      orderLimit: plan.orderLimit,
+      maxOrgs: plan.maxOrgs,
+      maxProductsPerOrg: plan.maxProductsPerOrg,
       updatedAt: new Date(),
     })
     .where(eq(subscription.userId, userId))
@@ -123,18 +140,123 @@ export async function checkOrganizationLimit(userId: string) {
 
   const plan = userSub.plan;
   const maxOrgs =
-    plan?.name === "Starter"
-      ? 1
+    plan?.name === "Free"
+      ? 2
       : plan?.name === "Growth"
-      ? 3
-      : plan?.name === "Pro"
       ? 10
-      : -1;
+      : plan?.name === "Pro"
+      ? -1
+      : 0;
 
   return {
     canCreate: maxOrgs === -1 || totalOrgs < maxOrgs,
     maxOrgs: maxOrgs === -1 ? "Unlimited" : maxOrgs,
     currentOrgs: totalOrgs,
+    planName: plan?.name || null,
+  };
+}
+
+export async function checkProductLimit(organizationId: string) {
+  const orgOwner = await db.query.member.findFirst({
+    where: (member, { eq }) => eq(member.organizationId, organizationId),
+    with: {
+      user: true,
+    },
+  });
+
+  if (!orgOwner) {
+    return {
+      canCreate: false,
+      maxProducts: 0,
+      currentProducts: 0,
+      planName: null,
+    };
+  }
+
+  const userSub = await getUserSubscription(orgOwner.userId);
+
+  if (
+    !userSub ||
+    userSub.status === "cancelled" ||
+    userSub.status === "expired"
+  ) {
+    return {
+      canCreate: false,
+      maxProducts: 0,
+      currentProducts: 0,
+      planName: null,
+    };
+  }
+
+  const plan = userSub.plan;
+  const maxProductsPerOrg = plan?.maxProductsPerOrg || 0;
+
+  const currentProducts = await db.query.product.findMany({
+    where: (product, { eq }) => eq(product.organizationId, organizationId),
+  });
+
+  const totalProducts = currentProducts.length;
+
+  return {
+    canCreate: maxProductsPerOrg === null || totalProducts < maxProductsPerOrg,
+    maxProducts: maxProductsPerOrg === null ? "Unlimited" : maxProductsPerOrg,
+    currentProducts: totalProducts,
+    planName: plan?.name || null,
+  };
+}
+
+export async function checkOrderLimit(organizationId: string) {
+  const orgOwner = await db.query.member.findFirst({
+    where: (member, { eq }) => eq(member.organizationId, organizationId),
+    with: {
+      user: true,
+    },
+  });
+
+  if (!orgOwner) {
+    return {
+      canCreate: false,
+      maxOrders: 0,
+      currentOrders: 0,
+      planName: null,
+    };
+  }
+
+  const userSub = await getUserSubscription(orgOwner.userId);
+
+  if (
+    !userSub ||
+    userSub.status === "cancelled" ||
+    userSub.status === "expired"
+  ) {
+    return {
+      canCreate: false,
+      maxOrders: 0,
+      currentOrders: 0,
+      planName: null,
+    };
+  }
+
+  const plan = userSub.plan;
+  const maxOrders = plan?.orderLimit || 0;
+
+  // Get current month's order usage for this organization
+  const currentMonth = new Date().toISOString().slice(0, 7);
+
+  const orderUsage = await db.query.orderUsageTracking.findFirst({
+    where: (tracking, { eq, and }) =>
+      and(
+        eq(tracking.organizationId, organizationId),
+        eq(tracking.monthYear, currentMonth)
+      ),
+  });
+
+  const currentOrders = orderUsage?.orderCount || 0;
+
+  return {
+    canCreate: maxOrders === null || currentOrders < maxOrders,
+    maxOrders: maxOrders === null ? "Unlimited" : maxOrders,
+    currentOrders,
     planName: plan?.name || null,
   };
 }

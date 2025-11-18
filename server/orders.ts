@@ -10,6 +10,7 @@ import { orderItem, order as orderTable, user } from "@/db/schema";
 import { ORDER_STATUS_VALUES } from "@/lib/constants";
 import { formatPriceInRWF } from "@/lib/utils";
 import { updateStock } from "./inventory";
+import { checkOrderLimit } from "./subscription";
 
 const orderItemSchema = z.object({
   productId: z.string().min(1),
@@ -57,6 +58,27 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
 
     const organizationId = organizationIds[0];
     const organization = products[0].organization;
+
+    // Check order limit - find the organization owner (merchant)
+    const orgOwner = await db.query.member.findFirst({
+      where: (member, { eq }) => eq(member.organizationId, organizationId),
+      with: {
+        user: true,
+      },
+    });
+
+    if (!orgOwner) {
+      return { ok: false, error: "Organization owner not found" };
+    }
+
+    // Check if merchant has reached their order limit
+    const orderLimit = await checkOrderLimit(organizationId);
+    if (!orderLimit.canCreate) {
+      return {
+        ok: false,
+        error: `Merchant has reached their monthly order limit of ${orderLimit.maxOrders}. Please try again next month or contact the merchant.`,
+      };
+    }
 
     let totalPrice = 0;
     const orderItems = items.map((item) => {

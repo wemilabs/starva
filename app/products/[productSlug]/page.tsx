@@ -156,13 +156,13 @@ export async function generateMetadata({
   const product = await getProductBySlug(productSlug);
   if (!product) {
     return {
-      title: "Product Not Found - Starva",
+      title: "Product Not Found - Starva.shop",
       description: "The requested product could not be found.",
     };
   }
 
   const resolvedSlug = product.slug ?? productSlug;
-  const title = `${product.name} - Starva`;
+  const title = `${product.name} - Starva.shop`;
   const description = `${product.name}${
     product.description ? ` - ${product.description}` : ""
   }. Price: ${formatPriceInRWF(product.price)}. Available from ${
@@ -182,7 +182,7 @@ export async function generateMetadata({
       url: FALLBACK_PRODUCT_IMG_URL,
       width: 1200,
       height: 630,
-      alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+      alt: "Starva.shop app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
     });
   }
 
@@ -199,7 +199,7 @@ export async function generateMetadata({
       url: productUrl,
       type: "website",
       images,
-      siteName: "Starva",
+      siteName: "Starva.shop",
     },
     twitter: {
       card: "summary_large_image",

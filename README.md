@@ -1,14 +1,15 @@
-# Starva
+# Starva.shop
 
 <p align="center">
-  <img src="https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dacuUyMdwvZO8oJpYyFEwgT69CVIdltrHUQc7" alt="Starva Banner" />
+  <img src="https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dacuUyMdwvZO8oJpYyFEwgT69CVIdltrHUQc7" alt="Starva.shop Banner" />
 </p>
 
-A modern, multi-tenant food ordering platform built with Next.js. Starva enables local businesses to showcase their products and manage orders while providing customers with a seamless ordering experience.
+A modern, multi-tenant food ordering platform built with Next.js. Starva.shop enables local businesses to showcase their products and manage orders while providing customers with a seamless ordering experience.
 
 ## Features
 
 ### For Businesses
+
 - **Multi-organization support** - Manage multiple businesses from a single account
 - **Product management** - Create, update, and organize products with images, descriptions, and pricing
 - **Order management** - Track orders through their complete lifecycle (pending → confirmed → preparing → ready → delivered)
@@ -17,6 +18,7 @@ A modern, multi-tenant food ordering platform built with Next.js. Starva enables
 - **Inventory tracking** - Manage stock status (in stock, out of stock, archived)
 
 ### For Customers
+
 - **Browse businesses** - Discover and explore different businesses and their products
 - **Product catalog** - Filter and search through products with tags
 - **Shopping cart** - Add multiple items and place orders
@@ -48,32 +50,38 @@ A modern, multi-tenant food ordering platform built with Next.js. Starva enables
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone <repository-url>
-cd starva
+cd Starva.shop
 ```
 
 2. Install dependencies:
+
 ```bash
 pnpm install
 ```
 
 3. Set up environment variables:
+
 ```bash
 cp .env.example .env
 ```
 
 Fill in the required environment variables:
+
 - Database connection string
 - Better Auth / Google credentials
 - UploadThing API keys
 
 4. Run database migrations:
+
 ```bash
 pnpm db-push
 ```
 
 5. Start the development server:
+
 ```bash
 pnpm dev
 ```
@@ -124,22 +132,22 @@ erDiagram
     USER ||--o{ MEMBER : has
     USER ||--o{ ORDER : places
     USER ||--o{ PRODUCT_LIKE : creates
-    
+
     ORGANIZATION ||--o{ MEMBER : has
     ORGANIZATION ||--o{ INVITATION : sends
     ORGANIZATION ||--o{ PRODUCT : owns
     ORGANIZATION ||--o{ TAG : creates
     ORGANIZATION ||--o{ ORDER : receives
     ORGANIZATION ||--o| SESSION : "active in"
-    
+
     PRODUCT ||--o{ PRODUCT_TAG : has
     PRODUCT ||--o{ ORDER_ITEM : "included in"
     PRODUCT ||--o{ PRODUCT_LIKE : receives
-    
+
     TAG ||--o{ PRODUCT_TAG : "tagged in"
-    
+
     ORDER ||--o{ ORDER_ITEM : contains
-    
+
     USER {
         string id PK
         string name
@@ -148,7 +156,7 @@ erDiagram
         string image
         timestamp createdAt
     }
-    
+
     ORGANIZATION {
         string id PK
         string name
@@ -156,7 +164,7 @@ erDiagram
         string logo
         timestamp createdAt
     }
-    
+
     MEMBER {
         string id PK
         string organizationId FK
@@ -164,7 +172,7 @@ erDiagram
         enum role
         timestamp createdAt
     }
-    
+
     PRODUCT {
         string id PK
         string name
@@ -175,7 +183,7 @@ erDiagram
         integer likesCount
         timestamp createdAt
     }
-    
+
     ORDER {
         string id PK
         integer orderNumber
@@ -185,7 +193,7 @@ erDiagram
         decimal totalPrice
         timestamp createdAt
     }
-    
+
     ORDER_ITEM {
         string id PK
         string orderId FK
@@ -194,20 +202,20 @@ erDiagram
         decimal priceAtOrder
         decimal subtotal
     }
-    
+
     TAG {
         string id PK
         string name
         string slug UK
         string organizationId FK
     }
-    
+
     PRODUCT_TAG {
         string id PK
         string productId FK
         string tagId FK
     }
-    
+
     PRODUCT_LIKE {
         string id PK
         string productId FK
@@ -219,6 +227,7 @@ erDiagram
 ## Key Workflows
 
 ### Order Lifecycle
+
 1. **Pending** - Order placed by customer
 2. **Confirmed** - Business confirms the order
 3. **Preparing** - Order is being prepared
@@ -227,7 +236,9 @@ erDiagram
 6. **Cancelled** - Order cancelled (by customer or business)
 
 ### Multi-tenant Architecture
+
 Each organization operates independently with:
+
 - Separate product catalogs
 - Independent order management
 - Team member management with roles (owner, admin, member)
@@ -255,4 +266,3 @@ MIT
 - [ ] Multiple languages, currencies
 - [ ] Payment gateways
 - [ ] Delivery methods
-

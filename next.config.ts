@@ -2,9 +2,6 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
-  devIndicators: {
-    position: "top-left",
-  },
   experimental: {
     turbopackFileSystemCacheForDev: true,
     typedEnv: true,

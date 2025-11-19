@@ -12,7 +12,7 @@ import {
 import { NOTFOUND_PAGE_IMG_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "404 Not Found | Starva",
+  title: "404 Not Found | Starva.shop",
   description: "The page you're looking for doesn't exist.",
 };
 

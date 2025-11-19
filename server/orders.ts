@@ -188,7 +188,7 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       `*Quick Actions:*\n` +
       `✅ *Confirm:* ${confirmUrl}\n` +
       `❌ *Reject:* ${rejectUrl}\n\n` +
-      "_*Powered by Starva*_";
+      "_*Powered by Starva.shop*_";
 
     const whatsappUrl = `https://wa.me/${whatsappPhone.replace(
       /[^0-9]/g,
@@ -452,4 +452,135 @@ export async function markOrderAsDelivered(
     console.error("Mark order as delivered error:", error);
     return { ok: false, error: "Failed to mark order as delivered" };
   }
+}
+
+export async function getOrganizationAnalyticsOverview(
+  organizationId: string,
+  days: number = 28
+) {
+  const now = new Date();
+  const startDate = new Date(now);
+  startDate.setDate(startDate.getDate() - (days - 1));
+
+  // Get organization to determine timezone
+  const organization = await db.query.organization.findFirst({
+    where: (org, { eq }) => eq(org.id, organizationId),
+    columns: {
+      metadata: true,
+    },
+  });
+
+  const orgTimezone = organization?.metadata
+    ? typeof organization.metadata === "string"
+      ? JSON.parse(organization.metadata).timezone
+      : (organization.metadata as Record<string, unknown>).timezone
+    : "Africa/Kigali";
+
+  const orders = await db.query.order.findMany({
+    where: (order, { and, eq, gte }) =>
+      and(
+        eq(order.organizationId, organizationId),
+        gte(order.createdAt, startDate)
+      ),
+    columns: {
+      id: true,
+      createdAt: true,
+      totalPrice: true,
+    },
+  });
+
+  const byDay: Record<string, number> = {};
+  const byWeek: Record<string, number> = {};
+  const byHour: Record<string, number> = {};
+
+  for (const o of orders) {
+    const d = new Date(o.createdAt);
+
+    // Use organization's timezone for day names
+    const dayKey = d.toLocaleDateString("en-US", {
+      weekday: "short",
+      timeZone: orgTimezone,
+    });
+    byDay[dayKey] = (byDay[dayKey] || 0) + 1;
+
+    // Week aggregation
+    const weekOfMonth = Math.floor((d.getDate() - 1) / 7) + 1;
+    const wKey = `Week ${weekOfMonth}`;
+    const revenue = Number(o.totalPrice ?? 0);
+    byWeek[wKey] = (byWeek[wKey] || 0) + revenue;
+
+    // Hour aggregation for peak time analysis
+    const hour = d.getHours();
+    byHour[hour] = (byHour[hour] || 0) + 1;
+  }
+
+  const weekdayOrder = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+  const freeSeries = weekdayOrder.map((day) => ({
+    day,
+    orders: byDay[day] || 0,
+  }));
+
+  const weekLabels = ["Week 1", "Week 2", "Week 3", "Week 4"];
+  const growthSeries = weekLabels.map((label) => ({
+    label,
+    revenue: byWeek[label] || 0,
+  }));
+
+  // Find peak hour
+  const peakHour = Object.entries(byHour).reduce(
+    (a, b) => (byHour[a[0]] > byHour[b[0]] ? a : b),
+    ["0", 0]
+  );
+
+  // Calculate basic metrics
+  const totalOrders = orders.length;
+  const totalRevenue = orders.reduce(
+    (sum, order) => sum + Number(order.totalPrice ?? 0),
+    0
+  );
+  const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+  // Pro analytics: Product performance (top products by revenue)
+  const orderItems = await db.query.orderItem.findMany({
+    where: (item, { eq, inArray }) => {
+      const orderIds = orders.map((o) => o.id);
+      return orderIds.length > 0
+        ? inArray(item.orderId, orderIds)
+        : eq(item.orderId, ""); // No orders
+    },
+    with: {
+      product: {
+        columns: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  const productRevenue: Record<string, number> = {};
+  for (const item of orderItems) {
+    const productName = item.product?.name || "Unknown";
+    const revenue = Number(item.subtotal ?? 0);
+    productRevenue[productName] = (productRevenue[productName] || 0) + revenue;
+  }
+
+  const topProducts = Object.entries(productRevenue)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([label, revenue]) => ({ label, revenue }));
+
+  return {
+    freeSeries,
+    growthSeries,
+    proSeries: topProducts.length > 0 ? topProducts : growthSeries,
+    metrics: {
+      totalOrders,
+      totalRevenue,
+      averageOrderValue,
+      peakHour: parseInt(peakHour[0], 10),
+      peakHourOrders: peakHour[1],
+      timezone: orgTimezone,
+    },
+  };
 }

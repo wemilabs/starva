@@ -4,7 +4,7 @@ import { PricingGrid } from "@/components/pricing/pricing-grid";
 import { PRICING_PLANS } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Pricing Plans - Starva",
+  title: "Pricing Plans - Starva.shop",
   description:
     "Start free for students & side hustlers. Upgrade as your business grows.",
 };
@@ -30,7 +30,7 @@ async function PricingFooter() {
   cacheLife("weeks");
 
   return (
-    <div className="mt-16 text-center space-y-4 py-8 border-t">
+    <div className="mt-16 text-center space-y-4 pt-8 max-w-7xl mx-auto border-t">
       <h2 className="text-2xl font-medium">Need a custom solution?</h2>
       <p className="text-muted-foreground text-sm md:text-base max-w-xl mx-auto font-mono tracking-tighter">
         We offer tailored enterprise solutions with custom features, dedicated

@@ -132,6 +132,9 @@ export function RegisterBusinessForm({
           ? phoneForNotifications
           : `${values.countryCodeForPayments} ${values.phoneNumberForPayments}`;
 
+        const browserTimezone =
+          Intl.DateTimeFormat().resolvedOptions().timeZone;
+
         await organization.create({
           name: values.name,
           slug: values.slug,
@@ -139,6 +142,7 @@ export function RegisterBusinessForm({
             description: values.description,
             phoneForNotifications,
             phoneForPayments,
+            timezone: browserTimezone ?? "Africa/Kigali",
           },
         });
         toast.success("Success", {

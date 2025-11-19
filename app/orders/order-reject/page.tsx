@@ -4,7 +4,7 @@ import { OrderConfirmationLoader } from "@/components/orders/order-confirmation-
 import { RejectOrderContent } from "./reject-order-content";
 
 export const metadata: Metadata = {
-  title: "Reject Order | Starva",
+  title: "Reject Order | Starva.shop",
   description:
     "Review and reject an order if you cannot fulfill it. Secure order management for local businesses.",
   robots: {

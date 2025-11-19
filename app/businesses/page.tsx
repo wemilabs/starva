@@ -71,9 +71,9 @@ async function BusinessesList() {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const title = "Businesses - Starva";
+  const title = "Businesses - Starva.shop";
   const description =
-    "Manage your businesses with Starva. Update products, track orders, and grow your business with powerful management tools.";
+    "Manage your businesses with Starva.shop. Update products, track orders, and grow your business with powerful management tools.";
 
   const businessesUrl = `${
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
@@ -92,10 +92,10 @@ export async function generateMetadata(): Promise<Metadata> {
           url: GENERAL_BRANDING_IMG_URL,
           width: 1200,
           height: 630,
-          alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+          alt: "Starva.shop app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
         },
       ],
-      siteName: "Starva",
+      siteName: "Starva.shop",
     },
     twitter: {
       card: "summary_large_image",

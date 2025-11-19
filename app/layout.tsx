@@ -27,11 +27,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "The Right Place for Local Commerce - Starva",
+  title: "The Right Place for Local Commerce - Starva.shop",
   description: "Search. Shop. Smile.",
-  metadataBase: new URL("https://starva.vercel.app/"),
+  metadataBase: new URL("https://starva.shop/"),
   keywords: [
     "starva",
+    "Starva.shop",
     "business",
     "customer",
     "meeting",
@@ -60,22 +61,22 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://starva.vercel.app/",
-    title: "The Right Place for Local Commerce - Starva",
+    url: "https://starva.shop/",
+    title: "The Right Place for Local Commerce - Starva.shop",
     description: "Search. Shop. Smile.",
-    siteName: "Starva",
+    siteName: "Starva.shop",
     images: [
       {
         url: GENERAL_BRANDING_IMG_URL,
         width: 1200,
         height: 630,
-        alt: "Starva app - Search. Shop. Smile.",
+        alt: "Starva.shop - Search. Shop. Smile.",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "The Right Place for Local Commerce - Starva",
+    title: "The Right Place for Local Commerce - Starva.shop",
     description: "Search. Shop. Smile.",
     images: [GENERAL_BRANDING_IMG_URL],
     creator: "@DorianTho5",

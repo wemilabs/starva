@@ -284,7 +284,7 @@ export async function generateMetadata({
   const order = await getOrderById(orderId);
   if (!order) {
     return {
-      title: "Order Not Found - Starva",
+      title: "Order Not Found - Starva.shop",
       description: "The requested order could not be found.",
     };
   }
@@ -305,7 +305,7 @@ export async function generateMetadata({
   const firstItem = order.orderItems[0];
   const hasMultipleItems = order.orderItems.length > 1;
 
-  const title = `Order #${orderNumber} - Starva`;
+  const title = `Order #${orderNumber} - Starva.shop`;
   const description = hasMultipleItems
     ? `Order #${orderNumber} with ${totalItems} items. Total: ${formatPriceInRWF(
         order.totalPrice
@@ -329,7 +329,7 @@ export async function generateMetadata({
       url: GENERAL_BRANDING_IMG_URL,
       width: 1200,
       height: 630,
-      alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+      alt: "Starva.shop app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
     });
   }
 
@@ -346,7 +346,7 @@ export async function generateMetadata({
       url: orderUrl,
       type: "website",
       images,
-      siteName: "Starva",
+      siteName: "Starva.shop",
     },
     twitter: {
       card: "summary_large_image",

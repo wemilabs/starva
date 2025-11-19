@@ -51,8 +51,6 @@ export async function createSubscription(userId: string, planName: string) {
     })
     .returning();
 
-  revalidatePath("/pricing");
-
   return newSubscription;
 }
 

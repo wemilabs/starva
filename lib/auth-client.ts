@@ -21,4 +21,5 @@ export const {
   useActiveOrganization,
   useListOrganizations,
   organization,
+  deleteUser,
 } = authClient;

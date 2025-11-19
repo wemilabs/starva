@@ -27,7 +27,11 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { signOut } from "@/lib/auth-client";
+import {
+  signOut,
+  useActiveOrganization,
+  useListOrganizations,
+} from "@/lib/auth-client";
 import { getInitials } from "@/lib/utils";
 import {
   AlertDialog,
@@ -63,12 +67,17 @@ export function NavUser({
 
   const router = useRouter();
 
+  const { refetch: refetchActiveBusiness } = useActiveOrganization();
+  const { refetch: refetchBusinesses } = useListOrganizations();
+
   const handleSignOut = () => {
     startSigningOutTransition(async () => {
       try {
         await signOut({
           fetchOptions: {
-            onSuccess: () => {
+            onSuccess: async () => {
+              refetchActiveBusiness();
+              refetchBusinesses();
               toast.success("Success", {
                 description: "Successfully signed out. See you soon!",
               });

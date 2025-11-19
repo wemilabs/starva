@@ -452,3 +452,13 @@ export const HERO_IMAGES = [
     alt: "Cars and automotive",
   },
 ] as const;
+
+export const TIMEZONES = [
+  { value: "Africa/Kigali", label: "Rwanda Time (Kigali, GMT+2)" },
+  { value: "Africa/Nairobi", label: "East Africa Time (Nairobi, GMT+3)" },
+  { value: "Africa/Lagos", label: "West Africa Time (Lagos, GMT+1)" },
+  { value: "Europe/London", label: "Greenwich Mean Time (London, GMT+0)" },
+  { value: "Europe/Paris", label: "Central European Time (Paris, GMT+1)" },
+  { value: "America/New_York", label: "Eastern Time (New York, GMT-5)" },
+  { value: "America/Los_Angeles", label: "Pacific Time (LA, GMT-8)" },
+] as const;

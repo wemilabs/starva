@@ -243,7 +243,7 @@ export async function generateMetadata({
   const merchant = await getBusinessBySlug(merchantSlug);
   if (!merchant) {
     return {
-      title: "Merchant Not Found - Starva",
+      title: "Merchant Not Found - Starva.shop",
       description: "The requested merchant could not be found.",
     };
   }
@@ -267,7 +267,7 @@ export async function generateMetadata({
       url: GENERAL_BRANDING_IMG_URL,
       width: 1200,
       height: 630,
-      alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+      alt: "Starva.shop app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
     });
   }
 
@@ -276,19 +276,19 @@ export async function generateMetadata({
   }/merchants/${resolvedSlug}`;
 
   return {
-    title: `${merchant.name} - Starva`,
+    title: `${merchant.name} - Starva.shop`,
     description,
     openGraph: {
-      title: `${merchant.name} - Starva`,
+      title: `${merchant.name} - Starva.shop`,
       description,
       url: merchantUrl,
       type: "website",
       images,
-      siteName: "Starva",
+      siteName: "Starva.shop",
     },
     twitter: {
       card: "summary_large_image",
-      title: `${merchant.name} - Starva`,
+      title: `${merchant.name} - Starva.shop`,
       description,
       images: images.map((img) => img.url),
     },

@@ -7,6 +7,7 @@ import { headers } from "next/headers";
 import { db } from "@/db/drizzle";
 import { organization } from "@/db/schema";
 import { auth } from "@/lib/auth";
+import { getCurrentMetadata } from "./organizations";
 
 export async function updateBusinessLogo(
   businessId: string,
@@ -52,18 +53,7 @@ export async function updateBusinessDescription(
 ) {
   const trimmedDescription = description.trim();
 
-  const currentBusiness = await auth.api.getFullOrganization({
-    query: {
-      organizationId: businessId,
-    },
-    headers: await headers(),
-  });
-
-  const currentMetadata = currentBusiness?.metadata
-    ? typeof currentBusiness.metadata === "string"
-      ? JSON.parse(currentBusiness.metadata)
-      : currentBusiness.metadata
-    : {};
+  const currentMetadata = await getCurrentMetadata(businessId);
 
   await auth.api.updateOrganization({
     body: {
@@ -89,18 +79,7 @@ export async function updateBusinessPhone(
 ) {
   const trimmedPhone = phoneNumber.trim();
 
-  const currentBusiness = await auth.api.getFullOrganization({
-    query: {
-      organizationId: businessId,
-    },
-    headers: await headers(),
-  });
-
-  const currentMetadata = currentBusiness?.metadata
-    ? typeof currentBusiness.metadata === "string"
-      ? JSON.parse(currentBusiness.metadata)
-      : currentBusiness.metadata
-    : {};
+  const currentMetadata = await getCurrentMetadata(businessId);
 
   const updatedMetadata = {
     ...currentMetadata,
@@ -127,18 +106,7 @@ export async function updateBusinessTimetable(
   businessSlug: string,
   timetable: Record<string, { open: string; close: string; closed: boolean }>
 ) {
-  const currentBusiness = await auth.api.getFullOrganization({
-    query: {
-      organizationId: businessId,
-    },
-    headers: await headers(),
-  });
-
-  const currentMetadata = currentBusiness?.metadata
-    ? typeof currentBusiness.metadata === "string"
-      ? JSON.parse(currentBusiness.metadata)
-      : currentBusiness.metadata
-    : {};
+  const currentMetadata = await getCurrentMetadata(businessId);
 
   await auth.api.updateOrganization({
     body: {
@@ -154,6 +122,53 @@ export async function updateBusinessTimetable(
   });
 
   revalidatePath(`/businesses/${businessSlug}`);
+}
+
+export async function updateBusinessTimezone(
+  _prevState: { success: boolean; error: string | null },
+  formData: FormData
+) {
+  const businessId = formData.get("businessId") as string;
+  const businessSlug = formData.get("businessSlug") as string;
+  const timezone = formData.get("timezone") as string;
+
+  if (!businessId || !businessSlug || !timezone) {
+    return {
+      success: false,
+      error: "Missing required fields",
+    };
+  }
+
+  try {
+    const currentMetadata = await getCurrentMetadata(businessId);
+
+    await auth.api.updateOrganization({
+      body: {
+        organizationId: businessId,
+        data: {
+          metadata: {
+            ...currentMetadata,
+            timezone,
+          },
+        },
+      },
+      headers: await headers(),
+    });
+
+    revalidatePath(`/businesses/${businessSlug}`);
+    revalidatePath("/settings");
+
+    return {
+      success: true,
+      error: null,
+    };
+  } catch (error) {
+    console.error("Failed to update timezone:", error);
+    return {
+      success: false,
+      error: "Failed to update timezone. Please try again.",
+    };
+  }
 }
 
 export async function deleteBusiness(businessId: string) {

@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const title = "Transaction History - Starva";
+  const title = "Transaction History - Starva.shop";
   const description =
     "Track all your payments and financial activity in one place. Detailed transaction records and payment history for complete financial oversight.";
 
@@ -24,10 +24,10 @@ export async function generateMetadata(): Promise<Metadata> {
           url: GENERAL_BRANDING_IMG_URL,
           width: 1200,
           height: 630,
-          alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+          alt: "Starva.shop app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
         },
       ],
-      siteName: "Starva",
+      siteName: "Starva.shop",
     },
     twitter: {
       card: "summary_large_image",
@@ -41,7 +41,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function TransactionsPage() {
+export default async function TransactionsPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-6">
       <div className="max-w-md w-full text-center space-y-6">

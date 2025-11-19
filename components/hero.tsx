@@ -54,7 +54,7 @@ export async function Hero() {
             className="mx-auto mt-2 max-w-2xl text-sm sm:text-base text-pretty text-primary-foreground font-mono tracking-tighter"
           >
             Say goodbye to WhatsApp madness. Whether discovering local gems or
-            expanding your business reach, Starva makes it simple.
+            expanding your business reach, Starva.shop makes it simple.
           </TextEffect>
 
           <AnimatedGroup

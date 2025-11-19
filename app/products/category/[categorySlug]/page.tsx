@@ -98,7 +98,7 @@ export async function generateMetadata({
 
   if (!isValidCategorySlug(categorySlug))
     return {
-      title: "Category Not Found - Starva",
+      title: "Category Not Found - Starva.shop",
       description: "The requested product category does not exist.",
     };
 
@@ -183,27 +183,27 @@ export async function generateMetadata({
       url: GENERAL_BRANDING_IMG_URL,
       width: 1200,
       height: 630,
-      alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+      alt: "Starva.shop - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
     });
   }
 
   // Build keywords for SEO
   const keywords = [
     ...(categoryContent?.keywords || []),
-    "starva",
+    "Starva.shop",
     "local businesses",
     "online shopping",
     categoryLabel.toLowerCase(),
   ];
 
   return {
-    title: `${title} - Starva`,
+    title: `${title} - Starva.shop`,
     description,
     keywords,
     openGraph: {
-      title: `${title} - Starva`,
+      title: `${title} - Starva.shop`,
       description,
-      url: `https://starva.vercel.app/products/category/${categorySlug}${
+      url: `https://Starva.shop.shop/products/category/${categorySlug}${
         search ? `?search=${encodeURIComponent(search)}` : ""
       }${
         parsedTags && parsedTags.length > 0
@@ -219,7 +219,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: `${title} - Starva`,
+      title: `${title} - Starva.shop`,
       description,
       images: images.map((img) => img.url),
     },

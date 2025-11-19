@@ -5,7 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Inventory Management - Starva",
+  title: "Inventory Management - Starva.shop",
   description:
     "Track and manage your product stock levels, monitor inventory changes, adjust stock quantities, and receive low stock alerts in real-time.",
   keywords: [
@@ -24,23 +24,23 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://starva.vercel.app/inventory",
-    title: "Inventory Management - Starva",
+    url: "https://starva.shop/inventory",
+    title: "Inventory Management - Starva.shop",
     description:
       "Track and manage your product stock levels, monitor inventory changes, and receive low stock alerts in real-time.",
-    siteName: "Starva",
+    siteName: "Starva.shop",
     images: [
       {
         url: GENERAL_BRANDING_IMG_URL,
         width: 1200,
         height: 630,
-        alt: "Starva Inventory Management - Track your stock levels",
+        alt: "Starva.shop Inventory Management - Track your stock levels",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Inventory Management - Starva",
+    title: "Inventory Management - Starva.shop",
     description:
       "Track and manage your product stock levels with real-time inventory monitoring.",
     images: [GENERAL_BRANDING_IMG_URL],

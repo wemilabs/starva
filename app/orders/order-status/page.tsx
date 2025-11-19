@@ -4,7 +4,7 @@ import { OrderConfirmationLoader } from "@/components/orders/order-confirmation-
 import { StatusContent } from "./status-content";
 
 export const metadata: Metadata = {
-  title: "Order Status | Starva",
+  title: "Order Status | Starva.shop",
   description:
     "Check the status of your order confirmation or rejection. Real-time order tracking for local businesses.",
   robots: {

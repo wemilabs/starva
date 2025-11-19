@@ -44,7 +44,7 @@ async function MerchantsList() {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const title = "Merchants - Starva";
+  const title = "Merchants - Starva.shop";
   const description =
     "Discover and order from local merchants. Browse menus, find your favorite restaurants, and order delicious food from local kitchens.";
 
@@ -65,10 +65,10 @@ export async function generateMetadata(): Promise<Metadata> {
           url: GENERAL_BRANDING_IMG_URL,
           width: 1200,
           height: 630,
-          alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+          alt: "Starva.shop app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
         },
       ],
-      siteName: "Starva",
+      siteName: "Starva.shop",
     },
     twitter: {
       card: "summary_large_image",

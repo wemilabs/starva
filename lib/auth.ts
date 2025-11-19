@@ -2,10 +2,24 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { lastLoginMethod, organization } from "better-auth/plugins";
+import { eq, inArray } from "drizzle-orm";
+
 // import { Resend } from "resend";
 
+// import { redirect } from "next/navigation";
 import { db } from "@/db/drizzle";
-import { schema } from "@/db/schema";
+import {
+  inventoryHistory,
+  member,
+  order,
+  orderItem,
+  orderUsageTracking,
+  organization as organizationTable,
+  product,
+  productLike,
+  productTag,
+  schema,
+} from "@/db/schema";
 // import VerificationEmail from "@/components/emails/verification-email";
 // import PasswordResetEmail from "@/components/emails/password-reset-email";
 
@@ -69,4 +83,83 @@ export const auth = betterAuth({
     nextCookies(),
     organization(),
   ],
+  user: {
+    deleteUser: {
+      enabled: true,
+      beforeDelete: async (user) => {
+        const userOrgs = await db.query.member.findMany({
+          where: eq(member.userId, user.id),
+          with: {
+            organization: true,
+          },
+        });
+
+        // Delete all organizations and their data
+        for (const userOrg of userOrgs) {
+          const orgId = userOrg.organization.id;
+
+          // Get all order and product IDs for bulk deletion
+          const orders = await db.query.order.findMany({
+            where: eq(order.organizationId, orgId),
+            columns: { id: true },
+          });
+          const orderIds = orders.map((o) => o.id);
+
+          const products = await db.query.product.findMany({
+            where: eq(product.organizationId, orgId),
+            columns: { id: true },
+          });
+          const productIds = products.map((p) => p.id);
+
+          // Delete order items
+          if (orderIds.length > 0) {
+            await db
+              .delete(orderItem)
+              .where(inArray(orderItem.orderId, orderIds));
+          }
+
+          // Delete orders
+          await db.delete(order).where(eq(order.organizationId, orgId));
+
+          // Delete product-related data
+          if (productIds.length > 0) {
+            await db
+              .delete(productTag)
+              .where(inArray(productTag.productId, productIds));
+            await db
+              .delete(productLike)
+              .where(inArray(productLike.productId, productIds));
+          }
+
+          // Delete inventory history
+          await db
+            .delete(inventoryHistory)
+            .where(eq(inventoryHistory.organizationId, orgId));
+
+          // Delete products
+          await db.delete(product).where(eq(product.organizationId, orgId));
+
+          // Delete order usage tracking
+          await db
+            .delete(orderUsageTracking)
+            .where(eq(orderUsageTracking.organizationId, orgId));
+
+          // Delete organization
+          await db
+            .delete(organizationTable)
+            .where(eq(organizationTable.id, orgId));
+        }
+
+        console.log(
+          `Deleted ${userOrgs.length} organization${
+            userOrgs.length <= 1 ? "" : "s"
+          } for user ${user.id}`
+        );
+      },
+      afterDelete: async (user) => {
+        console.log(`User "${user.name}" deleted successfully`);
+        // redirect("/");
+      },
+    },
+  },
 });

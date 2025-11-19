@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -52,7 +53,6 @@ import { getAllTags } from "@/server/tags";
 import { getAllUnitFormats } from "@/server/unit-formats";
 import { Card, CardContent } from "../ui/card";
 import { Spinner } from "../ui/spinner";
-import { useRouter } from "next/navigation";
 
 const schema = z.object({
   name: z.string().min(2, "Name is too short").max(100),

@@ -83,9 +83,9 @@ async function OrdersContent() {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const title = "Orders - Starva";
+  const title = "Orders - Starva.shop";
   const description =
-    "Manage and track all your orders in one place. View order status, track deliveries, and manage customer orders with Starva's powerful order management system.";
+    "Manage and track all your orders in one place. View order status, track deliveries, and manage customer orders with Starva.shop's powerful order management system.";
 
   const ordersUrl = `${
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
@@ -104,10 +104,10 @@ export async function generateMetadata(): Promise<Metadata> {
           url: GENERAL_BRANDING_IMG_URL,
           width: 1200,
           height: 630,
-          alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+          alt: "Starva.shop app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
         },
       ],
-      siteName: "Starva",
+      siteName: "Starva.shop",
     },
     twitter: {
       card: "summary_large_image",

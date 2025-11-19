@@ -159,7 +159,7 @@ export async function generateMetadata({
   const business = await getBusinessBySlug(businessSlug);
   if (!business) {
     return {
-      title: "Business Not Found - Starva",
+      title: "Business Not Found - Starva.shop",
       description: "The requested business could not be found.",
     };
   }
@@ -168,7 +168,7 @@ export async function generateMetadata({
   const metadata = business.metadata ? JSON.parse(business.metadata) : {};
   const description =
     metadata.description ??
-    `Manage your business ${business.name}. Update products, track orders, and grow your business with Starva.`;
+    `Manage your business ${business.name}. Update products, track orders, and grow your business with Starva.shop.`;
 
   const images = [];
   if (business.logo) {
@@ -183,7 +183,7 @@ export async function generateMetadata({
       url: GENERAL_BRANDING_IMG_URL,
       width: 1200,
       height: 630,
-      alt: "Starva app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+      alt: "Starva.shop app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
     });
   }
 
@@ -192,19 +192,19 @@ export async function generateMetadata({
   }/businesses/${resolvedSlug}`;
 
   return {
-    title: `${business.name} - Starva`,
+    title: `${business.name} - Starva.shop`,
     description,
     openGraph: {
-      title: `${business.name} - Starva`,
+      title: `${business.name} - Starva.shop`,
       description,
       url: businessUrl,
       type: "website",
       images,
-      siteName: "Starva",
+      siteName: "Starva.shop",
     },
     twitter: {
       card: "summary_large_image",
-      title: `${business.name} - Starva`,
+      title: `${business.name} - Starva.shop`,
       description,
       images: images.map((img) => img.url),
     },

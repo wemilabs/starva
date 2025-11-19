@@ -4,7 +4,7 @@ import { OrderConfirmationLoader } from "@/components/orders/order-confirmation-
 import { ConfirmOrderContent } from "./confirm-order-content";
 
 export const metadata: Metadata = {
-  title: "Confirm Order | Starva",
+  title: "Confirm Order | Starva.shop",
   description:
     "Review and confirm your order to start preparation. Fast and secure order confirmation for local businesses.",
   robots: {

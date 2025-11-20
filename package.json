@@ -1,6 +1,6 @@
 {
   "name": "starva",
-  "version": "0.94.19",
+  "version": "0.98.2",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",

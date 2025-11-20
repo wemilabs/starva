@@ -321,6 +321,10 @@ export const product = pgTable(
     imageUrl: text("image_url"),
     brand: text("brand"),
     specifications: text("specifications"),
+    isLandlord: boolean("is_landlord").default(false).notNull(),
+    visitFees: decimal("visit_fees", { precision: 10, scale: 2 }).default(
+      "0.00"
+    ),
     createdAt: timestamp("created_at")
       .$defaultFn(() => /* @__PURE__ */ new Date())
       .notNull(),

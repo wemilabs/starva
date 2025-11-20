@@ -113,6 +113,11 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
                 slug: product.slug,
                 price: product.price,
                 imageUrl: product.imageUrl,
+                category: product.category,
+                isLandlord: product.isLandlord,
+                visitFees: product.visitFees || "0",
+                currentStock: product.currentStock,
+                inventoryEnabled: product.inventoryEnabled,
               }}
             />
 

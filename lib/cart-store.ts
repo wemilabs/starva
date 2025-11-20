@@ -7,6 +7,9 @@ export interface CartItem {
   productSlug: string;
   productImage: string | null;
   price: string;
+  category: string;
+  isLandlord: boolean;
+  visitFees: string;
   quantity: number;
   currentStock?: number;
   inventoryEnabled?: boolean;
@@ -25,7 +28,13 @@ type CartActions = {
   clearCart: () => void;
   getTotalPrice: () => number;
   getItemCount: () => number;
-  refreshStock: (stocks: Array<{ id: string; currentStock: number; inventoryEnabled: boolean }>) => void;
+  refreshStock: (
+    stocks: Array<{
+      id: string;
+      currentStock: number;
+      inventoryEnabled: boolean;
+    }>
+  ) => void;
 };
 
 type CartStore = CartState & CartActions;
@@ -37,16 +46,18 @@ export const useCartStore = create<CartStore>()(
 
       addItem: (item) => {
         const existingItem = get().items.find(
-          (i) => i.productId === item.productId,
+          (i) => i.productId === item.productId
         );
 
         // Check stock availability if inventory is enabled
         if (item.inventoryEnabled && item.currentStock !== undefined) {
           const currentCartQty = existingItem?.quantity || 0;
           const requestedQty = (item.quantity || 1) + currentCartQty;
-          
+
           if (requestedQty > item.currentStock) {
-            throw new Error(`Only ${item.currentStock} units available in stock`);
+            throw new Error(
+              `Only ${item.currentStock} units available in stock`
+            );
           }
         }
 
@@ -54,13 +65,14 @@ export const useCartStore = create<CartStore>()(
           set({
             items: get().items.map((i) =>
               i.productId === item.productId
-                ? { 
-                    ...i, 
+                ? {
+                    ...i,
                     quantity: i.quantity + (item.quantity || 1),
                     currentStock: item.currentStock ?? i.currentStock,
-                    inventoryEnabled: item.inventoryEnabled ?? i.inventoryEnabled,
+                    inventoryEnabled:
+                      item.inventoryEnabled ?? i.inventoryEnabled,
                   }
-                : i,
+                : i
             ),
           });
         } else {
@@ -86,13 +98,15 @@ export const useCartStore = create<CartStore>()(
         const item = get().items.find((i) => i.productId === productId);
         if (item?.inventoryEnabled && item.currentStock !== undefined) {
           if (quantity > item.currentStock) {
-            throw new Error(`Only ${item.currentStock} units available in stock`);
+            throw new Error(
+              `Only ${item.currentStock} units available in stock`
+            );
           }
         }
 
         set({
           items: get().items.map((i) =>
-            i.productId === productId ? { ...i, quantity } : i,
+            i.productId === productId ? { ...i, quantity } : i
           ),
         });
       },
@@ -100,7 +114,7 @@ export const useCartStore = create<CartStore>()(
       updateNotes: (productId, notes) => {
         set({
           items: get().items.map((i) =>
-            i.productId === productId ? { ...i, notes } : i,
+            i.productId === productId ? { ...i, notes } : i
           ),
         });
       },
@@ -110,10 +124,25 @@ export const useCartStore = create<CartStore>()(
       },
 
       getTotalPrice: () => {
-        return get().items.reduce(
-          (total, item) => total + Number(item.price) * item.quantity,
-          0,
-        );
+        return get().items.reduce((total, item) => {
+          let itemPrice = 0;
+
+          // Real estate pricing logic
+          if (item.category === "real-estate") {
+            if (!item.isLandlord) {
+              // Intermediary case: Only charge visit fees
+              itemPrice = Number(item.visitFees) * item.quantity;
+            } else {
+              // Landlord case: No platform payment
+              itemPrice = 0;
+            }
+          } else {
+            // Normal products: Full price
+            itemPrice = Number(item.price) * item.quantity;
+          }
+
+          return total + itemPrice;
+        }, 0);
       },
 
       getItemCount: () => {
@@ -129,7 +158,7 @@ export const useCartStore = create<CartStore>()(
               const newQuantity = stockInfo.inventoryEnabled
                 ? Math.min(item.quantity, stockInfo.currentStock)
                 : item.quantity;
-              
+
               return {
                 ...item,
                 currentStock: stockInfo.currentStock,
@@ -146,6 +175,6 @@ export const useCartStore = create<CartStore>()(
       name: "cart-storage",
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ items: state.items }),
-    },
-  ),
+    }
+  )
 );

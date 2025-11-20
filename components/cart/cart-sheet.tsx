@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/sheet";
 import { Textarea } from "@/components/ui/textarea";
 import { useSession } from "@/lib/auth-client";
-import { useCartStore } from "@/lib/cart-store";
+import { type CartItem, useCartStore } from "@/lib/cart-store";
 import { FALLBACK_PRODUCT_IMG_URL } from "@/lib/constants";
 import { formatPriceInRWF } from "@/lib/utils";
 import { getProductsStock } from "@/server/inventory";
@@ -50,6 +50,26 @@ export function CartSheet() {
 
   const totalPrice = getTotalPrice();
   const itemCount = getItemCount();
+
+  // Helper function to display item pricing
+  const getItemDisplayPrice = (item: CartItem) => {
+    if (item.category === "real-estate") {
+      if (!item.isLandlord) {
+        return `${formatPriceInRWF(Number(item.price))} + ${formatPriceInRWF(
+          Number(item.visitFees)
+        )} fees`;
+      } else {
+        return formatPriceInRWF(Number(item.price));
+      }
+    }
+    return formatPriceInRWF(Number(item.price));
+  };
+
+  // Helper function to get item subtotal for display
+  const getItemDisplaySubtotal = (item: CartItem) => {
+    // Always show the property price subtotal for display
+    return formatPriceInRWF(Number(item.price) * item.quantity);
+  };
 
   const handleQuantityChange = (productId: string, newQuantity: number) => {
     try {
@@ -190,7 +210,7 @@ export function CartSheet() {
           </div>
         ) : (
           <>
-            <ScrollArea className="flex-1 h-[calc(100%-24rem)] px-4">
+            <ScrollArea className="flex-1 h-[calc(100%-29rem)] px-4">
               <div className="space-y-4">
                 {items.map((item) => (
                   <div
@@ -222,8 +242,15 @@ export function CartSheet() {
                           </Button>
                         </div>
                         <p className="text-sm text-muted-foreground font-mono tracking-tighter">
-                          {formatPriceInRWF(item.price)}
+                          {getItemDisplayPrice(item)}
                         </p>
+                        {item.category === "real-estate" && (
+                          <p className="text-xs text-blue-600">
+                            {item.isLandlord
+                              ? "Contact landlord directly for payment"
+                              : "Visit fees will be charged at checkout"}
+                          </p>
+                        )}
                         {item.inventoryEnabled &&
                           item.currentStock !== undefined && (
                             <p className="text-xs text-muted-foreground">
@@ -252,7 +279,8 @@ export function CartSheet() {
                           type="number"
                           min={1}
                           max={
-                            item.inventoryEnabled && item.currentStock !== undefined
+                            item.inventoryEnabled &&
+                            item.currentStock !== undefined
                               ? item.currentStock
                               : undefined
                           }
@@ -280,7 +308,7 @@ export function CartSheet() {
                         </Button>
                       </div>
                       <p className="ml-auto text-sm font-medium font-mono tracking-tighter">
-                        {formatPriceInRWF(Number(item.price) * item.quantity)}
+                        {getItemDisplaySubtotal(item)}
                       </p>
                     </div>
 
@@ -329,8 +357,36 @@ export function CartSheet() {
                   className="text-sm"
                 />
               </div>
+
+              {/* Real estate pricing explanation */}
+              {items.some((item) => item.category === "real-estate") && (
+                <div className="rounded-lg bg-blue-50 border border-blue-200 p-3 text-xs">
+                  <p className="font-medium text-blue-900 mb-1">
+                    Real Estate Pricing:
+                  </p>
+                  <ul className="space-y-1 text-blue-800">
+                    {items.some(
+                      (item) =>
+                        item.category === "real-estate" && !item.isLandlord
+                    ) && (
+                      <li>
+                        • Visit arrangement fees will be charged at checkout
+                      </li>
+                    )}
+                    {items.some(
+                      (item) =>
+                        item.category === "real-estate" && item.isLandlord
+                    ) && (
+                      <li>
+                        • Property payments are handled directly with landlords
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              )}
+
               <div className="flex items-center justify-between rounded-lg bg-muted px-3 py-2">
-                <span className="font-medium">Total</span>
+                <span className="font-medium">Total to Pay</span>
                 <span className="text-lg font-medium font-mono tracking-tighter">
                   {formatPriceInRWF(totalPrice)}
                 </span>

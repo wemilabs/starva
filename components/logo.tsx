@@ -5,8 +5,15 @@ export const Logo = () => {
         s.
       </div>
 
-      <div className="font-semibold group-data-[collapsible=icon]:hidden">
-        starva
+      <div className="group-data-[collapsible=icon]:hidden">
+        <div className="flex flex-col">
+          <span className="font-semibold leading-tight bg-linear-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+            starva
+          </span>
+          <span className="text-xs font-mono tracking-tighter text-muted-foreground leading-tight">
+            .shop
+          </span>
+        </div>
       </div>
     </span>
   );

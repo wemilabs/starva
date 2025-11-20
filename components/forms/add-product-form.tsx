@@ -54,25 +54,41 @@ import { getAllUnitFormats } from "@/server/unit-formats";
 import { Card, CardContent } from "../ui/card";
 import { Spinner } from "../ui/spinner";
 
-const schema = z.object({
-  name: z.string().min(2, "Name is too short").max(100),
-  slug: z.string().min(2, "Slug required").max(120),
-  price: z
-    .string()
-    .min(1, "Price is required")
-    .refine(
-      (v) => !Number.isNaN(Number(v)) && Number(v) >= 0,
-      "Enter a valid price"
-    ),
-  imageUrl: z.url("Provide a valid URL").optional().or(z.literal("")),
-  description: z.string().max(500).optional().or(z.literal("")),
-  category: z.string().min(1, "Category is required"),
-  specifications: z.string().optional().or(z.literal("")),
-  tags: z.array(z.custom<Tag>()),
-  unitFormat: z.custom<UnitFormat>().nullable(),
-  inventoryEnabled: z.boolean(),
-  lowStockThreshold: z.number().min(0),
-});
+const schema = z
+  .object({
+    name: z.string().min(2, "Name is too short").max(100),
+    slug: z.string().min(2, "Slug required").max(120),
+    price: z
+      .string()
+      .min(1, "Price is required")
+      .refine(
+        (v) => !Number.isNaN(Number(v)) && Number(v) >= 0,
+        "Enter a valid price"
+      ),
+    imageUrl: z.url("Provide a valid URL").optional().or(z.literal("")),
+    description: z.string().max(500).optional().or(z.literal("")),
+    category: z.string().min(1, "Category is required"),
+    specifications: z.string().optional().or(z.literal("")),
+    isLandlord: z.boolean(),
+    visitFees: z.string(),
+    tags: z.array(z.custom<Tag>()),
+    unitFormat: z.custom<UnitFormat>().nullable(),
+    inventoryEnabled: z.boolean(),
+    lowStockThreshold: z.number().min(0),
+  })
+  .refine(
+    (data) => {
+      // If real estate and not landlord, visit fees are required
+      if (data.category === "real-estate" && !data.isLandlord) {
+        return data.visitFees && Number(data.visitFees) > 0;
+      }
+      return true;
+    },
+    {
+      message: "Visit fees are required for intermediaries",
+      path: ["visitFees"],
+    }
+  );
 
 export function AddProductForm({
   organizationId,
@@ -111,6 +127,8 @@ export function AddProductForm({
       description: "",
       category: "",
       specifications: "",
+      isLandlord: false,
+      visitFees: "0",
       tags: [],
       unitFormat: null,
       inventoryEnabled: false,
@@ -155,6 +173,8 @@ export function AddProductForm({
           imageUrl: values.imageUrl || "",
           category: values.category,
           specifications: values.specifications ?? "",
+          isLandlord: values.isLandlord,
+          visitFees: values.visitFees,
           tagNames: values.tags.map((t) => t.name),
           unitFormatId: values.unitFormat?.id || null,
           unitFormatName: values.unitFormat?.name,
@@ -346,6 +366,55 @@ export function AddProductForm({
                     </FormItem>
                   )}
                 />
+
+                {form.watch("category") === "real-estate" && (
+                  <>
+                    <FormField
+                      control={form.control}
+                      name="isLandlord"
+                      render={({ field }) => (
+                        <FormItem className="flex items-start space-x-3 space-y-0 rounded-md border p-4">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <div className="space-y-1 leading-none">
+                            <FormLabel>Are you the landlord?</FormLabel>
+                            <p className="text-sm text-muted-foreground">
+                              Check if you are the property owner
+                            </p>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+
+                    {!form.watch("isLandlord") && (
+                      <FormField
+                        control={form.control}
+                        name="visitFees"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Visit Fees (RF)</FormLabel>
+                            <FormControl>
+                              <Input
+                                inputMode="decimal"
+                                placeholder="5000"
+                                className="placeholder:text-sm"
+                                {...field}
+                              />
+                            </FormControl>
+                            <p className="text-sm text-muted-foreground">
+                              Fees customers pay for property visits
+                            </p>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    )}
+                  </>
+                )}
 
                 <FormField
                   control={form.control}

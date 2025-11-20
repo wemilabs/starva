@@ -14,6 +14,9 @@ interface AddToCartButtonProps {
     slug: string;
     price: string;
     imageUrl: string | null;
+    category: string;
+    isLandlord: boolean;
+    visitFees: string;
     currentStock?: number | null;
     inventoryEnabled?: boolean;
   };
@@ -41,6 +44,9 @@ export function AddToCartButton({
         productSlug: product.slug,
         productImage: product.imageUrl,
         price: product.price,
+        category: product.category,
+        isLandlord: product.isLandlord,
+        visitFees: product.visitFees,
         currentStock: product.currentStock ?? undefined,
         inventoryEnabled: product.inventoryEnabled,
         quantity,

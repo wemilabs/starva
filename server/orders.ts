@@ -85,17 +85,51 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       const productData = products.find((p) => p.id === item.productId);
       if (!productData) throw new Error("Product not found");
 
-      const priceAtOrder = productData.price;
-      const subtotal = Number(priceAtOrder) * item.quantity;
-      totalPrice += subtotal;
+      let priceAtOrder = productData.price;
+      let subtotal = 0;
+
+      // Real estate pricing logic
+      if (productData.category === "real-estate") {
+        if (!productData.isLandlord) {
+          // Intermediary case: Only charge visit fees in total
+          priceAtOrder = productData.price; // Show property price for context
+          subtotal = 0; // But don't charge property price
+        } else {
+          // Landlord case: No platform payment at all
+          priceAtOrder = productData.price; // Show property price for context
+          subtotal = 0; // But don't charge anything
+        }
+      } else {
+        // Normal products: Full price
+        subtotal = Number(priceAtOrder) * item.quantity;
+      }
+
+      // Only add to total if it's not a real estate product
+      if (productData.category !== "real-estate") {
+        totalPrice += subtotal;
+      } else if (!productData.isLandlord) {
+        // Add visit fees for intermediaries
+        totalPrice += Number(productData.visitFees || "0") * item.quantity;
+      }
+
+      // For display, show property price for real estate, but actual charge is different
+      const displaySubtotal =
+        productData.category === "real-estate"
+          ? Number(priceAtOrder) * item.quantity
+          : subtotal;
 
       return {
         productId: item.productId,
         productName: productData.name,
         quantity: item.quantity,
         priceAtOrder,
-        subtotal: subtotal.toFixed(2),
+        subtotal: displaySubtotal.toFixed(2),
         notes: item.notes,
+        productData: {
+          category: productData.category,
+          isLandlord: productData.isLandlord,
+          visitFees: productData.visitFees,
+        },
       };
     });
 
@@ -156,14 +190,29 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
     }
 
     const itemsList = orderItems
-      .map(
-        (item) =>
+      .map((item) => {
+        let message =
           `📦 *${item.productName}*\n` +
           `   Qty: ${item.quantity} × ${formatPriceInRWF(
             Number(item.priceAtOrder)
-          )} = ${formatPriceInRWF(Number(item.subtotal))}` +
-          (item.notes ? `\n   _Note: ${item.notes}_` : "")
-      )
+          )} = ${formatPriceInRWF(Number(item.subtotal))}`;
+
+        // Add visit fees line for real estate intermediaries
+        if (
+          item.productData?.category === "real-estate" &&
+          !item.productData?.isLandlord
+        ) {
+          message += `\n   💰 Visit fees: ${formatPriceInRWF(
+            Number(item.productData.visitFees)
+          )}`;
+        }
+
+        if (item.notes) {
+          message += `\n   _Note: ${item.notes}_`;
+        }
+
+        return message;
+      })
       .join("\n\n");
 
     const orgTimezone = metadata.timezone ?? "Africa/Kigali";

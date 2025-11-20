@@ -150,7 +150,7 @@ export const PRICING_PLANS: PricingPlan[] = [
       "50 products per business",
       "500 orders/month",
       "Customer analytics",
-      "Peak time insights",
+      "Limited AI-powered insights",
       "30-day data retention",
       "Priority support",
     ],
@@ -170,8 +170,8 @@ export const PRICING_PLANS: PricingPlan[] = [
       "Unlimited businesses",
       "Unlimited products",
       "2,000 orders/month",
-      "AI-powered insights",
       "Advanced analytics",
+      "Full capacity AI-powered management",
       "90-day data retention",
       "24/7 priority support",
       "API access for integrations",
@@ -181,7 +181,6 @@ export const PRICING_PLANS: PricingPlan[] = [
   },
 ] as const;
 
-// Category-specific content configuration
 export const CATEGORY_CONTENT: Record<
   string,
   {

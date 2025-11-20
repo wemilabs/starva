@@ -48,6 +48,8 @@ export function ProductCard({
   status,
   category,
   specifications,
+  isLandlord,
+  visitFees,
   organization,
   createdAt,
   updatedAt,
@@ -63,9 +65,24 @@ export function ProductCard({
   className,
 }: ProductCardProps) {
   const priceNumber = Number(price) ?? 0;
+  const visitFeesNumber = Number(visitFees) ?? 0;
 
   const orgName = organization?.name ?? null;
   const orgLogo = organization?.logo ?? null;
+
+  // Real estate pricing display logic
+  const displayPrice = () => {
+    if (category === "real-estate") {
+      if (isLandlord) {
+        return formatPriceInRWF(priceNumber);
+      } else {
+        return `${formatPriceInRWF(priceNumber)} (${formatPriceInRWF(
+          visitFeesNumber
+        )} fees)`;
+      }
+    }
+    return formatPriceInRWF(priceNumber);
+  };
 
   const customCardContent = (
     <>
@@ -79,27 +96,29 @@ export function ProductCard({
         />
         <div className="absolute inset-0 bg-linear-to-tr from-black/70 via-black/30 to-transparent" />
       </div>
-      <div className="absolute inset-0 flex flex-col p-6 text-white">
+      <div className="absolute inset-0 flex flex-col p-4 text-white gap-y-3 md:gap-y-4">
         <div className="flex items-center justify-between gap-2 mb-auto">
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium tracking-wide text-white/90 ring-1 ring-white/15 backdrop-blur-sm">
+          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-2 py-1 text-xs font-medium tracking-wide text-white/90 ring-1 ring-white/15 backdrop-blur-sm shrink-0">
             <span
-              className={cn("size-1.5 rounded-full", {
+              className={cn("size-1.5 rounded-full shrink-0", {
                 "bg-blue-500": status === "draft",
                 "bg-green-600": status === "in_stock",
                 "bg-red-600": status === "out_of_stock",
                 "bg-gray-600": status === "archived",
               })}
             />
-            {removeUnderscoreAndCapitalizeOnlyTheFirstChar(status)}
+            <span className="truncate max-w-[20ch]">
+              {removeUnderscoreAndCapitalizeOnlyTheFirstChar(status)}
+            </span>
           </div>
 
-          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium font-mono tracking-wide text-white/90 ring-1 ring-white/15 backdrop-blur-sm">
-            {formatPriceInRWF(priceNumber)}
+          <div className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-1 text-xs font-medium font-mono tracking-wide text-white/90 ring-1 ring-white/15 backdrop-blur-sm shrink-0">
+            <span className="truncate max-w-[24ch]">{displayPrice()}</span>
           </div>
         </div>
 
         <div className="flex flex-col justify-end">
-          <h3 className="text-balance text-xl font-semibold leading-tight line-clamp-1">
+          <h3 className="text-balance text-lg md:text-xl font-semibold leading-tight line-clamp-1 min-w-0 flex-1">
             {name}
           </h3>
           <Activity mode={description ? "visible" : "hidden"}>
@@ -162,7 +181,7 @@ export function ProductCard({
           </Card>
         </DialogTrigger>
         <DialogContent
-          className="flex h-[calc(100vh-12rem)] flex-col gap-0 p-0 md:flex-row border-none md:h-[calc(100vh-25rem)]"
+          className="flex h-[calc(100vh-12rem)] flex-col gap-0 p-0 md:flex-row border-none md:h-[calc(100vh-25rem)] md:max-w-3xl md:w-full lg:max-w-4xl"
           aria-describedby="product details"
         >
           <div className="relative aspect-square overflow-hidden md:aspect-auto md:w-1/2">
@@ -192,15 +211,39 @@ export function ProductCard({
               )}
             </div>
 
-            <div className="flex items-center gap-4">
-              <p className="text-3xl font-medium text-primary/90">
-                {formatPriceInRWF(priceNumber)}
-              </p>
-              {/* {priceNumber > 0 && (
-              <p className="text-sm text-muted-foreground line-through">
-                {formatPriceInRWF(priceNumber * 1.13)}
-              </p>
-            )} */}
+            <div className="flex items-center gap-4 justify-between">
+              <div className="flex flex-col">
+                <p className="text-3xl font-medium text-primary/90">
+                  {formatPriceInRWF(priceNumber)}
+                </p>
+                <Activity
+                  mode={category === "real-estate" ? "visible" : "hidden"}
+                >
+                  <p className="text-sm text-muted-foreground">
+                    {isLandlord
+                      ? "Contact landlord directly"
+                      : `Property price (paid to landlord)`}
+                  </p>
+                </Activity>
+              </div>
+              <Activity
+                mode={
+                  category === "real-estate" &&
+                  !isLandlord &&
+                  visitFeesNumber > 0
+                    ? "visible"
+                    : "hidden"
+                }
+              >
+                <div className="flex flex-col">
+                  <p className="text-lg font-medium text-blue-600">
+                    {formatPriceInRWF(visitFeesNumber)}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Visit arrangement fee
+                  </p>
+                </div>
+              </Activity>
             </div>
 
             <Activity mode={href ? "visible" : "hidden"}>
@@ -212,6 +255,9 @@ export function ProductCard({
                     slug,
                     price,
                     imageUrl,
+                    category,
+                    isLandlord,
+                    visitFees: visitFees || "0",
                     currentStock,
                     inventoryEnabled,
                   }}
@@ -246,6 +292,8 @@ export function ProductCard({
               inventoryEnabled,
               currentStock,
               lowStockThreshold,
+              isLandlord,
+              visitFees,
             }}
             organizationId={organization?.id || ""}
             businessSlug={organization?.slug || ""}

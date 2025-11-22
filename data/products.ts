@@ -23,6 +23,9 @@ const getUserLikedProductIds = async (userId: string): Promise<Set<string>> => {
 };
 
 export const getInStockProducts = cache(async () => {
+  "use cache: private";
+  cacheLife("seconds");
+
   const { success, session } = await verifySession();
 
   const products = await db.query.product.findMany({
@@ -135,6 +138,9 @@ export const getProductsPerBusinessWithoutAuth = cache(
 );
 
 export const getProductBySlug = cache(async (slug: string) => {
+  "use cache: private";
+  cacheLife("weeks");
+
   try {
     const specificProduct = await db.query.product.findFirst({
       where: eq(product.slug, slug),
@@ -284,6 +290,9 @@ async function getFilteredCachedProductsBase(filters: ProductFilters = {}) {
 
 export const getProductsByCategorySlug = cache(
   async (categorySlug: ProductCategory) => {
+    "use cache: private";
+    cacheLife("seconds");
+
     const { success, session } = await verifySession();
 
     const products = await db.query.product.findMany({
@@ -335,6 +344,9 @@ export const getProductsByCategorySlug = cache(
 
 export const getFilteredProducts = cache(
   async (filters: ProductFilters = {}) => {
+    "use cache: private";
+    cacheLife("seconds");
+
     const { success, session } = await verifySession();
 
     const products = await getFilteredCachedProductsBase(filters);
@@ -349,6 +361,9 @@ export const getFilteredProducts = cache(
 );
 
 export const getLatestProductsByCategory = cache(async () => {
+  "use cache: private";
+  cacheLife("seconds");
+
   const { success, session } = await verifySession();
 
   const products = await db.query.product.findMany({

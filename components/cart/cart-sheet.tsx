@@ -136,6 +136,14 @@ export function CartSheet() {
         return;
       }
 
+      // Show stock warnings if any
+      if (result.stockWarnings && result.stockWarnings.length > 0) {
+        toast.warning("Stock availability notice", {
+          description: result.stockWarnings.join(" "),
+          duration: 8000,
+        });
+      }
+
       if (result.whatsappUrl) {
         clearCart();
         setIsOpen(false);

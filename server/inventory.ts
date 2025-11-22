@@ -67,6 +67,14 @@ export async function updateStock(input: z.infer<typeof updateStockSchema>) {
     const previousStock = currentProduct.currentStock || 0;
     const newStock = Math.max(0, previousStock + quantityChange);
 
+    // Prevent stock from going negative for sales
+    if (changeType === "sale" && newStock < 0) {
+      return {
+        ok: false,
+        error: `Insufficient stock. Only ${previousStock} units available.`,
+      } as const;
+    }
+
     // Determine new status based on stock level
     let newStatus = currentProduct.status;
     if (currentProduct.status === "draft" && newStock > 0) {

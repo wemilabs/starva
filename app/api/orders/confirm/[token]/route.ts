@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db/drizzle";
 import { order } from "@/db/schema";
-import { updateStock } from "@/server/inventory";
+import { getProductsStock, updateStock } from "@/server/inventory";
 
 export async function GET(
   _request: NextRequest,
@@ -114,6 +114,39 @@ export async function POST(
       );
     }
 
+    // Validate stock availability before confirming order
+    const productIds = orderData.orderItems.map((item) => item.productId);
+    const stockCheck = await getProductsStock({
+      productIds,
+      organizationId: orderData.organizationId,
+    });
+
+    if (!stockCheck.ok) {
+      return NextResponse.json(
+        { success: false, error: "Failed to check product availability" },
+        { status: 500 }
+      );
+    }
+
+    // Check each item against current stock
+    for (const item of orderData.orderItems) {
+      const productStock = stockCheck.stocks.find(
+        (s) => s.id === item.productId
+      );
+      if (productStock?.inventoryEnabled) {
+        const availableStock = productStock.currentStock || 0;
+        if (item.quantity > availableStock) {
+          return NextResponse.json(
+            {
+              success: false,
+              error: `Insufficient stock for ${item.product.name}. Only ${availableStock} units available, but ${item.quantity} requested.`,
+            },
+            { status: 400 }
+          );
+        }
+      }
+    }
+
     // Update order status to confirmed
     await db
       .update(order)
@@ -127,7 +160,7 @@ export async function POST(
     // Deduct stock for confirmed items with inventory tracking
     for (const item of orderData.orderItems) {
       if (item.product.inventoryEnabled) {
-        await updateStock({
+        const stockUpdate = await updateStock({
           productId: item.productId,
           organizationId: orderData.organizationId,
           quantityChange: -item.quantity,
@@ -135,6 +168,25 @@ export async function POST(
           reason: `Order ${orderData.id} confirmed via WhatsApp link`,
           revalidateTargetPath: "/inventory",
         });
+
+        if (!stockUpdate.ok) {
+          // Rollback order status if stock deduction fails
+          await db
+            .update(order)
+            .set({
+              status: "pending",
+              updatedAt: new Date(),
+            })
+            .where(eq(order.id, orderData.id));
+
+          return NextResponse.json(
+            {
+              success: false,
+              error: `Failed to deduct stock for ${item.product.name}: ${stockUpdate.error}`,
+            },
+            { status: 400 }
+          );
+        }
       }
     }
 

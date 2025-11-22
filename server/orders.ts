@@ -9,7 +9,7 @@ import { db } from "@/db/drizzle";
 import { orderItem, order as orderTable, user } from "@/db/schema";
 import { ORDER_STATUS_VALUES } from "@/lib/constants";
 import { formatPriceInRWF } from "@/lib/utils";
-import { updateStock } from "./inventory";
+import { getProductsStock, updateStock } from "./inventory";
 import { checkOrderLimit } from "./subscription";
 
 const orderItemSchema = z.object({
@@ -78,6 +78,36 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
         ok: false,
         error: `Merchant has reached their monthly order limit of ${orderLimit.maxOrders}. Please try again next month or contact the merchant.`,
       };
+    }
+
+    // Validate stock availability for products with inventory tracking
+    const stockCheck = await getProductsStock({
+      productIds,
+      organizationId,
+    });
+
+    if (!stockCheck.ok) {
+      return { ok: false, error: "Failed to check product availability" };
+    }
+
+    // Check each item against current stock
+    const stockWarnings: string[] = [];
+    for (const item of items) {
+      const productStock = stockCheck.stocks.find(
+        (s) => s.id === item.productId
+      );
+      if (productStock?.inventoryEnabled) {
+        const availableStock = productStock.currentStock || 0;
+        if (item.quantity > availableStock) {
+          stockWarnings.push(
+            `Only ${availableStock} units available for ${
+              products.find((p) => p.id === item.productId)?.name
+            }, but ${
+              item.quantity
+            } requested. Order will be confirmed when stock is available.`
+          );
+        }
+      }
     }
 
     let totalPrice = 0;
@@ -231,6 +261,9 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       `📅 ${orderDate}\n\n` +
       `Hello! I'd like to place an order:\n\n` +
       itemsList +
+      (stockWarnings.length > 0
+        ? `\n\n⚠️ *Stock Warnings:*\n${stockWarnings.join("\n")}`
+        : "") +
       `\n\n💵 *Total: ${formatPriceInRWF(totalPrice)}*\n` +
       (notes ? `\n📝 *Order Note: ${notes}*\n` : "") +
       `\n👤 *Customer: ${userData?.name || session.user.name}*\n\n` +
@@ -250,6 +283,7 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       ok: true,
       orderId: newOrder.id,
       whatsappUrl,
+      stockWarnings: stockWarnings.length > 0 ? stockWarnings : undefined,
     };
   } catch (error) {
     console.error("Order placement error:", error);
@@ -325,10 +359,44 @@ export async function updateOrderStatus(
         },
       });
 
+      // Validate stock availability before confirming
+      const productIds = orderItems.map((item) => item.productId);
+      const stockCheck = await getProductsStock({
+        productIds,
+        organizationId: existingOrder.organizationId,
+      });
+
+      if (stockCheck.ok) {
+        // Check each item against current stock
+        for (const item of orderItems) {
+          const productStock = stockCheck.stocks.find(
+            (s) => s.id === item.productId
+          );
+          if (productStock?.inventoryEnabled) {
+            const availableStock = productStock.currentStock || 0;
+            if (item.quantity > availableStock) {
+              // Rollback order status if insufficient stock
+              await db
+                .update(orderTable)
+                .set({
+                  status: oldStatus,
+                  updatedAt: new Date(),
+                })
+                .where(eq(orderTable.id, orderId));
+
+              return {
+                ok: false,
+                error: `Insufficient stock. Only ${availableStock} units available, but ${item.quantity} requested.`,
+              };
+            }
+          }
+        }
+      }
+
       // Deduct stock for each item with inventory tracking
       for (const item of orderItems) {
         if (item.product.inventoryEnabled) {
-          await updateStock({
+          const stockUpdate = await updateStock({
             productId: item.productId,
             organizationId: existingOrder.organizationId,
             quantityChange: -item.quantity,
@@ -336,6 +404,22 @@ export async function updateOrderStatus(
             reason: `Order ${orderId} confirmed`,
             revalidateTargetPath: "/inventory",
           });
+
+          if (!stockUpdate.ok) {
+            // Rollback order status if stock deduction fails
+            await db
+              .update(orderTable)
+              .set({
+                status: oldStatus,
+                updatedAt: new Date(),
+              })
+              .where(eq(orderTable.id, orderId));
+
+            return {
+              ok: false,
+              error: `Failed to deduct stock: ${stockUpdate.error}`,
+            };
+          }
         }
       }
     }

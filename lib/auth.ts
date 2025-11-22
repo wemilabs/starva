@@ -158,7 +158,6 @@ export const auth = betterAuth({
       },
       afterDelete: async (user) => {
         console.log(`User "${user.name}" deleted successfully`);
-        // redirect("/");
       },
     },
   },

@@ -10,7 +10,7 @@ export const Logo = () => {
           <span className="font-semibold leading-tight bg-linear-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
             starva
           </span>
-          <span className="text-xs font-mono tracking-tighter text-muted-foreground leading-tight">
+          <span className="text-xs font-mono tracking-tighter text-muted-foreground">
             .shop
           </span>
         </div>

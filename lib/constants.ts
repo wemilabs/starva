@@ -139,7 +139,7 @@ export const PRICING_PLANS: PricingPlan[] = [
   {
     name: "Growth",
     description: "For growing businesses & multiple locations",
-    price: 40000,
+    price: 90,
     originalPrice: null,
     period: "month",
     orderLimit: 500,
@@ -160,7 +160,7 @@ export const PRICING_PLANS: PricingPlan[] = [
   {
     name: "Pro",
     description: "For established businesses & large operations",
-    price: 90000,
+    price: 200,
     originalPrice: null,
     period: "month",
     orderLimit: 2000,
@@ -178,6 +178,29 @@ export const PRICING_PLANS: PricingPlan[] = [
     ],
     highlighted: false,
     cta: "Start Free Trial",
+  },
+  {
+    name: "Enterprise",
+    description: "For large organizations and custom requirements",
+    price: null,
+    originalPrice: null,
+    period: "month",
+    orderLimit: null,
+    maxOrgs: null,
+    maxProductsPerOrg: null,
+    features: [
+      "Unlimited everything",
+      "Custom integrations",
+      "White-label solutions",
+      "Dedicated account manager",
+      "SLA guarantee",
+      "Custom analytics & reporting",
+      "Unlimited team members",
+      "Unlimited data retention",
+      "Priority feature requests",
+    ],
+    highlighted: false,
+    cta: "Contact Sales",
   },
 ] as const;
 

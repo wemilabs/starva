@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { cn, formatPriceInRWF } from "@/lib/utils";
+import { cn, formatPrice } from "@/lib/utils";
 import { Spinner } from "../ui/spinner";
 
 interface PricingCardProps {
@@ -82,12 +82,12 @@ export function PricingCard({
         <div className="mt-4 flex flex-col items-center gap-1">
           {originalPrice && (
             <p className="text-sm text-muted-foreground line-through">
-              {formatPriceInRWF(originalPrice)}
+              {formatPrice(originalPrice)}
             </p>
           )}
           <div className="flex items-baseline gap-1">
             <span className="text-3xl lg:text-4xl font-medium tracking-tight">
-              {price === null ? "Custom" : formatPriceInRWF(price)}
+              {price === null ? "Custom" : formatPrice(price)}
             </span>
             {price !== null && price > 0 && (
               <span className="text-muted-foreground font-mono tracking-tighter">

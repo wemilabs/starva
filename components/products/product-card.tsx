@@ -70,20 +70,6 @@ export function ProductCard({
   const orgName = organization?.name ?? null;
   const orgLogo = organization?.logo ?? null;
 
-  // Real estate pricing display logic
-  const displayPrice = () => {
-    if (category === "real-estate") {
-      if (isLandlord) {
-        return formatPriceInRWF(priceNumber);
-      } else {
-        return `${formatPriceInRWF(priceNumber)} (${formatPriceInRWF(
-          visitFeesNumber
-        )} fees)`;
-      }
-    }
-    return formatPriceInRWF(priceNumber);
-  };
-
   const customCardContent = (
     <>
       <div className="relative aspect-video">
@@ -112,8 +98,56 @@ export function ProductCard({
             </span>
           </div>
 
-          <div className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-1 text-xs font-medium font-mono tracking-wide text-white/90 ring-1 ring-white/15 backdrop-blur-sm shrink-0">
-            <span className="truncate max-w-[24ch]">{displayPrice()}</span>
+          <div className="flex items-center gap-2">
+            <div className="inline-flex items-center gap-1 rounded-full bg-white/10 px-2 py-1 text-xs font-medium font-mono tracking-wide text-white/90 ring-1 ring-white/15 backdrop-blur-sm shrink-0">
+              <span className="truncate max-w-[24ch]">
+                {formatPriceInRWF(priceNumber)}
+              </span>
+            </div>
+
+            <Activity mode={!href ? "visible" : "hidden"}>
+              {/** biome-ignore lint/a11y/noStaticElementInteractions: actually needed */}
+              {/** biome-ignore lint/a11y/useKeyWithClickEvents: actually needed */}
+              <div
+                className="flex items-center gap-1.5"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <EditProductForm
+                  product={{
+                    id,
+                    name,
+                    slug,
+                    price,
+                    imageUrl,
+                    description,
+                    status,
+                    category,
+                    likesCount,
+                    createdAt,
+                    organizationId,
+                    calories,
+                    updatedAt,
+                    specifications,
+                    brand,
+                    unitFormatId,
+                    inventoryEnabled,
+                    currentStock,
+                    lowStockThreshold,
+                    isLandlord,
+                    visitFees,
+                  }}
+                  organizationId={organization?.id || ""}
+                  businessSlug={organization?.slug || ""}
+                  className="size-6 p-0 rounded-full bg-white/40 hover:bg-white/50 text-white/90 border-white/45"
+                />
+                <DeleteProductForm
+                  productId={id}
+                  organizationId={organization?.id || ""}
+                  businessSlug={organization?.slug || ""}
+                  className="size-6 p-0 rounded-full bg-red-600/70 hover:bg-red-600/80 text-red-100 ring-1 ring-red-600/80 flex-none flex items-center justify-center"
+                />
+              </div>
+            </Activity>
           </div>
         </div>
 
@@ -158,13 +192,6 @@ export function ProductCard({
                   <span className="text-[11px]">{likesCount ?? 0}</span>
                 </div>
               )}
-              {/* <ShareDialog
-                url={`${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/products/${slug}`}
-                title={`Share ${name}`}
-                description={`Share this product with others`}
-                className="py-[17px]"
-                variant={{ variant: "ghost", size: "icon" }}
-              /> */}
             </div>
           </div>
         </div>
@@ -268,44 +295,6 @@ export function ProductCard({
           </div>
         </DialogContent>
       </Dialog>
-
-      <Activity mode={!href ? "visible" : "hidden"}>
-        <div className="absolute -bottom-2 left-0 right-0 z-10 flex items-center justify-between gap-2 px-2">
-          <EditProductForm
-            product={{
-              id,
-              name,
-              slug,
-              price,
-              imageUrl,
-              description,
-              status,
-              category,
-              likesCount,
-              createdAt,
-              organizationId,
-              calories,
-              updatedAt,
-              specifications,
-              brand,
-              unitFormatId,
-              inventoryEnabled,
-              currentStock,
-              lowStockThreshold,
-              isLandlord,
-              visitFees,
-            }}
-            organizationId={organization?.id || ""}
-            businessSlug={organization?.slug || ""}
-            className="shadow-sm hover:shadow flex-1"
-          />
-          <DeleteProductForm
-            productId={id}
-            organizationId={organization?.id || ""}
-            businessSlug={organization?.slug || ""}
-          />
-        </div>
-      </Activity>
     </div>
   );
 }

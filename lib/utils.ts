@@ -98,14 +98,24 @@ export const formatRelativeTime = (date: Date | string) => {
   return rtf.format(0, "second");
 };
 
-export const formatPriceInRWF = (price: string | number) => {
+export const formatPrice = (
+  price: string | number,
+  currency: string = "USD",
+  locale: string = "en-US"
+) => {
   const numPrice = typeof price === "string" ? parseFloat(price) : price;
-  return new Intl.NumberFormat("en-RW", {
+  return new Intl.NumberFormat(locale, {
     style: "currency",
-    currency: "RWF",
+    currency,
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(numPrice);
+};
+
+// Temporarily keep this one because of existing places
+// Will just automate it later on
+export const formatPriceInRWF = (price: string | number) => {
+  return formatPrice(price, "RWF", "en-RW");
 };
 
 export const PRODUCT_CATEGORIES = productCategory.enumValues;

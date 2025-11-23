@@ -75,7 +75,7 @@ export function PricingCard({
         <CardTitle className="text-xl md:text-2xl font-medium">
           {name}
         </CardTitle>
-        <CardDescription className="md:text-base font-mono tracking-tighter">
+        <CardDescription className="font-mono tracking-tighter line-clamp-2">
           {description}
         </CardDescription>
 
@@ -86,7 +86,7 @@ export function PricingCard({
             </p>
           )}
           <div className="flex items-baseline gap-1">
-            <span className="text-3xl lg:text-4xl font-medium tracking-tight">
+            <span className="text-3xl font-medium tracking-tight">
               {price === null ? "Custom" : formatPrice(price)}
             </span>
             {price !== null && price > 0 && (

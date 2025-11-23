@@ -70,7 +70,7 @@ export function PricingGrid({ plans }: PricingGridProps) {
   };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-8 md:gap-6 mt-14">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-8 md:gap-6 mt-14">
       {plans.map((plan) => (
         <PricingCard
           key={plan.name}

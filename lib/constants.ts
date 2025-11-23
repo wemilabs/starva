@@ -1,7 +1,7 @@
 import type { FeedbackStatus, FeedbackType } from "@/db/schema";
 
 export const GENERAL_BRANDING_IMG_URL =
-  "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6d29uSOKR1NjHfKprbQATzOds86omZkUBPnG2c";
+  "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dXqCmYCtFrDwsIL6SElt8PgWAcRu57BaQqbkj";
 export const FALLBACK_PRODUCT_IMG_URL =
   "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6d89s9BRYhvCEDrKcu2HNpfYQo7eR4FUT8wVgS";
 export const ERROR_PAGE_IMG_URL =

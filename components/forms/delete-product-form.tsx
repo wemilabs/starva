@@ -24,14 +24,18 @@ const schema = z.object({
   revalidateTargetPath: z.string().min(1),
 });
 
+import { cn } from "@/lib/utils";
+
 export function DeleteProductForm({
   productId,
   organizationId,
   businessSlug,
+  className,
 }: {
   productId: string;
   organizationId: string;
   businessSlug: string;
+  className?: string;
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isDeletingPending, startDeletingTransition] = useTransition();
@@ -68,7 +72,12 @@ export function DeleteProductForm({
 
   return (
     <AlertDialog onOpenChange={setDialogOpen} open={dialogOpen}>
-      <AlertDialogTrigger className="py-2 px-2.5 bg-destructive hover:bg-destructive/80 text-white rounded-md w-full flex-1">
+      <AlertDialogTrigger
+        className={cn(
+          "py-2 px-2.5 bg-destructive hover:bg-destructive/80 text-white rounded-md w-full flex-1",
+          className
+        )}
+      >
         <Trash2 className="size-4 mx-auto" />
       </AlertDialogTrigger>
       <AlertDialogContent>

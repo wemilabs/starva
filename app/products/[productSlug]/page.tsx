@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Suspense } from "react";
+import { Activity, Suspense } from "react";
 
 import { AddToCartButton } from "@/components/products/add-to-cart-button";
 import { ProductLikeButton } from "@/components/products/product-like-button";
@@ -44,8 +44,21 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
             {product.name}
           </h1>
 
-          <div className="text-2xl font-medium">
-            {formatPriceInRWF(product.price)}
+          <div className="text-2xl font-medium flex gap-x-2">
+            <div>{formatPriceInRWF(product.price)}</div>
+            <Activity
+              mode={
+                product.category === "real-estate" &&
+                !product.isLandlord &&
+                Number(product.visitFees) > 0
+                  ? "visible"
+                  : "hidden"
+              }
+            >
+              <div className="text-sm text-blue-600">
+                + {formatPriceInRWF(Number(product.visitFees))} visit fees
+              </div>
+            </Activity>
           </div>
 
           <div className="flex items-center gap-2">

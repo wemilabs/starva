@@ -1,9 +1,18 @@
+import { ProtectedImage } from "@/components/ui/protected-image";
+
 export const Logo = () => {
   return (
-    <span className="flex items-center gap-1 py-2 rounded-lg">
-      <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 justify-center rounded-lg text-lg font-semibold text-center">
+    <div className="flex items-center py-2 rounded-lg">
+      {/* <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 justify-center rounded-lg text-lg font-semibold text-center">
         s.
-      </div>
+      </div> */}
+      <ProtectedImage
+        src="https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6du5UdXxlTLMJtliDeN9nXqzs57GUH6RgZbryB"
+        alt="Logo"
+        width={200}
+        height={200}
+        className="size-12 object-cover -ml-2 rounded-lg"
+      />
 
       <div className="group-data-[collapsible=icon]:hidden">
         <div className="flex flex-col">
@@ -15,6 +24,6 @@ export const Logo = () => {
           </span>
         </div>
       </div>
-    </span>
+    </div>
   );
 };

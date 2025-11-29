@@ -89,13 +89,13 @@ const schema = z
 export function EditProductForm({
   product,
   organizationId,
-  businessSlug,
+  storeSlug,
   productTags = [],
   className,
 }: {
   product: Product;
   organizationId: string;
-  businessSlug: string;
+  storeSlug: string;
   productTags?: Tag[];
   className?: string;
 }) {
@@ -205,7 +205,7 @@ export function EditProductForm({
           unitFormatName: values.unitFormat?.name,
           inventoryEnabled: values.inventoryEnabled,
           lowStockThreshold: values.lowStockThreshold,
-          revalidateTargetPath: `/businesses/${businessSlug}`,
+          revalidateTargetPath: `/stores/${storeSlug}`,
         });
         toast.success("Success", {
           description: "The product has successfully been updated",

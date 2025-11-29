@@ -71,7 +71,7 @@ export const getInStockProducts = cache(async () => {
   }));
 });
 
-export const getProductsPerBusiness = cache(async (organizationId: string) => {
+export const getProductsPerStore = cache(async (organizationId: string) => {
   const { success, session } = await verifySession();
   if (!success || !session)
     return { message: "Please sign in to access this page" };
@@ -104,7 +104,7 @@ export const getProductsPerBusiness = cache(async (organizationId: string) => {
   }
 });
 
-export const getProductsPerBusinessWithoutAuth = cache(
+export const getProductsPerStoreWithoutAuth = cache(
   async (organizationId: string) => {
     "use cache";
     cacheLife("minutes");

@@ -30,8 +30,8 @@ interface DangerZoneProps {
 export function DangerZone({ userId }: DangerZoneProps) {
   const router = useRouter();
 
-  const { refetch: refetchActiveBusiness } = useActiveOrganization();
-  const { refetch: refetchBusinesses } = useListOrganizations();
+  const { refetch: refetchActiveStore } = useActiveOrganization();
+  const { refetch: refetchStores } = useListOrganizations();
 
   const [resetState, resetFormAction, isResetting] = useActionState(
     resetAllData,
@@ -66,20 +66,20 @@ export function DangerZone({ userId }: DangerZoneProps) {
           </div>
 
           <p className="text-sm text-muted-foreground font-mono tracking-tighter text-pretty">
-            Clear all data from your businesses while keeping your account. This
+            Clear all data from your stores while keeping your account. This
             will remove:
           </p>
 
           <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside font-mono tracking-tighter text-pretty">
             <li>All products and inventory</li>
             <li>Order history and analytics</li>
-            <li>Business settings and metadata</li>
+            <li>Store settings and metadata</li>
             <li>Customer data</li>
           </ul>
 
           <p className="text-sm text-orange-600 font-medium">
             Your account will remain active, but you'll need to set up your
-            businesses again.
+            stores again.
           </p>
 
           <AlertDialog
@@ -100,8 +100,8 @@ export function DangerZone({ userId }: DangerZoneProps) {
                   Reset All Data
                 </AlertDialogTitle>
                 <AlertDialogDescription className="font-mono tracking-tighter text-pretty">
-                  This will remove all your business data but keep your account
-                  active. You can set up new businesses afterward.
+                  This will remove all your store data but keep your account
+                  active. You can set up new stores afterward.
                 </AlertDialogDescription>
               </AlertDialogHeader>
 
@@ -122,8 +122,8 @@ export function DangerZone({ userId }: DangerZoneProps) {
               <form
                 action={(formData) => {
                   resetFormAction(formData);
-                  refetchActiveBusiness();
-                  refetchBusinesses();
+                  refetchActiveStore();
+                  refetchStores();
                 }}
               >
                 <input type="hidden" name="userId" value={userId} />
@@ -177,7 +177,7 @@ export function DangerZone({ userId }: DangerZoneProps) {
 
           <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside font-mono tracking-tighter text-pretty">
             <li>Your user account and profile</li>
-            <li>All businesses and organizations</li>
+            <li>All stores and organizations</li>
             <li>All products, orders, and analytics</li>
             <li>All settings and preferences</li>
           </ul>
@@ -235,8 +235,8 @@ export function DangerZone({ userId }: DangerZoneProps) {
                         await deleteUser({
                           callbackURL: "/",
                         });
-                        refetchActiveBusiness();
-                        refetchBusinesses();
+                        refetchActiveStore();
+                        refetchStores();
                         setDeleteDialogOpen(false);
                         setDeleteConfirmText("");
                         router.push("/");

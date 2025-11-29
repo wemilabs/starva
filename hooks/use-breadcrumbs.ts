@@ -9,7 +9,7 @@ const routeConfig: Record<string, (params: string[]) => Crumb[]> = {
   "/": () => [],
   "/sign-in": () => [{ label: "Sign In" }],
   "/dashboard": () => [{ label: "Dashboard" }],
-  "/businesses": () => [{ label: "Businesses" }],
+  "/stores": () => [{ label: "Stores" }],
   "/merchants": () => [{ label: "Merchants" }],
   "/products": () => [{ label: "Products" }],
   "/orders": () => [{ label: "Orders" }],
@@ -31,13 +31,13 @@ const routeConfig: Record<string, (params: string[]) => Crumb[]> = {
   ],
 
   // Dynamic routes
-  "/businesses/[businessSlug]": (params) => [
-    { label: "Businesses", href: "/businesses" },
-    { label: formatBusinessName(params[0]) },
+  "/stores/[storeSlug]": (params) => [
+    { label: "Stores", href: "/stores" },
+    { label: formatStoreName(params[0]) },
   ],
   "/merchants/[merchantSlug]": (params) => [
     { label: "Merchants", href: "/merchants" },
-    { label: formatBusinessName(params[0]) },
+    { label: formatStoreName(params[0]) },
   ],
   "/products/[productSlug]": (params) => [
     { label: "Products", href: "/products" },
@@ -50,7 +50,7 @@ const routeConfig: Record<string, (params: string[]) => Crumb[]> = {
 };
 
 // Helper functions to format dynamic segments
-function formatBusinessName(slug: string): string {
+function formatStoreName(slug: string): string {
   return slug
     .split("-")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))

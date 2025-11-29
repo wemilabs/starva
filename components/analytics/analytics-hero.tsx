@@ -27,12 +27,12 @@ export const AnalyticsHero = ({ planName }: { planName: string }) => {
             </div>
 
             <h1 className="text-3xl font-medium tracking-tight">
-              Understand how your business is performing
+              Understand how your store is performing
             </h1>
 
             <p className="text-muted-foreground text-sm leading-relaxed font-mono tracking-tighter">
               Free plan gives you a quick pulse. Growth and Pro unlock deeper
-              trends, breakdowns, and multi-business insights.
+              trends, breakdowns, and multi-store insights.
             </p>
           </div>
         </div>

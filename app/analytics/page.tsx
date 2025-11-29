@@ -29,7 +29,7 @@ import { getUserSubscription } from "@/server/subscription";
 export async function generateMetadata(): Promise<Metadata> {
   const title = "Analytics Dashboard - Starva.shop";
   const description =
-    "Powerful insights and analytics to help you make data-driven decisions. Track sales, monitor performance, and grow your business with detailed metrics and reports.";
+    "Powerful insights and analytics to help you make data-driven decisions. Track sales, monitor performance, and grow your store with detailed metrics and reports.";
 
   const analyticsUrl = `${
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
@@ -48,7 +48,7 @@ export async function generateMetadata(): Promise<Metadata> {
           url: GENERAL_BRANDING_IMG_URL,
           width: 1200,
           height: 630,
-          alt: "Starva.shop app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+          alt: "Starva.shop app - A sure platform for local stores and customers to meet. Easy, fast and reliable.",
         },
       ],
       siteName: "Starva.shop",
@@ -150,13 +150,13 @@ async function AnalyticsContent({
             </EmptyMedia>
             <EmptyTitle>No Active Organization</EmptyTitle>
             <EmptyDescription className="font-mono tracking-tighter">
-              Please select or create an organization from the top business
-              switcher to view analytics.
+              Please select or create a store from the top store switcher to
+              view analytics.
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            The business switcher is located at the top of the sidebar, right
-            below the logo.
+            The store switcher is located at the top of the sidebar, right below
+            the logo.
           </EmptyContent>
         </Empty>
       </div>
@@ -190,7 +190,7 @@ async function AnalyticsContent({
           </p>
           <h2 className="text-sm font-medium mb-2">Free analytics</h2>
           <p className="text-xs text-muted-foreground font-mono tracking-tighter">
-            Daily/7-day overview of orders for your active business.
+            Daily/7-day overview of orders for your active store.
           </p>
           <FreeAnalyticsChart data={freeSeries} />
         </div>
@@ -204,8 +204,8 @@ async function AnalyticsContent({
               Deeper trends & insights
             </h2>
             <p className="text-xs text-muted-foreground font-mono tracking-tighter">
-              4-week revenue trends to help you understand how your active
-              business is growing.
+              4-week revenue trends to help you understand how your active store
+              is growing.
             </p>
             <GrowthAnalyticsChart data={growthSeries} />
           </div>

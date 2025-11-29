@@ -11,30 +11,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { TIMEZONES } from "@/lib/constants";
-import { updateBusinessTimezone } from "@/server/businesses";
+import { updateStoreTimezone } from "@/server/stores";
 import { Spinner } from "../ui/spinner";
 
-interface BusinessSettingsProps {
+interface StoreSettingsProps {
   orgId: string;
   orgSlug: string;
   initialTimezone: string;
 }
 
-export function BusinessSettings({
+export function StoreSettings({
   orgId,
   orgSlug,
   initialTimezone,
-}: BusinessSettingsProps) {
+}: StoreSettingsProps) {
   const [selectedTimezone, setSelectedTimezone] =
     useState<string>(initialTimezone);
 
-  const [state, formAction, isPending] = useActionState(
-    updateBusinessTimezone,
-    {
-      success: false,
-      error: null,
-    }
-  );
+  const [state, formAction, isPending] = useActionState(updateStoreTimezone, {
+    success: false,
+    error: null,
+  });
 
   const handleAutoDetect = () => {
     const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -46,16 +43,16 @@ export function BusinessSettings({
       <div className="flex flex-col">
         <div className="flex items-center gap-2">
           <Building2 className="size-4" />
-          <h2 className="text-lg font-medium">Business Timezone</h2>
+          <h2 className="text-lg font-medium">Store Timezone</h2>
         </div>
         <p className="text-sm text-muted-foreground mb-4 font-mono tracking-tighter">
-          Set your business timezone for accurate analytics and reporting.
+          Set your store timezone for accurate analytics and reporting.
         </p>
       </div>
 
       <form action={formAction} className="space-y-4">
-        <input type="hidden" name="businessId" value={orgId} />
-        <input type="hidden" name="businessSlug" value={orgSlug} />
+        <input type="hidden" name="storeId" value={orgId} />
+        <input type="hidden" name="storeSlug" value={orgSlug} />
         <input type="hidden" name="timezone" value={selectedTimezone} />
 
         <div className="space-y-3">

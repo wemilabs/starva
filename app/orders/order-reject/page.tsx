@@ -6,7 +6,7 @@ import { RejectOrderContent } from "./reject-order-content";
 export const metadata: Metadata = {
   title: "Reject Order | Starva.shop",
   description:
-    "Review and reject an order if you cannot fulfill it. Secure order management for local businesses.",
+    "Review and reject an order if you cannot fulfill it. Secure order management for local stores.",
   robots: {
     index: false,
     follow: false,

@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { AccountSettings } from "@/components/settings/account-settings";
-import { BusinessSettings } from "@/components/settings/business-settings";
 import { DangerZone } from "@/components/settings/danger-zone";
+import { StoreSettings } from "@/components/settings/store-settings";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -21,26 +21,26 @@ import { getOrganizationDetails } from "@/server/organizations";
 
 export const metadata: Metadata = {
   title: "Settings - Starva.shop",
-  description: "Manage your account and business preferences.",
+  description: "Manage your account and store preferences.",
   keywords: [
     "settings",
     "account settings",
-    "business settings",
+    "store settings",
     "preferences",
     "account management",
-    "business management",
+    "store management",
     "user settings",
     "organization settings",
     "profile settings",
     "user preferences",
-    "business preferences",
+    "store preferences",
   ],
   openGraph: {
     type: "website",
     locale: "en_US",
     url: "https://Starva.shop/settings",
     title: "Settings - Starva.shop",
-    description: "Manage your account and business preferences.",
+    description: "Manage your account and store preferences.",
     siteName: "Starva.shop",
     images: [
       {
@@ -94,13 +94,13 @@ async function SettingsContent() {
             </EmptyMedia>
             <EmptyTitle>No Active Organization</EmptyTitle>
             <EmptyDescription className="font-mono tracking-tighter">
-              Please select or create an organization from the top business
+              Please select or create an organization from the top store
               switcher to access settings.
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            The business switcher is located at the top of the sidebar, right
-            below the logo.
+            The store switcher is located at the top of the sidebar, right below
+            the logo.
           </EmptyContent>
         </Empty>
       </div>
@@ -118,11 +118,11 @@ async function SettingsContent() {
       <div>
         <h1 className="text-2xl font-medium tracking-tight">Settings</h1>
         <p className="text-muted-foreground mt-0.5 text-sm text-pretty font-mono tracking-tighter">
-          Manage your account and business preferences.
+          Manage your account and store preferences.
         </p>
       </div>
       <div className="space-y-8">
-        <BusinessSettings
+        <StoreSettings
           orgId={activeOrgId}
           orgSlug={activeOrgSlug}
           initialTimezone={currentTimezone}
@@ -142,7 +142,7 @@ export default function SettingsPage() {
           <div>
             <h1 className="text-2xl font-medium tracking-tight">Settings</h1>
             <p className="text-muted-foreground mt-0.5 text-sm text-pretty font-mono tracking-tighter">
-              Manage your account and business preferences.
+              Manage your account and store preferences.
             </p>
           </div>
           <div className="space-y-8">

@@ -125,8 +125,8 @@ export const PRICING_PLANS: PricingPlan[] = [
     maxOrgs: 2,
     maxProductsPerOrg: 12,
     features: [
-      "2 businesses",
-      "12 products per business",
+      "2 stores",
+      "12 products per store",
       "50 orders/month",
       "Basic sales dashboard",
       "7-day data retention",
@@ -138,7 +138,7 @@ export const PRICING_PLANS: PricingPlan[] = [
   },
   {
     name: "Growth",
-    description: "For growing businesses & multiple locations",
+    description: "For growing stores & multiple locations",
     price: 90,
     originalPrice: null,
     period: "month",
@@ -146,8 +146,8 @@ export const PRICING_PLANS: PricingPlan[] = [
     maxOrgs: 10,
     maxProductsPerOrg: 50,
     features: [
-      "10 businesses",
-      "50 products per business",
+      "10 stores",
+      "50 products per store",
       "500 orders/month",
       "Customer analytics",
       "Limited AI-powered insights",
@@ -159,7 +159,7 @@ export const PRICING_PLANS: PricingPlan[] = [
   },
   {
     name: "Pro",
-    description: "For established businesses & large operations",
+    description: "For established stores & large operations",
     price: 200,
     originalPrice: null,
     period: "month",
@@ -167,7 +167,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     maxOrgs: null,
     maxProductsPerOrg: null,
     features: [
-      "Unlimited businesses",
+      "Unlimited stores",
       "Unlimited products",
       "2,000 orders/month",
       "Advanced analytics",

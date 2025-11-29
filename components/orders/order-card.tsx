@@ -101,7 +101,7 @@ export function OrderCard({ order, variant = "merchant" }: OrderCardProps) {
                     <p className="text-sm font-medium">
                       {order.organization.name}
                     </p>
-                    <p className="text-xs text-muted-foreground">Business</p>
+                    <p className="text-xs text-muted-foreground">store</p>
                   </div>
                 </>
               ) : null}

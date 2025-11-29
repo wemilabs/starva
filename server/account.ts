@@ -95,7 +95,7 @@ export async function resetAllData(
     }
 
     revalidatePath("/settings");
-    revalidatePath("/businesses");
+    revalidatePath("/stores");
     revalidatePath("/analytics");
     revalidatePath("/orders");
 

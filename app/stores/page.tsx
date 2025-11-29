@@ -2,10 +2,10 @@ import { Building2, Lock } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
-import { BusinessCatalogueSection } from "@/components/businesses/business-catalogue section";
-import { SkeletonBusinessCard } from "@/components/businesses/skeleton-business-card";
-import { ExtractedRegisterBusinessDialog } from "@/components/forms/extracted-register-business-dialog";
+import { ExtractedRegisterStoreDialog } from "@/components/forms/extracted-register-store-dialog";
 import { SearchForm } from "@/components/forms/search-form";
+import { SkeletonStoreCard } from "@/components/stores/skeleton-store-card";
+import { StoreCatalogueSection } from "@/components/stores/store-catalogue-section";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -15,11 +15,11 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { getBusinessesPerUser } from "@/data/businesses";
+import { getStoresPerUser } from "@/data/stores";
 import { verifySession } from "@/data/user-session";
 import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
 
-async function BusinessesList() {
+async function StoresList() {
   const sessionData = await verifySession();
 
   if (!sessionData.success || !sessionData.session)
@@ -44,40 +44,38 @@ async function BusinessesList() {
       </Empty>
     );
 
-  const businessesPerUser = sessionData.success
-    ? await getBusinessesPerUser()
-    : [];
+  const storesPerUser = sessionData.success ? await getStoresPerUser() : [];
 
-  if (businessesPerUser.length === 0)
+  if (storesPerUser.length === 0)
     return (
       <Empty className="min-h-[400px]">
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <Building2 className="size-6" />
           </EmptyMedia>
-          <EmptyTitle>No businesses yet</EmptyTitle>
+          <EmptyTitle>No stores yet</EmptyTitle>
           <EmptyDescription className="font-mono tracking-tighter">
-            Get started by creating your first business. You'll be able to
-            manage products, team members, and more.
+            Get started by creating your first store. You'll be able to manage
+            products, team members, and more.
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <ExtractedRegisterBusinessDialog />
+          <ExtractedRegisterStoreDialog />
         </EmptyContent>
       </Empty>
     );
 
-  return <BusinessCatalogueSection data={businessesPerUser} />;
+  return <StoreCatalogueSection data={storesPerUser} />;
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const title = "Businesses - Starva.shop";
+  const title = "Stores - Starva.shop";
   const description =
-    "Manage your businesses with Starva.shop. Update products, track orders, and grow your business with powerful management tools.";
+    "Manage your stores with Starva.shop. Update products, track orders, and grow your store with powerful management tools.";
 
-  const businessesUrl = `${
+  const storesUrl = `${
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
-  }/businesses`;
+  }/stores`;
 
   return {
     title,
@@ -85,14 +83,14 @@ export async function generateMetadata(): Promise<Metadata> {
     openGraph: {
       title,
       description,
-      url: businessesUrl,
+      url: storesUrl,
       type: "website",
       images: [
         {
           url: GENERAL_BRANDING_IMG_URL,
           width: 1200,
           height: 630,
-          alt: "Starva.shop app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+          alt: "Starva.shop app - A sure platform for local stores and customers to meet. Easy, fast and reliable.",
         },
       ],
       siteName: "Starva.shop",
@@ -104,22 +102,22 @@ export async function generateMetadata(): Promise<Metadata> {
       images: [GENERAL_BRANDING_IMG_URL],
     },
     alternates: {
-      canonical: businessesUrl,
+      canonical: storesUrl,
     },
   };
 }
 
-export default async function BusinessesPage() {
+export default async function StoresPage() {
   return (
     <div className="container mx-auto max-w-7xl py-7 space-y-7">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-medium tracking-tight">Businesses</h1>
+          <h1 className="text-2xl font-medium tracking-tight">Stores</h1>
           <p className="text-muted-foreground mt-0.5 text-sm text-pretty font-mono tracking-tighter">
-            Manage and monitor all your businesses in one place
+            Manage and monitor all your stores in one place
           </p>
         </div>
-        <ExtractedRegisterBusinessDialog />
+        <ExtractedRegisterStoreDialog />
       </div>
 
       <Suspense
@@ -138,20 +136,20 @@ export default async function BusinessesPage() {
         fallback={
           <>
             <div className="col-span-full text-sm text-pretty text-muted-foreground font-mono tracking-tighter">
-              Loading businesses...
+              Loading stores...
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <SkeletonBusinessCard />
-              <SkeletonBusinessCard />
-              <SkeletonBusinessCard />
-              <SkeletonBusinessCard />
-              <SkeletonBusinessCard />
-              <SkeletonBusinessCard />
+              <SkeletonStoreCard />
+              <SkeletonStoreCard />
+              <SkeletonStoreCard />
+              <SkeletonStoreCard />
+              <SkeletonStoreCard />
+              <SkeletonStoreCard />
             </div>
           </>
         }
       >
-        <BusinessesList />
+        <StoresList />
       </Suspense>
     </div>
   );

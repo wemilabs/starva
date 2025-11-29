@@ -92,10 +92,10 @@ const schema = z
 
 export function AddProductForm({
   organizationId,
-  businessSlug,
+  storeSlug,
 }: {
   organizationId: string;
-  businessSlug: string;
+  storeSlug: string;
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -180,7 +180,7 @@ export function AddProductForm({
           unitFormatName: values.unitFormat?.name,
           inventoryEnabled: values.inventoryEnabled,
           lowStockThreshold: values.lowStockThreshold,
-          revalidateTargetPath: `/businesses/${businessSlug}`,
+          revalidateTargetPath: `/stores/${storeSlug}`,
         });
         form.reset();
         toast.success("Success", {

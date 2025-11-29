@@ -2,9 +2,9 @@
 
 import { usePathname } from "next/navigation";
 import { useQueryState } from "nuqs";
-import { BusinessCard } from "../forms/business-card";
+import { StoreCard } from "../forms/store-card";
 
-type BusinessCatalogueSectionProps = {
+type StoreCatalogueSectionProps = {
   data:
     | {
         id: string;
@@ -17,23 +17,23 @@ type BusinessCatalogueSectionProps = {
     | null;
 };
 
-export function FilteredBusiness({ data }: BusinessCatalogueSectionProps) {
+export function FilteredStore({ data }: StoreCatalogueSectionProps) {
   const [search] = useQueryState("search", { defaultValue: "" });
   const pathname = usePathname();
 
-  const filteredBusinesses = data?.filter((business) => {
+  const filteredStores = data?.filter((store) => {
     const matchesSearch =
-      business.name.toLowerCase().includes(search.toLowerCase()) ||
-      business.slug.toLowerCase().includes(search.toLowerCase());
+      store.name.toLowerCase().includes(search.toLowerCase()) ||
+      store.slug.toLowerCase().includes(search.toLowerCase());
     return matchesSearch;
   });
 
-  if (!filteredBusinesses?.length)
+  if (!filteredStores?.length)
     return (
       <div className="col-span-full flex items-center justify-center min-h-[200px] border border-dashed border-muted-foreground/50 rounded-lg">
         <div className="text-muted-foreground text-center">
           <p className="text-sm">
-            No {pathname === "/merchants" ? "merchants" : "businesses"} found
+            No {pathname === "/merchants" ? "merchants" : "stores"} found
             matching your search
           </p>
         </div>
@@ -42,8 +42,8 @@ export function FilteredBusiness({ data }: BusinessCatalogueSectionProps) {
 
   return (
     <>
-      {filteredBusinesses.map((business) => (
-        <BusinessCard key={business.id} business={business} />
+      {filteredStores.map((store) => (
+        <StoreCard key={store.id} store={store} />
       ))}
     </>
   );

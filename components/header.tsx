@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { CartSheet } from "@/components/cart/cart-sheet";
-import { RegisterBusinessForm } from "@/components/forms/register-business-form";
+import { RegisterStoreForm } from "@/components/forms/register-store-form";
 import { ModeToggle } from "@/components/mode-toggle";
 import { NavBreadcrumbs } from "@/components/nav-breadcrumbs";
 import { Button } from "@/components/ui/button";
@@ -15,12 +15,12 @@ import {
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { getBusinessesPerUser } from "@/data/businesses";
+import { getStoresPerUser } from "@/data/stores";
 import { verifySession } from "@/data/user-session";
 
 export async function Header() {
   const { success } = await verifySession();
-  const businesses = success ? await getBusinessesPerUser() : [];
+  const stores = success ? await getStoresPerUser() : [];
 
   return (
     <header className="flex h-16 shrink-0 items-center gap-2 px-4 justify-between transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 sticky top-0 z-11 border-b rounded-lg bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/50">
@@ -40,19 +40,19 @@ export async function Header() {
               <span>Sign In</span>
             </Link>
           </Button>
-        ) : businesses?.length === 0 ? (
+        ) : stores?.length === 0 ? (
           <Dialog>
             <DialogTrigger asChild>
-              <Button size="sm">Claim business</Button>
+              <Button size="sm">Claim Store</Button>
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Register Business</DialogTitle>
+                <DialogTitle>Register Store</DialogTitle>
                 <DialogDescription>
-                  Register a new business to get started.
+                  Register a new store to get started.
                 </DialogDescription>
               </DialogHeader>
-              <RegisterBusinessForm />
+              <RegisterStoreForm />
             </DialogContent>
           </Dialog>
         ) : null}

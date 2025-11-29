@@ -137,13 +137,13 @@ export function ProductCard({
                     visitFees,
                   }}
                   organizationId={organization?.id || ""}
-                  businessSlug={organization?.slug || ""}
+                  storeSlug={organization?.slug || ""}
                   className="size-6 p-0 rounded-full bg-white/40 hover:bg-white/50 text-white/90 border-white/45"
                 />
                 <DeleteProductForm
                   productId={id}
                   organizationId={organization?.id || ""}
-                  businessSlug={organization?.slug || ""}
+                  storeSlug={organization?.slug || ""}
                   className="size-6 p-0 rounded-full bg-red-600/70 hover:bg-red-600/80 text-red-100 ring-1 ring-red-600/80 flex-none flex items-center justify-center"
                 />
               </div>

@@ -17,26 +17,26 @@ import { Spinner } from "@/components/ui/spinner";
 import { COUNTRIES } from "@/lib/constants";
 import { parsePhoneNumber } from "@/lib/utils";
 
-interface EditableBusinessPhoneProps {
-  businessId: string;
-  businessSlug: string;
+interface EditableStorePhoneProps {
+  storeId: string;
+  storeSlug: string;
   phoneType: "notifications" | "payments";
   initialPhone?: string;
   updateAction: (
-    businessId: string,
-    businessSlug: string,
+    storeId: string,
+    storeSlug: string,
     phoneType: "notifications" | "payments",
     phone: string
   ) => Promise<void>;
 }
 
-export function EditableBusinessPhone({
-  businessId,
-  businessSlug,
+export function EditableStorePhone({
+  storeId,
+  storeSlug,
   phoneType,
   initialPhone = "",
   updateAction,
-}: EditableBusinessPhoneProps) {
+}: EditableStorePhoneProps) {
   const [isEditing, setIsEditing] = useState(false);
 
   const parsed = parsePhoneNumber(initialPhone);
@@ -69,10 +69,10 @@ export function EditableBusinessPhone({
 
     startTransition(async () => {
       try {
-        await updateAction(businessId, businessSlug, phoneType, fullPhone);
+        await updateAction(storeId, storeSlug, phoneType, fullPhone);
         setIsEditing(false);
         toast.success("Phone number updated", {
-          description: "Business phone number successfully updated",
+          description: "Store phone number successfully updated",
         });
       } catch (error) {
         console.error("Failed to update phone number:", error);
@@ -80,7 +80,7 @@ export function EditableBusinessPhone({
         setCountryCode(parsed.countryCode);
         setPhoneNumber(parsed.phoneNumber);
         toast.error("Failed to update phone number", {
-          description: "Business phone number could not be updated.",
+          description: "Store phone number could not be updated.",
         });
       }
     });

@@ -3,7 +3,7 @@
 import { Trash2 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useTransition } from "react";
+import { Activity, useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import {
@@ -28,10 +28,10 @@ import {
 } from "@/components/ui/card";
 import type { Organization } from "@/db/schema";
 import { getInitials } from "@/lib/utils";
-import { deleteBusiness } from "@/server/businesses";
+import { deleteStore } from "@/server/stores";
 import { Spinner } from "../ui/spinner";
 
-export function BusinessCard({ business }: { business: Organization }) {
+export function StoreCard({ store }: { store: Organization }) {
   const [isPending, startTransition] = useTransition();
   const pathname = usePathname();
 
@@ -40,22 +40,22 @@ export function BusinessCard({ business }: { business: Organization }) {
   const handleDelete = () => {
     startTransition(async () => {
       try {
-        await deleteBusiness(business.id);
+        await deleteStore(store.id);
         setOpen(false);
-        toast.success("Business deleted", {
-          description: `${business.name} has been successfully deleted.`,
+        toast.success("Store deleted", {
+          description: `${store.name} has been successfully deleted.`,
         });
       } catch (error) {
-        console.error("Error deleting business:", error);
-        toast.error("Failed to delete business", {
+        console.error("Error deleting store:", error);
+        toast.error("Failed to delete store", {
           description: "Please try again later.",
         });
       }
     });
   };
 
-  const metadata = business.metadata
-    ? (JSON.parse(business.metadata) as { description?: string })
+  const metadata = store.metadata
+    ? (JSON.parse(store.metadata) as { description?: string })
     : null;
 
   return (
@@ -63,22 +63,22 @@ export function BusinessCard({ business }: { business: Organization }) {
       <CardHeader>
         <div className="flex items-start gap-4">
           <Avatar className="size-14 ring-2 ring-border transition-all group-hover:ring-primary/50">
-            <AvatarImage alt={business.name} src={business.logo ?? ""} />
+            <AvatarImage alt={store.name} src={store.logo ?? ""} />
             <AvatarFallback className="bg-linear-to-br from-primary to-red-500 text-white text-base font-semibold">
-              {getInitials(business.name)}
+              {getInitials(store.name)}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <Link
               className="block hover:opacity-80 transition-opacity"
               href={
-                pathname === "/businesses"
-                  ? `/businesses/${business.slug}`
-                  : `/merchants/${business.slug}`
+                pathname === "/stores"
+                  ? `/stores/${store.slug}`
+                  : `/merchants/${store.slug}`
               }
             >
               <CardTitle className="truncate md:text-lg mb-2">
-                {business.name}
+                {store.name}
               </CardTitle>
               <CardDescription className="line-clamp-2 text-xs sm:text-sm font-mono tracking-tighter">
                 {metadata?.description || "No description provided"}
@@ -86,7 +86,8 @@ export function BusinessCard({ business }: { business: Organization }) {
             </Link>
           </div>
         </div>
-        {pathname === "/businesses" ? (
+
+        <Activity mode={pathname === "/stores" ? "visible" : "hidden"}>
           <CardAction>
             <AlertDialog open={open} onOpenChange={setOpen}>
               <AlertDialogTrigger asChild>
@@ -97,16 +98,16 @@ export function BusinessCard({ business }: { business: Organization }) {
                   variant="ghost"
                 >
                   <Trash2 className="size-4 text-destructive" />
-                  <span className="sr-only">Delete {business.name}</span>
+                  <span className="sr-only">Delete {store.name}</span>
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Delete {business.name}?</AlertDialogTitle>
+                  <AlertDialogTitle>Delete {store.name}?</AlertDialogTitle>
                   <AlertDialogDescription className="font-mono tracking-tighter">
                     This action cannot be undone. This will permanently delete
-                    the business and remove all associated data including
-                    products, members, and settings.
+                    the store and remove all associated data including products,
+                    members, and settings.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -131,7 +132,7 @@ export function BusinessCard({ business }: { business: Organization }) {
               </AlertDialogContent>
             </AlertDialog>
           </CardAction>
-        ) : null}
+        </Activity>
       </CardHeader>
     </Card>
   );

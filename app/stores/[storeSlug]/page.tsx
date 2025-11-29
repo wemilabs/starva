@@ -3,53 +3,54 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-import { EditableBusinessDescription } from "@/components/forms/editable-business-desc";
-import { EditableBusinessName } from "@/components/forms/editable-business-name";
-import { EditableBusinessPhone } from "@/components/forms/editable-business-phone";
-import { UpdateBusinessLogoForm } from "@/components/forms/update-business-logo";
+import { EditableStoreDescription } from "@/components/forms/editable-store-desc";
+import { EditableStoreName } from "@/components/forms/editable-store-name";
+import { EditableStorePhone } from "@/components/forms/editable-store-phone";
+import { UpdateStoreLogoForm } from "@/components/forms/update-store-logo";
 import { ProductCatalogueControls } from "@/components/products/product-catalogue-controls";
 import { ProductCatalogueSection } from "@/components/products/product-catalogue-section";
 import { SkeletonProductCard } from "@/components/products/skeleton-product-card";
-import { getBusinessBySlug } from "@/data/businesses";
-import { getProductsPerBusiness } from "@/data/products";
+import { Skeleton } from "@/components/ui/skeleton";
+import { getProductsPerStore } from "@/data/products";
+import { getStoreBySlug } from "@/data/stores";
 import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
 import {
-  updateBusinessDescription,
-  updateBusinessLogo,
-  updateBusinessName,
-  updateBusinessPhone,
-} from "@/server/businesses";
+  updateStoreDescription,
+  updateStoreLogo,
+  updateStoreName,
+  updateStorePhone,
+} from "@/server/stores";
 
-async function ProductsList({ businessId }: { businessId: string }) {
-  const productsPerBusiness = await getProductsPerBusiness(businessId);
+async function ProductsList({ storeId }: { storeId: string }) {
+  const productsPerStore = await getProductsPerStore(storeId);
 
-  if ("message" in productsPerBusiness) {
+  if ("message" in productsPerStore) {
     return (
       <div className="text-center py-10">
         <h2 className="text-lg font-semibold mb-2">Unable to load products</h2>
         <p className="text-muted-foreground font-mono tracking-tighter">
-          {productsPerBusiness.message}
+          {productsPerStore.message}
         </p>
       </div>
     );
   }
 
-  return <ProductCatalogueSection data={productsPerBusiness} />;
+  return <ProductCatalogueSection data={productsPerStore} />;
 }
 
-async function BusinessContent({
+async function StoreContent({
   params,
 }: {
-  params: Promise<{ businessSlug: string }>;
+  params: Promise<{ storeSlug: string }>;
 }) {
-  const { businessSlug } = await params;
+  const { storeSlug } = await params;
 
-  const business = await getBusinessBySlug(businessSlug);
-  if (!business) return notFound();
+  const store = await getStoreBySlug(storeSlug);
+  if (!store) return notFound();
 
-  const resolvedSlug = business.slug || businessSlug;
+  const resolvedSlug = store.slug || storeSlug;
 
-  const metadata = business.metadata ? JSON.parse(business.metadata) : {};
+  const metadata = store.metadata ? JSON.parse(store.metadata) : {};
   const description = metadata.description || "";
   const phoneForNotifications = metadata.phoneForNotifications || "";
   const phoneForPayments = metadata.phoneForPayments || "";
@@ -58,10 +59,10 @@ async function BusinessContent({
     <div className="space-y-8">
       <section className="relative overflow-hidden rounded-xl border">
         <div className="absolute inset-0">
-          {business.logo ? (
+          {store.logo ? (
             <Image
-              src={business.logo}
-              alt={`${business.name} logo`}
+              src={store.logo}
+              alt={`${store.name} logo`}
               fill
               className="object-cover"
               priority
@@ -73,39 +74,39 @@ async function BusinessContent({
         <div className="absolute inset-0 bg-black/50" />
         <div className="relative z-10 px-6 py-16 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div className="text-white flex flex-col gap-2">
-            <EditableBusinessName
-              businessId={business.id}
-              businessSlug={resolvedSlug}
-              initialName={business.name}
-              updateAction={updateBusinessName}
+            <EditableStoreName
+              storeId={store.id}
+              storeSlug={resolvedSlug}
+              initialName={store.name}
+              updateAction={updateStoreName}
             />
             <p className="text-white/80 text-sm font-mono tracking-tighter">
               @{resolvedSlug}
             </p>
-            <EditableBusinessDescription
-              businessId={business.id}
-              businessSlug={resolvedSlug}
+            <EditableStoreDescription
+              storeId={store.id}
+              storeSlug={resolvedSlug}
               initialDescription={description}
-              updateAction={updateBusinessDescription}
+              updateAction={updateStoreDescription}
             />
-            <EditableBusinessPhone
-              businessId={business.id}
-              businessSlug={resolvedSlug}
+            <EditableStorePhone
+              storeId={store.id}
+              storeSlug={resolvedSlug}
               phoneType="notifications"
               initialPhone={phoneForNotifications}
-              updateAction={updateBusinessPhone}
+              updateAction={updateStorePhone}
             />
-            <EditableBusinessPhone
-              businessId={business.id}
-              businessSlug={resolvedSlug}
+            <EditableStorePhone
+              storeId={store.id}
+              storeSlug={resolvedSlug}
               phoneType="payments"
               initialPhone={phoneForPayments}
-              updateAction={updateBusinessPhone}
+              updateAction={updateStorePhone}
             />
           </div>
 
-          <UpdateBusinessLogoForm
-            action={updateBusinessLogo.bind(null, business.id, resolvedSlug)}
+          <UpdateStoreLogoForm
+            action={updateStoreLogo.bind(null, store.id, resolvedSlug)}
             className="bg-white/10 backdrop-blur rounded-lg p-3 ring-1 ring-white/15"
           />
         </div>
@@ -118,9 +119,9 @@ async function BusinessContent({
           }
         >
           <ProductCatalogueControls
-            businessId={business.id}
-            businessSlug={resolvedSlug}
-            businessName={business.name}
+            storeId={store.id}
+            storeSlug={resolvedSlug}
+            storeName={store.name}
             timetable={metadata.timetable}
             defaultStatus="all"
           />
@@ -142,7 +143,7 @@ async function BusinessContent({
             </>
           }
         >
-          <ProductsList businessId={business.id} />
+          <ProductsList storeId={store.id} />
         </Suspense>
       </section>
     </div>
@@ -152,88 +153,88 @@ async function BusinessContent({
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ businessSlug: string }>;
+  params: Promise<{ storeSlug: string }>;
 }): Promise<Metadata> {
-  const { businessSlug } = await params;
+  const { storeSlug } = await params;
 
-  const business = await getBusinessBySlug(businessSlug);
-  if (!business) {
+  const store = await getStoreBySlug(storeSlug);
+  if (!store) {
     return {
-      title: "Business Not Found - Starva.shop",
-      description: "The requested business could not be found.",
+      title: "store Not Found - Starva.shop",
+      description: "The requested store could not be found.",
     };
   }
 
-  const resolvedSlug = business.slug ?? businessSlug;
-  const metadata = business.metadata ? JSON.parse(business.metadata) : {};
+  const resolvedSlug = store.slug ?? storeSlug;
+  const metadata = store.metadata ? JSON.parse(store.metadata) : {};
   const description =
     metadata.description ??
-    `Manage your business ${business.name}. Update products, track orders, and grow your business with Starva.shop.`;
+    `Manage your store ${store.name}. Update products, track orders, and grow your store with Starva.shop.`;
 
   const images = [];
-  if (business.logo) {
+  if (store.logo) {
     images.push({
-      url: business.logo,
+      url: store.logo,
       width: 1200,
       height: 630,
-      alt: `${business.name} logo`,
+      alt: `${store.name} logo`,
     });
   } else {
     images.push({
       url: GENERAL_BRANDING_IMG_URL,
       width: 1200,
       height: 630,
-      alt: "Starva.shop app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+      alt: "Starva.shop app - A sure platform for local stores and customers to meet. Easy, fast and reliable.",
     });
   }
 
-  const businessUrl = `${
+  const storeUrl = `${
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
-  }/businesses/${resolvedSlug}`;
+  }/stores/${resolvedSlug}`;
 
   return {
-    title: `${business.name} - Starva.shop`,
+    title: `${store.name} - Starva.shop`,
     description,
     openGraph: {
-      title: `${business.name} - Starva.shop`,
+      title: `${store.name} - Starva.shop`,
       description,
-      url: businessUrl,
+      url: storeUrl,
       type: "website",
       images,
       siteName: "Starva.shop",
     },
     twitter: {
       card: "summary_large_image",
-      title: `${business.name} - Starva.shop`,
+      title: `${store.name} - Starva.shop`,
       description,
       images: images.map((img) => img.url),
     },
     alternates: {
-      canonical: businessUrl,
+      canonical: storeUrl,
     },
   };
 }
 
-export default async function BusinessSlugPage(
-  props: PageProps<"/businesses/[businessSlug]">
+export default async function storeSlugPage(
+  props: PageProps<"/stores/[storeSlug]">
 ) {
   return (
     <Suspense
       fallback={
         <div className="space-y-8">
           <div className="relative overflow-hidden rounded-xl border">
-            <div className="h-64 bg-linear-to-br from-orange-500 via-amber-500 to-yellow-500 animate-pulse" />
+            <Skeleton className="h-64 bg-linear-to-br from-orange-500 via-amber-500 to-yellow-500" />
           </div>
           <div className="grid gap-6 mt-10">
-            <div className="h-20 rounded-lg border bg-background animate-pulse mb-6" />
+            <Skeleton className="h-20 mb-6" />
             <div className="col-span-full text-sm text-pretty text-muted-foreground mb-4 font-mono tracking-tighter">
-              Loading business details...
+              Loading store details...
             </div>
           </div>
         </div>
       }
     >
-      <BusinessContent params={props.params} />
+      <StoreContent params={props.params} />
     </Suspense>
   );
 }

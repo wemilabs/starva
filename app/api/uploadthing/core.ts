@@ -21,8 +21,8 @@ export const ourFileRouter = {
       return { url: file.ufsUrl, uploadedBy: metadata.userId };
     }),
 
-  // Business logo
-  businessLogo: f({
+  // Store logo
+  storeLogo: f({
     image: {
       maxFileSize: "4MB",
       maxFileCount: 1,

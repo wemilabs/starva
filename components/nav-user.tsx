@@ -67,8 +67,8 @@ export function NavUser({
 
   const router = useRouter();
 
-  const { refetch: refetchActiveBusiness } = useActiveOrganization();
-  const { refetch: refetchBusinesses } = useListOrganizations();
+  const { refetch: refetchActiveStore } = useActiveOrganization();
+  const { refetch: refetchStores } = useListOrganizations();
 
   const handleSignOut = () => {
     startSigningOutTransition(async () => {
@@ -76,8 +76,8 @@ export function NavUser({
         await signOut({
           fetchOptions: {
             onSuccess: async () => {
-              refetchActiveBusiness();
-              refetchBusinesses();
+              refetchActiveStore();
+              refetchStores();
               toast.success("Success", {
                 description: "Successfully signed out. See you soon!",
               });

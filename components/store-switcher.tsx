@@ -29,7 +29,7 @@ import {
   useSession,
 } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
-import { RegisterBusinessForm } from "./forms/register-business-form";
+import { RegisterStoreForm } from "./forms/register-store-form";
 import {
   Dialog,
   DialogContent,
@@ -45,25 +45,23 @@ import {
   useSidebar,
 } from "./ui/sidebar";
 
-export function BusinessSwitcher() {
+export function StoreSwitcher() {
   const [open, setOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { data: businesses, isPending: businessesPending } =
-    useListOrganizations();
+  const { data: stores, isPending: storesPending } = useListOrganizations();
   const { isMobile } = useSidebar();
-  const { data: activeBusiness, isPending: activeBusinessPending } =
+  const { data: activeStore, isPending: activeStorePending } =
     useActiveOrganization();
   const { data: session, isPending: sessionPending } = useSession();
 
   const router = useRouter();
 
   // Show loading skeleton during hydration to prevent mismatch
-  const isLoading =
-    businessesPending || activeBusinessPending || sessionPending;
+  const isLoading = storesPending || activeStorePending || sessionPending;
 
   const userId = session?.session?.userId;
 
-  const handleBusinessChange = async (
+  const handleStoreChange = async (
     e: React.MouseEvent<HTMLAnchorElement>,
     organizationId: string,
     organizationSlug: string
@@ -77,12 +75,12 @@ export function BusinessSwitcher() {
       setOpen(false);
       router.refresh();
       toast.success("Done!", {
-        description: "Business has been successfully set.",
+        description: "Store has been successfully set.",
       });
     } catch (error) {
-      console.error("Error setting business:", error);
+      console.error("Error setting store:", error);
       toast.error("Error", {
-        description: "Failed to set business.",
+        description: "Failed to set store.",
       });
     }
   };
@@ -106,20 +104,18 @@ export function BusinessSwitcher() {
                     <div className="flex w-full items-center gap-2">
                       <Avatar className="size-6 -ml-1 group-data-[collapsible=icon]:mx-auto">
                         <AvatarImage
-                          alt={activeBusiness?.name ?? "Business logo"}
+                          alt={activeStore?.name ?? "Store logo"}
                           src={
-                            (activeBusiness?.logo as string | undefined) ??
+                            (activeStore?.logo as string | undefined) ??
                             undefined
                           }
                         />
                         <AvatarFallback>
-                          {(activeBusiness?.name ?? "B")
-                            .slice(0, 2)
-                            .toUpperCase()}
+                          {(activeStore?.name ?? "B").slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <span className="truncate group-data-[collapsible=icon]:hidden">
-                        {activeBusiness?.name ?? "Activate business..."}
+                        {activeStore?.name ?? "Activate store..."}
                       </span>
                       <ChevronsUpDown className="ml-auto opacity-50 group-data-[collapsible=icon]:hidden size-4" />
                     </div>
@@ -134,44 +130,41 @@ export function BusinessSwitcher() {
               sideOffset={4}
             >
               <Command>
-                <CommandInput
-                  className="h-9"
-                  placeholder="Search business..."
-                />
+                <CommandInput className="h-9" placeholder="Search store..." />
                 <CommandList>
-                  <CommandEmpty>No business found.</CommandEmpty>
+                  <CommandEmpty>No store found.</CommandEmpty>
                   <CommandGroup>
                     {userId &&
-                      businesses?.map((business, index) => (
+                      stores?.map((store, index) => (
                         <Link
-                          href={`/businesses/${business.slug}`}
-                          key={business.id}
+                          href={`/stores/${store.slug}`}
+                          key={store.id}
                           onClick={(e) =>
-                            handleBusinessChange(e, business.id, business.slug)
+                            handleStoreChange(e, store.id, store.slug)
                           }
                         >
                           <CommandItem
                             className="py-2.5 cursor-pointer"
-                            value={business.name}
+                            value={store.name}
                           >
                             <div className="flex w-full items-center gap-2">
                               <Avatar className="size-6 rounded-lg">
                                 <AvatarImage
-                                  alt={business.name}
+                                  alt={store.name}
                                   src={
-                                    (business.logo as string | undefined) ??
+                                    (store.logo as string | undefined) ??
                                     undefined
                                   }
                                 />
                                 <AvatarFallback>
-                                  {business.name.slice(0, 2).toUpperCase()}
+                                  {store.name.slice(0, 2).toUpperCase()}
                                 </AvatarFallback>
                               </Avatar>
-                              <span className="truncate">{business.name}</span>
+                              <span className="truncate">{store.name}</span>
                               <Check
                                 className={cn(
                                   "ml-auto",
-                                  activeBusiness?.id === business.id
+                                  activeStore?.id === store.id
                                     ? "opacity-100"
                                     : "opacity-0"
                                 )}
@@ -196,16 +189,16 @@ export function BusinessSwitcher() {
                           <div className="border rounded-md p-1 -mt-0.5">
                             <Plus className="size-4" />
                           </div>
-                          Add business
+                          Add store
                         </DialogTrigger>
                         <DialogContent>
                           <DialogHeader className="mb-2">
-                            <DialogTitle>Register Business</DialogTitle>
+                            <DialogTitle>Register Store</DialogTitle>
                             <DialogDescription className="font-mono tracking-tighter">
-                              Register a new business to get started.
+                              Register a new store to get started.
                             </DialogDescription>
                           </DialogHeader>
-                          <RegisterBusinessForm
+                          <RegisterStoreForm
                             onSuccess={() => setDialogOpen(false)}
                             onCloseDialog={() => setDialogOpen(false)}
                           />

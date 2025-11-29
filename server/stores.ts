@@ -9,8 +9,8 @@ import { organization } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { getCurrentMetadata } from "./organizations";
 
-export async function updateBusinessLogo(
-  businessId: string,
+export async function updateStoreLogo(
+  storeId: string,
   resolvedSlug: string,
   formData: FormData
 ) {
@@ -20,14 +20,14 @@ export async function updateBusinessLogo(
   await db
     .update(organization)
     .set({ logo: logoUrl })
-    .where(eq(organization.id, businessId));
+    .where(eq(organization.id, storeId));
 
-  revalidatePath(`/businesses/${resolvedSlug}`);
+  revalidatePath(`/stores/${resolvedSlug}`);
 }
 
-export async function updateBusinessName(
-  businessId: string,
-  businessSlug: string,
+export async function updateStoreName(
+  storeId: string,
+  storeSlug: string,
   name: string
 ) {
   const trimmedName = name.trim();
@@ -35,7 +35,7 @@ export async function updateBusinessName(
 
   await auth.api.updateOrganization({
     body: {
-      organizationId: businessId,
+      organizationId: storeId,
       data: {
         name: trimmedName,
       },
@@ -43,21 +43,21 @@ export async function updateBusinessName(
     headers: await headers(),
   });
 
-  revalidatePath(`/businesses/${businessSlug}`);
+  revalidatePath(`/stores/${storeSlug}`);
 }
 
-export async function updateBusinessDescription(
-  businessId: string,
-  businessSlug: string,
+export async function updateStoreDescription(
+  storeId: string,
+  storeSlug: string,
   description: string
 ) {
   const trimmedDescription = description.trim();
 
-  const currentMetadata = await getCurrentMetadata(businessId);
+  const currentMetadata = await getCurrentMetadata(storeId);
 
   await auth.api.updateOrganization({
     body: {
-      organizationId: businessId,
+      organizationId: storeId,
       data: {
         metadata: {
           ...currentMetadata,
@@ -68,18 +68,18 @@ export async function updateBusinessDescription(
     headers: await headers(),
   });
 
-  revalidatePath(`/businesses/${businessSlug}`);
+  revalidatePath(`/stores/${storeSlug}`);
 }
 
-export async function updateBusinessPhone(
-  businessId: string,
-  businessSlug: string,
+export async function updateStorePhone(
+  storeId: string,
+  storeSlug: string,
   phoneType: "notifications" | "payments",
   phoneNumber: string
 ) {
   const trimmedPhone = phoneNumber.trim();
 
-  const currentMetadata = await getCurrentMetadata(businessId);
+  const currentMetadata = await getCurrentMetadata(storeId);
 
   const updatedMetadata = {
     ...currentMetadata,
@@ -90,7 +90,7 @@ export async function updateBusinessPhone(
 
   await auth.api.updateOrganization({
     body: {
-      organizationId: businessId,
+      organizationId: storeId,
       data: {
         metadata: updatedMetadata,
       },
@@ -98,19 +98,19 @@ export async function updateBusinessPhone(
     headers: await headers(),
   });
 
-  revalidatePath(`/businesses/${businessSlug}`);
+  revalidatePath(`/stores/${storeSlug}`);
 }
 
-export async function updateBusinessTimetable(
-  businessId: string,
-  businessSlug: string,
+export async function updateStoreTimetable(
+  storeId: string,
+  storeSlug: string,
   timetable: Record<string, { open: string; close: string; closed: boolean }>
 ) {
-  const currentMetadata = await getCurrentMetadata(businessId);
+  const currentMetadata = await getCurrentMetadata(storeId);
 
   await auth.api.updateOrganization({
     body: {
-      organizationId: businessId,
+      organizationId: storeId,
       data: {
         metadata: {
           ...currentMetadata,
@@ -121,18 +121,18 @@ export async function updateBusinessTimetable(
     headers: await headers(),
   });
 
-  revalidatePath(`/businesses/${businessSlug}`);
+  revalidatePath(`/stores/${storeSlug}`);
 }
 
-export async function updateBusinessTimezone(
+export async function updateStoreTimezone(
   _prevState: { success: boolean; error: string | null },
   formData: FormData
 ) {
-  const businessId = formData.get("businessId") as string;
-  const businessSlug = formData.get("businessSlug") as string;
+  const storeId = formData.get("storeId") as string;
+  const storeSlug = formData.get("storeSlug") as string;
   const timezone = formData.get("timezone") as string;
 
-  if (!businessId || !businessSlug || !timezone) {
+  if (!storeId || !storeSlug || !timezone) {
     return {
       success: false,
       error: "Missing required fields",
@@ -140,11 +140,11 @@ export async function updateBusinessTimezone(
   }
 
   try {
-    const currentMetadata = await getCurrentMetadata(businessId);
+    const currentMetadata = await getCurrentMetadata(storeId);
 
     await auth.api.updateOrganization({
       body: {
-        organizationId: businessId,
+        organizationId: storeId,
         data: {
           metadata: {
             ...currentMetadata,
@@ -155,7 +155,7 @@ export async function updateBusinessTimezone(
       headers: await headers(),
     });
 
-    revalidatePath(`/businesses/${businessSlug}`);
+    revalidatePath(`/stores/${storeSlug}`);
     revalidatePath("/settings");
 
     return {
@@ -171,13 +171,13 @@ export async function updateBusinessTimezone(
   }
 }
 
-export async function deleteBusiness(businessId: string) {
+export async function deleteStore(storeId: string) {
   await auth.api.deleteOrganization({
     body: {
-      organizationId: businessId,
+      organizationId: storeId,
     },
     headers: await headers(),
   });
 
-  revalidatePath("/businesses");
+  revalidatePath("/stores");
 }

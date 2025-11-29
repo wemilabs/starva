@@ -10,11 +10,11 @@ export const getOrganizationDetails = async (organizationId: string) =>
   });
 
 export const getCurrentMetadata = async (organizationId: string) => {
-  const currentBusiness = await getOrganizationDetails(organizationId);
+  const currentStore = await getOrganizationDetails(organizationId);
 
-  return currentBusiness?.metadata
-    ? typeof currentBusiness.metadata === "string"
-      ? JSON.parse(currentBusiness.metadata)
-      : currentBusiness.metadata
+  return currentStore?.metadata
+    ? typeof currentStore.metadata === "string"
+      ? JSON.parse(currentStore.metadata)
+      : currentStore.metadata
     : {};
 };

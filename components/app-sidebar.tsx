@@ -11,13 +11,12 @@ import {
   Settings,
 } from "lucide-react";
 import Link from "next/link";
-
-import { BusinessSwitcher } from "@/components/business-switcher";
 import { Logo } from "@/components/logo";
 import { NavMain } from "@/components/nav-main";
 import { NavSecondary } from "@/components/nav-secondary";
 // import { NavProjects } from "@/components/nav-projects";
 import { NavUser } from "@/components/nav-user";
+import { StoreSwitcher } from "@/components/store-switcher";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -117,7 +116,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <Logo />
         </Link>
 
-        <BusinessSwitcher />
+        <StoreSwitcher />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />

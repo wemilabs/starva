@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { DAYS, DEFAULT_HOURS } from "@/lib/constants";
-import { updateBusinessTimetable } from "@/server/businesses";
+import { updateStoreTimetable } from "@/server/stores";
 import { ScrollArea } from "../ui/scroll-area";
 import { Spinner } from "../ui/spinner";
 
@@ -20,19 +20,19 @@ export type DayTimetable = {
 
 export type TimetableData = Record<string, DayTimetable>;
 
-type EditBusinessTimetableProps = {
-  businessId: string;
-  businessSlug: string;
+type EditStoreTimetableProps = {
+  storeId: string;
+  storeSlug: string;
   initialTimetable?: TimetableData;
-  onSuccess?: () => void;
+  onSuccessAction?: () => void;
 };
 
-export function EditBusinessTimetable({
-  businessId,
-  businessSlug,
+export function EditStoreTimetable({
+  storeId,
+  storeSlug,
   initialTimetable,
-  onSuccess,
-}: EditBusinessTimetableProps) {
+  onSuccessAction,
+}: EditStoreTimetableProps) {
   const [timetable, setTimetable] = useState<TimetableData>(() => {
     const defaultTimetable: TimetableData = {};
     for (const day of DAYS) {
@@ -51,11 +51,7 @@ export function EditBusinessTimetable({
   const [state, action, isPending] = useActionState(
     async (_prev: { success: boolean; message: string } | null) => {
       try {
-        await updateBusinessTimetable(
-          businessId,
-          businessSlug,
-          timetableRef.current
-        );
+        await updateStoreTimetable(storeId, storeSlug, timetableRef.current);
         toast.success("Done!", {
           description: "Timetable updated successfully",
         });
@@ -70,7 +66,7 @@ export function EditBusinessTimetable({
 
   useEffect(() => {
     if (state?.success) {
-      onSuccess?.();
+      onSuccessAction?.();
       const timer = setTimeout(() => {
         if (formRef.current) {
           formRef.current.reset();
@@ -78,7 +74,7 @@ export function EditBusinessTimetable({
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [state, onSuccess]);
+  }, [state, onSuccessAction]);
 
   const handleDayToggle = (dayKey: string, checked: boolean) => {
     setTimetable((prev) => ({

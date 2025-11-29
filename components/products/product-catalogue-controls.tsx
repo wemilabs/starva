@@ -3,13 +3,13 @@
 import { CalendarClock, Clock } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { parseAsString, useQueryState } from "nuqs";
-import { useState } from "react";
+import { Activity, useState } from "react";
 
 import { AddProductForm } from "@/components/forms/add-product-form";
 import {
-  EditBusinessTimetable,
+  EditStoreTimetable,
   type TimetableData,
-} from "@/components/forms/edit-business-timetable";
+} from "@/components/forms/edit-store-timetable";
 import { SearchForm } from "@/components/forms/search-form";
 import {
   Dialog,
@@ -32,28 +32,28 @@ import { ShareDialog } from "../share-dialog";
 import { Button } from "../ui/button";
 
 type ProductCatalogueControlsProps = {
-  businessId: string;
-  businessSlug: string;
-  businessName?: string;
+  storeId: string;
+  storeSlug: string;
+  storeName?: string;
   timetable?: TimetableData;
   defaultStatus?: string;
 };
 
 export function ProductCatalogueControls({
-  businessId,
-  businessSlug,
-  businessName,
+  storeId,
+  storeSlug,
+  storeName,
   timetable,
   defaultStatus = "all",
 }: ProductCatalogueControlsProps) {
-  const [isBusinessHoursOpen, setIsBusinessHoursOpen] = useState(false);
+  const [isStoreHoursOpen, setIsStoreHoursOpen] = useState(false);
   const pathname = usePathname();
   const [status, setStatus] = useQueryState(
     "status",
     parseAsString.withDefault(defaultStatus)
   );
 
-  const isBusinessPage = pathname === `/businesses/${businessSlug}`;
+  const isStorePage = pathname === `/stores/${storeSlug}`;
 
   return (
     <div className="flex flex-col gap-3">
@@ -61,22 +61,15 @@ export function ProductCatalogueControls({
         <div className="flex flex-col gap-1">
           <h2 className="text-lg font-semibold">Catalogue</h2>
           <p className="text-muted-foreground text-sm font-mono tracking-tighter">
-            {isBusinessPage
-              ? "Manage your products here"
-              : "View products here"}
+            {isStorePage ? "Manage your products here" : "View products here"}
           </p>
         </div>
-        {isBusinessPage ? (
-          <div className="flex items-center gap-2">
-            <AddProductForm
-              organizationId={businessId}
-              businessSlug={businessSlug}
-            />
 
-            <Dialog
-              open={isBusinessHoursOpen}
-              onOpenChange={setIsBusinessHoursOpen}
-            >
+        <Activity mode={isStorePage ? "visible" : "hidden"}>
+          <div className="flex items-center gap-2">
+            <AddProductForm organizationId={storeId} storeSlug={storeSlug} />
+
+            <Dialog open={isStoreHoursOpen} onOpenChange={setIsStoreHoursOpen}>
               <DialogTrigger asChild>
                 <Button
                   variant="outline"
@@ -91,17 +84,17 @@ export function ProductCatalogueControls({
                 <DialogHeader>
                   <DialogTitle className="flex items-center">
                     <Clock className="size-5" />
-                    Business Hours
+                    Store Opening Hours
                   </DialogTitle>
                   <DialogDescription className="font-mono tracking-tighter">
-                    Set your business operating hours for each day of the week
+                    Set your store operating hours for each day of the week
                   </DialogDescription>
                 </DialogHeader>
-                <EditBusinessTimetable
-                  businessId={businessId}
-                  businessSlug={businessSlug}
+                <EditStoreTimetable
+                  storeId={storeId}
+                  storeSlug={storeSlug}
                   initialTimetable={timetable}
-                  onSuccess={() => setIsBusinessHoursOpen(false)}
+                  onSuccessAction={() => setIsStoreHoursOpen(false)}
                 />
               </DialogContent>
             </Dialog>
@@ -109,14 +102,14 @@ export function ProductCatalogueControls({
             <ShareDialog
               url={`${
                 process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
-              }/merchants/${businessSlug}`}
-              title={`Share ${businessName}`}
-              description={`Share your business catalogue with others`}
+              }/merchants/${storeSlug}`}
+              title={`Share ${storeName}`}
+              description={`Share your store catalogue with others`}
               variant={{ variant: "ghost", size: "icon" }}
               className="-ml-3"
             />
           </div>
-        ) : null}
+        </Activity>
       </div>
 
       <div className="flex items-center justify-between gap-2">

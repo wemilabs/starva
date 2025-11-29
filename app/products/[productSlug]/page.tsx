@@ -200,7 +200,7 @@ export async function generateMetadata({
       url: FALLBACK_PRODUCT_IMG_URL,
       width: 1200,
       height: 630,
-      alt: "Starva.shop app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+      alt: "Starva.shop app - A sure platform for local stores and customers to meet. Easy, fast and reliable.",
     });
   }
 

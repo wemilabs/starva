@@ -110,10 +110,10 @@ export function NavMain({
       </SidebarGroupLabel>
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton asChild tooltip="Businesses">
-            <Link href="/businesses">
+          <SidebarMenuButton asChild tooltip="stores">
+            <Link href="/stores">
               <Building2 />
-              <span>Businesses</span>
+              <span>Stores</span>
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>

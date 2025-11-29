@@ -1,7 +1,7 @@
 import { Card, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function SkeletonBusinessCard() {
+export function SkeletonStoreCard() {
   return (
     <Card>
       <CardHeader>

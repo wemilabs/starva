@@ -6,7 +6,7 @@ import { StatusContent } from "./status-content";
 export const metadata: Metadata = {
   title: "Order Status | Starva.shop",
   description:
-    "Check the status of your order confirmation or rejection. Real-time order tracking for local businesses.",
+    "Check the status of your order confirmation or rejection. Real-time order tracking for local stores.",
   robots: {
     index: false,
     follow: false,

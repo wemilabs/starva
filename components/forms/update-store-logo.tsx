@@ -9,7 +9,7 @@ type Props = {
   className?: string;
 };
 
-export function UpdateBusinessLogoForm({ action, className }: Props) {
+export function UpdateStoreLogoForm({ action, className }: Props) {
   const hiddenInputRef = useRef<HTMLInputElement | null>(null);
 
   return (
@@ -22,7 +22,7 @@ export function UpdateBusinessLogoForm({ action, className }: Props) {
       />
 
       <UploadButton
-        endpoint="businessLogo"
+        endpoint="storeLogo"
         className="ut-button:bg-primary ut-button:ut-readying:bg-primary/50"
         onClientUploadComplete={(res) => {
           const url = res?.[0]?.ufsUrl || "";

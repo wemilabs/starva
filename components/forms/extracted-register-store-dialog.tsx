@@ -10,24 +10,24 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { RegisterBusinessForm } from "./register-business-form";
+import { RegisterStoreForm } from "./register-store-form";
 
-export function ExtractedRegisterBusinessDialog() {
+export function ExtractedRegisterStoreDialog() {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
     <Dialog onOpenChange={setDialogOpen} open={dialogOpen}>
       <DialogTrigger asChild>
-        <Button size="sm">Claim business</Button>
+        <Button size="sm">Claim Store</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Register Business</DialogTitle>
+          <DialogTitle>Register Store</DialogTitle>
           <DialogDescription>
-            Register a new business to get started.
+            Register a new store to get started.
           </DialogDescription>
         </DialogHeader>
-        <RegisterBusinessForm
+        <RegisterStoreForm
           onSuccess={() => setDialogOpen(false)}
           onCloseDialog={() => setDialogOpen(false)}
         />

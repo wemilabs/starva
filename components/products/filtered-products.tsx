@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { parseAsArrayOf, parseAsString, useQueryStates } from "nuqs";
+import { Activity } from "react";
 import type { Product } from "@/db/schema";
 import { ProductCard } from "./product-card";
 
@@ -89,19 +90,18 @@ export function FilteredProducts({
     }
   });
 
-  const isBusinessesPage =
-    pathname === `/businesses/${data[0]?.organization?.slug}`;
+  const isStoresPage = pathname === `/stores/${data[0]?.organization?.slug}`;
   const isProductsPage =
     pathname === "/products" || pathname === "/products?search=";
 
   if (!filteredProducts?.length)
     return (
       <>
-        {isProductsPage && (
+        <Activity mode={isProductsPage ? "visible" : "hidden"}>
           <p className="col-span-full text-sm text-muted-foreground mb-4 font-mono tracking-tighter">
             Showing 0 product
           </p>
-        )}
+        </Activity>
         <div className="w-full sm:col-span-full flex items-center justify-center min-h-[200px] border border-dashed border-muted-foreground/50 rounded-lg">
           <p className="text-sm text-muted-foreground text-center font-mono tracking-tighter">
             No products found
@@ -112,12 +112,12 @@ export function FilteredProducts({
 
   return (
     <>
-      {isProductsPage && (
+      <Activity mode={isProductsPage ? "visible" : "hidden"}>
         <div className="col-span-full text-sm text-pretty text-muted-foreground font-mono tracking-tighter">
           Showing {filteredProducts.length} product
           {filteredProducts.length <= 1 ? "" : "s"}
         </div>
-      )}
+      </Activity>
       {filteredProducts?.map((product) => (
         <div
           key={product.id}
@@ -136,7 +136,7 @@ export function FilteredProducts({
         >
           <ProductCard
             {...product}
-            href={!isBusinessesPage ? product.slug : undefined}
+            href={!isStoresPage ? product.slug : undefined}
             className={
               highlightMatches && effectiveSearch
                 ? "ring-2 ring-primary/40 hover:ring-primary/80 transition-all duration-300"

@@ -7,23 +7,23 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "../ui/spinner";
 
-interface EditableBusinessDescriptionProps {
-  businessId: string;
-  businessSlug: string;
+interface EditableStoreDescriptionProps {
+  storeId: string;
+  storeSlug: string;
   initialDescription?: string;
   updateAction: (
-    businessId: string,
-    businessSlug: string,
-    description: string,
+    storeId: string,
+    storeSlug: string,
+    description: string
   ) => Promise<void>;
 }
 
-export function EditableBusinessDescription({
-  businessId,
-  businessSlug,
+export function EditableStoreDescription({
+  storeId,
+  storeSlug,
   initialDescription = "",
   updateAction,
-}: EditableBusinessDescriptionProps) {
+}: EditableStoreDescriptionProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [description, setDescription] = useState(initialDescription);
   const [isPending, startTransition] = useTransition();
@@ -48,17 +48,16 @@ export function EditableBusinessDescription({
 
     startTransition(async () => {
       try {
-        await updateAction(businessId, businessSlug, trimmedDescription);
+        await updateAction(storeId, storeSlug, trimmedDescription);
         setIsEditing(false);
-        toast.success("Description updated", {
-          description:
-            "Your business description has been updated successfully.",
+        toast.success("Store description updated", {
+          description: "Your store description has been updated successfully.",
         });
       } catch (error) {
         console.error("Failed to update description:", error);
         setDescription(initialDescription);
         toast.error("Failed to update description", {
-          description: "Your business description could not be updated.",
+          description: "Your store description could not be updated.",
         });
       }
     });
@@ -83,7 +82,7 @@ export function EditableBusinessDescription({
           onChange={(e) => setDescription(e.target.value)}
           onKeyDown={handleKeyDown}
           disabled={isPending}
-          placeholder="Add a description for your business..."
+          placeholder="Add a description for your store..."
           maxLength={500}
           className="min-h-24 bg-white/10 backdrop-blur rounded-lg ring-1 ring-white/15 text-white placeholder:text-white/50 resize-none"
         />

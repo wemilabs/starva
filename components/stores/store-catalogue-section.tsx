@@ -1,8 +1,8 @@
 "use client";
 
-import { FilteredBusiness } from "./filtered-business";
+import { FilteredStore } from "./filtered-store";
 
-type BusinessCatalogueSectionProps = {
+type StoreCatalogueSectionProps = {
   data:
     | {
         id: string;
@@ -15,12 +15,10 @@ type BusinessCatalogueSectionProps = {
     | null;
 };
 
-export function BusinessCatalogueSection({
-  data,
-}: BusinessCatalogueSectionProps) {
+export function StoreCatalogueSection({ data }: StoreCatalogueSectionProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <FilteredBusiness data={data} />
+      <FilteredStore data={data} />
     </div>
   );
 }

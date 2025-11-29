@@ -29,12 +29,12 @@ import { cn } from "@/lib/utils";
 export function DeleteProductForm({
   productId,
   organizationId,
-  businessSlug,
+  storeSlug,
   className,
 }: {
   productId: string;
   organizationId: string;
-  businessSlug: string;
+  storeSlug: string;
   className?: string;
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -45,7 +45,7 @@ export function DeleteProductForm({
       const payload = {
         productId,
         organizationId,
-        revalidateTargetPath: `/businesses/${businessSlug}`,
+        revalidateTargetPath: `/stores/${storeSlug}`,
       };
       const parsed = schema.safeParse(payload);
       if (!parsed.success) {

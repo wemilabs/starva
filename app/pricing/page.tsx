@@ -6,7 +6,7 @@ import { PRICING_PLANS } from "@/lib/constants";
 export const metadata: Metadata = {
   title: "Pricing Plans - Starva.shop",
   description:
-    "Start free for students & side hustlers. Upgrade as your business grows.",
+    "Start free for students & side hustlers. Upgrade as your store grows.",
 };
 
 async function PricingHeader() {

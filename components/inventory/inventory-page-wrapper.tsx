@@ -48,13 +48,13 @@ export async function InventoryPageWrapper() {
           </EmptyMedia>
           <EmptyTitle>No Active Organization</EmptyTitle>
           <EmptyDescription className="font-mono tracking-tighter">
-            Please select or create an organization from the top business
-            switcher to manage inventory.
+            Please select or create an organization from the top store switcher
+            to manage inventory.
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          The business switcher is located at the top of the sidebar, right
-          below the logo.
+          The store switcher is located at the top of the sidebar, right below
+          the logo.
         </EmptyContent>
       </Empty>
     );

@@ -63,14 +63,14 @@ interface OrderTabsProps {
     count: number;
     totalRevenue: string | null;
   }[];
-  hasActiveBusiness: boolean;
+  hasActiveStore: boolean;
 }
 
 export function OrderTabs({
   myOrders,
   customerOrders,
   merchantStats,
-  hasActiveBusiness,
+  hasActiveStore,
 }: OrderTabsProps) {
   const myOrdersStats = calculateOrderStats(myOrders);
 
@@ -107,7 +107,7 @@ export function OrderTabs({
       </TabsContent>
 
       <TabsContent value="customer-orders" className="space-y-6 mt-6">
-        {hasActiveBusiness ? (
+        {hasActiveStore ? (
           <>
             <OrderStats stats={merchantStats} />
             <Suspense
@@ -123,9 +123,9 @@ export function OrderTabs({
         ) : (
           <div className="text-center py-12 flex flex-col items-center justify-center border border-dashed rounded-md">
             <Store className="size-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No Business Selected</h3>
+            <h3 className="text-lg font-semibold mb-2">No store selected</h3>
             <p className="text-sm text-muted-foreground max-w-md font-mono tracking-tighter">
-              Please select a business to view and manage orders from your
+              Please select a store to view and manage orders from your
               customers
             </p>
           </div>

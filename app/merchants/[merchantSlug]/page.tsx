@@ -14,8 +14,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { getBusinessBySlug } from "@/data/businesses";
-import { getProductsPerBusinessWithoutAuth } from "@/data/products";
+import { getProductsPerStoreWithoutAuth } from "@/data/products";
+import { getStoreBySlug } from "@/data/stores";
 import { DAYS, GENERAL_BRANDING_IMG_URL, today } from "@/lib/constants";
 import { formatTime } from "@/lib/utils";
 
@@ -27,9 +27,7 @@ async function ProductsList({
   defaultStatus?: string;
 }) {
   "use cache";
-  const productsPerMerchant = await getProductsPerBusinessWithoutAuth(
-    merchantId
-  );
+  const productsPerMerchant = await getProductsPerStoreWithoutAuth(merchantId);
 
   if (!Array.isArray(productsPerMerchant) || productsPerMerchant.length === 0) {
     return (
@@ -57,7 +55,7 @@ async function MerchantContent({
 }) {
   const { merchantSlug } = await params;
 
-  const merchant = await getBusinessBySlug(merchantSlug);
+  const merchant = await getStoreBySlug(merchantSlug);
   if (!merchant) return notFound();
 
   const resolvedSlug = merchant.slug || merchantSlug;
@@ -134,7 +132,7 @@ async function MerchantContent({
       {hasTimetable ? (
         <section className="grid gap-6">
           <Accordion type="single" collapsible defaultValue="">
-            <AccordionItem value="business-hours">
+            <AccordionItem value="store-hours">
               <AccordionTrigger className="hover:no-underline">
                 <div className="flex items-center gap-2">
                   <Clock className="size-4" />
@@ -203,8 +201,8 @@ async function MerchantContent({
           }
         >
           <ProductCatalogueControls
-            businessId={merchant.id}
-            businessSlug={resolvedSlug}
+            storeId={merchant.id}
+            storeSlug={resolvedSlug}
             timetable={timetable}
             defaultStatus="in_stock"
           />
@@ -240,7 +238,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { merchantSlug } = await params;
 
-  const merchant = await getBusinessBySlug(merchantSlug);
+  const merchant = await getStoreBySlug(merchantSlug);
   if (!merchant) {
     return {
       title: "Merchant Not Found - Starva.shop",
@@ -267,7 +265,7 @@ export async function generateMetadata({
       url: GENERAL_BRANDING_IMG_URL,
       width: 1200,
       height: 630,
-      alt: "Starva.shop app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+      alt: "Starva.shop app - A sure platform for local stores and customers to meet. Easy, fast and reliable.",
     });
   }
 

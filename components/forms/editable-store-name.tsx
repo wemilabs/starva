@@ -7,23 +7,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "../ui/spinner";
 
-interface EditableBusinessNameProps {
-  businessId: string;
-  businessSlug: string;
+interface EditableStoreNameProps {
+  storeId: string;
+  storeSlug: string;
   initialName: string;
   updateAction: (
-    businessId: string,
-    businessSlug: string,
+    storeId: string,
+    storeSlug: string,
     name: string
   ) => Promise<void>;
 }
 
-export function EditableBusinessName({
-  businessId,
-  businessSlug,
+export function EditableStoreName({
+  storeId,
+  storeSlug,
   initialName,
   updateAction,
-}: EditableBusinessNameProps) {
+}: EditableStoreNameProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(initialName);
   const [isPending, startTransition] = useTransition();
@@ -48,16 +48,16 @@ export function EditableBusinessName({
 
     startTransition(async () => {
       try {
-        await updateAction(businessId, businessSlug, trimmedName);
+        await updateAction(storeId, storeSlug, trimmedName);
         setIsEditing(false);
-        toast.success("Business name updated", {
-          description: "Your business name has been updated successfully.",
+        toast.success("Store name updated", {
+          description: "Your store name has been updated successfully.",
         });
       } catch (error) {
-        console.error("Failed to update business name:", error);
+        console.error("Failed to update store name:", error);
         setName(initialName);
-        toast.error("Failed to update business name", {
-          description: "Your business name could not be updated.",
+        toast.error("Failed to update store name", {
+          description: "Your store name could not be updated.",
         });
       }
     });

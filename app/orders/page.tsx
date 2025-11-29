@@ -65,8 +65,8 @@ async function OrdersContent() {
             </EmptyMedia>
             <EmptyTitle>No orders yet</EmptyTitle>
             <EmptyDescription className="font-mono tracking-tighter">
-              Start shopping from businesses to place your first order. Your
-              order history will appear here.
+              Start shopping from stores to place your first order. Your order
+              history will appear here.
             </EmptyDescription>
           </EmptyHeader>
         </Empty>
@@ -75,7 +75,7 @@ async function OrdersContent() {
           myOrders={myOrders}
           customerOrders={customerOrders}
           merchantStats={merchantStats}
-          hasActiveBusiness={!!activeOrgId}
+          hasActiveStore={!!activeOrgId}
         />
       )}
     </div>
@@ -104,7 +104,7 @@ export async function generateMetadata(): Promise<Metadata> {
           url: GENERAL_BRANDING_IMG_URL,
           width: 1200,
           height: 630,
-          alt: "Starva.shop app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+          alt: "Starva.shop app - A sure platform for local stores and customers to meet. Easy, fast and reliable.",
         },
       ],
       siteName: "Starva.shop",

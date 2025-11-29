@@ -62,15 +62,15 @@ const formSchema = z
     }
   );
 
-interface RegisterBusinessFormProps {
+interface RegisterStoreFormProps {
   onSuccess?: () => void;
   onCloseDialog?: () => void;
 }
 
-export function RegisterBusinessForm({
+export function RegisterStoreForm({
   onSuccess,
   onCloseDialog,
-}: RegisterBusinessFormProps) {
+}: RegisterStoreFormProps) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const { data: session } = useSession();
@@ -120,7 +120,7 @@ export function RegisterBusinessForm({
       try {
         if (!ownerId) {
           toast.message("Please sign in first", {
-            description: "You must be signed in to register a business.",
+            description: "You must be signed in to register a store.",
           });
           router.push("/sign-in");
           return;
@@ -146,7 +146,7 @@ export function RegisterBusinessForm({
           },
         });
         toast.success("Success", {
-          description: "A new business has successfully been registered ",
+          description: "A new store has successfully been registered ",
         });
         onSuccess?.();
         router.refresh();
@@ -154,7 +154,7 @@ export function RegisterBusinessForm({
         const e = error as Error;
         console.error(e.message);
         toast.error("Failure", {
-          description: e.message || "Failed to register business",
+          description: e.message || "Failed to register store",
         });
       }
     });
@@ -166,7 +166,7 @@ export function RegisterBusinessForm({
         <CardContent className="flex flex-col items-center justify-center gap-2 py-8">
           <Spinner />
           <p className="text-sm text-muted-foreground font-mono tracking-tighter">
-            Checking your business limits...
+            Checking your store limits...
           </p>
         </CardContent>
       </Card>
@@ -179,7 +179,7 @@ export function RegisterBusinessForm({
         <Card className="border border-dashed bg-sidebar">
           <CardContent className="flex flex-col gap-2">
             <p className="text-sm text-muted-foreground text-center font-mono tracking-tighter">
-              First, you need to sign in to register your business
+              First, you need to sign in to register your store
             </p>
             <Button
               asChild
@@ -196,13 +196,13 @@ export function RegisterBusinessForm({
         <Card className="border border-dashed bg-sidebar">
           <CardContent className="flex flex-col gap-4 py-6">
             <div className="text-center space-y-2">
-              <h3 className="font-medium">Business Limit Reached</h3>
+              <h3 className="font-medium">Store Limit Reached</h3>
               <p className="text-xs text-muted-foreground font-mono tracking-tighter">
-                You've reached your limit of {orgLimit?.maxOrgs} businesses on
-                the {orgLimit?.planName} plan.
+                You've reached your limit of {orgLimit?.maxOrgs} stores on the{" "}
+                {orgLimit?.planName} plan.
               </p>
               <p className="text-xs text-muted-foreground font-mono tracking-tighter">
-                Current businesses: {orgLimit?.currentOrgs}/{orgLimit?.maxOrgs}
+                Current stores: {orgLimit?.currentOrgs}/{orgLimit?.maxOrgs}
               </p>
             </div>
             <Button
@@ -224,7 +224,7 @@ export function RegisterBusinessForm({
                 <FormLabel>Name</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="My Business"
+                    placeholder="My store"
                     className="placeholder:text-sm"
                     {...field}
                   />
@@ -242,7 +242,7 @@ export function RegisterBusinessForm({
                 <FormLabel>Slug</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="my-business"
+                    placeholder="my-store"
                     readOnly
                     className="bg-muted cursor-not-allowed text-muted-foreground placeholder:text-sm"
                     {...field}
@@ -261,7 +261,7 @@ export function RegisterBusinessForm({
                 <FormLabel>Description</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Could simply be the slogan of your business."
+                    placeholder="Could simply be the slogan of your store."
                     className="placeholder:text-sm"
                     {...field}
                   />
@@ -381,10 +381,10 @@ export function RegisterBusinessForm({
             {isPending ? (
               <div className="flex items-center gap-2">
                 <Spinner />
-                <p>Registering Business...</p>
+                <p>Registering Store...</p>
               </div>
             ) : (
-              "Register Business"
+              "Register Store"
             )}
           </Button>
         </form>

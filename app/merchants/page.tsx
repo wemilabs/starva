@@ -1,11 +1,10 @@
 import { Building2 } from "lucide-react";
 import type { Metadata } from "next";
 import { Suspense } from "react";
-
-import { BusinessCatalogueSection } from "@/components/businesses/business-catalogue section";
-import { SkeletonBusinessCard } from "@/components/businesses/skeleton-business-card";
-import { ExtractedRegisterBusinessDialog } from "@/components/forms/extracted-register-business-dialog";
+import { ExtractedRegisterStoreDialog } from "@/components/forms/extracted-register-store-dialog";
 import { SearchForm } from "@/components/forms/search-form";
+import { SkeletonStoreCard } from "@/components/stores/skeleton-store-card";
+import { StoreCatalogueSection } from "@/components/stores/store-catalogue-section";
 import {
   Empty,
   EmptyContent,
@@ -14,12 +13,12 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { getAllBusinesses } from "@/data/businesses";
+import { getAllStores } from "@/data/stores";
 import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
 
 async function MerchantsList() {
   "use cache";
-  const merchants = await getAllBusinesses();
+  const merchants = await getAllStores();
 
   if (!merchants || merchants.length === 0) {
     return (
@@ -34,13 +33,13 @@ async function MerchantsList() {
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <ExtractedRegisterBusinessDialog />
+          <ExtractedRegisterStoreDialog />
         </EmptyContent>
       </Empty>
     );
   }
 
-  return <BusinessCatalogueSection data={merchants} />;
+  return <StoreCatalogueSection data={merchants} />;
 }
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -65,7 +64,7 @@ export async function generateMetadata(): Promise<Metadata> {
           url: GENERAL_BRANDING_IMG_URL,
           width: 1200,
           height: 630,
-          alt: "Starva.shop app - A sure platform for local businesses and customers to meet. Easy, fast and reliable.",
+          alt: "Starva.shop app - A sure platform for local stores and customers to meet. Easy, fast and reliable.",
         },
       ],
       siteName: "Starva.shop",
@@ -113,12 +112,12 @@ export default async function MerchantsPage() {
               Loading merchants...
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <SkeletonBusinessCard />
-              <SkeletonBusinessCard />
-              <SkeletonBusinessCard />
-              <SkeletonBusinessCard />
-              <SkeletonBusinessCard />
-              <SkeletonBusinessCard />
+              <SkeletonStoreCard />
+              <SkeletonStoreCard />
+              <SkeletonStoreCard />
+              <SkeletonStoreCard />
+              <SkeletonStoreCard />
+              <SkeletonStoreCard />
             </div>
           </>
         }

@@ -2,11 +2,10 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { lastLoginMethod, organization } from "better-auth/plugins";
-import { eq, inArray } from "drizzle-orm";
-
+import { eq, inArray, type SQLWrapper } from "drizzle-orm";
 // import { Resend } from "resend";
-
-// import { redirect } from "next/navigation";
+// import VerificationEmail from "@/components/emails/verification-email";
+// import PasswordResetEmail from "@/components/emails/password-reset-email";
 import { db } from "@/db/drizzle";
 import {
   inventoryHistory,
@@ -20,8 +19,6 @@ import {
   productTag,
   schema,
 } from "@/db/schema";
-// import VerificationEmail from "@/components/emails/verification-email";
-// import PasswordResetEmail from "@/components/emails/password-reset-email";
 
 // const resend = new Resend(process.env.RESEND_API_KEY!);
 
@@ -86,7 +83,7 @@ export const auth = betterAuth({
   user: {
     deleteUser: {
       enabled: true,
-      beforeDelete: async (user) => {
+      beforeDelete: async (user: { id: string | SQLWrapper }) => {
         const userOrgs = await db.query.member.findMany({
           where: eq(member.userId, user.id),
           with: {
@@ -156,8 +153,8 @@ export const auth = betterAuth({
           } for user ${user.id}`
         );
       },
-      afterDelete: async (user) => {
-        console.log(`User "${user.name}" deleted successfully`);
+      afterDelete: async (user: { name: string }) => {
+        console.log(`User "${user.name}" successfully deleted!`);
       },
     },
   },

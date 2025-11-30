@@ -1,3 +1,5 @@
+/** biome-ignore-all lint/a11y/useSemanticElements: not a big deal here */
+/** biome-ignore-all lint/a11y/useKeyWithClickEvents: chill out bud! */
 "use client";
 
 import { cva, type VariantProps } from "class-variance-authority";

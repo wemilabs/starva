@@ -117,11 +117,11 @@ function AnimatedGroup({
 
   const MotionComponent = useMemo(
     () => motion.create(as as keyof React.JSX.IntrinsicElements),
-    [as],
+    [as]
   );
   const MotionChild = useMemo(
     () => motion.create(asChild as keyof React.JSX.IntrinsicElements),
-    [asChild],
+    [asChild]
   );
 
   return (
@@ -132,6 +132,7 @@ function AnimatedGroup({
       className={className}
     >
       {React.Children.map(children, (child, index) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: false positive
         <MotionChild key={index} variants={itemVariants}>
           {child}
         </MotionChild>

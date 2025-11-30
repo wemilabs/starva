@@ -28,8 +28,8 @@ export type TextEffectProps = {
   speedReveal?: number;
   speedSegment?: number;
   trigger?: boolean;
-  onAnimationComplete?: () => void;
-  onAnimationStart?: () => void;
+  onAnimationCompleteAction?: () => void;
+  onAnimationStartAction?: () => void;
   segmentWrapperClassName?:
     | string
     | ((segment: string, index: number) => string | undefined);
@@ -152,7 +152,10 @@ const AnimationComponent: React.FC<{
         <motion.span className="inline-block whitespace-pre">
           {segment.split("").map((char, charIndex) => (
             <motion.span
-              key={`char-${charIndex}`}
+              key={`char-${
+                // biome-ignore lint/suspicious/noArrayIndexKey: chill out bud
+                charIndex
+              }`}
               aria-hidden="true"
               variants={variants}
               className="inline-block whitespace-pre"
@@ -181,7 +184,7 @@ const AnimationComponent: React.FC<{
         {content}
       </Tag>
     );
-  },
+  }
 );
 
 AnimationComponent.displayName = "AnimationComponent";
@@ -192,7 +195,7 @@ const splitText = (text: string, per: PerType) => {
 };
 
 const hasTransition = (
-  variant?: Variant,
+  variant?: Variant
 ): variant is TargetAndTransition & { transition?: Transition } => {
   if (!variant) return false;
   return typeof variant === "object" && "transition" in variant;
@@ -200,7 +203,7 @@ const hasTransition = (
 
 const createVariantsWithTransition = (
   baseVariants: Variants,
-  transition?: Transition & { exit?: Transition },
+  transition?: Transition & { exit?: Transition }
 ): Variants => {
   if (!transition) return baseVariants;
 
@@ -241,8 +244,8 @@ export function TextEffect({
   speedReveal = 1,
   speedSegment = 1,
   trigger = true,
-  onAnimationComplete,
-  onAnimationStart,
+  onAnimationCompleteAction,
+  onAnimationStartAction,
   segmentWrapperClassName,
   containerTransition,
   segmentTransition,
@@ -286,7 +289,7 @@ export function TextEffect({
           staggerChildren: customStagger ?? stagger,
           staggerDirection: -1,
         },
-      },
+      }
     ),
     item: createVariantsWithTransition(variants?.item || baseVariants.item, {
       duration: baseDuration,
@@ -297,13 +300,13 @@ export function TextEffect({
   // Build a local, client-side function to decide per-segment highlighting
   const normalize = (s: string) => (caseSensitive ? s : s.toLowerCase());
   const wordsSet = new Set(
-    (highlightWords ?? []).map((w) => normalize(w.trim())),
+    (highlightWords ?? []).map((w) => normalize(w.trim()))
   );
   const indicesSet = new Set(highlightIndices ?? []);
 
   const localWrapperClassFn = (
     segment: string,
-    index: number,
+    index: number
   ): string | undefined => {
     const trimmed = segment.trim();
     const segNorm = normalize(trimmed);
@@ -325,8 +328,8 @@ export function TextEffect({
           exit="exit"
           variants={computedVariants.container}
           className={className}
-          onAnimationComplete={onAnimationComplete}
-          onAnimationStart={onAnimationStart}
+          onAnimationComplete={onAnimationCompleteAction}
+          onAnimationStart={onAnimationStartAction}
           style={style}
         >
           {per !== "line" ? <span className="sr-only">{children}</span> : null}

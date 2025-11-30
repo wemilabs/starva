@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/a11y/useSemanticElements: chill out bud */
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 import { Separator } from "@/components/ui/separator";

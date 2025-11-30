@@ -78,10 +78,10 @@ export function ProductLikeButton({
     >
       <Heart
         className={cn(
-          "transition-colors",
-          variant === "compact" ? "size-3.5" : "size-4"
+          "transition-colors size-4",
+          optimisticState.isLiked && "text-primary"
         )}
-        fill={optimisticState.isLiked ? "currentColor" : "none"}
+        fill={optimisticState.isLiked ? "var(--primary)" : "none"}
         aria-hidden="true"
       />
       <span className={cn("text-sm", variant === "compact" && "text-xs")}>

@@ -21,7 +21,7 @@ const buttonVariants = cva(
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
         compact:
-          "gap-1 rounded-full bg-black/30 text-white/90 ring-1 ring-white/10 backdrop-blur-sm transition-all hover:bg-black/40 disabled:opacity-50",
+          "gap-1 rounded-lg bg-black/30 text-white/90 ring-1 ring-white/10 backdrop-blur-sm transition-all hover:bg-black/40 disabled:opacity-50",
         success:
           "bg-green-600 text-green-50 shadow-xs hover:bg-green-700 dark:bg-green-600/90 dark:hover:bg-green-700",
       },

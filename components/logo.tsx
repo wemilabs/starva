@@ -11,7 +11,7 @@ export const Logo = () => {
         alt="Logo"
         width={200}
         height={200}
-        className="size-12 object-cover -ml-2 rounded-lg"
+        className="size-12 object-cover rounded-lg"
       />
 
       <div className="group-data-[collapsible=icon]:hidden">

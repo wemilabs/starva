@@ -27,7 +27,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "The Right Place for Whatever You Need to Buy - Starva.shop",
+  title: "The Right Place for Whatever Your Need - Starva.shop",
   description:
     "Search. Shop. Smile. - Starva.shop is super fast, secure, reliable and easy to use.",
   metadataBase: new URL("https://starva.shop/"),
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://starva.shop/",
-    title: "The Right Place for Whatever You Need to Buy - Starva.shop",
+    title: "The Right Place for Whatever Your Need - Starva.shop",
     description:
       "Search. Shop. Smile. - Starva.shop is super fast, secure, reliable and easy to use.",
     siteName: "Starva.shop",
@@ -80,7 +80,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "The Right Place for Whatever You Need to Buy - Starva.shop",
+    title: "The Right Place for Whatever Your Need - Starva.shop",
     description:
       "Search. Shop. Smile. - Starva.shop is super fast, secure, reliable and easy to use.",
     images: [GENERAL_BRANDING_IMG_URL],

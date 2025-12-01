@@ -63,7 +63,7 @@ export const getOrdersByOrganization = cache(async (organizationId: string) => {
             columns: {
               id: true,
               name: true,
-              imageUrl: true,
+              imageUrls: true,
               price: true,
             },
           },
@@ -115,7 +115,7 @@ export const getOrderById = cache(async (orderId: string) => {
             columns: {
               id: true,
               name: true,
-              imageUrl: true,
+              imageUrls: true,
               price: true,
               description: true,
             },
@@ -164,7 +164,7 @@ export const getOrdersByUser = cache(async (userId: string) => {
             columns: {
               id: true,
               name: true,
-              imageUrl: true,
+              imageUrls: true,
               price: true,
             },
           },
@@ -216,7 +216,7 @@ export const getOrdersByStatus = cache(
               columns: {
                 id: true,
                 name: true,
-                imageUrl: true,
+                imageUrls: true,
                 price: true,
               },
             },

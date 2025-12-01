@@ -2,6 +2,7 @@ import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Activity } from "react";
+import { ImageCarousel } from "@/components/products/image-carousel";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import {
@@ -41,7 +42,8 @@ export function ProductCard({
   id,
   name,
   slug,
-  imageUrl,
+  imageUrls,
+  videoUrl,
   price,
   description,
   likesCount,
@@ -74,7 +76,7 @@ export function ProductCard({
     <>
       <div className="relative aspect-video">
         <Image
-          src={imageUrl ?? FALLBACK_PRODUCT_IMG_URL}
+          src={imageUrls?.[0] ?? FALLBACK_PRODUCT_IMG_URL}
           alt={name}
           fill
           priority
@@ -118,7 +120,8 @@ export function ProductCard({
                     name,
                     slug,
                     price,
-                    imageUrl,
+                    imageUrls,
+                    videoUrl,
                     description,
                     status,
                     category,
@@ -208,20 +211,19 @@ export function ProductCard({
           </Card>
         </DialogTrigger>
         <DialogContent
-          className="flex h-[calc(100vh-12rem)] flex-col gap-0 p-0 md:flex-row border-none md:h-[calc(100vh-25rem)] md:max-w-3xl md:w-full lg:max-w-4xl"
+          className="flex h-[calc(100vh-10rem)] flex-col gap-0 p-0 md:flex-row border-none md:h-[calc(100vh-20rem)] md:max-w-3xl md:w-full lg:max-w-4xl"
           aria-describedby="product details"
         >
           <div className="relative aspect-square overflow-hidden md:aspect-auto md:w-1/2">
-            <Image
-              src={imageUrl ?? FALLBACK_PRODUCT_IMG_URL}
+            <ImageCarousel
+              images={imageUrls}
               alt={name}
-              fill
-              priority
-              className="object-cover rounded-t-lg md:rounded-l-lg md:rounded-r-none"
-              onContextMenu={(e) => e.preventDefault()}
+              video={videoUrl}
+              className="rounded-t-lg md:rounded-l-lg md:rounded-r-none"
             />
           </div>
-          <div className="flex flex-1 flex-col gap-5 p-6 md:py-8">
+
+          <div className="flex flex-1 flex-col justify-between gap-5 p-6 md:py-8">
             <div className="flex flex-col gap-2">
               {organization?.name && (
                 <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
@@ -274,14 +276,14 @@ export function ProductCard({
             </div>
 
             <Activity mode={href ? "visible" : "hidden"}>
-              <div className="flex flex-col gap-1.5 mt-4 mb-5">
+              <div className="flex flex-col gap-1.5">
                 <AddToCartButton
                   product={{
                     id,
                     name,
                     slug,
                     price,
-                    imageUrl,
+                    imageUrls,
                     category,
                     isLandlord,
                     visitFees: visitFees || "0",

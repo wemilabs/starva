@@ -23,7 +23,8 @@ const productSchema = z.object({
   slug: z.string().min(2).max(120),
   price: z.string().min(1),
   description: z.string().optional().default(""),
-  imageUrl: z.url().optional().or(z.literal("")),
+  imageUrls: z.array(z.url()).optional().default([]),
+  videoUrl: z.url().optional().or(z.literal("")),
   category: z.string().min(1),
   specifications: z.string().optional().default(""),
   isLandlord: z.boolean(),
@@ -49,7 +50,8 @@ export async function createProduct(input: z.infer<typeof productSchema>) {
       slug,
       price,
       description,
-      imageUrl,
+      imageUrls,
+      videoUrl,
       category,
       specifications,
       isLandlord,
@@ -94,7 +96,8 @@ export async function createProduct(input: z.infer<typeof productSchema>) {
         description: description || "",
         price,
         organizationId,
-        imageUrl: imageUrl || null,
+        imageUrls: imageUrls || [],
+        videoUrl: videoUrl || null,
         status: "draft",
         category: category as ProductCategory,
         specifications: specifications || null,
@@ -153,6 +156,8 @@ export async function createProduct(input: z.infer<typeof productSchema>) {
 
 const updateProductSchema = productSchema.extend({
   productId: z.string().min(1),
+  imageUrls: z.array(z.url()).optional().default([]),
+  videoUrl: z.url().optional().or(z.literal("")),
 });
 
 export async function updateProduct(
@@ -171,7 +176,8 @@ export async function updateProduct(
       slug,
       price,
       description,
-      imageUrl,
+      imageUrls,
+      videoUrl,
       category,
       specifications,
       isLandlord,
@@ -185,7 +191,10 @@ export async function updateProduct(
     } = parsed.data;
 
     const existingProduct = await db
-      .select({ imageUrl: productTable.imageUrl })
+      .select({
+        imageUrls: productTable.imageUrls,
+        videoUrl: productTable.videoUrl,
+      })
       .from(productTable)
       .where(
         and(
@@ -199,8 +208,10 @@ export async function updateProduct(
       return { ok: false, error: "Product not found" } as const;
     }
 
-    const oldImageUrl = existingProduct[0].imageUrl;
-    const newImageUrl = imageUrl || null;
+    const oldImageUrls = existingProduct[0].imageUrls || [];
+    const oldVideoUrl = existingProduct[0].videoUrl;
+    const newImageUrls = imageUrls || [];
+    const newVideoUrl = videoUrl || null;
 
     // Handle unit format creation/update if needed
     let finalUnitFormatId = unitFormatId;
@@ -233,7 +244,8 @@ export async function updateProduct(
         slug,
         description: description || "",
         price,
-        imageUrl: newImageUrl,
+        imageUrls: newImageUrls,
+        videoUrl: newVideoUrl,
         category: category as ProductCategory,
         specifications: specifications || null,
         isLandlord,
@@ -289,17 +301,39 @@ export async function updateProduct(
     }
 
     after(async () => {
-      if (oldImageUrl && oldImageUrl !== newImageUrl) {
+      // Delete old images that are not in the new array
+      if (oldImageUrls && oldImageUrls !== newImageUrls) {
         try {
-          const fileKey = extractFileKeyFromUrl(oldImageUrl);
-          if (fileKey) {
-            await utapi.deleteFiles(fileKey);
-            console.log(`Successfully deleted old image: ${fileKey}`);
+          const oldImagesToDelete = oldImageUrls.filter(
+            (url) => !newImageUrls.includes(url)
+          );
+          for (const oldImageUrl of oldImagesToDelete) {
+            const fileKey = extractFileKeyFromUrl(oldImageUrl);
+            if (fileKey) {
+              await utapi.deleteFiles(fileKey);
+              console.log(`Successfully deleted old image: ${fileKey}`);
+            }
           }
         } catch (error: unknown) {
           const e = error as Error;
           console.error(
-            `Failed to delete old image from UploadThing: ${e.message}`
+            `Failed to delete old images from UploadThing: ${e.message}`
+          );
+        }
+      }
+
+      // Delete old video if it's being replaced
+      if (oldVideoUrl && oldVideoUrl !== newVideoUrl) {
+        try {
+          const fileKey = extractFileKeyFromUrl(oldVideoUrl);
+          if (fileKey) {
+            await utapi.deleteFiles(fileKey);
+            console.log(`Successfully deleted old video: ${fileKey}`);
+          }
+        } catch (error: unknown) {
+          const e = error as Error;
+          console.error(
+            `Failed to delete old video from UploadThing: ${e.message}`
           );
         }
       }
@@ -332,7 +366,7 @@ export async function deleteProduct(
     const { productId, organizationId, revalidateTargetPath } = parsed.data;
 
     const productToDelete = await db
-      .select({ imageUrl: productTable.imageUrl })
+      .select({ imageUrls: productTable.imageUrls })
       .from(productTable)
       .where(
         and(
@@ -346,7 +380,7 @@ export async function deleteProduct(
       return { ok: false, error: "Product not found" } as const;
     }
 
-    const { imageUrl } = productToDelete[0];
+    const { imageUrls } = productToDelete[0];
 
     await db
       .delete(productTable)
@@ -358,17 +392,20 @@ export async function deleteProduct(
       );
 
     after(async () => {
-      if (imageUrl) {
+      if (imageUrls && imageUrls.length > 0) {
         try {
-          const fileKey = extractFileKeyFromUrl(imageUrl);
-          if (fileKey) {
-            await utapi.deleteFiles(fileKey);
-            console.log(`Successfully deleted image: ${fileKey}`);
+          // Delete all images when product is deleted
+          for (const imageUrl of imageUrls) {
+            const fileKey = extractFileKeyFromUrl(imageUrl);
+            if (fileKey) {
+              await utapi.deleteFiles(fileKey);
+              console.log(`Successfully deleted image: ${fileKey}`);
+            }
           }
         } catch (error: unknown) {
           const e = error as Error;
           console.error(
-            `Failed to delete image from UploadThing: ${e.message}`
+            `Failed to delete images from UploadThing: ${e.message}`
           );
         }
       }

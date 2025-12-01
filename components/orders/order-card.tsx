@@ -24,7 +24,7 @@ interface OrderCardProps {
       product: {
         id: string;
         name: string;
-        imageUrl: string | null;
+        imageUrls: string[] | null;
         price: string;
       };
     })[];

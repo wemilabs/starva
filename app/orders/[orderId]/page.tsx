@@ -103,9 +103,9 @@ async function OrderContent({
                     className="flex items-center gap-4 p-3 rounded-lg border"
                   >
                     <div className="relative size-16 rounded-md overflow-hidden bg-muted">
-                      {item.product.imageUrl ? (
+                      {item.product.imageUrls?.[0] ? (
                         <Image
-                          src={item.product.imageUrl}
+                          src={item.product.imageUrls[0]}
                           alt={item.product.name}
                           fill
                           className="object-cover"
@@ -317,9 +317,9 @@ export async function generateMetadata({
       )}. Status: ${order.status}.`;
 
   const images = [];
-  if (firstItem?.product.imageUrl) {
+  if (firstItem?.product.imageUrls?.[0]) {
     images.push({
-      url: firstItem.product.imageUrl,
+      url: firstItem.product.imageUrls[0],
       width: 1200,
       height: 630,
       alt: firstItem.product.name,

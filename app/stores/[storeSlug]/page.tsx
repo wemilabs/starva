@@ -107,6 +107,7 @@ async function StoreContent({
 
           <UpdateStoreLogoForm
             action={updateStoreLogo.bind(null, store.id, resolvedSlug)}
+            storeSlug={resolvedSlug}
             className="bg-white/10 backdrop-blur rounded-lg p-3 ring-1 ring-white/15"
           />
         </div>

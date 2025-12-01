@@ -141,9 +141,9 @@ export async function generateMetadata({
 
   // Build Open Graph images array
   const images = [];
-  if (firstProduct?.imageUrl) {
+  if (firstProduct?.imageUrls?.[0]) {
     images.push({
-      url: firstProduct.imageUrl,
+      url: firstProduct.imageUrls[0],
       width: 1200,
       height: 630,
       alt: `${firstProduct.name} from ${

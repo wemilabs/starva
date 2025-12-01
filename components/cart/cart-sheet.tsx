@@ -228,7 +228,9 @@ export function CartSheet() {
                     <div className="flex items-start gap-3">
                       <div className="relative size-16 overflow-hidden rounded-md bg-muted">
                         <Image
-                          src={item.productImage || FALLBACK_PRODUCT_IMG_URL}
+                          src={
+                            item.productImages?.[0] ?? FALLBACK_PRODUCT_IMG_URL
+                          }
                           alt={item.productName}
                           width={64}
                           height={64}

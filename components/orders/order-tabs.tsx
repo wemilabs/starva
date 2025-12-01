@@ -26,7 +26,7 @@ type OrderWithUser = Order & {
     product: {
       id: string;
       name: string;
-      imageUrl: string | null;
+      imageUrls: string[] | null;
       price: string;
     };
   })[];
@@ -49,7 +49,7 @@ type OrderWithOrganization = Order & {
     product: {
       id: string;
       name: string;
-      imageUrl: string | null;
+      imageUrls: string[] | null;
       price: string;
     };
   })[];

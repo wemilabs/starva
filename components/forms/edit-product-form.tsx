@@ -61,7 +61,8 @@ const schema = z
         (v) => !Number.isNaN(Number(v)) && Number(v) >= 0,
         "Enter a valid price"
       ),
-    imageUrl: z.url("Provide a valid URL").optional().or(z.literal("")),
+    imageUrls: z.array(z.url("Provide valid URLs")).optional(),
+    videoUrl: z.url("Provide a valid URL").optional().or(z.literal("")),
     description: z.string().max(500).optional().or(z.literal("")),
     category: z.string().min(1, "Category is required"),
     specifications: z.string().optional().or(z.literal("")),
@@ -114,7 +115,8 @@ export function EditProductForm({
       name: product.name || "",
       slug: product.slug || "",
       price: product.price || "",
-      imageUrl: product.imageUrl || "",
+      imageUrls: product.imageUrls || [],
+      videoUrl: product.videoUrl || "",
       description: product.description || "",
       category: product.category || "",
       specifications: product.specifications || "",
@@ -154,7 +156,7 @@ export function EditProductForm({
             name: product.name || "",
             slug: product.slug || "",
             price: product.price || "",
-            imageUrl: product.imageUrl || "",
+            imageUrls: product.imageUrls || [],
             description: product.description || "",
             category: product.category || "",
             tags: productTagsResult.tags,
@@ -195,7 +197,8 @@ export function EditProductForm({
           slug: values.slug,
           price: values.price,
           description: values.description || "",
-          imageUrl: values.imageUrl || "",
+          imageUrls: values.imageUrls || [],
+          videoUrl: values.videoUrl || "",
           category: values.category,
           specifications: values.specifications ?? "",
           isLandlord: values.isLandlord,
@@ -401,20 +404,105 @@ export function EditProductForm({
 
               <FormField
                 control={form.control}
-                name="imageUrl"
+                name="imageUrls"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Image</FormLabel>
+                    <FormLabel>Product Images (Up to 3)</FormLabel>
+                    <FormControl>
+                      <div className="flex flex-col gap-3">
+                        <div className="grid grid-cols-3 gap-2">
+                          {field.value?.map((url, index) => (
+                            <div
+                              key={`image-${index}-${url.slice(-8)}`}
+                              className="relative group"
+                            >
+                              <div className="relative aspect-square overflow-hidden rounded-md border">
+                                <Image
+                                  src={url}
+                                  alt={`Product image ${index + 1}`}
+                                  fill
+                                  className="object-cover"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="destructive"
+                                  size="sm"
+                                  className="absolute top-1 right-1 size-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  onClick={() => {
+                                    const newUrls =
+                                      field.value?.filter(
+                                        (_, i) => i !== index
+                                      ) || [];
+                                    field.onChange(newUrls);
+                                  }}
+                                >
+                                  ×
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                          {(field.value?.length || 0) < 3 && (
+                            <div className="aspect-square border-2 border-dashed border-muted-foreground/25 rounded-md flex items-center justify-center">
+                              <UploadButton
+                                endpoint="productMedia"
+                                className="ut-button:bg-primary ut-button:ut-readying:bg-primary/50"
+                                headers={{ "x-store-slug": storeSlug }}
+                                content={{
+                                  allowedContent: () => "Images only",
+                                }}
+                                onClientUploadComplete={(res) => {
+                                  const imageUrls =
+                                    res
+                                      ?.filter((file) =>
+                                        file.type?.startsWith("image/")
+                                      )
+                                      .map((file) => file.ufsUrl) || [];
+                                  const currentUrls = field.value || [];
+                                  const newUrls = [
+                                    ...currentUrls,
+                                    ...imageUrls,
+                                  ].slice(0, 3);
+                                  field.onChange(newUrls);
+                                }}
+                                onUploadError={(err) => {
+                                  console.error(err);
+                                  toast.error(
+                                    err?.message ||
+                                      "Upload failed. Please try again."
+                                  );
+                                }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {field.value?.length || 0}/3 images uploaded
+                        </p>
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="videoUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Product Video (Optional)</FormLabel>
                     <FormControl>
                       <div className="flex flex-col gap-3">
                         {field.value ? (
                           <div className="flex items-center gap-3">
-                            <div className="relative h-20 w-20 overflow-hidden rounded-md border">
-                              <Image
+                            <div className="relative overflow-hidden rounded-md border">
+                              <video
                                 src={field.value}
-                                alt={form.getValues("name") || "Product image"}
-                                fill
                                 className="object-cover"
+                                muted
+                                playsInline
+                                autoPlay
+                                loop
                               />
                             </div>
                             <Button
@@ -422,7 +510,7 @@ export function EditProductForm({
                               variant="outline"
                               size="sm"
                               onClick={() =>
-                                form.setValue("imageUrl", "", {
+                                form.setValue("videoUrl", "", {
                                   shouldValidate: true,
                                 })
                               }
@@ -432,23 +520,31 @@ export function EditProductForm({
                           </div>
                         ) : null}
 
-                        <UploadButton
-                          endpoint="productImage"
-                          className="ut-button:bg-primary ut-button:ut-readying:bg-primary/50"
-                          onClientUploadComplete={(res) => {
-                            const url = res?.[0]?.ufsUrl || "";
-                            if (url)
-                              form.setValue("imageUrl", url, {
-                                shouldValidate: true,
-                              });
-                          }}
-                          onUploadError={(err) => {
-                            console.error(err);
-                            toast.error(
-                              err?.message || "Upload failed. Please try again."
-                            );
-                          }}
-                        />
+                        {!field.value && (
+                          <UploadButton
+                            endpoint="productMedia"
+                            className="ut-button:bg-primary ut-button:ut-readying:bg-primary/50"
+                            headers={{ "x-store-slug": storeSlug }}
+                            content={{ allowedContent: () => "Video only" }}
+                            onClientUploadComplete={(res) => {
+                              const videoUrl =
+                                res?.find((file) =>
+                                  file.type?.startsWith("video/")
+                                )?.ufsUrl || "";
+                              if (videoUrl)
+                                form.setValue("videoUrl", videoUrl, {
+                                  shouldValidate: true,
+                                });
+                            }}
+                            onUploadError={(err) => {
+                              console.error(err);
+                              toast.error(
+                                err?.message ||
+                                  "Video upload failed. Please try again."
+                              );
+                            }}
+                          />
+                        )}
                       </div>
                     </FormControl>
                     <FormMessage />

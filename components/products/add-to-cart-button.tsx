@@ -13,7 +13,7 @@ interface AddToCartButtonProps {
     name: string;
     slug: string;
     price: string;
-    imageUrl: string | null;
+    imageUrls: string[] | null;
     category: string;
     isLandlord: boolean;
     visitFees: string;
@@ -42,7 +42,7 @@ export function AddToCartButton({
         productId: product.id,
         productName: product.name,
         productSlug: product.slug,
-        productImage: product.imageUrl,
+        productImages: product.imageUrls,
         price: product.price,
         category: product.category,
         isLandlord: product.isLandlord,

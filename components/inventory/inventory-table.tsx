@@ -29,7 +29,7 @@ type Product = {
   id: string;
   name: string;
   slug: string;
-  imageUrl: string | null;
+  imageUrls: string[] | null;
   status: "draft" | "in_stock" | "out_of_stock" | "archived";
   currentStock: number;
   lowStockThreshold: number;
@@ -286,7 +286,10 @@ export function InventoryTable({
                         <div className="flex items-center gap-3">
                           <div className="relative size-12 rounded-md overflow-hidden shrink-0">
                             <Image
-                              src={product.imageUrl ?? FALLBACK_PRODUCT_IMG_URL}
+                              src={
+                                product.imageUrls?.[0] ??
+                                FALLBACK_PRODUCT_IMG_URL
+                              }
                               alt={product.name}
                               fill
                               className="object-cover"

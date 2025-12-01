@@ -7,6 +7,7 @@ import { headers } from "next/headers";
 import { db } from "@/db/drizzle";
 import { organization } from "@/db/schema";
 import { auth } from "@/lib/auth";
+import { extractFileKeyFromUrl, utapi } from "@/lib/uploadthing-server";
 import { getCurrentMetadata } from "./organizations";
 
 export async function updateStoreLogo(
@@ -16,6 +17,27 @@ export async function updateStoreLogo(
 ) {
   const logoUrl = String(formData.get("logoUrl") || "").trim();
   if (!logoUrl) return;
+
+  // Get the old logo URL to delete it
+  const currentStore = await db
+    .select({ logo: organization.logo })
+    .from(organization)
+    .where(eq(organization.id, storeId))
+    .limit(1);
+
+  // Delete old logo from UploadThing if it exists
+  if (currentStore.length > 0 && currentStore[0].logo) {
+    try {
+      const oldLogoUrl = currentStore[0].logo;
+      const fileKey = extractFileKeyFromUrl(oldLogoUrl);
+      if (fileKey) {
+        await utapi.deleteFiles(fileKey);
+        console.log(`Successfully deleted old logo: ${fileKey}`);
+      }
+    } catch (error) {
+      console.error("Failed to delete old logo:", error);
+    }
+  }
 
   await db
     .update(organization)

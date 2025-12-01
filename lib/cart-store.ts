@@ -5,7 +5,7 @@ export interface CartItem {
   productId: string;
   productName: string;
   productSlug: string;
-  productImage: string | null;
+  productImages: string[] | null;
   price: string;
   category: string;
   isLandlord: boolean;

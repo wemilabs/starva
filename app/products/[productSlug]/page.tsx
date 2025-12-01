@@ -4,11 +4,11 @@ import { notFound } from "next/navigation";
 import { Activity, Suspense } from "react";
 
 import { AddToCartButton } from "@/components/products/add-to-cart-button";
+import { ProductGallery } from "@/components/products/product-gallery";
 import { ProductLikeButton } from "@/components/products/product-like-button";
 import { ProductSlugSkeleton } from "@/components/products/product-slug-skeleton";
 import { ShareDialog } from "@/components/share-dialog";
 import { Badge } from "@/components/ui/badge";
-import { ProtectedImage } from "@/components/ui/protected-image";
 import { getProductBySlug } from "@/data/products";
 import { FALLBACK_PRODUCT_IMG_URL } from "@/lib/constants";
 import {
@@ -28,16 +28,11 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
   return (
     <div className="container mx-auto px-4 py-8 space-y-12">
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <div className="aspect-square w-full overflow-hidden rounded-lg bg-muted">
-          <ProtectedImage
-            src={product.imageUrl ?? FALLBACK_PRODUCT_IMG_URL}
-            alt={product.name}
-            className="h-full w-full object-cover"
-            width={500}
-            height={500}
-            preload
-          />
-        </div>
+        <ProductGallery
+          images={product.imageUrls}
+          video={product.videoUrl}
+          alt={product.name}
+        />
 
         <div className="flex flex-col gap-6">
           <h1 className="text-3xl font-semibold tracking-tight">
@@ -100,7 +95,7 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
                 initialIsLiked={product.isLiked ?? false}
                 initialLikesCount={product.likesCount ?? 0}
                 revalidateTargetPath={`/products/${product.slug}`}
-                variant="default"
+                variant="outline"
               />
             </div>
             <div className="rounded-md border p-4">
@@ -125,7 +120,7 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
                 name: product.name,
                 slug: product.slug,
                 price: product.price,
-                imageUrl: product.imageUrl,
+                imageUrls: product.imageUrls,
                 category: product.category,
                 isLandlord: product.isLandlord,
                 visitFees: product.visitFees || "0",
@@ -187,22 +182,22 @@ export async function generateMetadata({
     product.organization.name
   }. Order now for delivery.`;
 
-  const images = [];
-  if (product.imageUrl) {
-    images.push({
-      url: product.imageUrl,
-      width: 1200,
-      height: 630,
-      alt: product.name,
-    });
-  } else {
-    images.push({
-      url: FALLBACK_PRODUCT_IMG_URL,
-      width: 1200,
-      height: 630,
-      alt: "Starva.shop app - A sure platform for local stores and customers to meet. Easy, fast and reliable.",
-    });
-  }
+  const images: { url: string; width: number; height: number; alt: string }[] =
+    product.imageUrls && product.imageUrls.length > 0
+      ? product.imageUrls.map((url) => ({
+          url,
+          width: 1200,
+          height: 630,
+          alt: product.name,
+        }))
+      : [
+          {
+            url: FALLBACK_PRODUCT_IMG_URL,
+            width: 1200,
+            height: 630,
+            alt: "Starva.shop app - A sure platform for local stores and customers to meet. Easy, fast and reliable.",
+          },
+        ];
 
   const productUrl = `${
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"

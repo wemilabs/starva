@@ -163,7 +163,7 @@ export async function getInventoryList(
         id: productTable.id,
         name: productTable.name,
         slug: productTable.slug,
-        imageUrl: productTable.imageUrl,
+        imageUrls: productTable.imageUrls,
         status: productTable.status,
         currentStock: productTable.currentStock,
         lowStockThreshold: productTable.lowStockThreshold,

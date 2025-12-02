@@ -1,7 +1,7 @@
 # Starva.shop
 
 <p align="center">
-  <img src="https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6du5UdXxlTLMJtliDeN9nXqzs57GUH6RgZbryB" alt="Starva.shop Logo" />
+  <img src="https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6du5UdXxlTLMJtliDeN9nXqzs57GUH6RgZbryB" alt="Starva.shop Logo" width="280" height="280" />
 </p>
 
 A modern, multi-tenant e-commerce platform. Starva.shop enables stores across various categories to showcase their products and manage orders while providing customers with a seamless shopping experience.
@@ -145,15 +145,6 @@ erDiagram
 
 ## Key Workflows
 
-### Order Lifecycle
-
-1. **Pending** - Order placed by customer
-2. **Confirmed** - Store confirms the order
-3. **Preparing** - Order is being prepared
-4. **Ready** - Order ready for pickup/delivery
-5. **Delivered** - Order completed
-6. **Cancelled** - Order cancelled (by customer or store)
-
 ### Multi-tenant Architecture
 
 Each organization operates independently with:
@@ -173,6 +164,3 @@ MIT
 - [ ] Multiple languages, currencies
 - [ ] Payment gateways
 - [ ] Delivery methods
-- [ ] Category-specific features ( real estate listings, service bookings, etc.)
-- [ ] Advanced product specifications per category
-- [ ] Multi-vendor marketplace features

@@ -83,7 +83,7 @@ export function ProductCatalogueControls({
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle className="flex items-center">
-                    <Clock className="size-5" />
+                    <Clock className="size-3.5 mr-2" />
                     Store Opening Hours
                   </DialogTitle>
                   <DialogDescription className="font-mono tracking-tighter">

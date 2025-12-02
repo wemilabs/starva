@@ -1,10 +1,10 @@
 # Starva.shop
 
 <p align="center">
-  <img src="https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6dacuUyMdwvZO8oJpYyFEwgT69CVIdltrHUQc7" alt="Starva.shop Banner" />
+  <img src="https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6du5UdXxlTLMJtliDeN9nXqzs57GUH6RgZbryB" alt="Starva.shop Logo" />
 </p>
 
-A modern, multi-tenant food ordering platform built with Next.js. Starva.shop enables local stores to showcase their products and manage orders while providing customers with a seamless ordering experience.
+A modern, multi-tenant e-commerce platform. Starva.shop enables stores across various categories to showcase their products and manage orders while providing customers with a seamless shopping experience.
 
 ## Features
 
@@ -13,9 +13,10 @@ A modern, multi-tenant food ordering platform built with Next.js. Starva.shop en
 - **Multi-organization support** - Manage multiple stores from a single account
 - **Product management** - Create, update, and organize products with images, descriptions, and pricing
 - **Order management** - Track orders through their complete lifecycle (pending → confirmed → preparing → ready → delivered)
-- **Analytics dashboard** - Monitor store performance and order metrics
+- **Analytics dashboard** - Monitor business performance and order metrics
 - **Tag system** - Categorize products for better organization and discovery
-- **Inventory tracking** - Manage stock status (in stock, out of stock, archived)
+- **Inventory tracking** - Manage stock status (in stock, out of stock, archived) with automated tracking
+- **Multi-category support** - Sell across various categories including health & wellness, food & groceries, clothing, real estate, electronics, and more
 
 ### For Customers
 
@@ -38,6 +39,7 @@ The application uses a relational database with the following main entities:
 - **Members**: Organization team members with roles
 - **Tags**: Product categorization
 - **Product Likes**: User favorites
+- **Categories**: Product categories including health & wellness, food & groceries, clothing, real estate, electronics, appliances, furniture, books & media, automotive, toys & games, and others
 
 ### Entity Relationship Diagram
 
@@ -95,6 +97,7 @@ erDiagram
         string slug UK
         decimal price
         enum status
+        enum category
         string organizationId FK
         integer likesCount
         timestamp createdAt
@@ -159,6 +162,7 @@ Each organization operates independently with:
 - Independent order management
 - Team member management with roles (owner, admin, member)
 - Organization-scoped analytics
+- Category-specific product management
 
 ## License
 
@@ -169,3 +173,6 @@ MIT
 - [ ] Multiple languages, currencies
 - [ ] Payment gateways
 - [ ] Delivery methods
+- [ ] Category-specific features ( real estate listings, service bookings, etc.)
+- [ ] Advanced product specifications per category
+- [ ] Multi-vendor marketplace features

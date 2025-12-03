@@ -1,6 +1,6 @@
 {
   "name": "starva",
-  "version": "0.104.0",
+  "version": "0.104.3",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -40,7 +40,7 @@
     "drizzle-orm": "^0.44.7",
     "lucide-react": "^0.542.0",
     "motion": "^12.23.24",
-    "next": "16.0.6",
+    "next": "16.0.7",
     "next-themes": "^0.4.6",
     "nuqs": "^2.8.1",
     "react": "19.2.0",

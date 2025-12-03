@@ -22,16 +22,7 @@ async function AdminFeedbackContent() {
   };
 
   return (
-    <div className="container mx-auto max-w-7xl py-7 space-y-7">
-      <div>
-        <h1 className="text-2xl font-medium tracking-tight">
-          Feedback Management
-        </h1>
-        <p className="text-muted-foreground mt-0.5 text-sm font-mono tracking-tighter">
-          Review and manage user feedback
-        </p>
-      </div>
-
+    <div className="space-y-7">
       <div className="grid gap-4 md:grid-cols-5">
         {Object.entries(stats).map(([key, value]) => (
           <Card key={key}>
@@ -68,18 +59,13 @@ async function AdminFeedbackContent() {
 
 function AdminFeedbackSkeleton() {
   return (
-    <div className="container mx-auto max-w-7xl py-7 space-y-7">
-      <div>
-        <Skeleton className="h-8 w-48" />
-        <Skeleton className="mt-2 h-4 w-64" />
-      </div>
-
+    <div className="space-y-7">
       <div className="grid gap-4 md:grid-cols-5">
         {[1, 2, 3, 4, 5].map((i) => (
           <Card key={i}>
             <CardHeader className="pb-2">
               <Skeleton className="h-4 w-16" />
-              <Skeleton className="h-8 w-8" />
+              <Skeleton className="size-8" />
             </CardHeader>
           </Card>
         ))}

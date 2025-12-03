@@ -139,7 +139,9 @@ export function AdminUserManagement() {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `users-${new Date().toISOString().split("T")[0]}.csv`;
+    a.download = `users-${
+      new Date().toISOString().split("T")[0]
+    }-${Date.now()}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -150,7 +152,8 @@ export function AdminUserManagement() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-end-safe">
+      <div className="flex items-center justify-between">
+        <p className="text-lg">User Management</p>
         <div className="flex items-center space-x-2">
           <Button variant="outline" onClick={refreshData} disabled={isLoading}>
             <RefreshCw

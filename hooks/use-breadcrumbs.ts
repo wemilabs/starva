@@ -22,9 +22,10 @@ const routeConfig: Record<string, (params: string[]) => Crumb[]> = {
   "/unauthorized": () => [{ label: "Unauthorized" }],
 
   // Admin routes
-  "/admin/dashboard": () => [
+  "/admin": () => [{ label: "Admin" }],
+  "/admin/user-management": () => [
     { label: "Admin", href: "/admin" },
-    { label: "Dashboard" },
+    { label: "User Management" },
   ],
   "/admin/feedback": () => [
     { label: "Admin", href: "/admin" },

@@ -73,8 +73,7 @@ export const getInStockProducts = cache(async () => {
 
 export const getProductsPerStore = cache(async (organizationId: string) => {
   const { success, session } = await verifySession();
-  if (!success || !session)
-    return { message: "Please sign in to access this page" };
+  if (!success) return { message: "Please sign in to access this page" };
 
   try {
     const products = await db.query.product.findMany({
@@ -161,7 +160,7 @@ export const getProductBySlug = cache(async (slug: string) => {
     if (!specificProduct) return undefined;
 
     const { success, session } = await verifySession();
-    if (!success || !session) {
+    if (!success) {
       return {
         ...specificProduct,
         isLiked: false,

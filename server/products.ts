@@ -440,7 +440,7 @@ export async function toggleProductLike(
 
   try {
     const { success, session } = await verifySession();
-    if (!success || !session) {
+    if (!success) {
       return {
         ok: false,
         error: "Unauthorized",

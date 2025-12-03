@@ -21,7 +21,7 @@ type SubmitFeedbackInput = {
 export async function submitFeedback(data: SubmitFeedbackInput) {
   const sessionData = await verifySession();
 
-  if (!sessionData.success || !sessionData.session?.user?.id) {
+  if (!sessionData.success) {
     return {
       success: false,
       error: "You must be signed in to submit feedback",
@@ -60,7 +60,7 @@ export async function updateFeedbackStatus(
 ) {
   const sessionData = await verifySession();
 
-  if (!sessionData.success || !sessionData.session?.user?.id) {
+  if (!sessionData.success) {
     return {
       success: false,
       error: "You must be signed in to update feedback status",
@@ -125,7 +125,7 @@ export async function updateFeedbackStatus(
 export async function getFeedbackHistory(feedbackId: string) {
   const sessionData = await verifySession();
 
-  if (!sessionData.success || !sessionData.session?.user?.id) {
+  if (!sessionData.success) {
     return {
       success: false,
       error: "You must be signed in to view feedback history",

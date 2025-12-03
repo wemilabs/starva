@@ -14,11 +14,12 @@ const routeConfig: Record<string, (params: string[]) => Crumb[]> = {
   "/products": () => [{ label: "Products" }],
   "/orders": () => [{ label: "Orders" }],
   "/pricing": () => [{ label: "Pricing" }],
-  "/support": () => [{ label: "Support" }],
-  "/feedback": () => [{ label: "Feedback" }],
   "/analytics": () => [{ label: "Analytics" }],
   "/transactions": () => [{ label: "Transactions" }],
   "/trends": () => [{ label: "Trends" }],
+  "/support": () => [{ label: "Support" }],
+  "/feedback": () => [{ label: "Feedback" }],
+  "/unauthorized": () => [{ label: "Unauthorized" }],
 
   // Admin routes
   "/admin/dashboard": () => [

@@ -29,8 +29,7 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
     return { ok: false, error: z.treeifyError(parsed.error) };
 
   const verified = await verifySession();
-  if (!verified.success || !verified.session)
-    return { ok: false, error: "Unauthorized" };
+  if (!verified.success) return { ok: false, error: "Unauthorized" };
 
   const session = verified.session;
 
@@ -305,8 +304,7 @@ export async function updateOrderStatus(
   }
 
   const verified = await verifySession();
-  if (!verified.success || !verified.session)
-    return { ok: false, error: "Unauthorized" };
+  if (!verified.success) return { ok: false, error: "Unauthorized" };
 
   const session = verified.session;
 
@@ -437,8 +435,7 @@ export async function updateOrderStatus(
 
 export async function cancelOrder(orderId: string) {
   const verified = await verifySession();
-  if (!verified.success || !verified.session)
-    return { ok: false, error: "Unauthorized" };
+  if (!verified.success) return { ok: false, error: "Unauthorized" };
 
   const session = verified.session;
 
@@ -538,8 +535,7 @@ export async function markOrderAsDelivered(
   }
 
   const verified = await verifySession();
-  if (!verified.success || !verified.session)
-    return { ok: false, error: "Unauthorized" };
+  if (!verified.success) return { ok: false, error: "Unauthorized" };
 
   const session = verified.session;
 

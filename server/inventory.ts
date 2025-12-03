@@ -23,7 +23,7 @@ export async function updateStock(input: z.infer<typeof updateStockSchema>) {
   }
 
   const sessionData = await verifySession();
-  if (!sessionData.success || !sessionData.session) {
+  if (!sessionData.success) {
     return { ok: false, error: "Unauthorized" } as const;
   }
 
@@ -151,7 +151,7 @@ export async function getInventoryList(
   }
 
   const sessionData = await verifySession();
-  if (!sessionData.success || !sessionData.session) {
+  if (!sessionData.success) {
     return { ok: false, error: "Unauthorized", products: [] } as const;
   }
 
@@ -212,7 +212,7 @@ export async function getInventoryHistory(
   }
 
   const sessionData = await verifySession();
-  if (!sessionData.success || !sessionData.session) {
+  if (!sessionData.success) {
     return { ok: false, error: "Unauthorized", history: [] } as const;
   }
 
@@ -252,7 +252,7 @@ export async function getProductsStock(
   }
 
   const sessionData = await verifySession();
-  if (!sessionData.success || !sessionData.session) {
+  if (!sessionData.success) {
     return { ok: false, error: "Unauthorized", stocks: [] } as const;
   }
 

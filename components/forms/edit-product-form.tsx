@@ -579,7 +579,7 @@ export function EditProductForm({
                     <FormControl>
                       <UnitFormatInput
                         availableUnitFormats={availableUnitFormats}
-                        selectedUnitFormat={field.value}
+                        selectedUnitFormat={field.value || null}
                         onUnitFormatChangeAction={field.onChange}
                         disabled={isPending}
                       />
@@ -646,7 +646,7 @@ export function EditProductForm({
                     <FormControl>
                       <TagInput
                         availableTags={availableTags}
-                        selectedTags={field.value}
+                        selectedTags={field.value || []}
                         onTagsChangeAction={field.onChange}
                         disabled={isPending}
                       />

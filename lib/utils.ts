@@ -6,6 +6,8 @@ import { COUNTRIES } from "./constants";
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+// ------------------------ String utils ------------------------
 export const getInitials = (name?: string | null) => {
   if (!name) return "";
   return name
@@ -34,6 +36,7 @@ export const removeUnderscoreAndCapitalizeOnlyTheFirstChar = (
   return withSpaces.charAt(0).toUpperCase() + withSpaces.slice(1);
 };
 
+// ------------------------ Phone utils ------------------------
 export const parsePhoneNumber = (fullPhone: string) => {
   if (!fullPhone) return { countryCode: COUNTRIES[0].code, phoneNumber: "" };
   const country = COUNTRIES.find((c) => fullPhone.startsWith(c.code));
@@ -46,6 +49,7 @@ export const parsePhoneNumber = (fullPhone: string) => {
   return { countryCode: COUNTRIES[0].code, phoneNumber: fullPhone };
 };
 
+// ------------------------ Date utils ------------------------
 export const formatDate = (date: Date | string) => {
   const dateObj = date instanceof Date ? date : new Date(date);
   return new Intl.DateTimeFormat("en-US", {
@@ -98,6 +102,39 @@ export const formatRelativeTime = (date: Date | string) => {
   return rtf.format(0, "second");
 };
 
+export const formatDistanceToNow = (date: Date): string => {
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) {
+    return "just now";
+  }
+
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes} minute${diffInMinutes > 1 ? "s" : ""} ago`;
+  }
+
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) {
+    return `${diffInHours} hour${diffInHours > 1 ? "s" : ""} ago`;
+  }
+
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays < 30) {
+    return `${diffInDays} day${diffInDays > 1 ? "s" : ""} ago`;
+  }
+
+  const diffInMonths = Math.floor(diffInDays / 30);
+  if (diffInMonths < 12) {
+    return `${diffInMonths} month${diffInMonths > 1 ? "s" : ""} ago`;
+  }
+
+  const diffInYears = Math.floor(diffInMonths / 12);
+  return `${diffInYears} year${diffInYears > 1 ? "s" : ""} ago`;
+};
+
+// ------------------------ Price utils ------------------------
 export const formatPrice = (
   price: string | number,
   currency: string = "USD",
@@ -118,6 +155,7 @@ export const formatPriceInRWF = (price: string | number) => {
   return formatPrice(price, "RWF", "en-RW");
 };
 
+// ------------------------ Product utils ------------------------
 export const PRODUCT_CATEGORIES = productCategory.enumValues;
 
 export function getCategoryLabel(key: string): string {

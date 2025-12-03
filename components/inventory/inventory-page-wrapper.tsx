@@ -15,7 +15,7 @@ import { InventoryContent } from "./inventory-content";
 export async function InventoryPageWrapper() {
   const sessionData = await verifySession();
 
-  if (!sessionData.success || !sessionData.session)
+  if (!sessionData.success)
     return (
       <Empty className="min-h-[400px]">
         <EmptyHeader>

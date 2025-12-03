@@ -15,7 +15,7 @@ import { FeedbackHistory } from "./feedback-history";
 export async function FeedbackHistoryWrapper() {
   const sessionData = await verifySession();
 
-  if (!sessionData.success || !sessionData.session) {
+  if (!sessionData.success) {
     return (
       <Empty className="min-h-[400px]">
         <EmptyHeader>

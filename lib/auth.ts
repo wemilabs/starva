@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
-import { lastLoginMethod, organization } from "better-auth/plugins";
+import { admin, lastLoginMethod, organization } from "better-auth/plugins";
 import { eq, inArray, type SQLWrapper } from "drizzle-orm";
 // import { Resend } from "resend";
 // import VerificationEmail from "@/components/emails/verification-email";
@@ -76,6 +76,9 @@ export const auth = betterAuth({
     },
   },
   plugins: [
+    admin({
+      defaultRole: "regular",
+    }),
     lastLoginMethod({ storeInDatabase: true }),
     nextCookies(),
     organization(),

@@ -141,14 +141,10 @@ export function AddProductForm({
   useEffect(() => {
     if (dialogOpen) {
       getAllTags().then((result) => {
-        if (result.ok) {
-          setAvailableTags(result.tags);
-        }
+        if (result.ok) setAvailableTags(result.tags);
       });
       getAllUnitFormats().then((result) => {
-        if (result.ok) {
-          setAvailableUnitFormats(result.unitFormats);
-        }
+        if (result.ok) setAvailableUnitFormats(result.unitFormats);
       });
     }
   }, [dialogOpen]);
@@ -596,7 +592,7 @@ export function AddProductForm({
                       <FormControl>
                         <UnitFormatInput
                           availableUnitFormats={availableUnitFormats}
-                          selectedUnitFormat={field.value}
+                          selectedUnitFormat={field.value || null}
                           onUnitFormatChangeAction={field.onChange}
                           disabled={isPending}
                         />
@@ -663,7 +659,7 @@ export function AddProductForm({
                       <FormControl>
                         <TagInput
                           availableTags={availableTags}
-                          selectedTags={field.value}
+                          selectedTags={field.value || []}
                           onTagsChangeAction={field.onChange}
                           disabled={isPending}
                         />

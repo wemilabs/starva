@@ -340,7 +340,7 @@ export function CartSheet() {
                         }
                         placeholder="Special instructions..."
                         rows={2}
-                        className="text-sm"
+                        className="placeholder:text-sm"
                       />
                     </div>
                   </div>
@@ -364,7 +364,7 @@ export function CartSheet() {
                   onChange={(e) => setOrderNotes(e.target.value)}
                   placeholder="Any special instructions for the entire order..."
                   rows={3}
-                  className="text-sm"
+                  className="placeholder:text-sm"
                 />
               </div>
 

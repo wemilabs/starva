@@ -5,8 +5,8 @@ import { Download, Plus, RefreshCw, Search, X } from "lucide-react";
 import { parseAsInteger, parseAsStringLiteral, useQueryStates } from "nuqs";
 import { Activity } from "react";
 import { toast } from "sonner";
-import { UserStatsCards } from "@/components/admin/user-stats-cards";
-import { UserTable } from "@/components/admin/user-table";
+import { UserStatsCards } from "@/components/admin/user-management/user-stats-cards";
+import { UserTable } from "@/components/admin/user-management/user-table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,12 +17,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { getUserMetrics } from "@/server/admin/user-metrics";
 import {
   deleteUserAdmin,
   getAllUsersAdmin,
   getUserStatsAdmin,
   updateUserAdmin,
 } from "@/server/users";
+import { UserMetrics } from "./user-metrics";
 
 const statusOptions = ["all", "active", "inactive"] as const;
 
@@ -63,6 +65,15 @@ export function AdminUserManagement() {
   } = useQuery({
     queryKey: ["admin-stats"],
     queryFn: () => getUserStatsAdmin(),
+  });
+
+  const {
+    data: metrics,
+    isLoading: metricsLoading,
+    refetch: refetchMetrics,
+  } = useQuery({
+    queryKey: ["admin-metrics"],
+    queryFn: () => getUserMetrics(),
   });
 
   const updateUserMutation = useMutation({
@@ -119,6 +130,7 @@ export function AdminUserManagement() {
   const refreshData = () => {
     refetchUsers();
     refetchStats();
+    refetchMetrics();
   };
 
   const handleExport = () => {
@@ -148,7 +160,7 @@ export function AdminUserManagement() {
     window.URL.revokeObjectURL(url);
   };
 
-  const isLoading = usersLoading || statsLoading;
+  const isLoading = usersLoading || statsLoading || metricsLoading;
 
   return (
     <div className="space-y-4">
@@ -175,6 +187,8 @@ export function AdminUserManagement() {
       <UserStatsCards
         stats={stats || { total: 0, active: 0, inactive: 0, newToday: 0 }}
       />
+
+      {metrics && <UserMetrics metrics={metrics} />}
 
       <Card>
         <CardHeader>

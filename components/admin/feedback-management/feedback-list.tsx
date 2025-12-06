@@ -2,7 +2,7 @@
 
 import { MessageSquare } from "lucide-react";
 import { parseAsStringLiteral, useQueryState } from "nuqs";
-import { FeedbackCardAdmin } from "@/components/admin/feedback-card-admin";
+import { FeedbackCard } from "@/components/admin/feedback-management/feedback-card";
 import { SearchForm } from "@/components/forms/search-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -160,7 +160,7 @@ export function FeedbackList({ feedback }: FeedbackListClientProps) {
           {filteredFeedback.map((item, index) => (
             <div key={item.id}>
               {index > 0 && <Separator className="mb-4" />}
-              <FeedbackCardAdmin feedback={item} />
+              <FeedbackCard feedback={item} />
             </div>
           ))}
         </div>

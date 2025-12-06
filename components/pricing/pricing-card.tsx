@@ -1,10 +1,10 @@
 import { Check, Sparkles } from "lucide-react";
+import { Activity } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -14,10 +14,10 @@ import { Spinner } from "../ui/spinner";
 
 interface PricingCardProps {
   name: string;
-  description: string;
   price: number | null;
   originalPrice: number | null;
   period: string;
+  additionalText: string;
   features: readonly string[];
   highlighted?: boolean;
   cta: string;
@@ -28,10 +28,10 @@ interface PricingCardProps {
 
 export function PricingCard({
   name,
-  description,
   price,
   originalPrice,
   period,
+  additionalText,
   features,
   highlighted = false,
   cta,
@@ -71,14 +71,8 @@ export function PricingCard({
         </div>
       )}
 
-      <CardHeader className="text-center pb-6">
-        <CardTitle className="text-xl md:text-2xl font-medium">
-          {name}
-        </CardTitle>
-        <CardDescription className="font-mono tracking-tighter line-clamp-2">
-          {description}
-        </CardDescription>
-
+      <CardHeader>
+        <CardTitle className="text-xl font-medium">{name}</CardTitle>
         <div className="mt-4 flex flex-col items-center gap-1">
           {originalPrice && (
             <p className="text-sm text-muted-foreground line-through">
@@ -87,19 +81,22 @@ export function PricingCard({
           )}
           <div className="flex items-baseline gap-1">
             <span className="text-3xl font-medium tracking-tight">
-              {price === null ? "Custom" : formatPrice(price)}
+              {price === null ? "Let's talk" : formatPrice(price)}
             </span>
-            {price !== null && price > 0 && (
+            <Activity mode={price !== null && price > 0 ? "visible" : "hidden"}>
               <span className="text-muted-foreground font-mono tracking-tighter">
                 /{period}
               </span>
-            )}
+            </Activity>
           </div>
         </div>
       </CardHeader>
 
       <CardContent className="flex-1 pt-6 border-t">
-        <ul className="space-y-2">
+        <p className="text-sm text-muted-foreground font-mono tracking-tighter">
+          {additionalText}
+        </p>
+        <ul className="mt-6 space-y-2">
           {features.map((feature) => (
             <li key={feature} className="flex items-start gap-2">
               <Check
@@ -108,16 +105,7 @@ export function PricingCard({
                   highlighted ? "text-primary" : "text-muted-foreground"
                 )}
               />
-              <span
-                className={cn(
-                  "text-sm",
-                  feature.includes("Everything in")
-                    ? "font-semibold"
-                    : "text-muted-foreground font-mono tracking-tighter"
-                )}
-              >
-                {feature}
-              </span>
+              <span className="text-sm tracking-wide">{feature}</span>
             </li>
           ))}
         </ul>

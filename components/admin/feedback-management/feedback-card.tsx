@@ -49,7 +49,7 @@ type FeedbackCardProps = {
   };
 };
 
-export function FeedbackCardAdmin({ feedback }: FeedbackCardProps) {
+export function FeedbackCard({ feedback }: FeedbackCardProps) {
   const [isPending, startTransition] = useTransition();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<FeedbackStatus | null>(

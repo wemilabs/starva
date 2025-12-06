@@ -37,7 +37,7 @@ export async function signInUser(email: string, password: string) {
 
       if (!existingSubscription) {
         // Automatically create free subscription for users without one
-        await createSubscription(session.user.id, "Free");
+        await createSubscription(session.user.id, "Hobby");
       }
     }
 
@@ -69,7 +69,7 @@ export async function signUpUser(
 
     if (session?.user?.id) {
       // Automatically create free subscription
-      await createSubscription(session.user.id, "Free");
+      await createSubscription(session.user.id, "Hobby");
     }
 
     return { success: true, message: "User signed up successfully" };
@@ -84,7 +84,7 @@ export async function ensureUserHasFreeSubscription(userId: string) {
   const existingSubscription = await getUserSubscription(userId);
 
   if (!existingSubscription) {
-    await createSubscription(userId, "Free");
+    await createSubscription(userId, "Hobby");
   }
 
   return existingSubscription;
@@ -216,7 +216,7 @@ export async function createUserAdmin(data: {
     });
 
     if (newUser) {
-      await createSubscription(newUser.id, "Free");
+      await createSubscription(newUser.id, "Hobby");
     }
 
     return { success: true, message: "User created successfully" };

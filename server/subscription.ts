@@ -138,7 +138,7 @@ export async function checkOrganizationLimit(userId: string) {
 
   const plan = userSub.plan;
   const maxOrgs =
-    plan?.name === "Free"
+    plan?.name === "Hobby"
       ? 2
       : plan?.name === "Growth"
       ? 10

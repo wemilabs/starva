@@ -31,7 +31,7 @@ export const AnalyticsHero = ({ planName }: { planName: string }) => {
             </h1>
 
             <p className="text-muted-foreground text-sm leading-relaxed font-mono tracking-tighter">
-              Free plan gives you a quick pulse. Growth and Pro unlock deeper
+              Hobby plan gives you a quick pulse. Growth and Pro unlock deeper
               trends, breakdowns, and multi-store insights.
             </p>
           </div>

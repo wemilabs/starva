@@ -163,7 +163,7 @@ async function AnalyticsContent({
     );
 
   const subscription = userId ? await getUserSubscription(userId) : null;
-  const planName = subscription?.plan?.name ?? "Free";
+  const planName = subscription?.plan?.name ?? "Hobby";
 
   const params = await searchParams;
   const days = parseInt(params.days || "28", 10) as 7 | 14 | 28;
@@ -195,7 +195,7 @@ async function AnalyticsContent({
           <FreeAnalyticsChart data={freeSeries} />
         </div>
 
-        {planName !== "Free" && (
+        {planName !== "Hobby" && (
           <div className="rounded-xl border bg-card p-4 shadow-sm">
             <p className="text-xs font-mono tracking-tighter text-muted-foreground mb-1">
               Growth & Pro

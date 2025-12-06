@@ -19,6 +19,7 @@ export const PRODUCT_STATUS_VALUES = [
 export const COUNTRIES = [
   { code: "+250", name: "Rwanda", flag: "🇷🇼" },
   { code: "+241", name: "Gabon", flag: "🇬🇦" },
+  { code: "+243", name: "DRC", flag: "🇨🇩" },
 ] as const;
 
 export const ORDER_STATUS_VALUES = [

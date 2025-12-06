@@ -102,13 +102,13 @@ export const feedbackStatusOptions: {
 
 export type PricingPlan = {
   name: string;
-  description: string;
   price: number | null;
   originalPrice: number | null;
   period: string;
   orderLimit: number | null;
   maxOrgs: number | null;
   maxProductsPerOrg: number | null;
+  additionalText?: string;
   features: readonly string[];
   highlighted: boolean;
   cta: string;
@@ -116,17 +116,16 @@ export type PricingPlan = {
 
 export const PRICING_PLANS: PricingPlan[] = [
   {
-    name: "Free",
-    description: "Perfect for students & side hustlers",
+    name: "Hobby",
     price: 0,
     originalPrice: null,
     period: "month",
     orderLimit: 50,
-    maxOrgs: 2,
-    maxProductsPerOrg: 12,
+    maxOrgs: 1,
+    maxProductsPerOrg: 10,
     features: [
-      "2 stores",
-      "12 products per store",
+      "1 store",
+      "10 products",
       "50 orders/month",
       "Basic sales dashboard",
       "7-day data retention",
@@ -138,20 +137,20 @@ export const PRICING_PLANS: PricingPlan[] = [
   },
   {
     name: "Growth",
-    description: "For growing stores & multiple locations",
-    price: 90,
-    originalPrice: null,
+    price: 28,
+    originalPrice: 40,
     period: "month",
-    orderLimit: 500,
-    maxOrgs: 10,
-    maxProductsPerOrg: 50,
+    orderLimit: 100,
+    maxOrgs: 5,
+    maxProductsPerOrg: 20,
+    additionalText: "Everything in Hobby, plus:",
     features: [
-      "10 stores",
-      "50 products per store",
-      "500 orders/month",
+      "5 stores",
+      "20 products per store",
+      "100 orders/month",
       "Customer analytics",
-      "Limited AI-powered insights",
-      "30-day data retention",
+      "Limited AI features",
+      "15-day data retention",
       "Priority support",
     ],
     highlighted: true,
@@ -159,13 +158,34 @@ export const PRICING_PLANS: PricingPlan[] = [
   },
   {
     name: "Pro",
-    description: "For established stores & large operations",
+    price: 90,
+    originalPrice: 120,
+    period: "month",
+    orderLimit: 500,
+    maxOrgs: 15,
+    maxProductsPerOrg: 50,
+    additionalText: "Everything in Growth, plus:",
+    features: [
+      "15 stores",
+      "50 products per store",
+      "500 orders/month",
+      "Customer analytics",
+      "Extended limits on AI features",
+      "30-day data retention",
+      "Priority support",
+    ],
+    highlighted: false,
+    cta: "Start Free Trial",
+  },
+  {
+    name: "Pro+",
     price: 200,
     originalPrice: null,
     period: "month",
     orderLimit: 2000,
     maxOrgs: null,
     maxProductsPerOrg: null,
+    additionalText: "Everything in Pro, plus:",
     features: [
       "Unlimited stores",
       "Unlimited products",
@@ -181,13 +201,13 @@ export const PRICING_PLANS: PricingPlan[] = [
   },
   {
     name: "Enterprise",
-    description: "For large organizations and custom requirements",
     price: null,
     originalPrice: null,
     period: "month",
     orderLimit: null,
     maxOrgs: null,
     maxProductsPerOrg: null,
+    additionalText: "Everything in Pro+, plus:",
     features: [
       "Unlimited everything",
       "Custom integrations",

@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { FeedbackList } from "@/components/admin/feedback-list";
+import { FeedbackList } from "@/components/admin/feedback-management/feedback-list";
 import {
   Card,
   CardContent,

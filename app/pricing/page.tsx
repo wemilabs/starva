@@ -4,7 +4,7 @@ import { PricingGrid } from "@/components/pricing/pricing-grid";
 import { PRICING_PLANS } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Pricing Plans - Starva.shop",
+  title: "Pricing - Starva.shop",
   description:
     "Start free for students & side hustlers. Upgrade as your store grows.",
 };

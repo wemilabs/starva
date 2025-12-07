@@ -71,7 +71,7 @@ export function PricingCard({
         </div>
       )}
 
-      <CardHeader>
+      <CardHeader className="text-center">
         <CardTitle className="text-xl font-medium">{name}</CardTitle>
         <div className="mt-4 flex flex-col items-center gap-1">
           {originalPrice && (

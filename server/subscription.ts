@@ -28,9 +28,7 @@ export async function getUserSubscription(userId: string) {
 
 export async function createSubscription(userId: string, planName: string) {
   const plan = PRICING_PLANS.find((p) => p.name === planName);
-  if (!plan) {
-    throw new Error(`Invalid plan name: ${planName}`);
-  }
+  if (!plan) throw new Error(`Invalid plan name: ${planName}`);
 
   const trialEndsAt = plan.price === 0 ? null : new Date();
   if (trialEndsAt) {
@@ -57,13 +55,9 @@ export async function createSubscription(userId: string, planName: string) {
 export async function updateSubscription(userId: string, planName: string) {
   const existingSubscription = await getUserSubscription(userId);
   const plan = PRICING_PLANS.find((p) => p.name === planName);
-  if (!plan) {
-    throw new Error(`Invalid plan name: ${planName}`);
-  }
+  if (!plan) throw new Error(`Invalid plan name: ${planName}`);
 
-  if (!existingSubscription) {
-    return createSubscription(userId, planName);
-  }
+  if (!existingSubscription) return createSubscription(userId, planName);
 
   const [updatedSubscription] = await db
     .update(subscription)
@@ -123,40 +117,36 @@ export async function checkOrganizationLimit(userId: string) {
 
   const totalOrgs = userOrgs.length;
 
+  const hobbyPlan = PRICING_PLANS.find((p) => p.name === "Hobby");
+  const defaultMaxOrgs = hobbyPlan?.maxOrgs ?? 1;
+
   if (
     !userSub ||
     userSub.status === "cancelled" ||
     userSub.status === "expired"
-  ) {
+  )
     return {
-      canCreate: false,
-      maxOrgs: 0,
+      canCreate: totalOrgs < defaultMaxOrgs,
+      maxOrgs: defaultMaxOrgs,
       currentOrgs: totalOrgs,
-      planName: null,
+      planName: "Hobby",
     };
-  }
 
   const plan = userSub.plan;
-  const maxOrgs =
-    plan?.name === "Hobby"
-      ? 1
-      : plan?.name === "Growth"
-      ? 5
-      : plan?.name === "Pro"
-      ? 15
-      : plan?.name === "Pro+"
-      ? -1
-      : 0;
+  const maxOrgs = plan !== undefined ? plan?.maxOrgs : defaultMaxOrgs;
 
   return {
-    canCreate: maxOrgs === -1 || totalOrgs < maxOrgs,
-    maxOrgs: maxOrgs === -1 ? "Unlimited" : maxOrgs,
+    canCreate: maxOrgs === null || totalOrgs < (maxOrgs ?? 0),
+    maxOrgs: maxOrgs === null ? "Unlimited" : maxOrgs ?? defaultMaxOrgs,
     currentOrgs: totalOrgs,
     planName: plan?.name || null,
   };
 }
 
 export async function checkProductLimit(organizationId: string) {
+  const hobbyPlan = PRICING_PLANS.find((p) => p.name === "Hobby");
+  const defaultMaxProducts = hobbyPlan?.maxProductsPerOrg ?? 10;
+
   const orgOwner = await db.query.member.findFirst({
     where: (member, { eq }) => eq(member.organizationId, organizationId),
     with: {
@@ -164,14 +154,18 @@ export async function checkProductLimit(organizationId: string) {
     },
   });
 
-  if (!orgOwner) {
+  const currentProducts = await db.query.product.findMany({
+    where: (product, { eq }) => eq(product.organizationId, organizationId),
+  });
+  const totalProducts = currentProducts.length;
+
+  if (!orgOwner)
     return {
-      canCreate: false,
-      maxProducts: 0,
-      currentProducts: 0,
-      planName: null,
+      canCreate: totalProducts < defaultMaxProducts,
+      maxProducts: defaultMaxProducts,
+      currentProducts: totalProducts,
+      planName: "Hobby",
     };
-  }
 
   const userSub = await getUserSubscription(orgOwner.userId);
 
@@ -179,68 +173,34 @@ export async function checkProductLimit(organizationId: string) {
     !userSub ||
     userSub.status === "cancelled" ||
     userSub.status === "expired"
-  ) {
+  )
     return {
-      canCreate: false,
-      maxProducts: 0,
-      currentProducts: 0,
-      planName: null,
+      canCreate: totalProducts < defaultMaxProducts,
+      maxProducts: defaultMaxProducts,
+      currentProducts: totalProducts,
+      planName: "Hobby",
     };
-  }
 
   const plan = userSub.plan;
-  const maxProductsPerOrg = plan?.maxProductsPerOrg || 0;
-
-  const currentProducts = await db.query.product.findMany({
-    where: (product, { eq }) => eq(product.organizationId, organizationId),
-  });
-
-  const totalProducts = currentProducts.length;
+  const maxProductsPerOrg =
+    plan !== undefined ? plan?.maxProductsPerOrg : defaultMaxProducts;
 
   return {
-    canCreate: maxProductsPerOrg === null || totalProducts < maxProductsPerOrg,
-    maxProducts: maxProductsPerOrg === null ? "Unlimited" : maxProductsPerOrg,
+    canCreate:
+      maxProductsPerOrg === null || totalProducts < (maxProductsPerOrg ?? 0),
+    maxProducts:
+      maxProductsPerOrg === null
+        ? "Unlimited"
+        : maxProductsPerOrg ?? defaultMaxProducts,
     currentProducts: totalProducts,
     planName: plan?.name || null,
   };
 }
 
 export async function checkOrderLimit(organizationId: string) {
-  const orgOwner = await db.query.member.findFirst({
-    where: (member, { eq }) => eq(member.organizationId, organizationId),
-    with: {
-      user: true,
-    },
-  });
+  const hobbyPlan = PRICING_PLANS.find((p) => p.name === "Hobby");
+  const defaultMaxOrders = hobbyPlan?.orderLimit ?? 50;
 
-  if (!orgOwner) {
-    return {
-      canCreate: false,
-      maxOrders: 0,
-      currentOrders: 0,
-      planName: null,
-    };
-  }
-
-  const userSub = await getUserSubscription(orgOwner.userId);
-
-  if (
-    !userSub ||
-    userSub.status === "cancelled" ||
-    userSub.status === "expired"
-  ) {
-    return {
-      canCreate: false,
-      maxOrders: 0,
-      currentOrders: 0,
-      planName: null,
-    };
-  }
-
-  const plan = userSub.plan;
-  const maxOrders = plan?.orderLimit || 0;
-
-  // Get current month's order usage for this organization
   const currentMonth = new Date().toISOString().slice(0, 7);
 
   const orderUsage = await db.query.orderUsageTracking.findFirst({
@@ -253,9 +213,41 @@ export async function checkOrderLimit(organizationId: string) {
 
   const currentOrders = orderUsage?.orderCount || 0;
 
+  const orgOwner = await db.query.member.findFirst({
+    where: (member, { eq }) => eq(member.organizationId, organizationId),
+    with: {
+      user: true,
+    },
+  });
+
+  if (!orgOwner)
+    return {
+      canCreate: currentOrders < defaultMaxOrders,
+      maxOrders: defaultMaxOrders,
+      currentOrders,
+      planName: "Hobby",
+    };
+
+  const userSub = await getUserSubscription(orgOwner.userId);
+
+  if (
+    !userSub ||
+    userSub.status === "cancelled" ||
+    userSub.status === "expired"
+  )
+    return {
+      canCreate: currentOrders < defaultMaxOrders,
+      maxOrders: defaultMaxOrders,
+      currentOrders,
+      planName: "Hobby",
+    };
+
+  const plan = userSub.plan;
+  const maxOrders = plan !== undefined ? plan?.orderLimit : defaultMaxOrders;
+
   return {
-    canCreate: maxOrders === null || currentOrders < maxOrders,
-    maxOrders: maxOrders === null ? "Unlimited" : maxOrders,
+    canCreate: maxOrders === null || currentOrders < (maxOrders ?? 0),
+    maxOrders: maxOrders === null ? "Unlimited" : maxOrders ?? defaultMaxOrders,
     currentOrders,
     planName: plan?.name || null,
   };

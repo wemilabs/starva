@@ -4,8 +4,8 @@ import { cacheLife } from "next/cache";
 import Link from "next/link";
 import { Suspense } from "react";
 import {
-  FreeAnalyticsChart,
   GrowthAnalyticsChart,
+  HobbyAnalyticsChart,
   ProAnalyticsChart,
 } from "@/components/analytics/analytics-charts";
 import { AnalyticsHero } from "@/components/analytics/analytics-hero";
@@ -168,7 +168,7 @@ async function AnalyticsContent({
   const params = await searchParams;
   const days = parseInt(params.days || "28", 10) as 7 | 14 | 28;
 
-  const { freeSeries, growthSeries, proSeries, metrics } =
+  const { hobbySeries, growthSeries, proSeries, metrics } =
     await getOrganizationAnalyticsOverview(activeOrgId, days);
 
   return (
@@ -188,11 +188,11 @@ async function AnalyticsContent({
           <p className="text-xs font-mono tracking-tighter text-muted-foreground mb-1">
             Core metrics
           </p>
-          <h2 className="text-sm font-medium mb-2">Free analytics</h2>
+          <h2 className="text-sm font-medium mb-2">Hobby analytics</h2>
           <p className="text-xs text-muted-foreground font-mono tracking-tighter">
             Daily/7-day overview of orders for your active store.
           </p>
-          <FreeAnalyticsChart data={freeSeries} />
+          <HobbyAnalyticsChart data={hobbySeries} />
         </div>
 
         {planName !== "Hobby" && (

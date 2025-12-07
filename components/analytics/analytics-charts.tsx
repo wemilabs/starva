@@ -16,7 +16,7 @@ import {
 import { formatPriceInRWF } from "@/lib/utils";
 import { ChartErrorBoundary } from "./chart-error-boundary";
 
-const freeConfig = {
+const hobbyConfig = {
   orders: {
     label: "Orders",
     theme: {
@@ -46,13 +46,23 @@ const proConfig = {
   },
 };
 
-export type FreeAnalyticsPoint = { day: string; orders: number };
+// const proPlusConfig = {
+//   revenue: {
+//     label: "Revenue (RWF)",
+//     theme: {
+//       light: "var(--chart-4)",
+//       dark: "var(--chart-4)",
+//     },
+//   },
+// };
 
-export function FreeAnalyticsChart({ data }: { data: FreeAnalyticsPoint[] }) {
+export type HobbyAnalyticsPoint = { day: string; orders: number };
+
+export function HobbyAnalyticsChart({ data }: { data: HobbyAnalyticsPoint[] }) {
   return (
     <ChartErrorBoundary>
       <ChartContainer
-        config={freeConfig}
+        config={hobbyConfig}
         className="mt-4 h-[200px] sm:h-[250px] aspect-auto!"
       >
         <ResponsiveContainer width="100%" height="100%">

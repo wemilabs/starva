@@ -13,20 +13,21 @@ export function SubscriptionBadge() {
   }
 
   const icon =
-    planName === "Enterprise" ? (
+    planName === "Enterprise" || planName === "Pro+" ? (
       <Crown className="size-3" />
-    ) : planName === "Pro" ? (
+    ) : planName === "Pro" || planName === "Growth" ? (
       <Sparkles className="size-3" />
-    ) : planName === "Starter" ? (
+    ) : planName === "Hobby" ? (
       <Zap className="size-3" />
     ) : null;
 
   const variant =
-    planName === "Enterprise"
+    planName === "Enterprise" ||
+    planName === "Pro+" ||
+    planName === "Pro" ||
+    planName === "Growth"
       ? "default"
-      : planName === "Pro"
-      ? "default"
-      : planName === "Starter"
+      : planName === "Hobby"
       ? "secondary"
       : "outline";
 

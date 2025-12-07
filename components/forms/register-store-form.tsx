@@ -78,7 +78,7 @@ export function RegisterStoreForm({
 
   const handleUpgradeClick = () => {
     onCloseDialog?.();
-    router.push("/pricing");
+    router.push("/usage/pricing");
   };
 
   const { data: orgLimit, isLoading } = useQuery({

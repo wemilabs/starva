@@ -1,0 +1,421 @@
+import {
+  AlertCircle,
+  Building2,
+  CheckCircle2,
+  Crown,
+  Lock,
+  Package,
+  ShoppingCart,
+  TrendingUp,
+} from "lucide-react";
+import Link from "next/link";
+import { Activity } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import { Progress } from "@/components/ui/progress";
+import { verifySession } from "@/data/user-session";
+import { db } from "@/db/drizzle";
+import {
+  checkOrderLimit,
+  checkOrganizationLimit,
+  checkProductLimit,
+  getUserSubscription,
+} from "@/server/subscription";
+
+export async function BillingContent() {
+  const sessionData = await verifySession();
+
+  if (!sessionData.success || !sessionData.session)
+    return (
+      <Empty className="min-h-[400px]">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <Lock className="size-6" />
+          </EmptyMedia>
+          <EmptyTitle>You are not yet signed in</EmptyTitle>
+          <EmptyDescription className="font-mono tracking-tighter">
+            Sign in first to access this service
+          </EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <Button asChild size="sm" className="w-full">
+            <Link href="/sign-in">
+              <span>Sign In</span>
+            </Link>
+          </Button>
+        </EmptyContent>
+      </Empty>
+    );
+
+  const subscription = await getUserSubscription(sessionData.session.user.id);
+
+  const organizationLimit = await checkOrganizationLimit(
+    sessionData.session.user.id
+  );
+
+  // Get user's organizations to check product and order limits
+  // Use the same logic as checkOrganizationLimit to get first organization
+  const userOrgs = await db.query.member.findMany({
+    where: (member, { eq }) => eq(member.userId, sessionData.session.user.id),
+  });
+
+  const plan = subscription?.plan;
+
+  // Get product and order limits for the first organization
+  // Default to plan limits when no orgs exist (0 usage means canCreate = true)
+  let productLimit = {
+    canCreate: true,
+    maxProducts: (plan?.maxProductsPerOrg === null
+      ? "Unlimited"
+      : plan?.maxProductsPerOrg ?? 10) as number | string,
+    currentProducts: 0,
+    planName: plan?.name ?? null,
+  };
+  let orderLimit = {
+    canCreate: true,
+    maxOrders: (plan?.orderLimit === null
+      ? "Unlimited"
+      : plan?.orderLimit ?? 50) as number | string,
+    currentOrders: 0,
+    planName: plan?.name ?? null,
+  };
+
+  if (userOrgs.length > 0) {
+    const firstOrgId = userOrgs[0].organizationId;
+    const productResult = await checkProductLimit(firstOrgId);
+    const orderResult = await checkOrderLimit(firstOrgId);
+
+    productLimit = {
+      canCreate: productResult.canCreate,
+      maxProducts: productResult.maxProducts,
+      currentProducts: productResult.currentProducts,
+      planName: productResult.planName,
+    };
+    orderLimit = {
+      canCreate: orderResult.canCreate,
+      maxOrders: orderResult.maxOrders,
+      currentOrders: orderResult.currentOrders,
+      planName: orderResult.planName,
+    };
+  }
+
+  const isTrial = subscription?.status === "trial";
+
+  const isOverLimit =
+    (organizationLimit.maxOrgs !== "Unlimited" &&
+      typeof organizationLimit.maxOrgs === "number" &&
+      (organizationLimit.currentOrgs / organizationLimit.maxOrgs) * 100 > 90) ||
+    (productLimit.maxProducts !== "Unlimited" &&
+      typeof productLimit.maxProducts === "number" &&
+      (productLimit.currentProducts / productLimit.maxProducts) * 100 > 90) ||
+    (orderLimit.maxOrders !== "Unlimited" &&
+      typeof orderLimit.maxOrders === "number" &&
+      (orderLimit.currentOrders / orderLimit.maxOrders) * 100 > 90);
+
+  const getStatusColor = (percentage: number) => {
+    if (percentage >= 90) return "text-destructive";
+    if (percentage >= 75) return "text-yellow-600";
+    return "text-green-600";
+  };
+
+  const formatLimit = (value: number | string) => {
+    return value === "Unlimited" ? "Unlimited" : value.toString();
+  };
+
+  const calculatePercentage = (current: number, max: number | string) => {
+    if (max === "Unlimited") return 0;
+    return Math.round((current / (max as number)) * 100);
+  };
+
+  const orgPercentage = calculatePercentage(
+    organizationLimit.currentOrgs,
+    organizationLimit.maxOrgs
+  );
+  const productPercentage = calculatePercentage(
+    productLimit.currentProducts,
+    productLimit.maxProducts
+  );
+  const orderPercentage = calculatePercentage(
+    orderLimit.currentOrders,
+    orderLimit.maxOrders
+  );
+
+  return (
+    <div className="space-y-7">
+      {/* Current Plan Card */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <Crown className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">Current Plan</CardTitle>
+                <CardDescription>
+                  {isTrial
+                    ? "Trial period"
+                    : subscription
+                    ? "Active subscription"
+                    : "No active plan"}
+                </CardDescription>
+              </div>
+            </div>
+            <Badge variant={plan?.highlighted ? "default" : "secondary"}>
+              {plan?.name || "Free"}
+            </Badge>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <p className="text-sm font-medium">Monthly Price</p>
+              <p className="text-2xl font-bold">
+                {plan?.price === 0 ? "Free" : `$${plan?.price}`}
+                {plan?.originalPrice && (
+                  <span className="text-sm text-muted-foreground line-through ml-2">
+                    ${plan.originalPrice}
+                  </span>
+                )}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm font-medium">Status</p>
+              <div className="flex items-center gap-2 mt-1">
+                {subscription?.status === "active" ? (
+                  <CheckCircle2 className="size-4 text-green-600" />
+                ) : (
+                  <AlertCircle className="size-4 text-yellow-600" />
+                )}
+                <span className="text-sm capitalize">
+                  {subscription?.status || "No subscription"}
+                  {isTrial && " (14 days)"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {plan?.features && (
+            <div className="mt-6">
+              <p className="text-sm font-medium mb-3">Plan Features</p>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {plan.features.map((feature, index) => (
+                  <div
+                    key={`feature-${index}-${feature.replace(/\s+/g, "-")}`}
+                    className="flex items-center gap-2 text-sm"
+                  >
+                    <CheckCircle2 className="size-3 text-green-600" />
+                    <span>{feature}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Usage Metrics */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Organizations Usage */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <Building2 className="size-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">
+                Organizations
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-2xl font-bold">
+                  {organizationLimit.currentOrgs}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  of {formatLimit(organizationLimit.maxOrgs)}
+                </span>
+              </div>
+              <Progress value={orgPercentage} className="h-2" />
+              <div className="flex items-center justify-between">
+                <span
+                  className={`text-xs font-medium ${getStatusColor(
+                    orgPercentage
+                  )}`}
+                >
+                  {orgPercentage}% used
+                </span>
+                {organizationLimit.canCreate ? (
+                  <span className="text-xs text-green-600">Can create</span>
+                ) : (
+                  <span className="text-xs text-destructive">
+                    Limit reached
+                  </span>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Products Usage */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <Package className="size-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">
+                Products per Org
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-2xl font-bold">
+                  {productLimit.currentProducts}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  of {formatLimit(productLimit.maxProducts)}
+                </span>
+              </div>
+              <Progress value={productPercentage} className="h-2" />
+              <div className="flex items-center justify-between">
+                <span
+                  className={`text-xs font-medium ${getStatusColor(
+                    productPercentage
+                  )}`}
+                >
+                  {productPercentage}% used
+                </span>
+                {productLimit.canCreate ? (
+                  <span className="text-xs text-green-600">Can create</span>
+                ) : (
+                  <span className="text-xs text-destructive">
+                    Limit reached
+                  </span>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Orders Usage */}
+        <Card>
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <ShoppingCart className="size-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium">
+                Orders This Month
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-2xl font-bold">
+                  {orderLimit.currentOrders}
+                </span>
+                <span className="text-sm text-muted-foreground">
+                  of {formatLimit(orderLimit.maxOrders)}
+                </span>
+              </div>
+              <Progress value={orderPercentage} className="h-2" />
+              <div className="flex items-center justify-between">
+                <span
+                  className={`text-xs font-medium ${getStatusColor(
+                    orderPercentage
+                  )}`}
+                >
+                  {orderPercentage}% used
+                </span>
+                {orderLimit.canCreate ? (
+                  <span className="text-xs text-green-600">Can receive</span>
+                ) : (
+                  <span className="text-xs text-destructive">
+                    Limit reached
+                  </span>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Alerts and Actions */}
+      <Activity mode={isOverLimit ? "visible" : "hidden"}>
+        <Card className="border-yellow-200 bg-yellow-50/50">
+          <CardContent className="pt-6">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="size-5 text-yellow-600 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="font-medium text-yellow-900">
+                  Approaching Usage Limits
+                </h3>
+                <p className="text-sm text-yellow-700 mt-1">
+                  You're approaching the limits of your current plan. Upgrade to
+                  continue growing your business without interruptions.
+                </p>
+                <div className="flex items-center gap-3 mt-4">
+                  <Button
+                    size="sm"
+                    className="bg-yellow-600 hover:bg-yellow-700"
+                  >
+                    <TrendingUp className="size-4" />
+                    Upgrade Plan
+                  </Button>
+                  <Button variant="outline" size="sm">
+                    View Pricing
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </Activity>
+
+      {/* Quick Actions */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Quick Actions</CardTitle>
+          <CardDescription>
+            Manage your subscription and billing settings
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <Button variant="outline">
+              <TrendingUp className="size-4" />
+              Upgrade Plan
+            </Button>
+            <Button variant="outline">
+              <Crown className="size-4" />
+              Change Plan
+            </Button>
+            <Button variant="outline">
+              <AlertCircle className="size-4" />
+              Billing History
+            </Button>
+            <Button variant="outline">
+              <Package className="size-4" />
+              Usage Report
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

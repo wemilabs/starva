@@ -180,7 +180,7 @@ export const PRICING_PLANS: PricingPlan[] = [
   {
     name: "Hobby",
     price: 0,
-    originalPrice: null,
+    originalPrice: 7,
     period: "month",
     orderLimit: 50,
     maxOrgs: 1,

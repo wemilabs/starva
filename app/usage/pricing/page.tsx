@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { cacheLife } from "next/cache";
-import { PricingGrid } from "@/components/pricing/pricing-grid";
+import { PricingGrid } from "@/components/usage/pricing-grid";
 import { PRICING_PLANS } from "@/lib/constants";
 
 export const metadata: Metadata = {

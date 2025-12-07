@@ -13,6 +13,7 @@ const routeConfig: Record<string, (params: string[]) => Crumb[]> = {
   "/merchants": () => [{ label: "Merchants" }],
   "/products": () => [{ label: "Products" }],
   "/orders": () => [{ label: "Orders" }],
+  "/usage/billing": () => [{ label: "Billing" }],
   "/usage/pricing": () => [{ label: "Pricing" }],
   "/analytics": () => [{ label: "Analytics" }],
   "/transactions": () => [{ label: "Transactions" }],
@@ -49,7 +50,6 @@ const routeConfig: Record<string, (params: string[]) => Crumb[]> = {
     { label: "Orders", href: "/orders" },
     { label: `Order #${params[0]?.slice(-8) || params[0]}` },
   ],
-  "/usage/billing": () => [{ label: "Billing" }],
 };
 
 // Helper functions to format dynamic segments

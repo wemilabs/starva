@@ -3,11 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { PricingCard } from "@/components/pricing/pricing-card";
 import { useUserSubscription } from "@/hooks/use-user-subscription";
 import { useSession } from "@/lib/auth-client";
 import type { PricingPlan } from "@/lib/constants";
 import { createSubscription, updateSubscription } from "@/server/subscription";
+import { PricingCard } from "./pricing-card";
 
 interface PricingGridProps {
   plans: readonly PricingPlan[];

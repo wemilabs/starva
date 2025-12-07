@@ -645,7 +645,7 @@ export async function getOrganizationAnalyticsOverview(
 
   const weekdayOrder = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-  const freeSeries = weekdayOrder.map((day) => ({
+  const hobbySeries = weekdayOrder.map((day) => ({
     day,
     orders: byDay[day] || 0,
   }));
@@ -700,7 +700,7 @@ export async function getOrganizationAnalyticsOverview(
     .map(([label, revenue]) => ({ label, revenue }));
 
   return {
-    freeSeries,
+    hobbySeries,
     growthSeries,
     proSeries: topProducts.length > 0 ? topProducts : growthSeries,
     metrics: {

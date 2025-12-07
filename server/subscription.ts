@@ -77,7 +77,7 @@ export async function updateSubscription(userId: string, planName: string) {
     .where(eq(subscription.userId, userId))
     .returning();
 
-  revalidatePath("/pricing");
+  revalidatePath("/usage/pricing");
 
   return updatedSubscription;
 }
@@ -93,7 +93,7 @@ export async function cancelSubscription(userId: string) {
     .where(eq(subscription.userId, userId))
     .returning();
 
-  revalidatePath("/pricing");
+  revalidatePath("/usage/pricing");
 
   return cancelledSubscription;
 }
@@ -109,7 +109,7 @@ export async function activateSubscription(userId: string) {
     .where(eq(subscription.userId, userId))
     .returning();
 
-  revalidatePath("/pricing");
+  revalidatePath("/usage/pricing");
 
   return activatedSubscription;
 }
@@ -139,10 +139,12 @@ export async function checkOrganizationLimit(userId: string) {
   const plan = userSub.plan;
   const maxOrgs =
     plan?.name === "Hobby"
-      ? 2
+      ? 1
       : plan?.name === "Growth"
-      ? 10
+      ? 5
       : plan?.name === "Pro"
+      ? 15
+      : plan?.name === "Pro+"
       ? -1
       : 0;
 

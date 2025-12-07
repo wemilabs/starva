@@ -17,9 +17,70 @@ export const PRODUCT_STATUS_VALUES = [
 ] as const;
 
 export const COUNTRIES = [
+  // African countries
   { code: "+250", name: "Rwanda", flag: "🇷🇼" },
   { code: "+241", name: "Gabon", flag: "🇬🇦" },
   { code: "+243", name: "DRC", flag: "🇨🇩" },
+  { code: "+254", name: "Kenya", flag: "🇰🇪" },
+  { code: "+256", name: "Uganda", flag: "🇺🇬" },
+  { code: "+255", name: "Tanzania", flag: "🇹🇿" },
+  { code: "+234", name: "Nigeria", flag: "🇳🇬" },
+  { code: "+27", name: "South Africa", flag: "🇿🇦" },
+  { code: "+20", name: "Egypt", flag: "🇪🇬" },
+  { code: "+212", name: "Morocco", flag: "🇲🇦" },
+  { code: "+216", name: "Tunisia", flag: "🇹🇳" },
+  { code: "+213", name: "Algeria", flag: "🇩🇿" },
+  { code: "+251", name: "Ethiopia", flag: "🇪🇹" },
+  { code: "+258", name: "Mozambique", flag: "🇲🇿" },
+  { code: "+260", name: "Zambia", flag: "🇿🇲" },
+  { code: "+263", name: "Zimbabwe", flag: "🇿🇼" },
+  { code: "+233", name: "Ghana", flag: "🇬🇭" },
+  { code: "+225", name: "Côte d'Ivoire", flag: "🇨🇮" },
+  { code: "+221", name: "Senegal", flag: "🇸🇳" },
+  { code: "+237", name: "Cameroon", flag: "🇨🇲" },
+
+  // European countries
+  { code: "+44", name: "United Kingdom", flag: "🇬🇧" },
+  { code: "+33", name: "France", flag: "🇫🇷" },
+  { code: "+49", name: "Germany", flag: "🇩🇪" },
+  { code: "+39", name: "Italy", flag: "🇮🇹" },
+  { code: "+34", name: "Spain", flag: "🇪🇸" },
+  { code: "+46", name: "Sweden", flag: "🇸🇪" },
+  // { code: "+31", name: "Netherlands", flag: "🇳🇱" },
+  // { code: "+47", name: "Norway", flag: "�🇴" },
+  // { code: "+45", name: "Denmark", flag: "�🇩🇰" },
+  // { code: "+358", name: "Finland", flag: "🇫🇮" },
+  // { code: "+41", name: "Switzerland", flag: "🇨🇭" },
+  // { code: "+43", name: "Austria", flag: "🇦🇹" },
+  // { code: "+32", name: "Belgium", flag: "🇧🇪" },
+  // { code: "+48", name: "Poland", flag: "🇵🇱" },
+  // { code: "+420", name: "Czech Republic", flag: "🇨🇿" },
+  // { code: "+36", name: "Hungary", flag: "🇭🇺" },
+  // { code: "+40", name: "Romania", flag: "🇷🇴" },
+  // { code: "+30", name: "Greece", flag: "🇬🇷" },
+  // { code: "+351", name: "Portugal", flag: "🇵🇹" },
+  // { code: "+353", name: "Ireland", flag: "🇮🇪" },
+
+  // American countries
+  { code: "+1", name: "United States", flag: "🇺🇸" },
+  { code: "+1", name: "Canada", flag: "🇨🇦" },
+  // { code: "+52", name: "Mexico", flag: "🇲🇽" },
+  // { code: "+55", name: "Brazil", flag: "🇧🇷" },
+  // { code: "+54", name: "Argentina", flag: "🇦🇷" },
+  // { code: "+56", name: "Chile", flag: "🇨🇱" },
+  // { code: "+57", name: "Colombia", flag: "🇨🇴" },
+  // { code: "+51", name: "Peru", flag: "🇵🇪" },
+  // { code: "+58", name: "Venezuela", flag: "🇻🇪" },
+  // { code: "+598", name: "Uruguay", flag: "🇺🇾" },
+  // { code: "+593", name: "Ecuador", flag: "🇪🇨" },
+  // { code: "+591", name: "Bolivia", flag: "🇧🇴" },
+  // { code: "+595", name: "Paraguay", flag: "🇵🇾" },
+  // { code: "+507", name: "Panama", flag: "🇵🇦" },
+  // { code: "+506", name: "Costa Rica", flag: "🇨🇷" },
+  // { code: "+503", name: "El Salvador", flag: "🇸🇻" },
+  // { code: "+502", name: "Guatemala", flag: "🇬🇹" },
+  // { code: "+504", name: "Honduras", flag: "🇭🇳" },
+  // { code: "+505", name: "Nicaragua", flag: "🇳🇮" },
 ] as const;
 
 export const ORDER_STATUS_VALUES = [
@@ -109,7 +170,7 @@ export type PricingPlan = {
   orderLimit: number | null;
   maxOrgs: number | null;
   maxProductsPerOrg: number | null;
-  additionalText?: string;
+  additionalText: string;
   features: readonly string[];
   highlighted: boolean;
   cta: string;
@@ -124,6 +185,7 @@ export const PRICING_PLANS: PricingPlan[] = [
     orderLimit: 50,
     maxOrgs: 1,
     maxProductsPerOrg: 10,
+    additionalText: "Includes:",
     features: [
       "1 store",
       "10 products",

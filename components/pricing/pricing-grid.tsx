@@ -35,7 +35,7 @@ export function PricingGrid({ plans }: PricingGridProps) {
       return;
     }
 
-    // Don't allow selecting free plan if user already has any subscription
+    // Don't allow selecting hobby plan if user already has any subscription
     if (planName === "Hobby" && currentPlanName) {
       toast.info(
         "You already have a subscription. Use the account settings to downgrade."
@@ -78,7 +78,7 @@ export function PricingGrid({ plans }: PricingGridProps) {
           price={plan.price}
           originalPrice={plan.originalPrice}
           period={plan.period}
-          additionalText={plan.additionalText || ""}
+          additionalText={plan.additionalText}
           features={plan.features}
           highlighted={plan.highlighted}
           cta={plan.cta}

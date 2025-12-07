@@ -92,7 +92,7 @@ export function StoreCard({ store }: { store: Organization }) {
             <AlertDialog open={open} onOpenChange={setOpen}>
               <AlertDialogTrigger asChild>
                 <Button
-                  className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all opacity-0 group-hover:opacity-100"
+                  className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all md:opacity-0 md:group-hover:opacity-100"
                   disabled={isPending}
                   size="icon"
                   variant="ghost"

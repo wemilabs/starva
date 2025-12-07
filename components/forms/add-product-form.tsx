@@ -108,7 +108,7 @@ export function AddProductForm({
 
   const handleUpgradeClick = () => {
     setDialogOpen(false);
-    router.push("/pricing");
+    router.push("/usage/pricing");
   };
 
   const { data: productLimit, isLoading } = useQuery({

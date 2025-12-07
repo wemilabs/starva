@@ -35,11 +35,11 @@ const data = {
       items: [
         {
           title: "Billing",
-          url: "#",
+          url: "/usage/billing",
         },
         {
-          title: "Pricing plans",
-          url: "/pricing",
+          title: "Plans & Pricing",
+          url: "/usage/pricing",
         },
       ],
     },

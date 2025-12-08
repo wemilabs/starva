@@ -30,7 +30,7 @@ import { Spinner } from "../ui/spinner";
 
 type PaymentStatus = "idle" | "pending" | "polling" | "success" | "failed";
 
-interface MoMoPaymentModalProps {
+interface PaymentModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   planName: string;
@@ -39,14 +39,14 @@ interface MoMoPaymentModalProps {
   onSuccess?: () => void;
 }
 
-export function MoMoPaymentModal({
+export function PaymentModal({
   open,
   onOpenChange,
   planName,
   isRenewal = false,
   defaultPhone,
   onSuccess,
-}: MoMoPaymentModalProps) {
+}: PaymentModalProps) {
   const [phone, setPhone] = useState(defaultPhone || "");
   const [paymentRef, setPaymentRef] = useState<string | null>(null);
   const [status, setStatus] = useState<PaymentStatus>("idle");

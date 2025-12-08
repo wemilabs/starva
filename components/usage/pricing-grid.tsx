@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { MoMoPaymentModal } from "@/components/billing/momo-payment-modal";
+import { PaymentModal } from "@/components/billing/payment-modal";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -183,7 +183,7 @@ export function PricingGrid({ plans }: PricingGridProps) {
 
       {/* Payment Modal for Upgrades */}
       {selectedPlan && showPaymentModal && (
-        <MoMoPaymentModal
+        <PaymentModal
           open={showPaymentModal}
           onOpenChange={setShowPaymentModal}
           planName={selectedPlan}

@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card";
 import type { Subscription } from "@/db/schema";
 import { cn, formatDateShort, getDaysUntil } from "@/lib/utils";
-import { MoMoPaymentModal } from "./momo-payment-modal";
+import { PaymentModal } from "./payment-modal";
 
 interface RenewalSectionProps {
   subscription: Subscription;
@@ -157,7 +157,7 @@ export function RenewalSection({ subscription }: RenewalSectionProps) {
         </CardContent>
       </Card>
 
-      <MoMoPaymentModal
+      <PaymentModal
         key={modalKeyRef.current}
         open={showPaymentModal}
         onOpenChange={setShowPaymentModal}

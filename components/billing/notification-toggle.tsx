@@ -41,12 +41,12 @@ export function NotificationToggle() {
     >
       {isSubscribed ? (
         <>
-          <BellRing className="mr-2 h-4 w-4" />
+          <BellRing className="size-4" />
           Notifications On
         </>
       ) : (
         <>
-          <Bell className="mr-2 h-4 w-4" />
+          <Bell className="size-4" />
           Enable Notifications
         </>
       )}

@@ -121,6 +121,24 @@ export const subscriptionStatus = pgEnum("subscription_status", [
   "trial",
 ]);
 
+export const paymentStatus = pgEnum("payment_status", [
+  "pending",
+  "successful",
+  "failed",
+  "expired",
+]);
+
+export const notificationType = pgEnum("notification_type", [
+  "renewal_reminder_7d",
+  "renewal_reminder_3d",
+  "renewal_reminder_1d",
+  "subscription_expired",
+  "subscription_activated",
+  "payment_successful",
+  "payment_failed",
+  "general",
+]);
+
 export const productCategory = pgEnum("product_category", [
   "health-wellness",
   "food-groceries",
@@ -183,6 +201,16 @@ export const subscription = pgTable(
     maxOrgs: integer("max_orgs"),
     maxProductsPerOrg: integer("max_products_per_org"),
     ordersUsedThisMonth: integer("orders_used_this_month").default(0).notNull(),
+    // Billing fields
+    phoneNumber: text("phone_number"),
+    currentPeriodStart: timestamp("current_period_start"),
+    currentPeriodEnd: timestamp("current_period_end"),
+    lastPaymentId: text("last_payment_id"),
+    renewalReminderSentAt: timestamp("renewal_reminder_sent_at"),
+    finalReminderSentAt: timestamp("final_reminder_sent_at"),
+    // Scheduled plan change (for downgrades)
+    scheduledPlanName: text("scheduled_plan_name"),
+    scheduledChangeDate: timestamp("scheduled_change_date"),
     createdAt: timestamp("created_at")
       .$defaultFn(() => new Date())
       .notNull(),
@@ -222,11 +250,94 @@ export const orderUsageTracking = pgTable(
   ]
 );
 
-export const userRelations = relations(user, ({ one }) => ({
+export const payment = pgTable(
+  "payment",
+  {
+    id: text("id")
+      .$defaultFn(() => randomUUID())
+      .primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    subscriptionId: text("subscription_id"),
+    // Paypack fields
+    paypackRef: text("paypack_ref").unique(),
+    phoneNumber: text("phone_number").notNull(),
+    amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+    currency: text("currency").default("RWF").notNull(),
+    provider: text("provider"),
+    // Payment details
+    status: paymentStatus("status").default("pending").notNull(),
+    planName: text("plan_name").notNull(),
+    isRenewal: boolean("is_renewal").default(false).notNull(),
+    processedAt: timestamp("processed_at"),
+    createdAt: timestamp("created_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (t) => [
+    index("payment_user_idx").on(t.userId),
+    index("payment_status_idx").on(t.status),
+    index("payment_ref_idx").on(t.paypackRef),
+  ]
+);
+
+export const pushSubscription = pgTable(
+  "push_subscription",
+  {
+    id: text("id")
+      .$defaultFn(() => randomUUID())
+      .primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    endpoint: text("endpoint").notNull(),
+    p256dh: text("p256dh").notNull(),
+    auth: text("auth").notNull(),
+    userAgent: text("user_agent"),
+    createdAt: timestamp("created_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (t) => [
+    index("push_sub_user_idx").on(t.userId),
+    unique("push_sub_endpoint").on(t.endpoint),
+  ]
+);
+
+export const notification = pgTable(
+  "notification",
+  {
+    id: text("id")
+      .$defaultFn(() => randomUUID())
+      .primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    type: notificationType("type").notNull(),
+    title: text("title").notNull(),
+    message: text("message").notNull(),
+    read: boolean("read").default(false).notNull(),
+    sentViaPush: boolean("sent_via_push").default(false),
+    actionUrl: text("action_url"),
+    createdAt: timestamp("created_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (t) => [
+    index("notification_user_idx").on(t.userId),
+    index("notification_read_idx").on(t.read),
+  ]
+);
+
+export const userRelations = relations(user, ({ one, many }) => ({
   subscription: one(subscription, {
     fields: [user.id],
     references: [subscription.userId],
   }),
+  payments: many(payment),
+  pushSubscriptions: many(pushSubscription),
+  notifications: many(notification),
 }));
 
 export const organizationRelations = relations(organization, ({ many }) => ({
@@ -253,6 +364,30 @@ export const orderUsageTrackingRelations = relations(
     }),
   })
 );
+
+export const paymentRelations = relations(payment, ({ one }) => ({
+  user: one(user, {
+    fields: [payment.userId],
+    references: [user.id],
+  }),
+}));
+
+export const pushSubscriptionRelations = relations(
+  pushSubscription,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [pushSubscription.userId],
+      references: [user.id],
+    }),
+  })
+);
+
+export const notificationRelations = relations(notification, ({ one }) => ({
+  user: one(user, {
+    fields: [notification.userId],
+    references: [user.id],
+  }),
+}));
 
 export const member = pgTable("member", {
   id: text("id").primaryKey(),
@@ -691,6 +826,11 @@ export type SubscriptionStatus = (typeof subscriptionStatus.enumValues)[number];
 export type OrderUsageTracking = typeof orderUsageTracking.$inferSelect;
 export type UnitFormat = typeof unitFormat.$inferSelect;
 export type InventoryHistory = typeof inventoryHistory.$inferSelect;
+export type Payment = typeof payment.$inferSelect;
+export type PaymentStatus = (typeof paymentStatus.enumValues)[number];
+export type PushSubscription = typeof pushSubscription.$inferSelect;
+export type Notification = typeof notification.$inferSelect;
+export type NotificationType = (typeof notificationType.enumValues)[number];
 
 export const schema = {
   user,
@@ -711,6 +851,9 @@ export const schema = {
   orderItem,
   inventoryHistory,
   feedback,
+  payment,
+  pushSubscription,
+  notification,
   userRelations,
   organizationRelations,
   memberRelations,
@@ -728,4 +871,7 @@ export const schema = {
   feedbackRelations,
   feedbackHistory,
   feedbackHistoryRelations,
+  paymentRelations,
+  pushSubscriptionRelations,
+  notificationRelations,
 };

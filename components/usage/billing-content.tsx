@@ -3,6 +3,7 @@ import {
   Building2,
   CheckCircle2,
   Crown,
+  History,
   Lock,
   Package,
   ShoppingCart,
@@ -10,6 +11,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Activity } from "react";
+import { NotificationToggle } from "@/components/billing/notification-toggle";
+import { RenewalSection } from "@/components/billing/renewal-section";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,6 +33,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
+import { getUserPayments } from "@/server/payments";
 import {
   checkOrderLimit,
   checkOrganizationLimit,
@@ -115,6 +119,7 @@ export async function BillingContent() {
   }
 
   const isTrial = subscription?.status === "trial";
+  const payments = await getUserPayments(5);
 
   const isOverLimit =
     (organizationLimit.maxOrgs !== "Unlimited" &&
@@ -387,29 +392,100 @@ export async function BillingContent() {
         </Card>
       </Activity>
 
+      {/* Renewal Section - Only for paid plans */}
+      {subscription && subscription.planName !== "Hobby" && (
+        <RenewalSection subscription={subscription} />
+      )}
+
+      {/* Payment History */}
+      {payments.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg">Payment History</CardTitle>
+                <CardDescription>
+                  Your recent subscription payments
+                </CardDescription>
+              </div>
+              <NotificationToggle />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {payments.map((payment) => (
+                <div
+                  key={payment.id}
+                  className="flex items-center justify-between py-3 border-b last:border-0"
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`size-2 rounded-full ${
+                        payment.status === "successful"
+                          ? "bg-green-500"
+                          : payment.status === "pending"
+                          ? "bg-yellow-500"
+                          : "bg-red-500"
+                      }`}
+                    />
+                    <div>
+                      <p className="text-sm font-medium">
+                        {payment.planName} Plan
+                        {payment.isRenewal && " (Renewal)"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(payment.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium">
+                      {Number(payment.amount).toLocaleString()}{" "}
+                      {payment.currency}
+                    </p>
+                    <p className="text-xs text-muted-foreground capitalize">
+                      {payment.status}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Quick Actions */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Quick Actions</CardTitle>
-          <CardDescription>
-            Manage your subscription and billing settings
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-lg">Quick Actions</CardTitle>
+              <CardDescription>
+                Manage your subscription and billing settings
+              </CardDescription>
+            </div>
+            {payments.length === 0 && <NotificationToggle />}
+          </div>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <Button variant="outline">
-              <TrendingUp className="size-4" />
-              Upgrade Plan
+            <Button variant="outline" asChild>
+              <Link href="/usage/pricing">
+                <TrendingUp className="size-4" />
+                Upgrade Plan
+              </Link>
             </Button>
-            <Button variant="outline">
-              <Crown className="size-4" />
-              Change Plan
+            <Button variant="outline" asChild>
+              <Link href="/usage/pricing">
+                <Crown className="size-4" />
+                View Plans
+              </Link>
             </Button>
-            <Button variant="outline">
-              <AlertCircle className="size-4" />
-              Billing History
+            <Button variant="outline" disabled>
+              <History className="size-4" />
+              Full History
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" disabled>
               <Package className="size-4" />
               Usage Report
             </Button>

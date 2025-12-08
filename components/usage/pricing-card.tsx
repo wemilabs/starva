@@ -24,6 +24,7 @@ interface PricingCardProps {
   onSelect?: () => void;
   isLoading?: boolean;
   isCurrentPlan?: boolean;
+  isScheduledPlan?: boolean;
 }
 
 export function PricingCard({
@@ -38,6 +39,7 @@ export function PricingCard({
   onSelect,
   isLoading = false,
   isCurrentPlan = false,
+  isScheduledPlan = false,
 }: PricingCardProps) {
   const discountPercentage =
     originalPrice && price
@@ -117,10 +119,12 @@ export function PricingCard({
           size="lg"
           variant={highlighted ? "default" : "outline"}
           onClick={onSelect}
-          disabled={isLoading || isCurrentPlan}
+          disabled={isLoading || isCurrentPlan || isScheduledPlan}
         >
           {isCurrentPlan ? (
             "Current Plan"
+          ) : isScheduledPlan ? (
+            "Scheduled ✓"
           ) : isLoading ? (
             <>
               <Spinner />

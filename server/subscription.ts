@@ -108,6 +108,83 @@ export async function activateSubscription(userId: string) {
   return activatedSubscription;
 }
 
+export async function scheduleDowngrade(userId: string, newPlanName: string) {
+  const existingSubscription = await getUserSubscription(userId);
+  if (!existingSubscription) {
+    throw new Error("No subscription found");
+  }
+
+  const plan = PRICING_PLANS.find((p) => p.name === newPlanName);
+  if (!plan) throw new Error(`Invalid plan name: ${newPlanName}`);
+
+  // Schedule the downgrade for the end of the current billing period
+  const scheduledDate = existingSubscription.currentPeriodEnd || new Date();
+
+  const [updatedSubscription] = await db
+    .update(subscription)
+    .set({
+      scheduledPlanName: newPlanName,
+      scheduledChangeDate: scheduledDate,
+      updatedAt: new Date(),
+    })
+    .where(eq(subscription.userId, userId))
+    .returning();
+
+  revalidatePath("/usage/pricing");
+  revalidatePath("/usage/billing");
+
+  return updatedSubscription;
+}
+
+export async function cancelScheduledDowngrade(userId: string) {
+  const [updatedSubscription] = await db
+    .update(subscription)
+    .set({
+      scheduledPlanName: null,
+      scheduledChangeDate: null,
+      updatedAt: new Date(),
+    })
+    .where(eq(subscription.userId, userId))
+    .returning();
+
+  revalidatePath("/usage/pricing");
+  revalidatePath("/usage/billing");
+
+  return updatedSubscription;
+}
+
+export async function applyScheduledDowngrades() {
+  const now = new Date();
+
+  // Find all subscriptions with scheduled changes that are due
+  const dueDowngrades = await db.query.subscription.findMany({
+    where: (s, { and, isNotNull, lte }) =>
+      and(isNotNull(s.scheduledPlanName), lte(s.scheduledChangeDate, now)),
+  });
+
+  for (const sub of dueDowngrades) {
+    if (!sub.scheduledPlanName) continue;
+
+    const plan = PRICING_PLANS.find((p) => p.name === sub.scheduledPlanName);
+    if (!plan) continue;
+
+    await db
+      .update(subscription)
+      .set({
+        planName: sub.scheduledPlanName,
+        orderLimit: plan.orderLimit,
+        maxOrgs: plan.maxOrgs,
+        maxProductsPerOrg: plan.maxProductsPerOrg,
+        scheduledPlanName: null,
+        scheduledChangeDate: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(subscription.id, sub.id));
+  }
+
+  return dueDowngrades.length;
+}
+
 export async function checkOrganizationLimit(userId: string) {
   const userSub = await getUserSubscription(userId);
 

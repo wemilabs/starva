@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { productCategory } from "@/db/schema";
-import { COUNTRIES } from "./constants";
+import { COUNTRIES, USD_TO_RWF } from "./constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -134,7 +134,17 @@ export const formatDistanceToNow = (date: Date): string => {
   return `${diffInYears} year${diffInYears > 1 ? "s" : ""} ago`;
 };
 
-// ------------------------ Price utils ------------------------
+export const getDaysUntil = (date: Date | string): number => {
+  const targetDate = date instanceof Date ? date : new Date(date);
+  const now = new Date();
+  // Reset time to start of day for accurate day calculation
+  now.setHours(0, 0, 0, 0);
+  targetDate.setHours(0, 0, 0, 0);
+  const diffInMs = targetDate.getTime() - now.getTime();
+  return Math.ceil(diffInMs / (1000 * 60 * 60 * 24));
+};
+
+// ------------------------ Price & phone utils ------------------------
 export const formatPrice = (
   price: string | number,
   currency: string = "USD",
@@ -154,6 +164,33 @@ export const formatPrice = (
 export const formatPriceInRWF = (price: string | number) => {
   return formatPrice(price, "RWF", "en-RW");
 };
+
+export function convertUsdToRwf(usd: number): number {
+  return Math.round(usd * USD_TO_RWF);
+}
+
+// Format phone number for Paypack API (07xxxxxxx format - 9 digits, no country code)
+export function formatRwandanPhone(phone: string): string {
+  // Remove any spaces or dashes
+  let cleaned = phone.replace(/[\s-]/g, "");
+
+  // Handle different formats - normalize to 9 digits starting with 7
+  if (cleaned.startsWith("+250")) {
+    cleaned = cleaned.slice(4); // +250781234567 -> 781234567
+  } else if (cleaned.startsWith("250")) {
+    cleaned = cleaned.slice(3); // 250781234567 -> 781234567
+  } else if (cleaned.startsWith("0")) {
+    cleaned = cleaned.slice(1); // 0781234567 -> 781234567
+  }
+
+  // Validate length (should be 9 digits: 7xxxxxxxx)
+  if (cleaned.length !== 9) {
+    throw new Error("Invalid phone number format");
+  }
+
+  // Return in 07xxxxxxx format (Paypack expects this, not 250xxxxxxx)
+  return `0${cleaned}`;
+}
 
 // ------------------------ Product utils ------------------------
 export const PRODUCT_CATEGORIES = productCategory.enumValues;

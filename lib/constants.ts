@@ -176,6 +176,7 @@ export type PricingPlan = {
   cta: string;
 };
 
+export const USD_TO_RWF = 1454.3;
 export const PRICING_PLANS: PricingPlan[] = [
   {
     name: "Hobby",
@@ -200,7 +201,7 @@ export const PRICING_PLANS: PricingPlan[] = [
   },
   {
     name: "Growth",
-    price: 28,
+    price: 0.069, // 28 real price
     originalPrice: 40,
     period: "month",
     orderLimit: 100,

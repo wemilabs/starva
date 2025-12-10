@@ -176,7 +176,7 @@ export type PricingPlan = {
   cta: string;
 };
 
-export const USD_TO_RWF = 1454.3;
+export const USD_TO_RWF = 1457.39;
 export const PRICING_PLANS: PricingPlan[] = [
   {
     name: "Hobby",

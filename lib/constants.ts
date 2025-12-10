@@ -201,7 +201,7 @@ export const PRICING_PLANS: PricingPlan[] = [
   },
   {
     name: "Growth",
-    price: 0.069, // 28 real price
+    price: 28,
     originalPrice: 40,
     period: "month",
     orderLimit: 100,

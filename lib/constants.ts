@@ -218,7 +218,7 @@ export const PRICING_PLANS: PricingPlan[] = [
       "Priority support",
     ],
     highlighted: true,
-    cta: "Start Free Trial",
+    cta: "Get Growth",
   },
   {
     name: "Pro",
@@ -239,7 +239,7 @@ export const PRICING_PLANS: PricingPlan[] = [
       "Priority support",
     ],
     highlighted: false,
-    cta: "Start Free Trial",
+    cta: "Get Pro",
   },
   {
     name: "Pro+",
@@ -261,7 +261,7 @@ export const PRICING_PLANS: PricingPlan[] = [
       "API access for integrations",
     ],
     highlighted: false,
-    cta: "Start Free Trial",
+    cta: "Get Pro+",
   },
   {
     name: "Enterprise",

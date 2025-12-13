@@ -44,6 +44,9 @@ export async function Hero() {
             className="mx-auto text-balance text-4xl font-semibold md:text-5xl lg:text-7xl tracking-wide lg:tracking-wider text-primary-foreground"
           >
             Search. Shop. Smile.
+            {/* Search. Shop. Ship. Smile. */}
+            {/* Search. Shop/Ship. Smile. */}
+            {/* Search. Shop or Ship. Smile. */}
           </TextEffect>
           <TextEffect
             per="line"
@@ -53,8 +56,8 @@ export async function Hero() {
             as="p"
             className="mx-auto mt-2 max-w-2xl text-sm sm:text-base text-pretty text-primary-foreground font-mono tracking-tighter"
           >
-            Say goodbye to WhatsApp madness. Whether discovering local gems or
-            expanding your store reach, Starva.shop makes it simple.
+            Whether discovering local gems or expanding your store reach,
+            Starva.shop is The Way forward.
           </TextEffect>
 
           <AnimatedGroup

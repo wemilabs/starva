@@ -86,7 +86,7 @@ export async function BillingContent() {
     canCreate: true,
     maxProducts: (plan?.maxProductsPerOrg === null
       ? "Unlimited"
-      : plan?.maxProductsPerOrg ?? 10) as number | string,
+      : (plan?.maxProductsPerOrg ?? 10)) as number | string,
     currentProducts: 0,
     planName: plan?.name ?? null,
   };
@@ -94,7 +94,7 @@ export async function BillingContent() {
     canCreate: true,
     maxOrders: (plan?.orderLimit === null
       ? "Unlimited"
-      : plan?.orderLimit ?? 50) as number | string,
+      : (plan?.orderLimit ?? 50)) as number | string,
     currentOrders: 0,
     planName: plan?.name ?? null,
   };
@@ -176,8 +176,8 @@ export async function BillingContent() {
                   {isTrial
                     ? "Trial period"
                     : subscription
-                    ? "Active subscription"
-                    : "No active plan"}
+                      ? "Active subscription"
+                      : "No active plan"}
                 </CardDescription>
               </div>
             </div>
@@ -424,8 +424,8 @@ export async function BillingContent() {
                         payment.status === "successful"
                           ? "bg-green-500"
                           : payment.status === "pending"
-                          ? "bg-yellow-500"
-                          : "bg-red-500"
+                            ? "bg-yellow-500"
+                            : "bg-red-500"
                       }`}
                     />
                     <div>

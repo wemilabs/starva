@@ -38,10 +38,12 @@ const productSchema = z.object({
 });
 
 export async function createProduct(input: z.infer<typeof productSchema>) {
+  const verified = await verifySession();
+  if (!verified.success) return { ok: false, error: "Unauthorized" };
+
   const parsed = productSchema.safeParse(input);
-  if (!parsed.success) {
+  if (!parsed.success)
     return { ok: false, error: z.treeifyError(parsed.error) };
-  }
 
   try {
     const {
@@ -163,10 +165,12 @@ const updateProductSchema = productSchema.extend({
 export async function updateProduct(
   input: z.infer<typeof updateProductSchema>
 ) {
+  const verified = await verifySession();
+  if (!verified.success) return { ok: false, error: "Unauthorized" };
+
   const parsed = updateProductSchema.safeParse(input);
-  if (!parsed.success) {
+  if (!parsed.success)
     return { ok: false, error: z.treeifyError(parsed.error) } as const;
-  }
 
   try {
     const {
@@ -357,10 +361,12 @@ const deleteProductSchema = z.object({
 export async function deleteProduct(
   input: z.infer<typeof deleteProductSchema>
 ) {
+  const verified = await verifySession();
+  if (!verified.success) return { ok: false, error: "Unauthorized" };
+
   const parsed = deleteProductSchema.safeParse(input);
-  if (!parsed.success) {
+  if (!parsed.success)
     return { ok: false, error: z.treeifyError(parsed.error) } as const;
-  }
 
   try {
     const { productId, organizationId, revalidateTargetPath } = parsed.data;

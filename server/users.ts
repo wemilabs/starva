@@ -14,7 +14,7 @@ import { db } from "@/db/drizzle";
 import { user } from "@/db/schema";
 import { requireAdmin } from "@/lib/admin-auth";
 import { auth } from "@/lib/auth";
-import { createSubscription } from "@/server/subscription";
+import { createSubscription, getUserSubscription } from "@/server/subscription";
 
 export async function signInUser(email: string, password: string) {
   try {
@@ -25,26 +25,22 @@ export async function signInUser(email: string, password: string) {
       },
     });
 
-    // Get the session after signin to check subscription
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
     if (session?.user?.id) {
-      // Check if user already has a subscription
-      const { getUserSubscription } = await import("@/server/subscription");
       const existingSubscription = await getUserSubscription(session.user.id);
 
-      if (!existingSubscription) {
-        // Automatically create free subscription for users without one
+      if (!existingSubscription)
         await createSubscription(session.user.id, "Hobby");
-      }
     }
 
     return { success: true, message: "User signed in successfully" };
   } catch (error: unknown) {
-    console.error("signInUser failed", { error });
-    return { success: false, message: "User sign in failed" };
+    const err = error as Error;
+    console.error("signInUser failed", { err });
+    return { success: false, message: err.message };
   }
 }
 
@@ -62,30 +58,24 @@ export async function signUpUser(
       },
     });
 
-    // Get the session after signup to get user ID
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
-    if (session?.user?.id) {
-      // Automatically create free subscription
-      await createSubscription(session.user.id, "Hobby");
-    }
+    if (session?.user?.id) await createSubscription(session.user.id, "Hobby");
 
     return { success: true, message: "User signed up successfully" };
   } catch (error: unknown) {
-    console.error("signUpUser failed", { error });
-    return { success: false, message: "User sign up failed" };
+    const err = error as Error;
+    console.error("signUpUser failed", { err });
+    return { success: false, message: err.message };
   }
 }
 
 export async function ensureUserHasFreeSubscription(userId: string) {
-  const { getUserSubscription } = await import("@/server/subscription");
   const existingSubscription = await getUserSubscription(userId);
 
-  if (!existingSubscription) {
-    await createSubscription(userId, "Hobby");
-  }
+  if (!existingSubscription) await createSubscription(userId, "Hobby");
 
   return existingSubscription;
 }
@@ -93,17 +83,13 @@ export async function ensureUserHasFreeSubscription(userId: string) {
 export const getCurrentUser = async () => {
   const result = await verifySession();
 
-  if (!result.success) {
-    redirect("/sign-in");
-  }
+  if (!result.success) redirect("/sign-in");
 
   const currentUser = await db.query.user.findFirst({
     where: eq(user.id, result.session.user.id),
   });
 
-  if (!currentUser) {
-    redirect("/sign-in");
-  }
+  if (!currentUser) redirect("/sign-in");
 
   await ensureUserHasFreeSubscription(result.session.user.id);
 
@@ -215,9 +201,7 @@ export async function createUserAdmin(data: {
       where: eq(user.email, data.email),
     });
 
-    if (newUser) {
-      await createSubscription(newUser.id, "Hobby");
-    }
+    if (newUser) await createSubscription(newUser.id, "Hobby");
 
     return { success: true, message: "User created successfully" };
   } catch (error) {

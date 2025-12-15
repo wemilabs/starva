@@ -24,14 +24,14 @@ const orderSchema = z.object({
 });
 
 export async function placeOrder(input: z.infer<typeof orderSchema>) {
-  const parsed = orderSchema.safeParse(input);
-  if (!parsed.success)
-    return { ok: false, error: z.treeifyError(parsed.error) };
-
   const verified = await verifySession();
   if (!verified.success) return { ok: false, error: "Unauthorized" };
 
-  const session = verified.session;
+  const { session } = verified;
+
+  const parsed = orderSchema.safeParse(input);
+  if (!parsed.success)
+    return { ok: false, error: z.treeifyError(parsed.error) };
 
   const { items, notes } = parsed.data;
 
@@ -66,18 +66,15 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       },
     });
 
-    if (!orgOwner) {
-      return { ok: false, error: "Organization owner not found" };
-    }
+    if (!orgOwner) return { ok: false, error: "Organization owner not found" };
 
     // Check if merchant has reached their order limit
     const orderLimit = await checkOrderLimit(organizationId);
-    if (!orderLimit.canCreate) {
+    if (!orderLimit.canCreate)
       return {
         ok: false,
         error: `Merchant has reached their monthly order limit of ${orderLimit.maxOrders}. Please try again next month or contact the merchant.`,
       };
-    }
 
     // Validate stock availability for products with inventory tracking
     const stockCheck = await getProductsStock({
@@ -85,9 +82,8 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       organizationId,
     });
 
-    if (!stockCheck.ok) {
+    if (!stockCheck.ok)
       return { ok: false, error: "Failed to check product availability" };
-    }
 
     // Check each item against current stock
     const stockWarnings: string[] = [];
@@ -210,13 +206,12 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
 
     const whatsappPhone = metadata.phoneForNotifications;
 
-    if (!whatsappPhone) {
+    if (!whatsappPhone)
       return {
         ok: true,
         orderId: newOrder.id,
-        error: "Merchant WhatsApp number not configured",
+        error: "Merchant WhatsApp number not configured yet",
       };
-    }
 
     const itemsList = orderItems
       .map((item) => {
@@ -298,15 +293,13 @@ const updateOrderStatusSchema = z.object({
 export async function updateOrderStatus(
   input: z.infer<typeof updateOrderStatusSchema>
 ) {
-  const parsed = updateOrderStatusSchema.safeParse(input);
-  if (!parsed.success) {
-    return { ok: false, error: "Invalid input" };
-  }
-
   const verified = await verifySession();
   if (!verified.success) return { ok: false, error: "Unauthorized" };
 
-  const session = verified.session;
+  const { session } = verified;
+
+  const parsed = updateOrderStatusSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Invalid input" };
 
   const { orderId, status } = parsed.data;
 
@@ -324,14 +317,11 @@ export async function updateOrderStatus(
       },
     });
 
-    if (!existingOrder) {
-      return { ok: false, error: "Order not found" };
-    }
+    if (!existingOrder) return { ok: false, error: "Order not found" };
 
     const member = existingOrder.organization.members[0];
-    if (!member || (member.role !== "admin" && member.role !== "owner")) {
+    if (!member || (member.role !== "admin" && member.role !== "owner"))
       return { ok: false, error: "Unauthorized to update this order" };
-    }
 
     const oldStatus = existingOrder.status;
 
@@ -437,16 +427,14 @@ export async function cancelOrder(orderId: string) {
   const verified = await verifySession();
   if (!verified.success) return { ok: false, error: "Unauthorized" };
 
-  const session = verified.session;
+  const { session } = verified;
 
   try {
     const existingOrder = await db.query.order.findFirst({
       where: eq(orderTable.id, orderId),
     });
 
-    if (!existingOrder) {
-      return { ok: false, error: "Order not found" };
-    }
+    if (!existingOrder) return { ok: false, error: "Order not found" };
 
     if (existingOrder.userId !== session.user.id) {
       const organizationMember = await db.query.member.findFirst({
@@ -461,18 +449,15 @@ export async function cancelOrder(orderId: string) {
         !organizationMember ||
         (organizationMember.role !== "admin" &&
           organizationMember.role !== "owner")
-      ) {
+      )
         return { ok: false, error: "Unauthorized to cancel this order" };
-      }
     }
 
-    if (existingOrder.status === "delivered") {
+    if (existingOrder.status === "delivered")
       return { ok: false, error: "Cannot cancel a delivered order" };
-    }
 
-    if (existingOrder.status === "cancelled") {
+    if (existingOrder.status === "cancelled")
       return { ok: false, error: "Order is already cancelled" };
-    }
 
     // Get order items with product inventory info
     const orderItems = await db.query.orderItem.findMany({
@@ -529,15 +514,13 @@ const markOrderAsDeliveredSchema = z.object({
 export async function markOrderAsDelivered(
   input: z.infer<typeof markOrderAsDeliveredSchema>
 ) {
-  const parsed = markOrderAsDeliveredSchema.safeParse(input);
-  if (!parsed.success) {
-    return { ok: false, error: "Invalid input" };
-  }
-
   const verified = await verifySession();
   if (!verified.success) return { ok: false, error: "Unauthorized" };
 
-  const session = verified.session;
+  const { session } = verified;
+
+  const parsed = markOrderAsDeliveredSchema.safeParse(input);
+  if (!parsed.success) return { ok: false, error: "Invalid input" };
 
   const { orderId } = parsed.data;
 
@@ -546,24 +529,19 @@ export async function markOrderAsDelivered(
       where: (order, { eq }) => eq(order.id, orderId),
     });
 
-    if (!existingOrder) {
-      return { ok: false, error: "Order not found" };
-    }
+    if (!existingOrder) return { ok: false, error: "Order not found" };
 
-    if (existingOrder.userId !== session.user.id) {
+    if (existingOrder.userId !== session.user.id)
       return {
         ok: false,
         error: "Only the customer can mark this as delivered",
       };
-    }
 
-    if (existingOrder.status === "delivered") {
+    if (existingOrder.status === "delivered")
       return { ok: false, error: "Order is already delivered" };
-    }
 
-    if (existingOrder.status === "cancelled") {
+    if (existingOrder.status === "cancelled")
       return { ok: false, error: "Cannot mark a cancelled order as delivered" };
-    }
 
     await db
       .update(orderTable)
@@ -587,6 +565,9 @@ export async function getOrganizationAnalyticsOverview(
   organizationId: string,
   days: number = 28
 ) {
+  const verified = await verifySession();
+  if (!verified.success) return { ok: false, error: "Unauthorized" };
+
   const now = new Date();
   const startDate = new Date(now);
   startDate.setDate(startDate.getDate() - (days - 1));

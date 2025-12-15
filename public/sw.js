@@ -8,15 +8,15 @@ self.addEventListener("push", (event) => {
     data = event.data.json();
   } catch {
     data = {
-      title: "Starva",
+      title: "Starva.shop",
       body: event.data.text(),
     };
   }
 
   const options = {
     body: data.body,
-    icon: "/icon-192x192.png",
-    badge: "/badge-72x72.png",
+    icon: "/starva-dot-shop-512x512.png",
+    badge: "/starva-dot-shop-192x192.png",
     vibrate: [100, 50, 100],
     data: {
       url: data.url || "/",

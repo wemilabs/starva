@@ -176,11 +176,11 @@ async function AnalyticsContent({
       <AnalyticsHero planName={planName} />
 
       <MetricsCards
-        totalOrders={metrics.totalOrders}
-        totalRevenue={metrics.totalRevenue}
-        averageOrderValue={metrics.averageOrderValue}
-        peakHour={metrics.peakHour}
-        peakHourOrders={metrics.peakHourOrders}
+        totalOrders={metrics?.totalOrders ?? 0}
+        totalRevenue={metrics?.totalRevenue ?? 0}
+        averageOrderValue={metrics?.averageOrderValue ?? 0}
+        peakHour={metrics?.peakHour ?? 0}
+        peakHourOrders={metrics?.peakHourOrders ?? 0}
       />
 
       <section className="grid gap-6 md:grid-cols-3">
@@ -192,7 +192,7 @@ async function AnalyticsContent({
           <p className="text-xs text-muted-foreground font-mono tracking-tighter">
             Daily/7-day overview of orders for your active store.
           </p>
-          <HobbyAnalyticsChart data={hobbySeries} />
+          <HobbyAnalyticsChart data={hobbySeries ?? []} />
         </div>
 
         {planName !== "Hobby" && (
@@ -207,7 +207,7 @@ async function AnalyticsContent({
               4-week revenue trends to help you understand how your active store
               is growing.
             </p>
-            <GrowthAnalyticsChart data={growthSeries} />
+            <GrowthAnalyticsChart data={growthSeries ?? []} />
           </div>
         )}
 
@@ -220,7 +220,7 @@ async function AnalyticsContent({
             <p className="text-xs text-muted-foreground font-mono tracking-tighter">
               Top 5 products by revenue to identify your best sellers.
             </p>
-            <ProAnalyticsChart data={proSeries} />
+            <ProAnalyticsChart data={proSeries ?? []} />
           </div>
         )}
       </section>

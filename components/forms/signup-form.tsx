@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Activity, useTransition } from "react";
+import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -25,23 +25,22 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { getLastUsedLoginMethod, signIn } from "@/lib/auth-client";
+import { signIn } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
-import { signInUser } from "@/server/users";
-import { Badge } from "../ui/badge";
+import { signUpUser } from "@/server/users";
 import { Spinner } from "../ui/spinner";
 
 const formSchema = z.object({
+  username: z.string().min(3),
   email: z.email(),
   password: z.string().min(8),
 });
 
-export const SignInForm = ({
+export function SignUpForm({
   className,
   ...props
-}: React.ComponentProps<"div">) => {
+}: React.ComponentProps<"div">) {
   const router = useRouter();
-  const lastLoginMethod = getLastUsedLoginMethod();
 
   const [isGooglePending, startGoogleTransition] = useTransition();
   const [isCredentialsPending, startCredentialsTransition] = useTransition();
@@ -49,6 +48,7 @@ export const SignInForm = ({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      username: "",
       email: "",
       password: "",
     },
@@ -57,12 +57,15 @@ export const SignInForm = ({
   async function onSubmit(values: z.infer<typeof formSchema>) {
     startCredentialsTransition(async () => {
       try {
-        const { success, message } = await signInUser(
+        const { success, message } = await signUpUser(
           values.email,
-          values.password
+          values.password,
+          values.username
         );
         if (success) {
-          toast.success(message);
+          toast.info(message, {
+            description: "Please check your email inbox for verification.",
+          });
           router.push("/");
         } else toast.error(message);
       } catch (error: unknown) {
@@ -76,14 +79,14 @@ export const SignInForm = ({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card className="border-none shadow-none">
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Welcome back</CardTitle>
+          <CardTitle className="text-xl">Most Welcome</CardTitle>
           <CardDescription className="font-mono tracking-tighter">
-            Sign in with your Google account
+            Sign up with your Google account
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
               <div className="flex flex-col gap-6">
                 <Button
                   variant="outline"
@@ -111,7 +114,7 @@ export const SignInForm = ({
                   {isGooglePending ? (
                     <div className="flex items-center gap-2">
                       <Spinner />
-                      Signing in...
+                      Signing up...
                     </div>
                   ) : (
                     <>
@@ -125,19 +128,9 @@ export const SignInForm = ({
                           fill="currentColor"
                         />
                       </svg>
-                      Sign in with Google
+                      Sign up with Google
                     </>
                   )}
-                  <Activity
-                    mode={lastLoginMethod === "google" ? "visible" : "hidden"}
-                  >
-                    <Badge
-                      variant="outline"
-                      className="absolute -right-[1.5px] -top-2 bg-primary text-primary-foreground text-[9px] border-none"
-                    >
-                      last used
-                    </Badge>
-                  </Activity>
                 </Button>
 
                 <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
@@ -149,24 +142,30 @@ export const SignInForm = ({
                 <div className="grid gap-3">
                   <FormField
                     control={form.control}
+                    name="username"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Username</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Trismegistus"
+                            className="placeholder:text-sm"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid gap-3">
+                  <FormField
+                    control={form.control}
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <div className="flex items-center justify-between">
-                          <FormLabel>Email</FormLabel>
-                          <Activity
-                            mode={
-                              lastLoginMethod === "email" ? "visible" : "hidden"
-                            }
-                          >
-                            <Badge
-                              variant="outline"
-                              className="bg-primary text-primary-foreground text-[9px] border-none"
-                            >
-                              last used
-                            </Badge>
-                          </Activity>
-                        </div>
+                        <FormLabel>Email</FormLabel>
                         <FormControl>
                           <Input
                             placeholder="m@example.com"
@@ -209,22 +208,26 @@ export const SignInForm = ({
                 </div>
 
                 <div className="flex flex-col gap-3">
-                  <Button type="submit" disabled={isCredentialsPending}>
+                  <Button
+                    className="w-full"
+                    type="submit"
+                    disabled={isCredentialsPending}
+                  >
                     {isCredentialsPending ? (
                       <div className="flex items-center gap-2">
                         <Spinner />
-                        Signing in...
+                        Signing up...
                       </div>
                     ) : (
-                      "Sign in"
+                      "Sign up"
                     )}
                   </Button>
                 </div>
               </div>
               <div className="mt-4 text-center text-sm">
-                Don&apos;t have an account yet?{" "}
-                <Link href="/sign-up" className="underline underline-offset-4">
-                  Sign up
+                Already have an account?{" "}
+                <Link className="underline underline-offset-4" href="/sign-in">
+                  Sign in
                 </Link>
               </div>
             </form>
@@ -240,4 +243,4 @@ export const SignInForm = ({
       </Card>
     </div>
   );
-};
+}

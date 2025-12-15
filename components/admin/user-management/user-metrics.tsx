@@ -1,6 +1,6 @@
 import { Activity, Eye, TrendingDown, TrendingUp, Users } from "lucide-react";
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   ChartContainer,
   ChartTooltip,

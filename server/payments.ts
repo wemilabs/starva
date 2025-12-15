@@ -2,10 +2,9 @@
 
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
+import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
 import { payment, subscription } from "@/db/schema";
-import { auth } from "@/lib/auth";
 import { PRICING_PLANS } from "@/lib/constants";
 import {
   getTransactionEvents,
@@ -19,20 +18,19 @@ export async function initiateSubscriptionPayment(data: {
   phoneNumber: string;
   isRenewal: boolean;
 }) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) return { error: "Unauthorized" };
+  const verified = await verifySession();
+  if (!verified.success) return { ok: false, error: "Unauthorized" };
+
+  const { session } = verified;
 
   const plan = PRICING_PLANS.find((p) => p.name === data.planName);
-  if (!plan || plan.price === null || plan.price === 0) {
+  if (!plan || plan.price === null || plan.price === 0)
     return { error: "Invalid plan" };
-  }
 
   try {
-    // Format phone number
     const phone = formatRwandanPhone(data.phoneNumber);
     const amountRWF = convertUsdToRwf(plan.price);
 
-    // Initiate Paypack cashin
     const result = await paypackInitiate(phone, amountRWF);
 
     // Create payment record
@@ -75,31 +73,26 @@ export async function initiateSubscriptionPayment(data: {
 }
 
 export async function checkPaymentStatus(paypackRef: string) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) return { error: "Unauthorized", status: "error" };
+  const verified = await verifySession();
+  if (!verified.success) return { ok: false, error: "Unauthorized" };
 
   // Get payment from our DB
   const existingPayment = await db.query.payment.findFirst({
     where: (p, { eq }) => eq(p.paypackRef, paypackRef),
   });
 
-  if (!existingPayment) {
-    return { error: "Payment not found", status: "error" };
-  }
+  if (!existingPayment) return { error: "Payment not found", status: "error" };
 
   // If already processed, return current status
-  if (existingPayment.status !== "pending") {
+  if (existingPayment.status !== "pending")
     return { status: existingPayment.status };
-  }
 
   // Check with Paypack
   try {
     const events = await getTransactionEvents(paypackRef);
     const latestEvent = events[0];
 
-    if (!latestEvent) {
-      return { status: "pending" };
-    }
+    if (!latestEvent) return { status: "pending" };
 
     const transactionStatus = latestEvent.data?.status;
 
@@ -126,6 +119,9 @@ export async function checkPaymentStatus(paypackRef: string) {
 async function processSuccessfulPayment(
   paymentRecord: typeof payment.$inferSelect
 ) {
+  const verified = await verifySession();
+  if (!verified.success) return { ok: false, error: "Unauthorized" };
+
   const plan = PRICING_PLANS.find((p) => p.name === paymentRecord.planName);
   if (!plan) return;
 
@@ -198,8 +194,10 @@ async function processSuccessfulPayment(
 }
 
 export async function getUserPayments(limit = 10) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user) return [];
+  const verified = await verifySession();
+  if (!verified.success) return [];
+
+  const { session } = verified;
 
   const payments = await db.query.payment.findMany({
     where: (p, { eq }) => eq(p.userId, session.user.id),

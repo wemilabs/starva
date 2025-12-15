@@ -171,24 +171,18 @@ export function convertUsdToRwf(usd: number): number {
 
 // Format phone number for Paypack API (07xxxxxxx format - 9 digits, no country code)
 export function formatRwandanPhone(phone: string): string {
-  // Remove any spaces or dashes
   let cleaned = phone.replace(/[\s-]/g, "");
 
-  // Handle different formats - normalize to 9 digits starting with 7
   if (cleaned.startsWith("+250")) {
-    cleaned = cleaned.slice(4); // +250781234567 -> 781234567
+    cleaned = cleaned.slice(4);
   } else if (cleaned.startsWith("250")) {
-    cleaned = cleaned.slice(3); // 250781234567 -> 781234567
+    cleaned = cleaned.slice(3);
   } else if (cleaned.startsWith("0")) {
-    cleaned = cleaned.slice(1); // 0781234567 -> 781234567
+    cleaned = cleaned.slice(1);
   }
 
-  // Validate length (should be 9 digits: 7xxxxxxxx)
-  if (cleaned.length !== 9) {
-    throw new Error("Invalid phone number format");
-  }
+  if (cleaned.length !== 9) throw new Error("Invalid phone number format");
 
-  // Return in 07xxxxxxx format (Paypack expects this, not 250xxxxxxx)
   return `0${cleaned}`;
 }
 

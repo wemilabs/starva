@@ -3,9 +3,10 @@ import {
   Button,
   Container,
   Head,
-  Hr,
+  Heading,
   Html,
   Link,
+  Preview,
   Section,
   Tailwind,
   Text,
@@ -22,49 +23,89 @@ export const VerifyEmail = (props: VerifyEmailProps) => {
     <Html dir="ltr" lang="en">
       <Tailwind>
         <Head />
+        <Preview>Verify your email - Action required</Preview>
         <Body className="bg-gray-100 py-[40px] font-sans">
-          <Container className="mx-auto max-w-[600px] rounded-[8px] bg-white p-[32px]">
-            <Section>
-              <Text className="mt-0 mb-[16px] font-bold text-[24px] text-gray-900">
+          <Container className="mx-auto max-w-[600px] rounded-[8px] bg-white p-[40px] shadow-sm">
+            {/* Header */}
+            <Section className="mb-[32px] text-center">
+              <Heading className="m-0 mb-[8px] font-bold text-[28px] text-gray-900">
                 Verify your email address
-              </Text>
-
-              <Text className="mt-0 mb-[24px] text-[16px] text-gray-700 leading-[24px]">
-                Thanks {username} for signing up! To complete your registration
-                and secure your account, please verify your email address by
-                clicking the button below.
-              </Text>
-
-              <Section className="mb-[32px] text-center">
-                <Button
-                  className="box-border rounded-[6px] bg-orange-500 px-[32px] py-[12px] font-medium text-[16px] text-white no-underline"
-                  href={verifyUrl}
-                >
-                  Verify Email Address
-                </Button>
-              </Section>
-
-              <Text className="mt-0 mb-[24px] text-[14px] text-orange-500 leading-[20px]">
-                If the button doesn&apos;t work, you can copy and paste this
-                link into your browser:
-                <br />
-                {verifyUrl}
-              </Text>
-
-              <Text className="mt-0 mb-[32px] text-[14px] text-gray-600 leading-[20px]">
-                This verification link will expire in 24 hours. If you
-                didn&apos;t create an account, you can safely ignore this email.
-              </Text>
-
-              <Hr className="my-[24px] border-gray-200" />
-
-              <Text className="m-0 text-[12px] text-gray-500 leading-[16px]">
-                Best regards,
-                <br />
-                The Team
+              </Heading>
+              <Text className="m-0 text-[16px] text-gray-600">
+                We received a request to verify your email address
               </Text>
             </Section>
 
+            {/* Main Content */}
+            <Section className="mb-[32px]">
+              <Text className="m-0 mb-[16px] text-[16px] text-gray-700 leading-[24px]">
+                Hello, {username}
+              </Text>
+              <Text className="m-0 mb-[16px] text-[16px] text-gray-700 leading-[24px]">
+                Thanks for signing up! To complete your registration and secure
+                your account, please verify your email address by clicking the
+                button below.
+              </Text>
+              <Text className="m-0 mb-[24px] text-sm text-gray-700 leading-[24px]">
+                This link will expire in 24 hours for security reasons.
+              </Text>
+            </Section>
+
+            {/* Verify Button */}
+            <Section className="mb-[32px] text-center">
+              <Button
+                className="box-border inline-block rounded-[8px] bg-orange-300 px-[32px] py-[16px] font-semibold text-[16px] text-white no-underline"
+                href={verifyUrl}
+              >
+                Verify Email
+              </Button>
+            </Section>
+
+            {/* Alternative Link */}
+            <Section className="mb-[32px]">
+              <Text className="m-0 mb-[8px] text-[14px] text-gray-600 leading-[20px]">
+                If the button doesn&apos;t work, copy and paste this link into
+                your browser:
+              </Text>
+              <Link
+                className="break-all text-[14px] text-orange-500"
+                href={verifyUrl}
+              >
+                {verifyUrl}
+              </Link>
+            </Section>
+
+            {/* Security Notice */}
+            <Section className="mb-[32px] rounded-[8px] bg-gray-50 p-[20px]">
+              <Text className="m-0 mb-[8px] font-semibold text-[14px] text-gray-700 leading-[20px]">
+                Security Notice:
+              </Text>
+              <Text className="m-0 mb-[8px] text-[14px] text-gray-600 leading-[20px]">
+                • If you didn&apos;t request this verification, please ignore
+                this email
+              </Text>
+              <Text className="m-0 mb-[8px] text-[14px] text-gray-600 leading-[20px]">
+                • This link will expire in 24 hours
+              </Text>
+              <Text className="m-0 text-[14px] text-gray-600 leading-[20px]">
+                • For security, never share this link with anyone
+              </Text>
+            </Section>
+
+            {/* Help */}
+            <Section className="mb-[32px]">
+              <Text className="m-0 text-[14px] text-gray-600 leading-[20px]">
+                Need help? Contact our support team at{" "}
+                <Link
+                  className="text-orange-500"
+                  href="mailto:support@starva.shop"
+                >
+                  support@starva.shop
+                </Link>
+              </Text>
+            </Section>
+
+            {/* Footer */}
             <Section className="mt-[32px] border-gray-200 border-t pt-[24px]">
               <Text className="m-0 text-center text-[12px] text-gray-400 leading-[16px]">
                 Starva.shop Ltd

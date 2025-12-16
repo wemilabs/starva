@@ -64,6 +64,7 @@ export const SignInForm = ({
         if (success) {
           toast.success(message);
           router.push("/");
+          router.refresh();
         } else toast.error(message);
       } catch (error: unknown) {
         const e = error as Error;

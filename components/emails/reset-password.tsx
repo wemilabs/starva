@@ -20,7 +20,6 @@ type ForgotPasswordEmailProps = {
 
 export const ForgotPasswordEmail = (props: ForgotPasswordEmailProps) => {
   const { username, resetUrl, userEmail } = props;
-
   return (
     <Html dir="ltr" lang="en">
       <Tailwind>
@@ -56,7 +55,7 @@ export const ForgotPasswordEmail = (props: ForgotPasswordEmailProps) => {
             {/* Reset Button */}
             <Section className="mb-[32px] text-center">
               <Button
-                className="box-border inline-block rounded-[8px] bg-orange-500 px-[32px] py-[16px] font-semibold text-[16px] text-white no-underline"
+                className="box-border inline-block rounded-[8px] bg-orange-300 px-[32px] py-[16px] font-semibold text-[16px] text-white no-underline"
                 href={resetUrl}
               >
                 Reset Password
@@ -94,13 +93,13 @@ export const ForgotPasswordEmail = (props: ForgotPasswordEmailProps) => {
               </Text>
             </Section>
 
-            {/* Help Section */}
+            {/* Help */}
             <Section className="mb-[32px]">
               <Text className="m-0 text-[14px] text-gray-600 leading-[20px]">
                 Need help? Contact our support team at{" "}
                 <Link
                   className="text-orange-500"
-                  href="mailto:support@company.com"
+                  href="mailto:support@starva.shop"
                 >
                   support@starva.shop
                 </Link>
@@ -108,19 +107,21 @@ export const ForgotPasswordEmail = (props: ForgotPasswordEmailProps) => {
             </Section>
 
             {/* Footer */}
-            <Section className="border-gray-200 border-t pt-[24px]">
-              <Text className="m-0 mb-[8px] text-[12px] text-gray-500 leading-[16px]">
-                This email was sent to {userEmail}
+            <Section className="mt-[32px] border-gray-200 border-t pt-[24px]">
+              <Text className="m-0 text-center text-[12px] text-gray-400 leading-[16px]">
+                Starva.shop Ltd
+                <br />
+                KK 456 Gatenga, Niboye, Kicukiro
+                <br />
+                Kigali, Republic of Rwanda
               </Text>
-              <Text className="m-0 mb-[8px] text-[12px] text-gray-500 leading-[16px]">
-                Starva.shop Ltd, Kigali, Republic of Rwanda
-              </Text>
-              <Text className="m-0 text-[12px] text-gray-500 leading-[16px]">
-                © {new Date().getFullYear()} Starva.shop Ltd. All rights
-                reserved.{" "}
-                <Link className="text-gray-500" href="#">
+
+              <Text className="m-0 mt-[8px] text-center text-[12px] text-gray-400 leading-[16px]">
+                <Link className="text-gray-400" href="#">
                   Unsubscribe
-                </Link>
+                </Link>{" "}
+                | © {new Date().getFullYear()} Starva.shop Ltd. All rights
+                reserved.
               </Text>
             </Section>
           </Container>

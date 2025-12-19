@@ -51,25 +51,19 @@ export function CartSheet() {
   const totalPrice = getTotalPrice();
   const itemCount = getItemCount();
 
-  // Helper function to display item pricing
   const getItemDisplayPrice = (item: CartItem) => {
     if (item.category === "real-estate") {
-      if (!item.isLandlord) {
+      if (!item.isLandlord)
         return `${formatPriceInRWF(Number(item.price))} + ${formatPriceInRWF(
           Number(item.visitFees)
         )} fees`;
-      } else {
-        return formatPriceInRWF(Number(item.price));
-      }
+      else return formatPriceInRWF(Number(item.price));
     }
     return formatPriceInRWF(Number(item.price));
   };
 
-  // Helper function to get item subtotal for display
-  const getItemDisplaySubtotal = (item: CartItem) => {
-    // Always show the property price subtotal for display
-    return formatPriceInRWF(Number(item.price) * item.quantity);
-  };
+  const getItemDisplaySubtotal = (item: CartItem) =>
+    formatPriceInRWF(Number(item.price) * item.quantity);
 
   const handleQuantityChange = (productId: string, newQuantity: number) => {
     try {
@@ -136,44 +130,28 @@ export function CartSheet() {
         return;
       }
 
-      // Show stock warnings if any
-      if (result.stockWarnings && result.stockWarnings.length > 0) {
+      if (result.stockWarnings && result.stockWarnings.length > 0)
         toast.warning("Stock availability notice", {
           description: result.stockWarnings.join(" "),
           duration: 8000,
         });
-      }
 
-      if (result.whatsappUrl) {
+      if (result.ok) {
         clearCart();
         setIsOpen(false);
         setOrderNotes("");
-
-        const isSafari = /^((?!chrome|android).)*safari/i.test(
-          navigator.userAgent
-        );
-
-        if (isSafari) {
-          toast.success("Order placed! Redirecting to WhatsApp...");
-          window.location.href = result.whatsappUrl;
-        } else {
-          const newWindow = window.open(result.whatsappUrl, "_blank");
-
-          if (
-            !newWindow ||
-            newWindow.closed ||
-            typeof newWindow.closed === "undefined"
-          ) {
-            toast.success("Order placed! Redirecting to WhatsApp...");
-            window.location.href = result.whatsappUrl;
-          } else {
-            toast.success("Order placed! Opening WhatsApp...");
-          }
-        }
+        toast.success("Order placed successfully!", {
+          description:
+            "Your order has been received and will be processed soon.",
+        });
+        router.push("/orders");
       } else {
         console.error(result.error);
         toast.error("Failed to place order", {
-          description: "WhatsApp not configured for this merchant",
+          description:
+            typeof result.error === "string"
+              ? result.error
+              : "Please try again later.",
         });
       }
     });

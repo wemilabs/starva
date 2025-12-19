@@ -6,9 +6,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
-import { orderItem, order as orderTable, user } from "@/db/schema";
+import { orderItem, order as orderTable } from "@/db/schema";
 import { ORDER_STATUS_VALUES } from "@/lib/constants";
-import { formatPriceInRWF } from "@/lib/utils";
 import { getProductsStock, updateStock } from "./inventory";
 import { checkOrderLimit } from "./subscription";
 
@@ -56,7 +55,7 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       };
 
     const organizationId = organizationIds[0];
-    const organization = products[0].organization;
+    // const organization = products[0].organization;
 
     // Check order limit - find the organization owner (merchant)
     const orgOwner = await db.query.member.findFirst({
@@ -183,6 +182,7 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       })
       .returning();
 
+    // Store order items in database
     await db.insert(orderItem).values(
       orderItems.map((item) => ({
         orderId: newOrder.id,
@@ -193,94 +193,21 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       }))
     );
 
-    const userData = await db.query.user.findFirst({
-      where: eq(user.id, session.user.id),
-    });
-
-    const metadata = organization.metadata
-      ? typeof organization.metadata === "string"
-        ? JSON.parse(organization.metadata)
-        : organization.metadata
-      : {};
-
-    const whatsappPhone = metadata.phoneForNotifications;
-
-    if (!whatsappPhone)
-      return {
-        ok: true,
-        orderId: newOrder.id,
-        error: "Merchant WhatsApp number not configured yet",
-      };
-
-    const itemsList = orderItems
-      .map((item) => {
-        let message =
-          `📦 *${item.productName}*\n` +
-          `   Qty: ${item.quantity} × ${formatPriceInRWF(
-            Number(item.priceAtOrder)
-          )} = ${formatPriceInRWF(Number(item.subtotal))}`;
-
-        // Add visit fees line for real estate intermediaries
-        if (
-          item.productData?.category === "real-estate" &&
-          !item.productData?.isLandlord
-        ) {
-          message += `\n   💰 Visit fees: ${formatPriceInRWF(
-            Number(item.productData.visitFees)
-          )}`;
-        }
-
-        if (item.notes) {
-          message += `\n   _Note: ${item.notes}_`;
-        }
-
-        return message;
-      })
-      .join("\n\n");
-
-    const orgTimezone = metadata.timezone ?? "Africa/Kigali";
-    const orderDate = new Intl.DateTimeFormat("en-US", {
-      dateStyle: "medium",
-      timeStyle: "short",
-      timeZone: orgTimezone,
-    }).format(newOrder.createdAt);
-
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
-    const confirmUrl = `${baseUrl}/api/orders/confirm/${confirmationToken}`;
-    const rejectUrl = `${baseUrl}/api/orders/reject/${confirmationToken}`;
-
-    const message =
-      `🛒 *New Order #${newOrder.orderNumber}*\n` +
-      `📅 ${orderDate}\n\n` +
-      `Hello! I'd like to place an order:\n\n` +
-      itemsList +
-      (stockWarnings.length > 0
-        ? `\n\n⚠️ *Stock Warnings:*\n${stockWarnings.join("\n")}`
-        : "") +
-      `\n\n💵 *Total: ${formatPriceInRWF(totalPrice)}*\n` +
-      (notes ? `\n📝 *Order Note: ${notes}*\n` : "") +
-      `\n👤 *Customer: ${userData?.name || session.user.name}*\n\n` +
-      `*Quick Actions:*\n` +
-      `✅ *Confirm:* ${confirmUrl}\n` +
-      `❌ *Reject:* ${rejectUrl}\n\n` +
-      "_*Powered by Starva.shop*_";
-
-    const whatsappUrl = `https://wa.me/${whatsappPhone.replace(
-      /[^0-9]/g,
-      ""
-    )}?text=${encodeURIComponent(message)}`;
-
-    revalidatePath("/");
+    // const metadata = organization.metadata
+    //   ? typeof organization.metadata === "string"
+    //     ? JSON.parse(organization.metadata)
+    //     : organization.metadata
+    //   : {};
 
     return {
       ok: true,
       orderId: newOrder.id,
-      whatsappUrl,
       stockWarnings: stockWarnings.length > 0 ? stockWarnings : undefined,
     };
-  } catch (error) {
-    console.error("Order placement error:", error);
-    return { ok: false, error: "Failed to place order" };
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error("Order placement failed:", { err });
+    return { ok: false, error: err.message };
   }
 }
 

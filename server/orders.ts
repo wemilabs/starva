@@ -93,7 +93,7 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       );
       if (productStock?.inventoryEnabled) {
         const availableStock = productStock.currentStock || 0;
-        if (item.quantity > availableStock) {
+        if (item.quantity > availableStock)
           stockWarnings.push(
             `Only ${availableStock} units available for ${
               products.find((p) => p.id === item.productId)?.name
@@ -101,7 +101,6 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
               item.quantity
             } requested. Order will be confirmed when stock is available.`
           );
-        }
       }
     }
 

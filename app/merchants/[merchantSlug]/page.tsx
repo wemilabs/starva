@@ -61,8 +61,8 @@ async function MerchantContent({
   const resolvedSlug = merchant.slug || merchantSlug;
   const metadata = merchant.metadata ? JSON.parse(merchant.metadata) : {};
   const description = metadata.description || "";
-  const phoneForNotifications = metadata.phoneForNotifications || "";
-  const phoneForPayments = metadata.phoneForPayments || "";
+  // const phoneForNotifications = metadata.phoneForNotifications || "";
+  // const phoneForPayments = metadata.phoneForPayments || "";
   const timetable = metadata.timetable || {};
 
   const hasTimetable =
@@ -98,22 +98,22 @@ async function MerchantContent({
             <p className="text-white/80 text-sm font-mono tracking-tighter">
               {description}
             </p>
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <p className="text-white/60 text-xs font-medium uppercase tracking-wider">
                 WhatsApp Notifications
               </p>
               <p className="text-white/80 text-sm leading-relaxed">
                 {phoneForNotifications}
               </p>
-            </div>
-            <div className="space-y-2">
+            </div> */}
+            {/* <div className="space-y-2">
               <p className="text-white/60 text-xs font-medium uppercase tracking-wider">
                 Payments
               </p>
               <p className="text-white/80 text-sm leading-relaxed">
                 {phoneForPayments}
               </p>
-            </div>
+            </div> */}
           </div>
           <div className="flex items-center gap-3 justify-end">
             <ShareDialog

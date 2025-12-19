@@ -2,10 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
-  experimental: {
-    turbopackFileSystemCacheForDev: true,
-    typedEnv: true,
-  },
+  experimental: { typedEnv: true },
   images: {
     remotePatterns: [
       {
@@ -15,6 +12,7 @@ const nextConfig: NextConfig = {
     ],
   },
   reactCompiler: true,
+  serverExternalPackages: ["prettier"], // This package is required by @react-email/components, so we externalize it instead of installing it as a dependency
   typedRoutes: true,
 };
 

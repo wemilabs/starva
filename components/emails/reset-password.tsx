@@ -55,7 +55,7 @@ export const ForgotPasswordEmail = (props: ForgotPasswordEmailProps) => {
             {/* Reset Button */}
             <Section className="mb-[32px] text-center">
               <Button
-                className="box-border inline-block rounded-[8px] bg-orange-300 px-[32px] py-[16px] font-semibold text-[16px] text-white no-underline"
+                className="box-border inline-block rounded-[8px] bg-orange-500 px-[32px] py-[16px] font-semibold text-[16px] text-white no-underline"
                 href={resetUrl}
               >
                 Reset Password

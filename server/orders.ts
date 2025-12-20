@@ -199,18 +199,7 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       where: eq(user.id, session.user.id),
     });
 
-    await realtime.channel(`org:${organizationId}`).emit("orders.new", {
-      orderId: newOrder.id,
-      orderNumber: newOrder.orderNumber,
-      customerName: userData?.name || session.user.name,
-      customerEmail: userData?.email || session.user.email,
-      total: totalPrice.toFixed(2),
-      organizationId,
-      itemCount: items.length,
-      createdAt: newOrder.createdAt.toISOString(),
-    });
-
-    await createOrderNotification({
+    const { notificationId } = await createOrderNotification({
       organizationId,
       orderId: newOrder.id,
       orderNumber: newOrder.orderNumber,
@@ -219,6 +208,18 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       customerEmail: userData?.email || session.user.email,
       total: totalPrice.toFixed(2),
       itemCount: items.length,
+    });
+
+    await realtime.channel(`org:${organizationId}`).emit("orders.new", {
+      notificationId,
+      orderId: newOrder.id,
+      orderNumber: newOrder.orderNumber,
+      customerName: userData?.name || session.user.name,
+      customerEmail: userData?.email || session.user.email,
+      total: totalPrice.toFixed(2),
+      organizationId,
+      itemCount: items.length,
+      createdAt: newOrder.createdAt.toISOString(),
     });
 
     return {

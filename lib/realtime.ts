@@ -5,6 +5,7 @@ import { redis } from "./redis";
 const schema = {
   orders: {
     new: z.object({
+      notificationId: z.string(),
       orderId: z.string(),
       orderNumber: z.number(),
       customerName: z.string(),

@@ -10,6 +10,7 @@ import { orderItem, order as orderTable, user } from "@/db/schema";
 import { ORDER_STATUS_VALUES } from "@/lib/constants";
 import { realtime } from "@/lib/realtime";
 import { getProductsStock, updateStock } from "./inventory";
+import { createOrderNotification } from "./notifications";
 import { checkOrderLimit } from "./subscription";
 
 const orderItemSchema = z.object({
@@ -207,6 +208,17 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       organizationId,
       itemCount: items.length,
       createdAt: newOrder.createdAt.toISOString(),
+    });
+
+    await createOrderNotification({
+      organizationId,
+      orderId: newOrder.id,
+      orderNumber: newOrder.orderNumber,
+      type: "new",
+      customerName: userData?.name || session.user.name,
+      customerEmail: userData?.email || session.user.email,
+      total: totalPrice.toFixed(2),
+      itemCount: items.length,
     });
 
     return {

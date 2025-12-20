@@ -115,7 +115,7 @@ export function NotificationsDropdownMenu() {
         payload.data.organizationId === activeStore?.id
       ) {
         const newNotification: OrderNotification = {
-          id: payload.data.orderId,
+          id: payload.data.notificationId,
           organizationId: payload.data.organizationId,
           orderId: payload.data.orderId,
           type: "new",
@@ -206,7 +206,7 @@ export function NotificationsDropdownMenu() {
                 asChild
               >
                 <Link
-                  href={`/orders/${notification.id}`}
+                  href={`/orders/${notification.orderId}`}
                   onClick={() => handleNotificationClick(notification.id)}
                 >
                   <div className="flex items-start gap-3 w-full">

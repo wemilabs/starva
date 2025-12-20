@@ -81,7 +81,10 @@ export async function createOrderNotification(data: {
   total?: string;
   itemCount?: number;
 }) {
-  await db.insert(orderNotification).values(data);
+  const [notification] = await db
+    .insert(orderNotification)
+    .values(data)
+    .returning({ id: orderNotification.id });
 
-  return { success: true };
+  return { success: true, notificationId: notification.id };
 }

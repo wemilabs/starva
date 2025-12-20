@@ -6,8 +6,9 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
-import { orderItem, order as orderTable } from "@/db/schema";
+import { orderItem, order as orderTable, user } from "@/db/schema";
 import { ORDER_STATUS_VALUES } from "@/lib/constants";
+import { realtime } from "@/lib/realtime";
 import { getProductsStock, updateStock } from "./inventory";
 import { checkOrderLimit } from "./subscription";
 
@@ -193,11 +194,20 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       }))
     );
 
-    // const metadata = organization.metadata
-    //   ? typeof organization.metadata === "string"
-    //     ? JSON.parse(organization.metadata)
-    //     : organization.metadata
-    //   : {};
+    const userData = await db.query.user.findFirst({
+      where: eq(user.id, session.user.id),
+    });
+
+    await realtime.channel(`org:${organizationId}`).emit("orders.new", {
+      orderId: newOrder.id,
+      orderNumber: newOrder.orderNumber,
+      customerName: userData?.name || session.user.name,
+      customerEmail: userData?.email || session.user.email,
+      total: totalPrice.toFixed(2),
+      organizationId,
+      itemCount: items.length,
+      createdAt: newOrder.createdAt.toISOString(),
+    });
 
     return {
       ok: true,

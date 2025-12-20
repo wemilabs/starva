@@ -137,7 +137,7 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
 
             <Button variant="outline" disabled>
               <MessageCircle className="size-4" />
-              Ask the merchant about
+              Chat with seller
             </Button>
 
             <Button

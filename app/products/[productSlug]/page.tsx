@@ -1,14 +1,15 @@
+import { CalendarClock, MessageCircle, Sparkles } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Activity, Suspense } from "react";
-
 import { AddToCartButton } from "@/components/products/add-to-cart-button";
 import { ProductGallery } from "@/components/products/product-gallery";
 import { ProductLikeButton } from "@/components/products/product-like-button";
 import { ProductSlugSkeleton } from "@/components/products/product-slug-skeleton";
 import { ShareDialog } from "@/components/share-dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { getProductBySlug } from "@/data/products";
 import { FALLBACK_PRODUCT_IMG_URL } from "@/lib/constants";
 import {
@@ -113,7 +114,7 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
             </div>
           </div>
 
-          <div className="mt-2 flex flex-wrap gap-3">
+          <div className="mt-2 grid grid-cols-2 gap-3">
             <AddToCartButton
               product={{
                 id: product.id,
@@ -129,10 +130,22 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
               }}
             />
 
-            {/* <Button variant="outline" disabled>
+            <Button variant="outline" disabled>
               <CalendarClock className="size-4" />
-              <span className="hidden sm:block">Schedule order</span>
-            </Button> */}
+              Schedule order
+            </Button>
+
+            <Button variant="outline" disabled>
+              <MessageCircle className="size-4" />
+              Ask the merchant about
+            </Button>
+
+            <Button
+              className="fixed right-10 bottom-9 z-20 rounded-full size-12"
+              disabled
+            >
+              <Sparkles className="size-4" />
+            </Button>
 
             <ShareDialog
               url={`${
@@ -141,7 +154,7 @@ async function ProductDisplay({ productSlug }: { productSlug: string }) {
               buttonTitle="Share"
               title={`Share ${product.name}`}
               description={`Share this product with others`}
-              variant={{ variant: "ghost" }}
+              variant={{ variant: "outline" }}
             />
           </div>
         </div>

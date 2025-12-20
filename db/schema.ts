@@ -139,6 +139,11 @@ export const notificationType = pgEnum("notification_type", [
   "general",
 ]);
 
+export const orderNotificationType = pgEnum("order_notification_type", [
+  "new",
+  "status_update",
+]);
+
 export const productCategory = pgEnum("product_category", [
   "health-wellness",
   "food-groceries",
@@ -330,6 +335,36 @@ export const notification = pgTable(
   ]
 );
 
+export const orderNotification = pgTable(
+  "order_notification",
+  {
+    id: text("id")
+      .$defaultFn(() => randomUUID())
+      .primaryKey(),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    orderId: text("order_id")
+      .notNull()
+      .references(() => order.id, { onDelete: "cascade" }),
+    orderNumber: integer("order_number").notNull(),
+    type: orderNotificationType("type").notNull(),
+    customerName: text("customer_name"),
+    customerEmail: text("customer_email"),
+    total: text("total"),
+    itemCount: integer("item_count"),
+    read: boolean("read").default(false).notNull(),
+    createdAt: timestamp("created_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (t) => [
+    index("order_notification_org_idx").on(t.organizationId),
+    index("order_notification_order_idx").on(t.orderId),
+    index("order_notification_read_idx").on(t.read),
+  ]
+);
+
 export const userRelations = relations(user, ({ one, many }) => ({
   subscription: one(subscription, {
     fields: [user.id],
@@ -346,6 +381,7 @@ export const organizationRelations = relations(organization, ({ many }) => ({
   products: many(product),
   orders: many(order),
   orderUsageTracking: many(orderUsageTracking),
+  orderNotifications: many(orderNotification),
 }));
 
 export const subscriptionRelations = relations(subscription, ({ one }) => ({
@@ -644,6 +680,7 @@ export const orderRelations = relations(order, ({ one, many }) => ({
     references: [organization.id],
   }),
   orderItems: many(orderItem),
+  orderNotification: one(orderNotification),
 }));
 
 export const orderItemRelations = relations(orderItem, ({ one }) => ({
@@ -816,6 +853,9 @@ export type Tag = typeof tag.$inferSelect;
 export type ProductStatus = (typeof productStatus.enumValues)[number];
 export type Order = typeof order.$inferSelect;
 export type OrderItem = typeof orderItem.$inferSelect;
+export type OrderNotification = typeof orderNotification.$inferSelect;
+export type OrderNotificationType =
+  (typeof orderNotificationType.enumValues)[number];
 export type OrderStatus = (typeof orderStatus.enumValues)[number];
 export type Feedback = typeof feedback.$inferSelect;
 export type FeedbackType = (typeof feedbackType.enumValues)[number];
@@ -849,6 +889,7 @@ export const schema = {
   productTag,
   order,
   orderItem,
+  orderNotification,
   inventoryHistory,
   feedback,
   payment,

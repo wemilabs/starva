@@ -17,6 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { getStoresPerUser } from "@/data/stores";
 import { verifySession } from "@/data/user-session";
+import { NotificationsDropdownMenu } from "./notifications/notifications-dropdown-menu";
 
 export async function Header() {
   const { success } = await verifySession();
@@ -59,6 +60,7 @@ export async function Header() {
 
         <div className="flex items-center gap-0.5">
           <CartSheet />
+          <NotificationsDropdownMenu />
           <ModeToggle />
         </div>
       </div>

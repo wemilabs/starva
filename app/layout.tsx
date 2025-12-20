@@ -7,11 +7,12 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { BreadcrumbManager } from "@/components/breadcrumb-manager";
 import { Header } from "@/components/header";
 import { HeaderSkeleton } from "@/components/header-skeleton";
-import { QueryProvider } from "@/components/query-client-provider";
-import { ThemeProvider } from "@/components/theme-provider";
+import { QueryProvider } from "@/components/providers/query-client-provider";
+import { ThemeProvider } from "@/components/providers/theme-provider";
+import { UploadThingProvider } from "@/components/providers/uploadthing-provider";
+import { UpstashRealtimeProvider } from "@/components/providers/upstash-realtime-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
-import { UploadThingProvider } from "@/components/uploadthing-provider";
 import { BreadcrumbsProvider } from "@/contexts/breadcrumbs-context";
 import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
 import "./globals.css";
@@ -101,31 +102,33 @@ export default async function RootLayout(props: LayoutProps<"/">) {
           enableSystem
           disableTransitionOnChange
         >
-          {auth}
-          <QueryProvider>
-            <BreadcrumbsProvider>
-              <SidebarProvider>
-                <AppSidebar />
-                <SidebarInset>
-                  <Suspense fallback={<HeaderSkeleton />}>
-                    <Header />
-                  </Suspense>
-                  <main className="flex flex-1 flex-col gap-4 p-4 pt-0">
-                    <Suspense fallback={null}>
-                      <BreadcrumbManager />
+          <UpstashRealtimeProvider>
+            {auth}
+            <QueryProvider>
+              <BreadcrumbsProvider>
+                <SidebarProvider>
+                  <AppSidebar />
+                  <SidebarInset>
+                    <Suspense fallback={<HeaderSkeleton />}>
+                      <Header />
                     </Suspense>
-                    <NuqsAdapter>
-                      <Suspense>
-                        <UploadThingProvider />
+                    <main className="flex flex-1 flex-col gap-4 p-4 pt-0">
+                      <Suspense fallback={null}>
+                        <BreadcrumbManager />
                       </Suspense>
-                      {children}
-                    </NuqsAdapter>
-                  </main>
-                </SidebarInset>
-              </SidebarProvider>
-            </BreadcrumbsProvider>
-            <Toaster richColors />
-          </QueryProvider>
+                      <NuqsAdapter>
+                        <Suspense>
+                          <UploadThingProvider />
+                        </Suspense>
+                        {children}
+                      </NuqsAdapter>
+                    </main>
+                  </SidebarInset>
+                </SidebarProvider>
+              </BreadcrumbsProvider>
+              <Toaster richColors />
+            </QueryProvider>
+          </UpstashRealtimeProvider>
         </ThemeProvider>
         <Analytics />
       </body>

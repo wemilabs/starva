@@ -74,6 +74,12 @@ importers:
       '@uploadthing/react':
         specifier: ^7.3.3
         version: 7.3.3(next@16.1.0(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(uploadthing@7.7.4(next@16.1.0(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(tailwindcss@4.1.17))
+      '@upstash/realtime':
+        specifier: ^1.0.0
+        version: 1.0.0(@upstash/redis@1.35.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod@4.1.13)
+      '@upstash/redis':
+        specifier: ^1.35.8
+        version: 1.35.8
       '@vercel/analytics':
         specifier: ^1.5.0
         version: 1.6.1(next@16.1.0(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
@@ -94,7 +100,7 @@ importers:
         version: 1.1.1(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       drizzle-orm:
         specifier: ^0.45.0
-        version: 0.45.0(@neondatabase/serverless@1.0.2)(@types/pg@8.15.6)(kysely@0.28.8)
+        version: 0.45.0(@neondatabase/serverless@1.0.2)(@types/pg@8.15.6)(@upstash/redis@1.35.8)(kysely@0.28.8)
       lucide-react:
         specifier: ^0.560.0
         version: 0.560.0(react@19.2.3)
@@ -1721,6 +1727,22 @@ packages:
   '@uploadthing/shared@7.1.10':
     resolution: {integrity: sha512-R/XSA3SfCVnLIzFpXyGaKPfbwlYlWYSTuGjTFHuJhdAomuBuhopAHLh2Ois5fJibAHzi02uP1QCKbgTAdmArqg==}
 
+  '@upstash/realtime@1.0.0':
+    resolution: {integrity: sha512-PJNm+laOlPTkbVbm8vPge14en8OgiIZIazPUAhAXys0KS8mFIs6ri2/EaL3lhc7GEJIZ9+9kHHgw9gdV9R7oUg==}
+    peerDependencies:
+      '@upstash/redis': '>=1.35.4'
+      react: '>=16.8.0'
+      react-dom: '>=16.8.0'
+      zod: ^3.25.0 || ^4.0.0
+    peerDependenciesMeta:
+      react:
+        optional: true
+      react-dom:
+        optional: true
+
+  '@upstash/redis@1.35.8':
+    resolution: {integrity: sha512-QqLpVCD9PCPE6hlRzOkz864nfijSdazxtyJLIy9ZeTh6kU2nBIKKfjT5HMHjIRD4BCm6TK1dbUT9pxhFjcvpng==}
+
   '@vercel/analytics@1.6.1':
     resolution: {integrity: sha512-oH9He/bEM+6oKlv3chWuOOcp8Y6fo6/PSro8hEkgCW3pu9/OiCXiUpRUogDh3Fs3LH2sosDrx8CxeOLBEE+afg==}
     peerDependencies:
@@ -2565,6 +2587,9 @@ packages:
     resolution: {integrity: sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==}
     engines: {node: '>=14.17'}
     hasBin: true
+
+  uncrypto@0.1.3:
+    resolution: {integrity: sha512-Ql87qFHB3s/De2ClA9e0gsnS6zXG27SkTiSJwjCc9MebbfapQfuPzumMIUMi38ezPZVNFcHI9sUIepeQfw8J8Q==}
 
   undici-types@6.21.0:
     resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
@@ -3923,6 +3948,18 @@ snapshots:
       effect: 3.17.7
       sqids: 0.3.0
 
+  '@upstash/realtime@1.0.0(@upstash/redis@1.35.8)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(zod@4.1.13)':
+    dependencies:
+      '@upstash/redis': 1.35.8
+      zod: 4.1.13
+    optionalDependencies:
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
+
+  '@upstash/redis@1.35.8':
+    dependencies:
+      uncrypto: 0.1.3
+
   '@vercel/analytics@1.6.1(next@16.1.0(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)':
     optionalDependencies:
       next: 16.1.0(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -4085,10 +4122,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  drizzle-orm@0.45.0(@neondatabase/serverless@1.0.2)(@types/pg@8.15.6)(kysely@0.28.8):
+  drizzle-orm@0.45.0(@neondatabase/serverless@1.0.2)(@types/pg@8.15.6)(@upstash/redis@1.35.8)(kysely@0.28.8):
     optionalDependencies:
       '@neondatabase/serverless': 1.0.2
       '@types/pg': 8.15.6
+      '@upstash/redis': 1.35.8
       kysely: 0.28.8
 
   ecdsa-sig-formatter@1.0.11:
@@ -4629,6 +4667,8 @@ snapshots:
   tw-animate-css@1.4.0: {}
 
   typescript@5.9.3: {}
+
+  uncrypto@0.1.3: {}
 
   undici-types@6.21.0: {}
 

@@ -139,6 +139,12 @@ export const notificationType = pgEnum("notification_type", [
   "general",
 ]);
 
+export const emailStatus = pgEnum("email_status", [
+  "received",
+  "processed",
+  "failed",
+]);
+
 export const orderNotificationType = pgEnum("order_notification_type", [
   "new",
   "status_update",
@@ -382,6 +388,7 @@ export const organizationRelations = relations(organization, ({ many }) => ({
   orders: many(order),
   orderUsageTracking: many(orderUsageTracking),
   orderNotifications: many(orderNotification),
+  receivedEmails: many(receivedEmail),
 }));
 
 export const subscriptionRelations = relations(subscription, ({ one }) => ({
@@ -840,6 +847,81 @@ export const feedbackHistoryRelations = relations(
   })
 );
 
+export const receivedEmail = pgTable(
+  "received_email",
+  {
+    id: text("id")
+      .$defaultFn(() => randomUUID())
+      .primaryKey(),
+    emailId: text("email_id").notNull().unique(),
+    from: text("from").notNull(),
+    to: text("to").array().notNull(),
+    cc: text("cc").array(),
+    bcc: text("bcc").array(),
+    subject: text("subject"),
+    htmlBody: text("html_body"),
+    textBody: text("text_body"),
+    messageId: text("message_id"),
+    status: emailStatus("status").default("received").notNull(),
+    processedAt: timestamp("processed_at"),
+    error: text("error"),
+    createdAt: timestamp("created_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: timestamp("updated_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (t) => [
+    index("received_email_status_idx").on(t.status),
+    index("received_email_created_idx").on(t.createdAt),
+    unique("received_email_email_id").on(t.emailId),
+  ]
+);
+
+export const emailAttachment = pgTable(
+  "email_attachment",
+  {
+    id: text("id")
+      .$defaultFn(() => randomUUID())
+      .primaryKey(),
+    emailId: text("email_id")
+      .notNull()
+      .references(() => receivedEmail.emailId, { onDelete: "cascade" }),
+    attachmentId: text("attachment_id").notNull(),
+    filename: text("filename").notNull(),
+    contentType: text("content_type").notNull(),
+    size: integer("size"),
+    contentDisposition: text("content_disposition"),
+    contentId: text("content_id"),
+    downloadUrl: text("download_url"),
+    expiresAt: timestamp("expires_at"),
+    fileKey: text("file_key"),
+    uploadedAt: timestamp("uploaded_at"),
+    createdAt: timestamp("created_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (t) => [
+    index("email_attachment_email_idx").on(t.emailId),
+    unique("email_attachment_attachment_id").on(t.attachmentId),
+  ]
+);
+
+export const receivedEmailRelations = relations(receivedEmail, ({ many }) => ({
+  attachments: many(emailAttachment),
+}));
+
+export const emailAttachmentRelations = relations(
+  emailAttachment,
+  ({ one }) => ({
+    email: one(receivedEmail, {
+      fields: [emailAttachment.emailId],
+      references: [receivedEmail.emailId],
+    }),
+  })
+);
+
 export type Organization = typeof organization.$inferSelect;
 export type Role = (typeof role.enumValues)[number];
 export type Member = typeof member.$inferSelect & {
@@ -871,6 +953,9 @@ export type PaymentStatus = (typeof paymentStatus.enumValues)[number];
 export type PushSubscription = typeof pushSubscription.$inferSelect;
 export type Notification = typeof notification.$inferSelect;
 export type NotificationType = (typeof notificationType.enumValues)[number];
+export type ReceivedEmail = typeof receivedEmail.$inferSelect;
+export type EmailStatus = (typeof emailStatus.enumValues)[number];
+export type EmailAttachment = typeof emailAttachment.$inferSelect;
 
 export const schema = {
   user,
@@ -895,6 +980,8 @@ export const schema = {
   payment,
   pushSubscription,
   notification,
+  receivedEmail,
+  emailAttachment,
   userRelations,
   organizationRelations,
   memberRelations,
@@ -915,4 +1002,6 @@ export const schema = {
   paymentRelations,
   pushSubscriptionRelations,
   notificationRelations,
+  receivedEmailRelations,
+  emailAttachmentRelations,
 };

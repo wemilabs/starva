@@ -86,7 +86,7 @@ function AdminFeedbackSkeleton() {
   );
 }
 
-export default async function AdminFeedbackPage() {
+export default async function FeedbackManagementPage() {
   return (
     <Suspense fallback={<AdminFeedbackSkeleton />}>
       <AdminFeedbackContent />

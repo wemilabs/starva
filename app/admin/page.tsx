@@ -1,4 +1,4 @@
-import { ChevronRight, MessageSquare, Users } from "lucide-react";
+import { ChevronRight, Mail, MessageSquare, Users } from "lucide-react";
 import Link from "next/link";
 import {
   Card,
@@ -39,7 +39,7 @@ export default function AdminDashboardPage() {
         </Card>
       </Link>
 
-      <Link href="/admin/feedback">
+      <Link href="/admin/feedback-management">
         <Card className="group cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-l-4 border-l-green-500">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
@@ -62,6 +62,34 @@ export default function AdminDashboardPage() {
           <CardContent className="pt-0">
             <p className="text-sm text-muted-foreground">
               Monitor feedback status and manage user submissions
+            </p>
+          </CardContent>
+        </Card>
+      </Link>
+
+      <Link href="/admin/email-management">
+        <Card className="group cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-[1.02] border-l-4 border-l-purple-500">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/20 group-hover:bg-purple-200 dark:group-hover:bg-purple-900/30 transition-colors">
+                  <Mail className="size-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div>
+                  <CardTitle className="text-lg">Email Management</CardTitle>
+                  <CardDescription className="text-sm">
+                    View and manage received emails
+                  </CardDescription>
+                </div>
+              </div>
+              <div className="text-muted-foreground group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                <ChevronRight className="size-5" />
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <p className="text-sm text-muted-foreground">
+              Monitor incoming emails and professional inquiries
             </p>
           </CardContent>
         </Card>

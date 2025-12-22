@@ -12,7 +12,7 @@ export default async function AdminLayout(props: LayoutProps<"/admin">) {
 
   return (
     <div className="container mx-auto max-w-7xl py-7 space-y-7">
-      <Suspense fallback={<div>Loading admin view...</div>}>
+      <Suspense>
         <AdminHeader />
         <AdminAuthCheck>{children}</AdminAuthCheck>
       </Suspense>

@@ -29,12 +29,11 @@ export async function POST(request: NextRequest) {
     const svixTimestamp = headersList.get("svix-timestamp");
     const svixSignature = headersList.get("svix-signature");
 
-    if (!svixId || !svixTimestamp || !svixSignature) {
+    if (!svixId || !svixTimestamp || !svixSignature)
       return NextResponse.json(
         { error: "Missing required svix headers" },
         { status: 400 }
       );
-    }
 
     // Verify webhook signature
     const wh = new Webhook(webhookSecret);
@@ -100,7 +99,21 @@ async function handleEmailReceived(data: {
   const { email_id, from, to, cc, bcc, subject, message_id } = data;
 
   try {
-    const { data: email } = await resend.emails.receiving.get(email_id);
+    const response = await resend.emails.receiving.get(email_id);
+
+    // Debug logging to see what we get
+    console.log("Email fetch result:", {
+      emailId: email_id,
+      response: response,
+      emailData: response.data,
+      hasHtml: !!response.data?.html,
+      hasText: !!response.data?.text,
+      htmlLength: response.data?.html?.length || 0,
+      textLength: response.data?.text?.length || 0,
+      responseKeys: response.data ? Object.keys(response.data) : null,
+    });
+
+    const email = response.data;
 
     // Store email in database
     await db.insert(receivedEmail).values({

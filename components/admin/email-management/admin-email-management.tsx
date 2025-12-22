@@ -178,8 +178,8 @@ export function AdminEmailManagement() {
   };
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
+    <div className="flex-1 space-y-4">
+      <div className="flex items-center justify-between">
         <h2 className="text-lg">Email Management</h2>
         <Button variant="outline" onClick={refreshData} disabled={isLoading}>
           <RefreshCw className={`size-4 ${isLoading ? "animate-spin" : ""}`} />

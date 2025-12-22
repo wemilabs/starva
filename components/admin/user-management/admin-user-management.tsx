@@ -1,7 +1,15 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Download, Plus, RefreshCw, Search, X } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Plus,
+  RefreshCw,
+  Search,
+  X,
+} from "lucide-react";
 import { parseAsInteger, parseAsStringLiteral, useQueryStates } from "nuqs";
 import { Activity } from "react";
 import { toast } from "sonner";
@@ -264,7 +272,7 @@ export function AdminUserManagement() {
                       onClick={() => setFilters({ page: page - 1 })}
                       disabled={page === 1}
                     >
-                      Previous
+                      <ChevronLeft className="size-4" />
                     </Button>
                     <Button
                       variant="outline"
@@ -272,7 +280,7 @@ export function AdminUserManagement() {
                       onClick={() => setFilters({ page: page + 1 })}
                       disabled={page === (usersData.pagination.pages || 0)}
                     >
-                      Next
+                      <ChevronRight className="size-4" />
                     </Button>
                   </div>
                 </div>

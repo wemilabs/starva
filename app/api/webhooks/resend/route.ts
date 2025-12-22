@@ -99,21 +99,7 @@ async function handleEmailReceived(data: {
   const { email_id, from, to, cc, bcc, subject, message_id } = data;
 
   try {
-    const response = await resend.emails.receiving.get(email_id);
-
-    // Debug logging to see what we get
-    console.log("Email fetch result:", {
-      emailId: email_id,
-      response: response,
-      emailData: response.data,
-      hasHtml: !!response.data?.html,
-      hasText: !!response.data?.text,
-      htmlLength: response.data?.html?.length || 0,
-      textLength: response.data?.text?.length || 0,
-      responseKeys: response.data ? Object.keys(response.data) : null,
-    });
-
-    const email = response.data;
+    const { data: email } = await resend.emails.receiving.get(email_id);
 
     // Store email in database
     await db.insert(receivedEmail).values({

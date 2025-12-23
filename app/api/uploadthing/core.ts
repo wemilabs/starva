@@ -84,6 +84,45 @@ export const ourFileRouter = {
         storeSlug: metadata.storeSlug,
       };
     }),
+
+  // Email attachment route (server-side uploads via UTApi)
+  emailAttachment: f({
+    image: { maxFileSize: "16MB", maxFileCount: 10 },
+    pdf: { maxFileSize: "16MB", maxFileCount: 10 },
+    text: { maxFileSize: "4MB", maxFileCount: 10 },
+    blob: { maxFileSize: "16MB", maxFileCount: 10 },
+  })
+    .middleware(async ({ req, files }) => {
+      // Get sender email from request headers (set by server action)
+      const senderEmail = req.headers.get("x-sender-email") || "unknown-sender";
+      const emailId = req.headers.get("x-email-id") || "unknown-email";
+
+      // Sanitize email for use in file path
+      const sanitizedEmail = senderEmail
+        .replace(/@/g, "_at_")
+        .replace(/[^a-zA-Z0-9_.-]/g, "_");
+
+      // Organize files by sender email
+      const fileOverrides = files.map((file) => {
+        const timestamp = Date.now();
+        const randomSuffix = Math.random().toString(36).substring(2, 8);
+        const newName = `emails/${sanitizedEmail}/${emailId}/${timestamp}_${randomSuffix}_${file.name}`;
+        return { ...file, name: newName };
+      });
+
+      return {
+        senderEmail,
+        emailId,
+        [UTFiles]: fileOverrides,
+      };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      return {
+        url: file.ufsUrl,
+        senderEmail: metadata.senderEmail,
+        emailId: metadata.emailId,
+      };
+    }),
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;

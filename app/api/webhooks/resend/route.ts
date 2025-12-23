@@ -124,6 +124,12 @@ async function handleEmailReceived(data: {
     });
 
     if (email?.attachments && email.attachments.length > 0) {
+      // Log attachment structure to debug
+      console.log(
+        "Attachment structure:",
+        JSON.stringify(email.attachments[0], null, 2)
+      );
+
       // Map attachments to include download_url if missing
       const attachmentsWithUrl = email.attachments.map(
         (att: {
@@ -183,7 +189,6 @@ async function processAttachments(
 ) {
   for (const attachment of attachments) {
     try {
-      // Download attachment from Resend
       const response = await fetch(attachment.download_url, {
         headers: {
           Authorization: `Bearer ${process.env.RESEND_API_KEY}`,

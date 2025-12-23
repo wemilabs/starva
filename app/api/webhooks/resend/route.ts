@@ -7,6 +7,19 @@ import { UTApi } from "uploadthing/server";
 import { db } from "@/db/drizzle";
 import { emailAttachment, receivedEmail } from "@/db/schema";
 
+interface ResendWebhookEvent {
+  type: string;
+  data: {
+    email_id: string;
+    from: string;
+    to: string[];
+    cc?: string[];
+    bcc?: string[];
+    subject?: string;
+    message_id?: string;
+  };
+}
+
 const resend = new Resend(process.env.RESEND_API_KEY);
 const webhookSecret = process.env.RESEND_WEBHOOK_SECRET;
 const utapi = new UTApi();
@@ -51,19 +64,6 @@ export async function POST(request: NextRequest) {
         { error: "Invalid webhook signature" },
         { status: 401 }
       );
-    }
-
-    interface ResendWebhookEvent {
-      type: string;
-      data: {
-        email_id: string;
-        from: string;
-        to: string[];
-        cc?: string[];
-        bcc?: string[];
-        subject?: string;
-        message_id?: string;
-      };
     }
 
     // Handle email.received event

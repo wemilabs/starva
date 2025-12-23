@@ -157,14 +157,19 @@ async function handleEmailReceived(data: {
             // Get the file's contents
             const buffer = Buffer.from(await response.arrayBuffer());
 
-            // Create a File object for UploadThing
-            const file = new File(
-              [buffer],
-              attachment.filename || "attachment",
-              {
-                type: attachment.content_type,
-              }
-            );
+            // Sanitize sender email for use in file path
+            const sanitizedEmail = from
+              .replace(/@/g, "_at_")
+              .replace(/[^a-zA-Z0-9_.-]/g, "_");
+            const timestamp = Date.now();
+            const randomSuffix = Math.random().toString(36).substring(2, 8);
+            const originalFilename = attachment.filename || "attachment";
+            const organizedFilename = `emails/${sanitizedEmail}/${email_id}/${timestamp}_${randomSuffix}_${originalFilename}`;
+
+            // Create a File object for UploadThing with organized name
+            const file = new File([buffer], organizedFilename, {
+              type: attachment.content_type,
+            });
 
             // Upload to UploadThing for permanent storage
             const uploadResponse = await utapi.uploadFiles([file]);

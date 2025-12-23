@@ -109,6 +109,15 @@ async function handleEmailReceived(data: {
       attachments: email?.attachments || [],
     });
 
+    // Check for raw email content
+    console.log("Email keys:", Object.keys(email || {}));
+    console.log("Checking for raw/mime content:", {
+      hasRaw: "raw" in (email || {}),
+      hasMime: "mime" in (email || {}),
+      hasContent: "content" in (email || {}),
+      hasEmail: "email" in (email || {}),
+    });
+
     // Store email in database
     await db.insert(receivedEmail).values({
       emailId: email_id,
@@ -124,35 +133,77 @@ async function handleEmailReceived(data: {
     });
 
     if (email?.attachments && email.attachments.length > 0) {
-      // Log attachment structure to debug
-      console.log(
-        "Attachment structure:",
-        JSON.stringify(email.attachments[0], null, 2)
-      );
-      console.log("Attachment keys:", Object.keys(email.attachments[0]));
-      console.log("Checking for content field:", {
-        hasContent: "content" in email.attachments[0],
-        hasData: "data" in email.attachments[0],
-        hasBase64: "base64" in email.attachments[0],
-      });
+      // Get attachments with download URLs using Resend SDK
+      try {
+        const { data: attachments, error } =
+          await resend.emails.receiving.attachments.list({ emailId: email_id });
 
-      // Map attachments to include download_url if missing
-      const attachmentsWithUrl = email.attachments.map(
-        (att: {
-          id: string;
-          filename: string;
-          content_type: string;
-          content_id?: string;
-          content_disposition?: string;
-          download_url?: string;
-        }) => ({
-          ...att,
-          download_url:
-            att.download_url ||
-            `https://api.resend.com/emails/${email_id}/attachments/${att.id}`,
-        })
-      );
-      await processAttachments(email_id, attachmentsWithUrl);
+        if (error) {
+          throw new Error(`Failed to fetch attachments: ${error.message}`);
+        }
+
+        console.log("Attachments from SDK:", attachments);
+
+        // Process attachments using download_url
+        for (const attachment of attachments.data || []) {
+          try {
+            // Download attachment using the provided download_url
+            const response = await fetch(attachment.download_url || "");
+            if (!response.ok) {
+              console.error(`Failed to download ${attachment.filename}`);
+              continue;
+            }
+
+            // Get the file's contents
+            const buffer = Buffer.from(await response.arrayBuffer());
+
+            // Create a File object for UploadThing
+            const file = new File(
+              [buffer],
+              attachment.filename || "attachment",
+              {
+                type: attachment.content_type,
+              }
+            );
+
+            // Upload to UploadThing for permanent storage
+            const uploadResponse = await utapi.uploadFiles([file]);
+
+            if (!uploadResponse[0]?.data) {
+              throw new Error("Failed to upload attachment to UploadThing");
+            }
+
+            // Store attachment metadata in database
+            await db.insert(emailAttachment).values({
+              emailId: email_id,
+              attachmentId: attachment.id,
+              filename: attachment.filename || "attachment",
+              contentType:
+                attachment.content_type || "application/octet-stream",
+              size: buffer.byteLength,
+              contentDisposition: attachment.content_disposition,
+              contentId: attachment.content_id,
+              downloadUrl: attachment.download_url || "",
+              expiresAt: attachment.expires_at
+                ? new Date(attachment.expires_at)
+                : null,
+              fileKey: uploadResponse[0]?.data?.key || "",
+              uploadedAt: new Date(),
+            });
+
+            console.log(
+              `Successfully processed attachment ${attachment.filename}`
+            );
+          } catch (error) {
+            console.error(
+              `Failed to process attachment ${attachment.filename}:`,
+              error
+            );
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch attachments:", error);
+      }
     }
 
     await db
@@ -178,70 +229,5 @@ async function handleEmailReceived(data: {
     }
 
     throw error;
-  }
-}
-
-async function processAttachments(
-  emailId: string,
-  attachments: Array<{
-    id: string;
-    filename: string;
-    content_type: string;
-    content_disposition?: string;
-    content_id?: string;
-    download_url: string;
-    expires_at?: string;
-  }>
-) {
-  for (const attachment of attachments) {
-    try {
-      const response = await fetch(attachment.download_url, {
-        headers: {
-          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-        },
-      });
-      if (!response.ok)
-        throw new Error(
-          `Failed to download attachment: ${response.statusText}`
-        );
-
-      const arrayBuffer = await response.arrayBuffer();
-
-      // Create a File object for UploadThing
-      const file = new File([arrayBuffer], attachment.filename, {
-        type: attachment.content_type,
-      });
-
-      // Upload to UploadThing for permanent storage
-      const uploadResponse = await utapi.uploadFiles([file]);
-
-      if (!uploadResponse[0]?.data) {
-        throw new Error("Failed to upload attachment to UploadThing");
-      }
-
-      // Store attachment metadata in database
-      await db.insert(emailAttachment).values({
-        emailId,
-        attachmentId: attachment.id,
-        filename: attachment.filename,
-        contentType: attachment.content_type,
-        size: arrayBuffer.byteLength,
-        contentDisposition: attachment.content_disposition,
-        contentId: attachment.content_id,
-        downloadUrl: attachment.download_url || "",
-        expiresAt: attachment.expires_at
-          ? new Date(attachment.expires_at)
-          : null,
-        fileKey: uploadResponse[0]?.data?.key || "",
-        uploadedAt: new Date(),
-      });
-
-      console.log(`Successfully processed attachment ${attachment.filename}`);
-    } catch (error) {
-      console.error(
-        `Failed to process attachment ${attachment.filename}:`,
-        error
-      );
-    }
   }
 }

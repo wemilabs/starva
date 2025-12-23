@@ -101,6 +101,14 @@ async function handleEmailReceived(data: {
   try {
     const { data: email } = await resend.emails.receiving.get(email_id);
 
+    // Debug attachments
+    console.log("Attachments debug:", {
+      emailId: email_id,
+      hasAttachments: !!email?.attachments,
+      attachmentsCount: email?.attachments?.length || 0,
+      attachments: email?.attachments || [],
+    });
+
     // Store email in database
     await db.insert(receivedEmail).values({
       emailId: email_id,

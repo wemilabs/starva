@@ -101,23 +101,6 @@ async function handleEmailReceived(data: {
   try {
     const { data: email } = await resend.emails.receiving.get(email_id);
 
-    // Debug attachments
-    console.log("Attachments debug:", {
-      emailId: email_id,
-      hasAttachments: !!email?.attachments,
-      attachmentsCount: email?.attachments?.length || 0,
-      attachments: email?.attachments || [],
-    });
-
-    // Check for raw email content
-    console.log("Email keys:", Object.keys(email || {}));
-    console.log("Checking for raw/mime content:", {
-      hasRaw: "raw" in (email || {}),
-      hasMime: "mime" in (email || {}),
-      hasContent: "content" in (email || {}),
-      hasEmail: "email" in (email || {}),
-    });
-
     // Store email in database
     await db.insert(receivedEmail).values({
       emailId: email_id,
@@ -133,21 +116,15 @@ async function handleEmailReceived(data: {
     });
 
     if (email?.attachments && email.attachments.length > 0) {
-      // Get attachments with download URLs using Resend SDK
       try {
         const { data: attachments, error } =
           await resend.emails.receiving.attachments.list({ emailId: email_id });
 
-        if (error) {
+        if (error)
           throw new Error(`Failed to fetch attachments: ${error.message}`);
-        }
 
-        console.log("Attachments from SDK:", attachments);
-
-        // Process attachments using download_url
         for (const attachment of attachments.data || []) {
           try {
-            // Download attachment using the provided download_url
             const response = await fetch(attachment.download_url || "");
             if (!response.ok) {
               console.error(`Failed to download ${attachment.filename}`);
@@ -174,9 +151,8 @@ async function handleEmailReceived(data: {
             // Upload to UploadThing for permanent storage
             const uploadResponse = await utapi.uploadFiles([file]);
 
-            if (!uploadResponse[0]?.data) {
+            if (!uploadResponse[0]?.data)
               throw new Error("Failed to upload attachment to UploadThing");
-            }
 
             // Store attachment metadata in database
             await db.insert(emailAttachment).values({
@@ -195,10 +171,6 @@ async function handleEmailReceived(data: {
               fileKey: uploadResponse[0]?.data?.key || "",
               uploadedAt: new Date(),
             });
-
-            console.log(
-              `Successfully processed attachment ${attachment.filename}`
-            );
           } catch (error) {
             console.error(
               `Failed to process attachment ${attachment.filename}:`,

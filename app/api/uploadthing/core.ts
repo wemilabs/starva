@@ -9,11 +9,11 @@ export const ourFileRouter = {
   productMedia: f({
     image: {
       maxFileSize: "4MB",
-      maxFileCount: 3, // could be dependent on the current plan
+      maxFileCount: 3, // might become subscription-based
     },
     video: {
       maxFileSize: "64MB",
-      maxFileCount: 1, // could be dependent on the current plan
+      maxFileCount: 1, // might become subscription-based
     },
   })
     .middleware(async ({ req, files }) => {

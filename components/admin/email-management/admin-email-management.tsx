@@ -5,6 +5,8 @@ import {
   CheckCircle,
   Clock,
   Download,
+  Eye,
+  FileText,
   Mail,
   Paperclip,
   RefreshCw,
@@ -13,6 +15,7 @@ import {
   X,
   XCircle,
 } from "lucide-react";
+import Image from "next/image";
 import { parseAsStringLiteral, useQueryStates } from "nuqs";
 import { Activity, useState } from "react";
 import { toast } from "sonner";
@@ -46,12 +49,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatDateShort, formatDistanceToNow } from "@/lib/utils";
+import { cn, formatDateShort, formatDistanceToNow } from "@/lib/utils";
 import {
   deleteReceivedEmail,
   getEmailStats,
   getReceivedEmails,
 } from "@/server/admin/emails";
+import { Spinner } from "@/components/ui/spinner";
 
 interface Email {
   id: string;
@@ -68,7 +72,158 @@ interface Email {
     filename: string;
     contentType: string;
     size: number | null;
+    fileKey: string | null;
   }>;
+}
+
+interface AttachmentPreviewProps {
+  attachment: {
+    id: string;
+    filename: string;
+    contentType: string;
+    size: number | null;
+    fileKey: string | null;
+  };
+  isImage: boolean;
+  isPdf: boolean;
+}
+
+function AttachmentPreview({
+  attachment,
+  isImage,
+  isPdf,
+}: AttachmentPreviewProps) {
+  const {
+    data: previewUrl,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["attachment-preview", attachment.id],
+    queryFn: async () => {
+      const { getEmailAttachmentUrl } = await import("@/server/admin/emails");
+      return getEmailAttachmentUrl(attachment.id);
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const renderPreview = () => {
+    if (isLoading) {
+      return (
+        <div className="aspect-video flex items-center justify-center bg-muted/50">
+          <Spinner className="size-8 text-muted-foreground" />
+        </div>
+      );
+    }
+
+    if (isError || !previewUrl) {
+      return (
+        <div className="aspect-video flex items-center justify-center bg-muted/50">
+          <Paperclip className="size-12 text-muted-foreground" />
+        </div>
+      );
+    }
+
+    if (isImage) {
+      return (
+        <div className="aspect-video relative">
+          <Image
+            src={previewUrl}
+            alt={attachment.filename || "Attachment"}
+            fill
+            sizes="(max-width: 768px) 50vw, 200px"
+            className="object-cover"
+          />
+        </div>
+      );
+    }
+
+    if (isPdf) {
+      return (
+        <div className="aspect-video relative overflow-hidden">
+          <iframe
+            src={`${previewUrl}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
+            title={attachment.filename || "PDF Preview"}
+            className="w-full h-full border-0 pointer-events-none"
+            style={{ transform: "scale(1)", transformOrigin: "top left" }}
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div className="aspect-video flex items-center justify-center bg-muted/50">
+        <FileText className="size-12 text-muted-foreground" />
+      </div>
+    );
+  };
+
+  return (
+    <div className="group relative border rounded-lg overflow-hidden bg-muted/30">
+      {renderPreview()}
+      <div className="p-2 space-y-1">
+        <p
+          className="text-xs font-medium truncate"
+          title={attachment.filename || "Attachment"}
+        >
+          {attachment.filename}
+        </p>
+        <p className="text-xs text-muted-foreground font-mono">
+          {((attachment.size ?? 0) / 1024).toFixed(1)} KB
+        </p>
+      </div>
+      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={async () => {
+            try {
+              if (previewUrl) {
+                window.open(previewUrl, "_blank");
+              }
+            } catch (error) {
+              console.error("Failed to open attachment:", error);
+            }
+          }}
+        >
+          <Eye className="size-4" />
+          View
+        </Button>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={async () => {
+            try {
+              if (previewUrl) {
+                const response = await fetch(previewUrl);
+                const blob = await response.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = blobUrl;
+                a.download = attachment.filename || "attachment";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(blobUrl);
+              }
+            } catch (error) {
+              console.error("Failed to download attachment:", error);
+              toast.error("Failed to download attachment");
+            }
+          }}
+        >
+          <Download className="size-4" />
+          Save
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+interface EmailStatsCard {
+  emailStatsTitle: string;
+  emailStatsIcon: React.ReactNode;
+  emailStatsAddClassName?: string;
+  emailStatsQty: number;
 }
 
 const statusOptions = ["all", "received", "processed", "failed"] as const;
@@ -151,6 +306,31 @@ export function AdminEmailManagement() {
 
   const isLoading = emailsLoading || statsLoading;
 
+  const statsCardData: EmailStatsCard[] = [
+    {
+      emailStatsTitle: "Total Emails",
+      emailStatsIcon: <Mail className="size-4 text-muted-foreground" />,
+      emailStatsQty: stats.total,
+    },
+    {
+      emailStatsTitle: "Today's",
+      emailStatsIcon: <Clock className="size-4 text-muted-foreground" />,
+      emailStatsQty: stats.received,
+    },
+    {
+      emailStatsTitle: "Processed",
+      emailStatsIcon: <CheckCircle className="size-4 text-muted-foreground" />,
+      emailStatsAddClassName: "text-green-600",
+      emailStatsQty: stats.processed,
+    },
+    {
+      emailStatsTitle: "Failed",
+      emailStatsIcon: <XCircle className="size-4 text-muted-foreground" />,
+      emailStatsAddClassName: "text-red-600",
+      emailStatsQty: stats.failed,
+    },
+  ];
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "processed":
@@ -185,49 +365,36 @@ export function AdminEmailManagement() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Emails</CardTitle>
-            <Mail className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Today&apos;s</CardTitle>
-            <Clock className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.received}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Processed</CardTitle>
-            <CheckCircle className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">
-              {stats.processed}
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Failed</CardTitle>
-            <XCircle className="size-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">
-              {stats.failed}
-            </div>
-          </CardContent>
-        </Card>
+        {statsCardData.map(
+          ({
+            emailStatsTitle,
+            emailStatsIcon,
+            emailStatsAddClassName,
+            emailStatsQty,
+          }) => (
+            <Card key={emailStatsTitle}>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {emailStatsTitle}
+                </CardTitle>
+                {emailStatsIcon}
+              </CardHeader>
+              <CardContent>
+                <div
+                  className={cn(
+                    emailStatsAddClassName,
+                    "text-2xl font-bold font-mono tracking-tighter"
+                  )}
+                >
+                  {emailStatsQty}
+                </div>
+              </CardContent>
+            </Card>
+          )
+        )}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-[300px_1fr]">
+      <div className="grid gap-4 md:grid-cols-[400px_1fr]">
         {/* Email List */}
         <Card>
           <CardHeader>
@@ -315,7 +482,7 @@ export function AdminEmailManagement() {
                           <p className="text-sm font-medium truncate">
                             {email.subject || "No Subject"}
                           </p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-muted-foreground font-mono tracking-tighter">
                             {formatDistanceToNow(new Date(email.createdAt))}
                           </p>
                         </div>
@@ -340,7 +507,7 @@ export function AdminEmailManagement() {
                   <CardTitle className="text-xl">
                     {selectedEmail.subject || "No Subject"}
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="font-mono tracking-tighter">
                     From: {selectedEmail.from} •{" "}
                     {formatDateShort(selectedEmail.createdAt)}
                   </CardDescription>
@@ -400,7 +567,7 @@ export function AdminEmailManagement() {
               <div className="space-y-4">
                 <div>
                   <h4 className="text-sm font-medium mb-2">To:</h4>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-muted-foreground font-mono tracking-tighter">
                     {selectedEmail.to.join(", ")}
                   </p>
                 </div>
@@ -409,65 +576,22 @@ export function AdminEmailManagement() {
                   selectedEmail.attachments.length > 0 && (
                     <div>
                       <h4 className="text-sm font-medium mb-2">Attachments:</h4>
-                      <div className="space-y-2">
-                        {selectedEmail.attachments.map((attachment) => (
-                          <div
-                            key={attachment.id}
-                            className="flex items-center justify-between p-2 border rounded"
-                          >
-                            <div className="flex items-center gap-2">
-                              <Paperclip className="size-4" />
-                              <span className="text-sm">
-                                {attachment.filename}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                ({((attachment.size ?? 0) / 1024).toFixed(1)}{" "}
-                                KB)
-                              </span>
-                            </div>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={async () => {
-                                try {
-                                  const url = await (
-                                    await import("@/server/admin/emails")
-                                  ).getEmailAttachmentUrl(attachment.id);
-                                  if (url) {
-                                    window.open(url, "_blank");
-                                  }
-                                } catch (error) {
-                                  console.error(
-                                    "Failed to download attachment:",
-                                    error
-                                  );
-                                }
-                              }}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter" || e.key === " ") {
-                                  e.preventDefault();
-                                  (async () => {
-                                    try {
-                                      const url = await (
-                                        await import("@/server/admin/emails")
-                                      ).getEmailAttachmentUrl(attachment.id);
-                                      if (url) {
-                                        window.open(url, "_blank");
-                                      }
-                                    } catch (error) {
-                                      console.error(
-                                        "Failed to download attachment:",
-                                        error
-                                      );
-                                    }
-                                  })();
-                                }
-                              }}
-                            >
-                              <Download className="size-4" />
-                            </Button>
-                          </div>
-                        ))}
+                      <div className="grid grid-cols-2 gap-3">
+                        {selectedEmail.attachments.map((attachment) => {
+                          const isImage =
+                            attachment.contentType?.startsWith("image/");
+                          const isPdf =
+                            attachment.contentType === "application/pdf";
+
+                          return (
+                            <AttachmentPreview
+                              key={attachment.id}
+                              attachment={attachment}
+                              isImage={isImage}
+                              isPdf={isPdf}
+                            />
+                          );
+                        })}
                       </div>
                     </div>
                   )}

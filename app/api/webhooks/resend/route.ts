@@ -184,12 +184,15 @@ async function processAttachments(
   for (const attachment of attachments) {
     try {
       // Download attachment from Resend
-      const response = await fetch(attachment.download_url);
-      if (!response.ok) {
+      const response = await fetch(attachment.download_url, {
+        headers: {
+          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+        },
+      });
+      if (!response.ok)
         throw new Error(
           `Failed to download attachment: ${response.statusText}`
         );
-      }
 
       const arrayBuffer = await response.arrayBuffer();
 

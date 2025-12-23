@@ -129,6 +129,12 @@ async function handleEmailReceived(data: {
         "Attachment structure:",
         JSON.stringify(email.attachments[0], null, 2)
       );
+      console.log("Attachment keys:", Object.keys(email.attachments[0]));
+      console.log("Checking for content field:", {
+        hasContent: "content" in email.attachments[0],
+        hasData: "data" in email.attachments[0],
+        hasBase64: "base64" in email.attachments[0],
+      });
 
       // Map attachments to include download_url if missing
       const attachmentsWithUrl = email.attachments.map(

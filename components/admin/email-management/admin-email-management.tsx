@@ -153,8 +153,6 @@ export function AdminEmailManagement() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "received":
-        return <Mail className="size-4" />;
       case "processed":
         return <CheckCircle className="size-4 text-green-500" />;
       case "failed":
@@ -166,10 +164,8 @@ export function AdminEmailManagement() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "received":
-        return "default";
       case "processed":
-        return "outline";
+        return "available";
       case "failed":
         return "destructive";
       default:
@@ -200,7 +196,7 @@ export function AdminEmailManagement() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Received</CardTitle>
+            <CardTitle className="text-sm font-medium">Today&apos;s</CardTitle>
             <Clock className="size-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -380,11 +376,7 @@ export function AdminEmailManagement() {
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel
-                        disabled={deleteEmailMutation.isPending}
-                      >
-                        Cancel
-                      </AlertDialogCancel>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={confirmDelete}
                         disabled={deleteEmailMutation.isPending}

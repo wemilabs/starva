@@ -1,6 +1,6 @@
 "use server";
 
-import { and, count, desc, eq, ilike, or } from "drizzle-orm";
+import { and, count, desc, eq, gte, ilike, or } from "drizzle-orm";
 import { UTApi } from "uploadthing/server";
 import { db } from "@/db/drizzle";
 import { emailAttachment, receivedEmail } from "@/db/schema";
@@ -22,7 +22,11 @@ export async function getReceivedEmails(
 
   const whereConditions = [];
 
-  if (status) whereConditions.push(eq(receivedEmail.status, status));
+  if (status === "received") {
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+    whereConditions.push(gte(receivedEmail.createdAt, today));
+  } else if (status) whereConditions.push(eq(receivedEmail.status, status));
 
   if (search) {
     const searchConditions = or(
@@ -114,9 +118,16 @@ export async function deleteReceivedEmail(emailId: string) {
 export async function getEmailStats() {
   await requireAdmin();
 
-  // Get individual counts
-  const [total, processed, failed] = await Promise.all([
+  const today = new Date();
+  today.setUTCHours(0, 0, 0, 0);
+
+  // Get counts for each status
+  const [total, receivedToday, processed, failed] = await Promise.all([
     db.select({ count: count() }).from(receivedEmail),
+    db
+      .select({ count: count() })
+      .from(receivedEmail)
+      .where(gte(receivedEmail.createdAt, today)),
     db
       .select({ count: count() })
       .from(receivedEmail)
@@ -129,9 +140,7 @@ export async function getEmailStats() {
 
   return {
     total: total[0]?.count || 0,
-    received:
-      (total[0]?.count || 0) -
-      ((processed[0]?.count || 0) + (failed[0]?.count || 0)),
+    received: receivedToday[0]?.count || 0,
     processed: processed[0]?.count || 0,
     failed: failed[0]?.count || 0,
   };

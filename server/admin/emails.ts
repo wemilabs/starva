@@ -65,11 +65,11 @@ export async function getReceivedEmailById(emailId: string) {
   return email;
 }
 
-export async function getEmailAttachmentUrl(attachmentId: string) {
+export async function getEmailAttachmentUrl(id: string) {
   await requireAdmin();
 
   const attachment = await db.query.emailAttachment.findFirst({
-    where: eq(emailAttachment.attachmentId, attachmentId),
+    where: eq(emailAttachment.id, id),
   });
 
   if (!attachment) throw new Error("Attachment not found");

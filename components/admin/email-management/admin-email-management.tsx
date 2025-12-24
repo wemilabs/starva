@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   CheckCircle,
   Clock,
@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { parseAsStringLiteral, useQueryStates } from "nuqs";
-import { Activity, useState } from "react";
+import { Activity, useState, useTransition } from "react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -48,6 +48,7 @@ import {
 } from "@/components/ui/empty";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn, formatDateShort, formatDistanceToNow } from "@/lib/utils";
 import {
@@ -55,7 +56,6 @@ import {
   getEmailStats,
   getReceivedEmails,
 } from "@/server/admin/emails";
-import { Spinner } from "@/components/ui/spinner";
 
 interface Email {
   id: string;
@@ -107,23 +107,21 @@ function AttachmentPreview({
   });
 
   const renderPreview = () => {
-    if (isLoading) {
+    if (isLoading)
       return (
         <div className="aspect-video flex items-center justify-center bg-muted/50">
           <Spinner className="size-8 text-muted-foreground" />
         </div>
       );
-    }
 
-    if (isError || !previewUrl) {
+    if (isError || !previewUrl)
       return (
         <div className="aspect-video flex items-center justify-center bg-muted/50">
           <Paperclip className="size-12 text-muted-foreground" />
         </div>
       );
-    }
 
-    if (isImage) {
+    if (isImage)
       return (
         <div className="aspect-video relative">
           <Image
@@ -135,9 +133,8 @@ function AttachmentPreview({
           />
         </div>
       );
-    }
 
-    if (isPdf) {
+    if (isPdf)
       return (
         <div className="aspect-video relative overflow-hidden">
           <iframe
@@ -148,7 +145,6 @@ function AttachmentPreview({
           />
         </div>
       );
-    }
 
     return (
       <div className="aspect-video flex items-center justify-center bg-muted/50">
@@ -231,7 +227,8 @@ const statusOptions = ["all", "received", "processed", "failed"] as const;
 export function AdminEmailManagement() {
   const queryClient = useQueryClient();
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
-  const [emailToDelete, setEmailToDelete] = useState<string | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isDeleting, startDeleteTransition] = useTransition();
 
   const [{ search, status }, setFilters] = useQueryStates(
     {
@@ -271,32 +268,24 @@ export function AdminEmailManagement() {
     queryFn: () => getEmailStats(),
   });
 
-  const deleteEmailMutation = useMutation({
-    mutationFn: deleteReceivedEmail,
-    onSuccess: () => {
-      toast.success("Email deleted successfully");
-      queryClient.invalidateQueries({ queryKey: ["admin-emails"] });
-      queryClient.invalidateQueries({ queryKey: ["admin-email-stats"] });
-      if (selectedEmail) {
+  const handleDeleteEmail = () => {
+    if (!selectedEmail) return;
+    startDeleteTransition(async () => {
+      try {
+        await deleteReceivedEmail(selectedEmail.emailId);
+        toast.success("Email deleted successfully", {
+          description:
+            "This email and all associated data have been cleaned up from the storage",
+        });
+        queryClient.invalidateQueries({ queryKey: ["admin-emails"] });
+        queryClient.invalidateQueries({ queryKey: ["admin-email-stats"] });
         setSelectedEmail(null);
+        setDeleteDialogOpen(false);
+      } catch (error) {
+        console.error("Failed to delete email:", error);
+        toast.error("Failed to delete email");
       }
-    },
-    onError: (error) => {
-      console.error("Failed to delete email:", error);
-      toast.error("Failed to delete email");
-    },
-    onSettled: () => {
-      setEmailToDelete(null);
-    },
-  });
-
-  const handleDeleteEmail = async (emailId: string) => {
-    setEmailToDelete(emailId);
-  };
-
-  const confirmDelete = () => {
-    if (!emailToDelete) return;
-    deleteEmailMutation.mutate(emailToDelete);
+    });
   };
 
   const refreshData = () => {
@@ -516,41 +505,42 @@ export function AdminEmailManagement() {
                   </Badge>
                 </div>
                 <AlertDialog
-                  open={emailToDelete !== null}
-                  onOpenChange={() =>
-                    !deleteEmailMutation.isPending && setEmailToDelete(null)
-                  }
+                  open={deleteDialogOpen}
+                  onOpenChange={setDeleteDialogOpen}
                 >
                   <AlertDialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() =>
-                        selectedEmail &&
-                        handleDeleteEmail(selectedEmail.emailId)
-                      }
-                      disabled={deleteEmailMutation.isPending || !selectedEmail}
-                    >
+                    <Button variant="outline" size="sm" disabled={isDeleting}>
                       <Trash2 className="size-4" />
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Email</AlertDialogTitle>
+                      <AlertDialogTitle>
+                        Absolutely sure about deleting this email?
+                      </AlertDialogTitle>
                       <AlertDialogDescription className="font-mono tracking-tighter text-sm">
-                        Are you sure you want to delete this email? This action
-                        cannot be undone.
+                        This action cannot be undone. It will permanently delete
+                        this email and all associated data.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
-                        onClick={confirmDelete}
-                        disabled={deleteEmailMutation.isPending}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleDeleteEmail();
+                        }}
+                        disabled={isDeleting}
+                        className="bg-destructive hover:bg-destructive/80"
                       >
-                        {deleteEmailMutation.isPending
-                          ? "Deleting..."
-                          : "Delete"}
+                        {isDeleting ? (
+                          <div className="flex items-center gap-2">
+                            <Spinner />
+                            Deleting...
+                          </div>
+                        ) : (
+                          "Delete"
+                        )}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>

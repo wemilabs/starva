@@ -221,7 +221,7 @@ export function UserTable({
                             Are you absolutely sure?
                           </AlertDialogTitle>
                           <AlertDialogDescription>
-                            This action cannot be undone. This will permanently
+                            This action cannot be undone. It will permanently
                             delete the user account and all associated data.
                           </AlertDialogDescription>
                         </AlertDialogHeader>

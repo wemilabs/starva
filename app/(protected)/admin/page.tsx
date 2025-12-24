@@ -21,7 +21,7 @@ export default function AdminDashboardPage() {
                 </div>
                 <div>
                   <CardTitle className="text-lg">User Management</CardTitle>
-                  <CardDescription className="text-sm">
+                  <CardDescription className="text-sm font-mono tracking-tighter">
                     Manage user accounts and permissions
                   </CardDescription>
                 </div>
@@ -32,7 +32,7 @@ export default function AdminDashboardPage() {
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground font-mono tracking-tighter">
               View, edit, and manage all user accounts in the system
             </p>
           </CardContent>
@@ -49,7 +49,7 @@ export default function AdminDashboardPage() {
                 </div>
                 <div>
                   <CardTitle className="text-lg">Feedback Management</CardTitle>
-                  <CardDescription className="text-sm">
+                  <CardDescription className="text-sm font-mono tracking-tighter">
                     Review and respond to user feedback
                   </CardDescription>
                 </div>
@@ -60,7 +60,7 @@ export default function AdminDashboardPage() {
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground font-mono tracking-tighter">
               Monitor feedback status and manage user submissions
             </p>
           </CardContent>
@@ -77,7 +77,7 @@ export default function AdminDashboardPage() {
                 </div>
                 <div>
                   <CardTitle className="text-lg">Email Management</CardTitle>
-                  <CardDescription className="text-sm">
+                  <CardDescription className="text-sm font-mono tracking-tighter">
                     View and manage received emails
                   </CardDescription>
                 </div>
@@ -88,7 +88,7 @@ export default function AdminDashboardPage() {
             </div>
           </CardHeader>
           <CardContent className="pt-0">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground font-mono tracking-tighter">
               Monitor incoming emails and professional inquiries
             </p>
           </CardContent>

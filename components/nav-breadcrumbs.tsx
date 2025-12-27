@@ -17,7 +17,7 @@ export function NavBreadcrumbs({ base }: { base: Crumb[] }) {
 
   return (
     <Breadcrumb>
-      <BreadcrumbList>
+      <BreadcrumbList suppressHydrationWarning>
         {all.map((c, idx) => (
           <Fragment key={`${c.label}-${idx}`}>
             <BreadcrumbItem>

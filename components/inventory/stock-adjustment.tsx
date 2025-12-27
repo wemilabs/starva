@@ -83,7 +83,7 @@ export function StockAdjustment({
           quantityChange,
           changeType: values.changeType,
           reason: values.reason,
-          revalidateTargetPath: "/inventory",
+          revalidateTargetPath: "/point-of-sales/inventory",
         });
 
         if (!result.ok) {

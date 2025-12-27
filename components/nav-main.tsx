@@ -2,15 +2,11 @@
 
 import {
   Building2,
-  ChartColumn,
   ChevronRight,
   Globe,
   Home,
   type LucideIcon,
   Package,
-  Receipt,
-  ScrollText,
-  SquaresExclude,
   Store,
 } from "lucide-react";
 import type { Route } from "next";
@@ -114,38 +110,6 @@ export function NavMain({
             <Link href="/stores">
               <Building2 />
               <span>Stores</span>
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuButton asChild tooltip="Orders">
-            <Link href="/orders">
-              <ScrollText />
-              <span>Orders</span>
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuButton asChild tooltip="Inventory">
-            <Link href="/inventory">
-              <SquaresExclude />
-              <span>Inventory</span>
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuButton asChild tooltip="Transactions">
-            <Link href="/transactions">
-              <Receipt />
-              <span>Transactions</span>
-            </Link>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-        <SidebarMenuItem>
-          <SidebarMenuButton asChild tooltip="Analytics">
-            <Link href="/analytics">
-              <ChartColumn />
-              <span>Analytics</span>
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>

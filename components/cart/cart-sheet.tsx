@@ -144,7 +144,7 @@ export function CartSheet() {
           description:
             "Your order has been received and will be processed soon.",
         });
-        router.push("/orders");
+        router.push("/point-of-sales/orders");
       } else {
         console.error(result.error);
         toast.error("Failed to place order", {

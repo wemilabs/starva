@@ -136,7 +136,7 @@ export function NotificationsDropdownMenu() {
           action: {
             label: "View Order",
             onClick: () => {
-              router.push(`/orders/${payload.data.orderId}`);
+              router.push(`/point-of-sales/orders/${payload.data.orderId}`);
             },
           },
         });
@@ -206,7 +206,7 @@ export function NotificationsDropdownMenu() {
                 asChild
               >
                 <Link
-                  href={`/orders/${notification.orderId}`}
+                  href={`/point-of-sales/orders/${notification.orderId}`}
                   onClick={() => handleNotificationClick(notification.id)}
                 >
                   <div className="flex items-start gap-3 w-full">

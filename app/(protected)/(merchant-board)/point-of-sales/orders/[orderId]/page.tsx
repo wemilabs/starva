@@ -56,7 +56,7 @@ async function OrderContent({
     <div className="container mx-auto max-w-7xl py-7 space-y-7">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" asChild>
-          <Link href="/orders">
+          <Link href="/point-of-sales/orders">
             <ArrowLeft className="size-4" />
           </Link>
         </Button>
@@ -360,7 +360,9 @@ export async function generateMetadata({
   };
 }
 
-export default async function OrderPage(props: PageProps<"/orders/[orderId]">) {
+export default async function OrderPage(
+  props: PageProps<"/point-of-sales/orders/[orderId]">
+) {
   return (
     <Suspense
       fallback={

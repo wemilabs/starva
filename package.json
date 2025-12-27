@@ -1,6 +1,6 @@
 {
   "name": "starva-dot-shop",
-  "version": "0.119.7",
+  "version": "0.120.0",
   "private": true,
   "scripts": {
     "dev": "next dev --inspect --turbopack",

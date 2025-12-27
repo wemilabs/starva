@@ -96,8 +96,8 @@ export async function resetAllData(
 
     revalidatePath("/settings");
     revalidatePath("/stores");
-    revalidatePath("/analytics");
-    revalidatePath("/orders");
+    revalidatePath("/point-of-sales/analytics");
+    revalidatePath("/point-of-sales/orders");
 
     return {
       success: true,

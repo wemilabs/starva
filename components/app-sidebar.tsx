@@ -3,6 +3,7 @@
 import {
   CircleQuestionMark,
   CreditCard,
+  HandCoins,
   LogIn,
   Send,
   Settings,
@@ -28,6 +29,29 @@ import { useSession } from "@/lib/auth-client";
 
 const data = {
   navMain: [
+    {
+      title: "Point of Sales",
+      url: "#",
+      icon: HandCoins,
+      items: [
+        {
+          title: "Orders",
+          url: "/point-of-sales/orders",
+        },
+        {
+          title: "Inventory",
+          url: "/point-of-sales/inventory",
+        },
+        {
+          title: "Transactions",
+          url: "/point-of-sales/transactions",
+        },
+        {
+          title: "Analytics",
+          url: "/point-of-sales/analytics",
+        },
+      ],
+    },
     {
       title: "Usage",
       url: "#",

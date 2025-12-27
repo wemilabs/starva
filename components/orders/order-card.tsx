@@ -47,7 +47,7 @@ export function OrderCard({ order, variant = "merchant" }: OrderCardProps) {
 
   return (
     <Card className="hover:shadow-md transition-shadow cursor-pointer">
-      <Link href={`/orders/${order.id}`}>
+      <Link href={`/point-of-sales/orders/${order.id}`}>
         <CardHeader className="-mt-1">
           <div className="flex items-center justify-between space-y-1">
             <div className="flex items-center gap-2">

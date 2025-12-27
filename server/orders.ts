@@ -1,6 +1,5 @@
 "use server";
 
-import { randomUUID } from "node:crypto";
 import { eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -115,27 +114,14 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
 
       // Real estate pricing logic
       if (productData.category === "real-estate") {
-        if (!productData.isLandlord) {
-          // Intermediary case: Only charge visit fees in total
-          priceAtOrder = productData.price; // Show property price for context
-          subtotal = 0; // But don't charge property price
-        } else {
-          // Landlord case: No platform payment at all
-          priceAtOrder = productData.price; // Show property price for context
-          subtotal = 0; // But don't charge anything
-        }
-      } else {
-        // Normal products: Full price
-        subtotal = Number(priceAtOrder) * item.quantity;
-      }
+        priceAtOrder = productData.price;
+        subtotal = 0;
+      } else subtotal = Number(priceAtOrder) * item.quantity;
 
       // Only add to total if it's not a real estate product
-      if (productData.category !== "real-estate") {
-        totalPrice += subtotal;
-      } else if (!productData.isLandlord) {
-        // Add visit fees for intermediaries
+      if (productData.category !== "real-estate") totalPrice += subtotal;
+      else if (!productData.isLandlord)
         totalPrice += Number(productData.visitFees || "0") * item.quantity;
-      }
 
       // For display, show property price for real estate, but actual charge is different
       const displaySubtotal =
@@ -167,10 +153,6 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       .where(eq(orderTable.organizationId, organizationId));
     const nextOrderNumber = (maxOrderResult[0]?.maxNum || 0) + 1;
 
-    // Generate confirmation token and set expiration (48 hours)
-    const confirmationToken = randomUUID();
-    const tokenExpiresAt = new Date(Date.now() + 48 * 60 * 60 * 1000);
-
     const [newOrder] = await db
       .insert(orderTable)
       .values({
@@ -179,8 +161,6 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
         organizationId,
         notes: notes || null,
         totalPrice: totalPrice.toFixed(2),
-        confirmationToken,
-        tokenExpiresAt,
       })
       .returning();
 
@@ -339,7 +319,7 @@ export async function updateOrderStatus(
             quantityChange: -item.quantity,
             changeType: "sale",
             reason: `Order ${orderId} confirmed`,
-            revalidateTargetPath: "/inventory",
+            revalidateTargetPath: "/point-of-sales/inventory",
           });
 
           if (!stockUpdate.ok) {
@@ -361,9 +341,9 @@ export async function updateOrderStatus(
       }
     }
 
-    revalidatePath("/orders");
-    revalidatePath(`/orders/${orderId}`);
-    revalidatePath("/inventory");
+    revalidatePath("/point-of-sales/orders");
+    revalidatePath(`/point-of-sales/orders/${orderId}`);
+    revalidatePath("/point-of-sales/inventory");
 
     return { ok: true };
   } catch (error) {
@@ -431,7 +411,7 @@ export async function cancelOrder(orderId: string) {
             quantityChange: item.quantity,
             changeType: "return",
             reason: `Order ${orderId} cancelled`,
-            revalidateTargetPath: "/inventory",
+            revalidateTargetPath: "/point-of-sales/inventory",
           });
         }
       }
@@ -445,9 +425,9 @@ export async function cancelOrder(orderId: string) {
       })
       .where(eq(orderTable.id, orderId));
 
-    revalidatePath("/orders");
-    revalidatePath(`/orders/${orderId}`);
-    revalidatePath("/inventory");
+    revalidatePath("/point-of-sales/orders");
+    revalidatePath(`/point-of-sales/orders/${orderId}`);
+    revalidatePath("/point-of-sales/inventory");
 
     return { ok: true };
   } catch (error) {
@@ -500,8 +480,8 @@ export async function markOrderAsDelivered(
       })
       .where(eq(orderTable.id, orderId));
 
-    revalidatePath("/orders");
-    revalidatePath(`/orders/${orderId}`);
+    revalidatePath("/point-of-sales/orders");
+    revalidatePath(`/point-of-sales/orders/${orderId}`);
 
     return { ok: true };
   } catch (error) {

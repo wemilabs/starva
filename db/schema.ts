@@ -628,8 +628,6 @@ export const order = pgTable(
     notes: text("notes"),
     status: orderStatus("status").default("pending").notNull(),
     totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),
-    confirmationToken: text("confirmation_token").unique(),
-    tokenExpiresAt: timestamp("token_expires_at"),
     confirmedAt: timestamp("confirmed_at"),
     confirmedBy: text("confirmed_by").references(() => user.id),
     createdAt: timestamp("created_at")
@@ -644,7 +642,6 @@ export const order = pgTable(
     index("order_org_idx").on(t.organizationId),
     index("order_status_idx").on(t.status),
     index("order_number_idx").on(t.orderNumber),
-    index("order_confirmation_token_idx").on(t.confirmationToken),
     unique("order_number_per_org").on(t.organizationId, t.orderNumber),
   ]
 );

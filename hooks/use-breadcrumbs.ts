@@ -12,11 +12,14 @@ const routeConfig: Record<string, (params: string[]) => Crumb[]> = {
   "/stores": () => [{ label: "Stores" }],
   "/merchants": () => [{ label: "Merchants" }],
   "/products": () => [{ label: "Products" }],
-  "/orders": () => [{ label: "Orders" }],
+  "/point-of-sales/orders": () => [{ label: "POS" }, { label: "Orders" }],
   "/usage/billing": () => [{ label: "Billing" }],
   "/usage/pricing": () => [{ label: "Pricing" }],
-  "/analytics": () => [{ label: "Analytics" }],
-  "/transactions": () => [{ label: "Transactions" }],
+  "/point-of-sales/analytics": () => [{ label: "POS" }, { label: "Analytics" }],
+  "/point-of-sales/transactions": () => [
+    { label: "POS" },
+    { label: "Transactions" },
+  ],
   "/trends": () => [{ label: "Trends" }],
   "/support": () => [{ label: "Support" }],
   "/feedback": () => [{ label: "Feedback" }],
@@ -46,8 +49,9 @@ const routeConfig: Record<string, (params: string[]) => Crumb[]> = {
     { label: "Products", href: "/products" },
     { label: formatProductName(params[0]) },
   ],
-  "/orders/[orderId]": (params) => [
-    { label: "Orders", href: "/orders" },
+  "/point-of-sales/orders/[orderId]": (params) => [
+    { label: "POS" },
+    { label: "Orders", href: "/point-of-sales/orders" },
     { label: `Order #${params[0]?.slice(-8) || params[0]}` },
   ],
 };

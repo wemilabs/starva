@@ -55,9 +55,11 @@ async function OrdersContent() {
     activeOrgId ? getOrderStats(activeOrgId) : Promise.resolve([]),
   ]);
 
+  const hasAnyOrders = myOrders.length > 0 || customerOrders.length > 0;
+
   return (
     <div className="space-y-7">
-      {myOrders.length === 0 ? (
+      {!hasAnyOrders ? (
         <Empty className="min-h-[400px]">
           <EmptyHeader>
             <EmptyMedia variant="icon">

@@ -3,6 +3,13 @@
 import { ShoppingBag, Store } from "lucide-react";
 import { Suspense } from "react";
 import { Badge } from "@/components/ui/badge";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Order, OrderItem } from "@/db/schema";
 import { ORDER_STATUS_VALUES } from "@/lib/constants";
@@ -94,20 +101,50 @@ export function OrderTabs({
       </TabsList>
 
       <TabsContent value="my-orders" className="space-y-6 mt-6">
-        <OrderStats stats={myOrdersStats} />
-        <Suspense
-          fallback={
-            <div className="text-center text-muted-foreground font-mono tracking-tighter">
-              Loading orders...
-            </div>
-          }
-        >
-          <OrderList orders={myOrders} variant="customer" />
-        </Suspense>
+        {myOrders.length > 0 ? (
+          <>
+            <OrderStats stats={myOrdersStats} />
+            <Suspense
+              fallback={
+                <div className="text-center text-muted-foreground font-mono tracking-tighter">
+                  Loading orders...
+                </div>
+              }
+            >
+              <OrderList orders={myOrders} variant="customer" />
+            </Suspense>
+          </>
+        ) : (
+          <Empty className="min-h-[300px]">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <ShoppingBag className="size-6" />
+              </EmptyMedia>
+              <EmptyTitle>No personal orders</EmptyTitle>
+              <EmptyDescription className="font-mono tracking-tighter">
+                You haven&apos;t placed any orders yet. Start shopping from
+                stores to see your order history here.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        )}
       </TabsContent>
 
       <TabsContent value="customer-orders" className="space-y-6 mt-6">
-        {hasActiveStore ? (
+        {!hasActiveStore ? (
+          <Empty className="min-h-[300px]">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Store className="size-6" />
+              </EmptyMedia>
+              <EmptyTitle>No store selected</EmptyTitle>
+              <EmptyDescription className="font-mono tracking-tighter">
+                Please select a store to view and manage orders from your
+                customers
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : customerOrders.length > 0 ? (
           <>
             <OrderStats stats={merchantStats} />
             <Suspense
@@ -121,14 +158,18 @@ export function OrderTabs({
             </Suspense>
           </>
         ) : (
-          <div className="text-center py-12 flex flex-col items-center justify-center border border-dashed rounded-md">
-            <Store className="size-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No store selected</h3>
-            <p className="text-sm text-muted-foreground max-w-md font-mono tracking-tighter">
-              Please select a store to view and manage orders from your
-              customers
-            </p>
-          </div>
+          <Empty className="min-h-[300px]">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Store className="size-6" />
+              </EmptyMedia>
+              <EmptyTitle>No customer orders yet</EmptyTitle>
+              <EmptyDescription className="font-mono tracking-tighter">
+                When customers place orders from your store, they will appear
+                here.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         )}
       </TabsContent>
     </Tabs>

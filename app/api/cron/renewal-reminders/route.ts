@@ -1,8 +1,7 @@
-import { and, eq, gt, isNull, lte, or } from "drizzle-orm";
+import { and, eq, gt, isNull, lte } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { db } from "@/db/drizzle";
 import { subscription } from "@/db/schema";
-import { PRICING_PLANS } from "@/lib/constants";
 import {
   createNotification,
   sendPushToUser,
@@ -63,19 +62,14 @@ export async function GET(request: Request) {
         )
       );
 
-    // Get expired subscriptions to downgrade (not Hobby)
+    // Get expired subscriptions
     const expired = await db
       .select()
       .from(subscription)
       .where(
         and(
           eq(subscription.status, "active"),
-          lte(subscription.currentPeriodEnd, now),
-          or(
-            eq(subscription.planName, "Growth"),
-            eq(subscription.planName, "Pro"),
-            eq(subscription.planName, "Pro+")
-          )
+          lte(subscription.currentPeriodEnd, now)
         )
       );
 
@@ -97,9 +91,9 @@ export async function GET(request: Request) {
     // Apply scheduled downgrades (user-initiated plan changes)
     const scheduledDowngradesApplied = await applyScheduledDowngrades();
 
-    // Process expired - downgrade to Hobby
+    // Process expired subscriptions
     for (const sub of expired) {
-      await downgradeToHobby(sub);
+      await expireSubscription(sub);
     }
 
     return NextResponse.json({
@@ -181,18 +175,11 @@ async function sendRenewalReminder(
     .where(eq(subscription.id, sub.id));
 }
 
-async function downgradeToHobby(sub: typeof subscription.$inferSelect) {
-  const hobbyPlan = PRICING_PLANS.find((p) => p.name === "Hobby");
-  if (!hobbyPlan) return;
-
+async function expireSubscription(sub: typeof subscription.$inferSelect) {
   await db
     .update(subscription)
     .set({
-      planName: "Hobby",
       status: "expired",
-      orderLimit: hobbyPlan.orderLimit,
-      maxOrgs: hobbyPlan.maxOrgs,
-      maxProductsPerOrg: hobbyPlan.maxProductsPerOrg,
       updatedAt: new Date(),
     })
     .where(eq(subscription.id, sub.id));
@@ -200,18 +187,18 @@ async function downgradeToHobby(sub: typeof subscription.$inferSelect) {
   // Send notification
   await sendPushToUser(sub.userId, {
     title: "Subscription Expired",
-    body: `Your ${sub.planName} plan has expired. You've been moved to the free Hobby plan.`,
+    body: `Your ${sub.planName} plan has expired. Renew now to restore access to your features.`,
     url: "/usage/billing",
     tag: "subscription-expired",
     requireInteraction: true,
-    actions: [{ action: "renew", title: "Upgrade Now" }],
+    actions: [{ action: "renew", title: "Renew Now" }],
   });
 
   await createNotification({
     userId: sub.userId,
     type: "subscription_expired",
     title: "Subscription Expired",
-    message: `Your ${sub.planName} plan has expired. You've been moved to the free Hobby plan. Upgrade anytime to restore your premium features.`,
+    message: `Your ${sub.planName} plan has expired. Renew anytime to restore your features.`,
     actionUrl: "/usage/billing",
     sendPush: false,
   });

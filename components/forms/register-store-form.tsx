@@ -196,21 +196,30 @@ export function RegisterStoreForm({
         <Card className="border border-dashed bg-sidebar">
           <CardContent className="flex flex-col gap-4 py-6">
             <div className="text-center space-y-2">
-              <h3 className="font-medium">Store Limit Reached</h3>
+              <h3 className="font-medium">
+                {orgLimit?.noSubscription
+                  ? "Subscription Required"
+                  : "Store Limit Reached"}
+              </h3>
               <p className="text-xs text-muted-foreground font-mono tracking-tighter">
-                You've reached your limit of {orgLimit?.maxOrgs} stores on the{" "}
-                {orgLimit?.planName} plan.
+                {orgLimit?.noSubscription
+                  ? "You need an active subscription to create stores. Start your 14-day free trial today!"
+                  : `You've reached your limit of ${orgLimit?.maxOrgs} stores on the ${orgLimit?.planName} plan.`}
               </p>
-              <p className="text-xs text-muted-foreground font-mono tracking-tighter">
-                Current stores: {orgLimit?.currentOrgs}/{orgLimit?.maxOrgs}
-              </p>
+              {!orgLimit?.noSubscription && (
+                <p className="text-xs text-muted-foreground font-mono tracking-tighter">
+                  Current stores: {orgLimit?.currentOrgs}/{orgLimit?.maxOrgs}
+                </p>
+              )}
             </div>
             <Button
               onClick={handleUpgradeClick}
               className="w-full"
               variant="outline"
             >
-              <span>Upgrade Plan</span>
+              <span>
+                {orgLimit?.noSubscription ? "View Plans" : "Upgrade Plan"}
+              </span>
             </Button>
           </CardContent>
         </Card>

@@ -35,11 +35,6 @@ export function RenewalSection({ subscription }: RenewalSectionProps) {
   const isExpiringSoon = daysLeft !== null && daysLeft <= 7 && !isExpired;
   const isUrgent = daysLeft !== null && daysLeft <= 3 && !isExpired;
 
-  // Don't show renewal section for Hobby plan
-  if (subscription.planName === "Hobby") {
-    return null;
-  }
-
   return (
     <>
       <Card
@@ -162,6 +157,9 @@ export function RenewalSection({ subscription }: RenewalSectionProps) {
         open={showPaymentModal}
         onOpenChange={setShowPaymentModal}
         planName={subscription.planName}
+        billingPeriod={
+          (subscription.billingPeriod as "monthly" | "yearly") || "monthly"
+        }
         isRenewal={true}
         defaultPhone={subscription.phoneNumber}
         onSuccess={() => window.location.reload()}

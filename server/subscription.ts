@@ -4,7 +4,15 @@ import { desc, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { db } from "@/db/drizzle";
 import { subscription } from "@/db/schema";
-import { PRICING_PLANS } from "@/lib/constants";
+import { type BillingPeriod, PRICING_PLANS } from "@/lib/constants";
+
+async function isUserAdmin(userId: string): Promise<boolean> {
+  const userData = await db.query.user.findFirst({
+    where: (u, { eq }) => eq(u.id, userId),
+    columns: { role: true },
+  });
+  return userData?.role === "admin";
+}
 
 export async function getUserSubscription(userId: string) {
   const [currentSubscription] = await db
@@ -26,21 +34,24 @@ export async function getUserSubscription(userId: string) {
   };
 }
 
-export async function createSubscription(userId: string, planName: string) {
+export async function createSubscription(
+  userId: string,
+  planName: string,
+  billingPeriod: BillingPeriod = "monthly"
+) {
   const plan = PRICING_PLANS.find((p) => p.name === planName);
   if (!plan) throw new Error(`Invalid plan name: ${planName}`);
 
-  const trialEndsAt = plan.price === 0 ? null : new Date();
-  if (trialEndsAt) {
-    trialEndsAt.setDate(trialEndsAt.getDate() + 14);
-  }
+  const trialEndsAt = new Date();
+  trialEndsAt.setDate(trialEndsAt.getDate() + 14);
 
   const [newSubscription] = await db
     .insert(subscription)
     .values({
       userId,
       planName,
-      status: plan.price === 0 ? "active" : "trial",
+      billingPeriod,
+      status: "trial",
       trialEndsAt,
       startDate: new Date(),
       orderLimit: plan.orderLimit,
@@ -52,17 +63,23 @@ export async function createSubscription(userId: string, planName: string) {
   return newSubscription;
 }
 
-export async function updateSubscription(userId: string, planName: string) {
+export async function updateSubscription(
+  userId: string,
+  planName: string,
+  billingPeriod?: BillingPeriod
+) {
   const existingSubscription = await getUserSubscription(userId);
   const plan = PRICING_PLANS.find((p) => p.name === planName);
   if (!plan) throw new Error(`Invalid plan name: ${planName}`);
 
-  if (!existingSubscription) return createSubscription(userId, planName);
+  if (!existingSubscription)
+    return createSubscription(userId, planName, billingPeriod);
 
   const [updatedSubscription] = await db
     .update(subscription)
     .set({
       planName,
+      ...(billingPeriod && { billingPeriod }),
       orderLimit: plan.orderLimit,
       maxOrgs: plan.maxOrgs,
       maxProductsPerOrg: plan.maxProductsPerOrg,
@@ -186,16 +203,24 @@ export async function applyScheduledDowngrades() {
 }
 
 export async function checkOrganizationLimit(userId: string) {
-  const userSub = await getUserSubscription(userId);
-
   const userOrgs = await db.query.member.findMany({
     where: (member, { eq }) => eq(member.userId, userId),
   });
-
   const totalOrgs = userOrgs.length;
 
-  const hobbyPlan = PRICING_PLANS.find((p) => p.name === "Hobby");
-  const defaultMaxOrgs = hobbyPlan?.maxOrgs ?? 1;
+  // Admin bypass - unlimited access
+  if (await isUserAdmin(userId)) {
+    return {
+      canCreate: true,
+      maxOrgs: "Unlimited",
+      currentOrgs: totalOrgs,
+      planName: "Admin",
+    };
+  }
+
+  const userSub = await getUserSubscription(userId);
+  const starterPlan = PRICING_PLANS.find((p) => p.name === "Starter");
+  const defaultMaxOrgs = starterPlan?.maxOrgs ?? 3;
 
   if (
     !userSub ||
@@ -203,10 +228,11 @@ export async function checkOrganizationLimit(userId: string) {
     userSub.status === "expired"
   )
     return {
-      canCreate: totalOrgs < defaultMaxOrgs,
-      maxOrgs: defaultMaxOrgs,
+      canCreate: false,
+      maxOrgs: 0,
       currentOrgs: totalOrgs,
-      planName: "Hobby",
+      planName: null,
+      noSubscription: true,
     };
 
   const plan = userSub.plan;
@@ -221,8 +247,10 @@ export async function checkOrganizationLimit(userId: string) {
 }
 
 export async function checkProductLimit(organizationId: string) {
-  const hobbyPlan = PRICING_PLANS.find((p) => p.name === "Hobby");
-  const defaultMaxProducts = hobbyPlan?.maxProductsPerOrg ?? 10;
+  const currentProducts = await db.query.product.findMany({
+    where: (product, { eq }) => eq(product.organizationId, organizationId),
+  });
+  const totalProducts = currentProducts.length;
 
   const orgOwner = await db.query.member.findFirst({
     where: (member, { eq }) => eq(member.organizationId, organizationId),
@@ -231,19 +259,26 @@ export async function checkProductLimit(organizationId: string) {
     },
   });
 
-  const currentProducts = await db.query.product.findMany({
-    where: (product, { eq }) => eq(product.organizationId, organizationId),
-  });
-  const totalProducts = currentProducts.length;
-
   if (!orgOwner)
     return {
-      canCreate: totalProducts < defaultMaxProducts,
-      maxProducts: defaultMaxProducts,
+      canCreate: false,
+      maxProducts: 0,
       currentProducts: totalProducts,
-      planName: "Hobby",
+      planName: null,
     };
 
+  // Admin bypass - unlimited access
+  if (await isUserAdmin(orgOwner.userId)) {
+    return {
+      canCreate: true,
+      maxProducts: "Unlimited",
+      currentProducts: totalProducts,
+      planName: "Admin",
+    };
+  }
+
+  const starterPlan = PRICING_PLANS.find((p) => p.name === "Starter");
+  const defaultMaxProducts = starterPlan?.maxProductsPerOrg ?? 30;
   const userSub = await getUserSubscription(orgOwner.userId);
 
   if (
@@ -252,10 +287,10 @@ export async function checkProductLimit(organizationId: string) {
     userSub.status === "expired"
   )
     return {
-      canCreate: totalProducts < defaultMaxProducts,
-      maxProducts: defaultMaxProducts,
+      canCreate: false,
+      maxProducts: 0,
       currentProducts: totalProducts,
-      planName: "Hobby",
+      planName: null,
     };
 
   const plan = userSub.plan;
@@ -275,9 +310,6 @@ export async function checkProductLimit(organizationId: string) {
 }
 
 export async function checkOrderLimit(organizationId: string) {
-  const hobbyPlan = PRICING_PLANS.find((p) => p.name === "Hobby");
-  const defaultMaxOrders = hobbyPlan?.orderLimit ?? 50;
-
   const currentMonth = new Date().toISOString().slice(0, 7);
 
   const orderUsage = await db.query.orderUsageTracking.findFirst({
@@ -299,12 +331,24 @@ export async function checkOrderLimit(organizationId: string) {
 
   if (!orgOwner)
     return {
-      canCreate: currentOrders < defaultMaxOrders,
-      maxOrders: defaultMaxOrders,
+      canCreate: false,
+      maxOrders: 0,
       currentOrders,
-      planName: "Hobby",
+      planName: null,
     };
 
+  // Admin bypass - unlimited access
+  if (await isUserAdmin(orgOwner.userId)) {
+    return {
+      canCreate: true,
+      maxOrders: "Unlimited",
+      currentOrders,
+      planName: "Admin",
+    };
+  }
+
+  const starterPlan = PRICING_PLANS.find((p) => p.name === "Starter");
+  const defaultMaxOrders = starterPlan?.orderLimit ?? 200;
   const userSub = await getUserSubscription(orgOwner.userId);
 
   if (
@@ -313,10 +357,10 @@ export async function checkOrderLimit(organizationId: string) {
     userSub.status === "expired"
   )
     return {
-      canCreate: currentOrders < defaultMaxOrders,
-      maxOrders: defaultMaxOrders,
+      canCreate: false,
+      maxOrders: 0,
       currentOrders,
-      planName: "Hobby",
+      planName: null,
     };
 
   const plan = userSub.plan;

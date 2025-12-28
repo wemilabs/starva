@@ -164,9 +164,9 @@ export const feedbackStatusOptions: {
 
 export type PricingPlan = {
   name: string;
-  price: number | null;
-  originalPrice: number | null;
-  period: string;
+  monthlyPrice: number | null;
+  yearlyPrice: number | null;
+  period: "month" | "year";
   orderLimit: number | null;
   maxOrgs: number | null;
   maxProductsPerOrg: number | null;
@@ -176,117 +176,117 @@ export type PricingPlan = {
   cta: string;
 };
 
+export type BillingPeriod = "monthly" | "yearly";
+
 export const USD_TO_RWF = 1457.39;
+export const TRIAL_DAYS = 14;
+export const ANNUAL_DISCOUNT_PERCENT = 10;
+
 export const PRICING_PLANS: PricingPlan[] = [
   {
-    name: "Hobby",
-    price: 0,
-    originalPrice: 7,
+    name: "Starter",
+    monthlyPrice: 50,
+    yearlyPrice: 540,
     period: "month",
-    orderLimit: 50,
-    maxOrgs: 1,
-    maxProductsPerOrg: 10,
+    orderLimit: 200,
+    maxOrgs: 3,
+    maxProductsPerOrg: 30,
     additionalText: "Includes:",
     features: [
-      "1 store",
-      "10 products",
-      "50 orders/month",
-      "Basic sales dashboard",
-      "7-day data retention",
-      "Community support",
+      "3 stores",
+      "30 products per store",
+      "200 orders/month",
+      "Sales dashboard",
+      "14-day data retention",
+      "Email support",
       "Full transaction processing",
     ],
     highlighted: false,
-    cta: "Get Started Free",
+    cta: "Start 14-Day Free Trial",
   },
   {
     name: "Growth",
-    price: 28,
-    originalPrice: 40,
-    period: "month",
-    orderLimit: 100,
-    maxOrgs: 5,
-    maxProductsPerOrg: 20,
-    additionalText: "Everything in Hobby, plus:",
-    features: [
-      "5 stores",
-      "20 products per store",
-      "100 orders/month",
-      "Customer analytics",
-      "Limited AI features",
-      "15-day data retention",
-      "Priority support",
-    ],
-    highlighted: true,
-    cta: "Get Growth",
-  },
-  {
-    name: "Pro",
-    price: 90,
-    originalPrice: 120,
+    monthlyPrice: 100,
+    yearlyPrice: 1080,
     period: "month",
     orderLimit: 500,
-    maxOrgs: 15,
-    maxProductsPerOrg: 50,
-    additionalText: "Everything in Growth, plus:",
+    maxOrgs: 10,
+    maxProductsPerOrg: 100,
+    additionalText: "Everything in Starter, plus:",
     features: [
-      "15 stores",
-      "50 products per store",
+      "10 stores",
+      "100 products per store",
       "500 orders/month",
       "Customer analytics",
-      "Extended limits on AI features",
+      "AI-powered insights",
       "30-day data retention",
       "Priority support",
     ],
-    highlighted: false,
-    cta: "Get Pro",
+    highlighted: true,
+    cta: "Start 14-Day Free Trial",
   },
   {
-    name: "Pro+",
-    price: 200,
-    originalPrice: null,
+    name: "Pro",
+    monthlyPrice: 200,
+    yearlyPrice: 2160,
     period: "month",
     orderLimit: 2000,
+    maxOrgs: 25,
+    maxProductsPerOrg: 500,
+    additionalText: "Everything in Growth, plus:",
+    features: [
+      "25 stores",
+      "500 products per store",
+      "2,000 orders/month",
+      "Advanced analytics",
+      "Full AI-powered management",
+      "90-day data retention",
+      "24/7 priority support",
+      "API access",
+    ],
+    highlighted: false,
+    cta: "Start 14-Day Free Trial",
+  },
+  {
+    name: "Enterprise",
+    monthlyPrice: 500,
+    yearlyPrice: 5400,
+    period: "month",
+    orderLimit: null,
     maxOrgs: null,
     maxProductsPerOrg: null,
     additionalText: "Everything in Pro, plus:",
     features: [
       "Unlimited stores",
       "Unlimited products",
-      "2,000 orders/month",
-      "Advanced analytics",
-      "Full capacity AI-powered management",
-      "90-day data retention",
-      "24/7 priority support",
-      "API access for integrations",
-    ],
-    highlighted: false,
-    cta: "Get Pro+",
-  },
-  {
-    name: "Enterprise",
-    price: null,
-    originalPrice: null,
-    period: "month",
-    orderLimit: null,
-    maxOrgs: null,
-    maxProductsPerOrg: null,
-    additionalText: "Everything in Pro+, plus:",
-    features: [
-      "Unlimited everything",
+      "Unlimited orders",
       "Custom integrations",
       "White-label solutions",
       "Dedicated account manager",
       "SLA guarantee",
-      "Custom analytics & reporting",
-      "Unlimited team members",
       "Unlimited data retention",
-      "Priority feature requests",
     ],
     highlighted: false,
     cta: "Contact Sales",
   },
 ] as const;
+
+export function getPlanPrice(
+  plan: PricingPlan,
+  billingPeriod: BillingPeriod
+): number | null {
+  return billingPeriod === "yearly" ? plan.yearlyPrice : plan.monthlyPrice;
+}
+
+export function getMonthlyEquivalent(
+  plan: PricingPlan,
+  billingPeriod: BillingPeriod
+): number | null {
+  if (billingPeriod === "yearly" && plan.yearlyPrice) {
+    return Math.round(plan.yearlyPrice / 12);
+  }
+  return plan.monthlyPrice;
+}
 
 export const CATEGORY_CONTENT: Record<
   string,

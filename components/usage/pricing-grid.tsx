@@ -14,27 +14,32 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useUserSubscription } from "@/hooks/use-user-subscription";
 import { useSession } from "@/lib/auth-client";
-import { PRICING_PLANS, type PricingPlan } from "@/lib/constants";
+import {
+  ANNUAL_DISCOUNT_PERCENT,
+  type BillingPeriod,
+  PRICING_PLANS,
+  type PricingPlan,
+} from "@/lib/constants";
 import { formatDateShort } from "@/lib/utils";
-import { createSubscription, scheduleDowngrade } from "@/server/subscription";
+import { scheduleDowngrade } from "@/server/subscription";
 import { PricingCard } from "./pricing-card";
 
 interface PricingGridProps {
   plans: readonly PricingPlan[];
 }
 
-// Get plan price rank for comparison (higher = more expensive)
 function getPlanRank(planName: string | null): number {
   const ranks: Record<string, number> = {
-    Hobby: 0,
+    Starter: 0,
     Growth: 1,
     Pro: 2,
-    "Pro+": 3,
-    Enterprise: 4,
+    Enterprise: 3,
   };
-  return ranks[planName || "Hobby"] ?? 0;
+  return ranks[planName || ""] ?? -1;
 }
 
 export function PricingGrid({ plans }: PricingGridProps) {
@@ -46,6 +51,7 @@ export function PricingGrid({ plans }: PricingGridProps) {
     refetch,
   } = useUserSubscription();
   const router = useRouter();
+  const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>("monthly");
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showDowngradeDialog, setShowDowngradeDialog] = useState(false);
@@ -86,28 +92,10 @@ export function PricingGrid({ plans }: PricingGridProps) {
       return;
     }
 
-    const plan = plans.find((p) => p.name === planName);
-
-    // No current subscription - new user
+    // No current subscription or new user - all plans require trial/payment
     if (!currentPlanName) {
-      if (plan?.price === 0) {
-        // Free plan - create immediately
-        setLoadingPlan(planName);
-        try {
-          await createSubscription(session.user.id, planName);
-          toast.success(`Welcome to ${planName} plan! Get started right away.`);
-          refetch();
-        } catch (error) {
-          console.error("Subscription error:", error);
-          toast.error("Failed to create subscription. Please try again.");
-        } finally {
-          setLoadingPlan(null);
-        }
-      } else {
-        // Paid plan - require payment
-        setSelectedPlan(planName);
-        setShowPaymentModal(true);
-      }
+      setSelectedPlan(planName);
+      setShowPaymentModal(true);
       return;
     }
 
@@ -159,18 +147,30 @@ export function PricingGrid({ plans }: PricingGridProps) {
 
   return (
     <>
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8 md:gap-6 mt-14">
+      <div className="flex flex-col items-center gap-4 mt-8">
+        <Tabs
+          value={billingPeriod}
+          onValueChange={(v) => setBillingPeriod(v as BillingPeriod)}
+          className="w-full max-w-xs"
+        >
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="monthly">Monthly</TabsTrigger>
+            <TabsTrigger value="yearly" className="gap-1.5">
+              Yearly
+              <Badge variant="secondary" className="text-xs">
+                Save {ANNUAL_DISCOUNT_PERCENT}%
+              </Badge>
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-8 md:gap-6 mt-8">
         {plans.map((plan) => (
           <PricingCard
             key={plan.name}
-            name={plan.name}
-            price={plan.price}
-            originalPrice={plan.originalPrice}
-            period={plan.period}
-            additionalText={plan.additionalText}
-            features={plan.features}
-            highlighted={plan.highlighted}
-            cta={plan.cta}
+            plan={plan}
+            billingPeriod={billingPeriod}
             onSelect={() => handleSelectPlan(plan.name)}
             isLoading={loadingPlan === plan.name}
             isCurrentPlan={
@@ -187,6 +187,7 @@ export function PricingGrid({ plans }: PricingGridProps) {
           open={showPaymentModal}
           onOpenChange={setShowPaymentModal}
           planName={selectedPlan}
+          billingPeriod={billingPeriod}
           isRenewal={false}
           defaultPhone={subscription?.phoneNumber}
           onSuccess={handlePaymentSuccess}

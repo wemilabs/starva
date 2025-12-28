@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { PRICING_PLANS, USD_TO_RWF } from "@/lib/constants";
+import { type BillingPeriod, PRICING_PLANS, USD_TO_RWF } from "@/lib/constants";
 import {
   checkPaymentStatus,
   initiateSubscriptionPayment,
@@ -34,6 +34,7 @@ interface PaymentModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   planName: string;
+  billingPeriod?: BillingPeriod;
   isRenewal?: boolean;
   defaultPhone?: string | null;
   onSuccess?: () => void;
@@ -43,6 +44,7 @@ export function PaymentModal({
   open,
   onOpenChange,
   planName,
+  billingPeriod = "monthly",
   isRenewal = false,
   defaultPhone,
   onSuccess,
@@ -54,7 +56,9 @@ export function PaymentModal({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const plan = PRICING_PLANS.find((p) => p.name === planName);
-  const amountRWF = plan?.price ? Math.round(plan.price * USD_TO_RWF) : 0;
+  const priceUSD =
+    billingPeriod === "yearly" ? plan?.yearlyPrice : plan?.monthlyPrice;
+  const amountRWF = priceUSD ? Math.round(priceUSD * USD_TO_RWF) : 0;
 
   // Cleanup polling on unmount or close
   useEffect(() => {
@@ -116,6 +120,7 @@ export function PaymentModal({
       const result = await initiateSubscriptionPayment({
         planName,
         phoneNumber: phone,
+        billingPeriod,
         isRenewal,
       });
 
@@ -165,7 +170,7 @@ export function PaymentModal({
               {amountRWF.toLocaleString()} RWF
             </p>
             <p className="text-xs text-muted-foreground">
-              ≈ ${plan?.price}/month
+              ≈ ${priceUSD}/{billingPeriod === "yearly" ? "year" : "month"}
             </p>
           </div>
 

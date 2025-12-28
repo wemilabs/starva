@@ -1,5 +1,4 @@
 import { Check, Sparkles } from "lucide-react";
-import { Activity } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,18 +8,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  type BillingPeriod,
+  getMonthlyEquivalent,
+  getPlanPrice,
+  type PricingPlan,
+} from "@/lib/constants";
 import { cn, formatPrice } from "@/lib/utils";
 import { Spinner } from "../ui/spinner";
 
 interface PricingCardProps {
-  name: string;
-  price: number | null;
-  originalPrice: number | null;
-  period: string;
-  additionalText: string;
-  features: readonly string[];
-  highlighted?: boolean;
-  cta: string;
+  plan: PricingPlan;
+  billingPeriod: BillingPeriod;
   onSelect?: () => void;
   isLoading?: boolean;
   isCurrentPlan?: boolean;
@@ -28,23 +27,18 @@ interface PricingCardProps {
 }
 
 export function PricingCard({
-  name,
-  price,
-  originalPrice,
-  period,
-  additionalText,
-  features,
-  highlighted = false,
-  cta,
+  plan,
+  billingPeriod,
   onSelect,
   isLoading = false,
   isCurrentPlan = false,
   isScheduledPlan = false,
 }: PricingCardProps) {
-  const discountPercentage =
-    originalPrice && price
-      ? Math.round(((originalPrice - price) / originalPrice) * 100)
-      : 0;
+  const { name, additionalText, features, highlighted, cta } = plan;
+  const price = getPlanPrice(plan, billingPeriod);
+  const monthlyEquivalent = getMonthlyEquivalent(plan, billingPeriod);
+  const isYearly = billingPeriod === "yearly";
+  const period = isYearly ? "year" : "month";
 
   return (
     <Card
@@ -62,35 +56,29 @@ export function PricingCard({
         </div>
       )}
 
-      {discountPercentage > 0 && (
-        <div className="absolute -top-3 -right-3">
-          <Badge
-            variant="destructive"
-            className="rounded-full px-3 py-1 text-xs"
-          >
-            Save {discountPercentage}%
-          </Badge>
-        </div>
-      )}
-
       <CardHeader className="text-center">
         <CardTitle className="text-xl font-medium">{name}</CardTitle>
         <div className="mt-4 flex flex-col items-center gap-1">
-          {originalPrice && (
-            <p className="text-sm text-muted-foreground line-through">
-              {formatPrice(originalPrice)}
+          {isYearly && monthlyEquivalent && (
+            <p className="text-sm text-muted-foreground">
+              {formatPrice(monthlyEquivalent)}/month
             </p>
           )}
           <div className="flex items-baseline gap-1">
             <span className="text-3xl font-medium tracking-tight">
-              {price === null ? "Let's talk" : formatPrice(price)}
+              {price === null ? "From $499" : formatPrice(price)}
             </span>
-            <Activity mode={price !== null && price > 0 ? "visible" : "hidden"}>
+            {price !== null && (
               <span className="text-muted-foreground font-mono tracking-tighter">
                 /{period}
               </span>
-            </Activity>
+            )}
           </div>
+          {isYearly && price && (
+            <p className="text-xs text-muted-foreground mt-1 font-mono tracking-tighter">
+              Billed annually
+            </p>
+          )}
         </div>
       </CardHeader>
 

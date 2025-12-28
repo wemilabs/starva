@@ -1,7 +1,6 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { verifySession } from "@/data/user-session";
 import {
@@ -14,7 +13,7 @@ import { db } from "@/db/drizzle";
 import { user } from "@/db/schema";
 import { requireAdmin } from "@/lib/admin-auth";
 import { auth } from "@/lib/auth";
-import { createSubscription, getUserSubscription } from "@/server/subscription";
+import { getUserSubscription } from "@/server/subscription";
 
 export async function signInUser(email: string, password: string) {
   try {
@@ -24,17 +23,6 @@ export async function signInUser(email: string, password: string) {
         password,
       },
     });
-
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (session?.user?.id) {
-      const existingSubscription = await getUserSubscription(session.user.id);
-
-      if (!existingSubscription)
-        await createSubscription(session.user.id, "Hobby");
-    }
 
     return { success: true, message: "User signed in successfully" };
   } catch (error: unknown) {
@@ -58,12 +46,6 @@ export async function signUpUser(
       },
     });
 
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-
-    if (session?.user?.id) await createSubscription(session.user.id, "Hobby");
-
     return { success: true, message: "User signed up successfully" };
   } catch (error: unknown) {
     const err = error as Error;
@@ -72,12 +54,8 @@ export async function signUpUser(
   }
 }
 
-export async function ensureUserHasFreeSubscription(userId: string) {
-  const existingSubscription = await getUserSubscription(userId);
-
-  if (!existingSubscription) await createSubscription(userId, "Hobby");
-
-  return existingSubscription;
+export async function getUserSubscriptionStatus(userId: string) {
+  return await getUserSubscription(userId);
 }
 
 export const getCurrentUser = async () => {
@@ -90,8 +68,6 @@ export const getCurrentUser = async () => {
   });
 
   if (!currentUser) redirect("/sign-in");
-
-  await ensureUserHasFreeSubscription(result.session.user.id);
 
   return {
     ...result.session,
@@ -196,12 +172,6 @@ export async function createUserAdmin(data: {
         data: { emailVerified: data.emailVerified ?? false },
       },
     });
-
-    const newUser = await db.query.user.findFirst({
-      where: eq(user.email, data.email),
-    });
-
-    if (newUser) await createSubscription(newUser.id, "Hobby");
 
     return { success: true, message: "User created successfully" };
   } catch (error) {

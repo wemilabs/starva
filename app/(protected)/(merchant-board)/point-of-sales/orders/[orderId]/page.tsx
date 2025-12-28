@@ -1,4 +1,4 @@
-import { ArrowLeft, Calendar, Package } from "lucide-react";
+import { ArrowLeft, Calendar, CheckCircle, Package } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -8,7 +8,9 @@ import { CancelOrderButton } from "@/components/orders/cancel-order-button";
 import { MarkAsDeliveredButton } from "@/components/orders/mark-as-delivered-button";
 import { OrderStatusBadge } from "@/components/orders/order-status-badge";
 import { OrderStatusSelect } from "@/components/orders/order-status-select";
+import { PayOrderButton } from "@/components/orders/pay-order-button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -68,7 +70,15 @@ async function OrderContent({
             Placed on {formatDate(order.createdAt)}
           </p>
         </div>
-        <OrderStatusBadge status={order.status} />
+        <div className="flex items-center gap-2">
+          <OrderStatusBadge status={order.status} />
+          <Activity mode={order.isPaid ? "visible" : "hidden"}>
+            <Badge variant="successful">
+              <CheckCircle className="size-3" />
+              Paid
+            </Badge>
+          </Activity>
+        </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
@@ -248,6 +258,24 @@ async function OrderContent({
               mode={
                 isOwner &&
                 !isMerchant &&
+                order.status === "confirmed" &&
+                !order.isPaid
+                  ? "visible"
+                  : "hidden"
+              }
+            >
+              <PayOrderButton
+                orderId={order.id}
+                orderNumber={orderNumber}
+                storeName={order.organization.name}
+                amount={Number(order.totalPrice)}
+              />
+            </Activity>
+            <Activity
+              mode={
+                isOwner &&
+                !isMerchant &&
+                order.isPaid &&
                 order.status !== "delivered" &&
                 order.status !== "cancelled"
                   ? "visible"

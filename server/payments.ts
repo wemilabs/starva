@@ -4,12 +4,13 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
-import { payment, subscription } from "@/db/schema";
+import { order, payment, subscription } from "@/db/schema";
 import { type BillingPeriod, PRICING_PLANS } from "@/lib/constants";
 import {
   getTransactionEvents,
   initiatePayment as paypackInitiate,
 } from "@/lib/paypack";
+import { realtime } from "@/lib/realtime";
 import { convertUsdToRwf, formatRwandanPhone } from "@/lib/utils";
 import { createNotification } from "./push-notifications";
 
@@ -126,6 +127,8 @@ async function processSuccessfulPayment(
   const verified = await verifySession();
   if (!verified.success) return { ok: false, error: "Unauthorized" };
 
+  if (!paymentRecord.planName) return;
+
   const plan = PRICING_PLANS.find((p) => p.name === paymentRecord.planName);
   if (!plan) return;
 
@@ -224,4 +227,139 @@ export async function getPaymentByRef(paypackRef: string) {
   return db.query.payment.findFirst({
     where: (p, { eq }) => eq(p.paypackRef, paypackRef),
   });
+}
+
+export async function initiateOrderPayment(data: {
+  orderId: string;
+  phoneNumber: string;
+}) {
+  const verified = await verifySession();
+  if (!verified.success) return { ok: false, error: "Unauthorized" };
+
+  const { session } = verified;
+
+  const order = await db.query.order.findFirst({
+    where: (o, { eq }) => eq(o.id, data.orderId),
+    with: {
+      organization: true,
+    },
+  });
+
+  if (!order) return { error: "Order not found" };
+  if (order.userId !== session.user.id) return { error: "Unauthorized" };
+
+  try {
+    const phone = formatRwandanPhone(data.phoneNumber);
+    const amountRWF = Number(order.totalPrice);
+
+    const result = await paypackInitiate(phone, amountRWF);
+
+    const [newPayment] = await db
+      .insert(payment)
+      .values({
+        userId: session.user.id,
+        phoneNumber: phone,
+        amount: String(amountRWF),
+        currency: "RWF",
+        planName: null,
+        billingPeriod: null,
+        isRenewal: false,
+        paypackRef: result.ref,
+        status: "pending",
+        orderId: data.orderId,
+      })
+      .returning();
+
+    return {
+      paymentId: newPayment.id,
+      paypackRef: result.ref,
+      status: "pending",
+      message: "Please approve the payment on your phone",
+    };
+  } catch (error) {
+    console.error("Order payment initiation failed:", error);
+    return { error: "Failed to initiate payment. Please try again." };
+  }
+}
+
+export async function checkOrderPaymentStatus(paypackRef: string) {
+  const verified = await verifySession();
+  if (!verified.success) return { ok: false, error: "Unauthorized" };
+
+  const existingPayment = await db.query.payment.findFirst({
+    where: (p, { eq }) => eq(p.paypackRef, paypackRef),
+  });
+
+  if (!existingPayment) return { error: "Payment not found", status: "error" };
+
+  if (existingPayment.status !== "pending")
+    return { status: existingPayment.status };
+
+  try {
+    const events = await getTransactionEvents(paypackRef);
+    const latestEvent = events[0];
+
+    if (!latestEvent) return { status: "pending" };
+
+    const transactionStatus = latestEvent.data?.status;
+
+    if (transactionStatus === "successful") {
+      const now = new Date();
+
+      await db
+        .update(payment)
+        .set({
+          status: "successful",
+          processedAt: now,
+        })
+        .where(eq(payment.id, existingPayment.id));
+
+      if (existingPayment.orderId) {
+        const paidOrder = await db.query.order.findFirst({
+          where: (o, { eq }) => eq(o.id, existingPayment.orderId as string),
+          with: {
+            user: true,
+          },
+        });
+
+        if (paidOrder) {
+          await db
+            .update(order)
+            .set({
+              isPaid: true,
+              paidAt: now,
+              updatedAt: now,
+            })
+            .where(eq(order.id, existingPayment.orderId));
+
+          await realtime
+            .channel(`org:${paidOrder.organizationId}`)
+            .emit("orders.paid", {
+              orderId: paidOrder.id,
+              orderNumber: paidOrder.orderNumber,
+              customerName: paidOrder.user.name,
+              total: paidOrder.totalPrice,
+              organizationId: paidOrder.organizationId,
+              paidAt: now.toISOString(),
+            });
+        }
+      }
+
+      revalidatePath(`/point-of-sales/orders/${existingPayment.orderId}`);
+      return { status: "successful" };
+    }
+
+    if (transactionStatus === "failed") {
+      await db
+        .update(payment)
+        .set({ status: "failed" })
+        .where(eq(payment.id, existingPayment.id));
+      return { status: "failed" };
+    }
+
+    return { status: "pending" };
+  } catch (error) {
+    console.error("Order payment status check failed:", error);
+    return { status: "pending" };
+  }
 }

@@ -104,6 +104,8 @@ export async function POST(request: Request) {
 async function processSuccessfulPayment(
   paymentRecord: typeof payment.$inferSelect
 ) {
+  if (!paymentRecord.planName) return;
+
   const plan = PRICING_PLANS.find((p) => p.name === paymentRecord.planName);
   if (!plan) return;
 

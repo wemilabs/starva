@@ -28,8 +28,8 @@ async function MerchantsList() {
             <Building2 className="size-6" />
           </EmptyMedia>
           <EmptyTitle>No merchants yet</EmptyTitle>
-          <EmptyDescription>
-            Become a merchant and start selling your products.
+          <EmptyDescription className="font-mono tracking-tighter">
+            Become a merchant and start reaching a broader clientele.
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>

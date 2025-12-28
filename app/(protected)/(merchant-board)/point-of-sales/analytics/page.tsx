@@ -5,8 +5,8 @@ import Link from "next/link";
 import { Suspense } from "react";
 import {
   GrowthAnalyticsChart,
-  HobbyAnalyticsChart,
   ProAnalyticsChart,
+  StarterAnalyticsChart,
 } from "@/components/analytics/analytics-charts";
 import { AnalyticsHero } from "@/components/analytics/analytics-hero";
 import { AnalyticsWrapper } from "@/components/analytics/analytics-wrapper";
@@ -163,12 +163,12 @@ async function AnalyticsContent({
     );
 
   const subscription = userId ? await getUserSubscription(userId) : null;
-  const planName = subscription?.plan?.name ?? "Hobby";
+  const planName = subscription?.plan?.name ?? "Starter";
 
   const params = await searchParams;
   const days = parseInt(params.days || "28", 10) as 7 | 14 | 28;
 
-  const { hobbySeries, growthSeries, proSeries, metrics } =
+  const { starterSeries, growthSeries, proSeries, metrics } =
     await getOrganizationAnalyticsOverview(activeOrgId, days);
 
   return (
@@ -188,14 +188,14 @@ async function AnalyticsContent({
           <p className="text-xs font-mono tracking-tighter text-muted-foreground mb-1">
             Core metrics
           </p>
-          <h2 className="text-sm font-medium mb-2">Hobby analytics</h2>
+          <h2 className="text-sm font-medium mb-2">Starter analytics</h2>
           <p className="text-xs text-muted-foreground font-mono tracking-tighter">
             Daily/7-day overview of orders for your active store.
           </p>
-          <HobbyAnalyticsChart data={hobbySeries ?? []} />
+          <StarterAnalyticsChart data={starterSeries ?? []} />
         </div>
 
-        {planName !== "Hobby" && (
+        {planName !== "Starter" && (
           <div className="rounded-xl border bg-card p-4 shadow-sm">
             <p className="text-xs font-mono tracking-tighter text-muted-foreground mb-1">
               Growth & Pro

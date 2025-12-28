@@ -212,14 +212,13 @@ export const subscription = pgTable(
     maxOrgs: integer("max_orgs"),
     maxProductsPerOrg: integer("max_products_per_org"),
     ordersUsedThisMonth: integer("orders_used_this_month").default(0).notNull(),
-    // Billing fields
+    billingPeriod: text("billing_period").default("monthly"),
     phoneNumber: text("phone_number"),
     currentPeriodStart: timestamp("current_period_start"),
     currentPeriodEnd: timestamp("current_period_end"),
     lastPaymentId: text("last_payment_id"),
     renewalReminderSentAt: timestamp("renewal_reminder_sent_at"),
     finalReminderSentAt: timestamp("final_reminder_sent_at"),
-    // Scheduled plan change (for downgrades)
     scheduledPlanName: text("scheduled_plan_name"),
     scheduledChangeDate: timestamp("scheduled_change_date"),
     createdAt: timestamp("created_at")
@@ -280,6 +279,7 @@ export const payment = pgTable(
     // Payment details
     status: paymentStatus("status").default("pending").notNull(),
     planName: text("plan_name").notNull(),
+    billingPeriod: text("billing_period").default("monthly"),
     isRenewal: boolean("is_renewal").default(false).notNull(),
     processedAt: timestamp("processed_at"),
     createdAt: timestamp("created_at")

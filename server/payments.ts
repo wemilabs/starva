@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
 import { payment, subscription } from "@/db/schema";
-import { PRICING_PLANS } from "@/lib/constants";
+import { type BillingPeriod, PRICING_PLANS } from "@/lib/constants";
 import {
   getTransactionEvents,
   initiatePayment as paypackInitiate,
@@ -16,6 +16,7 @@ import { createNotification } from "./push-notifications";
 export async function initiateSubscriptionPayment(data: {
   planName: string;
   phoneNumber: string;
+  billingPeriod: BillingPeriod;
   isRenewal: boolean;
 }) {
   const verified = await verifySession();
@@ -24,12 +25,14 @@ export async function initiateSubscriptionPayment(data: {
   const { session } = verified;
 
   const plan = PRICING_PLANS.find((p) => p.name === data.planName);
-  if (!plan || plan.price === null || plan.price === 0)
+  const priceUSD =
+    data.billingPeriod === "yearly" ? plan?.yearlyPrice : plan?.monthlyPrice;
+  if (!plan || priceUSD === null || priceUSD === 0)
     return { error: "Invalid plan" };
 
   try {
     const phone = formatRwandanPhone(data.phoneNumber);
-    const amountRWF = convertUsdToRwf(plan.price);
+    const amountRWF = convertUsdToRwf(priceUSD as number);
 
     const result = await paypackInitiate(phone, amountRWF);
 
@@ -42,6 +45,7 @@ export async function initiateSubscriptionPayment(data: {
         amount: String(amountRWF),
         currency: "RWF",
         planName: data.planName,
+        billingPeriod: data.billingPeriod,
         isRenewal: data.isRenewal,
         paypackRef: result.ref,
         status: "pending",
@@ -125,9 +129,15 @@ async function processSuccessfulPayment(
   const plan = PRICING_PLANS.find((p) => p.name === paymentRecord.planName);
   if (!plan) return;
 
+  const billingPeriod =
+    (paymentRecord.billingPeriod as BillingPeriod) || "monthly";
   const now = new Date();
   const periodEnd = new Date(now);
-  periodEnd.setMonth(periodEnd.getMonth() + 1);
+  if (billingPeriod === "yearly") {
+    periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+  } else {
+    periodEnd.setMonth(periodEnd.getMonth() + 1);
+  }
 
   // Update payment status
   await db
@@ -148,6 +158,7 @@ async function processSuccessfulPayment(
       .update(subscription)
       .set({
         planName: paymentRecord.planName,
+        billingPeriod,
         status: "active",
         currentPeriodStart: now,
         currentPeriodEnd: periodEnd,
@@ -165,6 +176,7 @@ async function processSuccessfulPayment(
     await db.insert(subscription).values({
       userId: paymentRecord.userId,
       planName: paymentRecord.planName,
+      billingPeriod,
       status: "active",
       startDate: now,
       currentPeriodStart: now,

@@ -73,30 +73,33 @@ export async function BillingContent() {
   );
 
   // Get user's organizations to check product and order limits
-  // Use the same logic as checkOrganizationLimit to get first organization
   const userOrgs = await db.query.member.findMany({
     where: (member, { eq }) => eq(member.userId, sessionData.session.user.id),
   });
 
   const plan = subscription?.plan;
+  const isAdmin = organizationLimit.planName === "Admin";
 
   // Get product and order limits for the first organization
-  // Default to plan limits when no orgs exist (0 usage means canCreate = true)
   let productLimit = {
     canCreate: true,
-    maxProducts: (plan?.maxProductsPerOrg === null
+    maxProducts: isAdmin
       ? "Unlimited"
-      : (plan?.maxProductsPerOrg ?? 10)) as number | string,
+      : ((plan?.maxProductsPerOrg === null
+          ? "Unlimited"
+          : plan?.maxProductsPerOrg ?? 10) as number | string),
     currentProducts: 0,
-    planName: plan?.name ?? null,
+    planName: isAdmin ? "Admin" : plan?.name ?? null,
   };
   let orderLimit = {
     canCreate: true,
-    maxOrders: (plan?.orderLimit === null
+    maxOrders: isAdmin
       ? "Unlimited"
-      : (plan?.orderLimit ?? 50)) as number | string,
+      : ((plan?.orderLimit === null ? "Unlimited" : plan?.orderLimit ?? 50) as
+          | number
+          | string),
     currentOrders: 0,
-    planName: plan?.name ?? null,
+    planName: isAdmin ? "Admin" : plan?.name ?? null,
   };
 
   if (userOrgs.length > 0) {
@@ -173,16 +176,20 @@ export async function BillingContent() {
               <div>
                 <CardTitle className="text-lg">Current Plan</CardTitle>
                 <CardDescription>
-                  {isTrial
+                  {organizationLimit.planName === "Admin"
+                    ? "Unlimited access"
+                    : isTrial
                     ? "Trial period"
                     : subscription
-                      ? "Active subscription"
-                      : "No active plan"}
+                    ? "Active subscription"
+                    : "No active plan"}
                 </CardDescription>
               </div>
             </div>
             <Badge variant={plan?.highlighted ? "default" : "secondary"}>
-              {plan?.name || "Free"}
+              {organizationLimit.planName === "Admin"
+                ? "Admin"
+                : plan?.name || "No Plan"}
             </Badge>
           </div>
         </CardHeader>
@@ -191,24 +198,21 @@ export async function BillingContent() {
             <div>
               <p className="text-sm font-medium">Monthly Price</p>
               <p className="text-2xl font-bold">
-                {plan?.price === 0 ? "Free" : `$${plan?.price}`}
-                {plan?.originalPrice && (
-                  <span className="text-sm text-muted-foreground line-through ml-2">
-                    ${plan.originalPrice}
-                  </span>
-                )}
+                {plan?.monthlyPrice ? `$${plan.monthlyPrice}` : "—"}
               </p>
             </div>
             <div>
               <p className="text-sm font-medium">Status</p>
               <div className="flex items-center gap-2 mt-1">
-                {subscription?.status === "active" ? (
+                {subscription?.status === "active" || isAdmin ? (
                   <CheckCircle2 className="size-4 text-green-600" />
                 ) : (
                   <AlertCircle className="size-4 text-yellow-600" />
                 )}
                 <span className="text-sm capitalize">
-                  {subscription?.status || "No subscription"}
+                  {isAdmin
+                    ? "Active"
+                    : subscription?.status || "No subscription"}
                   {isTrial && " (14 days)"}
                 </span>
               </div>
@@ -392,10 +396,8 @@ export async function BillingContent() {
         </Card>
       </Activity>
 
-      {/* Renewal Section - Only for paid plans */}
-      {subscription && subscription.planName !== "Hobby" && (
-        <RenewalSection subscription={subscription} />
-      )}
+      {/* Renewal Section */}
+      {subscription && <RenewalSection subscription={subscription} />}
 
       {/* Payment History */}
       {payments.length > 0 && (
@@ -424,8 +426,8 @@ export async function BillingContent() {
                         payment.status === "successful"
                           ? "bg-green-500"
                           : payment.status === "pending"
-                            ? "bg-yellow-500"
-                            : "bg-red-500"
+                          ? "bg-yellow-500"
+                          : "bg-red-500"
                       }`}
                     />
                     <div>

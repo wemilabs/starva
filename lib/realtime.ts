@@ -29,6 +29,32 @@ const schema = {
       organizationId: z.string(),
       userId: z.string(),
     }),
+    confirmed: z.object({
+      orderId: z.string(),
+      orderNumber: z.number(),
+      storeName: z.string(),
+      total: z.string(),
+      itemCount: z.number(),
+      confirmedAt: z.string(),
+    }),
+    paid: z.object({
+      orderId: z.string(),
+      orderNumber: z.number(),
+      customerName: z.string(),
+      total: z.string(),
+      organizationId: z.string(),
+      paidAt: z.string(),
+    }),
+    cancelled: z.object({
+      orderId: z.string(),
+      orderNumber: z.number(),
+      cancelledBy: z.enum(["customer", "merchant"]),
+      storeName: z.string(),
+      customerName: z.string(),
+      organizationId: z.string(),
+      userId: z.string(),
+      cancelledAt: z.string(),
+    }),
   },
   notifications: {
     badge: z.object({

@@ -1,6 +1,13 @@
 "use client";
 
-import { Bell, Clock, Package } from "lucide-react";
+import {
+  Banknote,
+  Bell,
+  CheckCircle,
+  Clock,
+  Package,
+  XCircle,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -16,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useRealtime } from "@/hooks/use-realtime";
-import { useActiveOrganization } from "@/lib/auth-client";
+import { useActiveOrganization, useSession } from "@/lib/auth-client";
 import { formatPriceInRWF, formatRelativeTime } from "@/lib/utils";
 import {
   getOrderNotifications,
@@ -25,14 +32,22 @@ import {
   markOrderNotificationAsRead,
 } from "@/server/notifications";
 
+type NotificationType =
+  | "new"
+  | "status_update"
+  | "order_confirmed"
+  | "order_paid"
+  | "order_cancelled";
+
 interface OrderNotification {
   id: string;
-  organizationId: string;
+  organizationId: string | null;
   orderId: string;
-  type: "new" | "status_update";
+  type: NotificationType;
   orderNumber: number;
   customerName: string | null;
   customerEmail: string | null;
+  storeName: string | null;
   total: string | null;
   itemCount: number | null;
   createdAt: Date;
@@ -41,9 +56,12 @@ interface OrderNotification {
 
 export function NotificationsDropdownMenu() {
   const router = useRouter();
+  const { data: session } = useSession();
   const [notifications, setNotifications] = useState<OrderNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const { data: activeStore } = useActiveOrganization();
+
+  const userId = session?.user?.id;
 
   // Sync with database on mount and when organization changes
   useEffect(() => {
@@ -60,7 +78,12 @@ export function NotificationsDropdownMenu() {
         ]);
 
         if (!ignore) {
-          setNotifications(notificationsData);
+          setNotifications(
+            notificationsData.map((n) => ({
+              ...n,
+              storeName: null,
+            }))
+          );
           setUnreadCount(unreadData);
         }
       } catch (error) {
@@ -105,10 +128,10 @@ export function NotificationsDropdownMenu() {
     }
   };
 
-  // Listen for new orders
+  // Listen for new orders, payments, and cancellations (merchant)
   useRealtime({
     channels: activeStore ? [`org:${activeStore.id}`] : [],
-    events: ["orders.new"],
+    events: ["orders.new", "orders.paid", "orders.cancelled"],
     onData: (payload) => {
       if (
         payload.event === "orders.new" &&
@@ -122,6 +145,7 @@ export function NotificationsDropdownMenu() {
           orderNumber: payload.data.orderNumber,
           customerName: payload.data.customerName,
           customerEmail: payload.data.customerEmail,
+          storeName: null,
           total: payload.data.total,
           itemCount: payload.data.itemCount,
           createdAt: new Date(payload.data.createdAt),
@@ -141,17 +165,185 @@ export function NotificationsDropdownMenu() {
           },
         });
       }
+
+      if (
+        payload.event === "orders.paid" &&
+        payload.data.organizationId === activeStore?.id
+      ) {
+        const paidNotification: OrderNotification = {
+          id: crypto.randomUUID(),
+          organizationId: payload.data.organizationId,
+          orderId: payload.data.orderId,
+          type: "order_paid",
+          orderNumber: payload.data.orderNumber,
+          customerName: payload.data.customerName,
+          customerEmail: null,
+          storeName: null,
+          total: payload.data.total,
+          itemCount: null,
+          createdAt: new Date(payload.data.paidAt),
+          read: false,
+        };
+
+        setNotifications((prev) => [paidNotification, ...prev].slice(0, 50));
+        setUnreadCount((prev) => prev + 1);
+
+        toast.success("Order Paid!", {
+          description: `Order #${payload.data.orderNumber} from ${payload.data.customerName} has been paid`,
+          action: {
+            label: "View Order",
+            onClick: () => {
+              router.push(`/point-of-sales/orders/${payload.data.orderId}`);
+            },
+          },
+        });
+      }
+
+      // Customer cancelled → notify merchant
+      if (
+        payload.event === "orders.cancelled" &&
+        payload.data.organizationId === activeStore?.id &&
+        payload.data.cancelledBy === "customer"
+      ) {
+        const cancelledNotification: OrderNotification = {
+          id: crypto.randomUUID(),
+          organizationId: payload.data.organizationId,
+          orderId: payload.data.orderId,
+          type: "order_cancelled",
+          orderNumber: payload.data.orderNumber,
+          customerName: payload.data.customerName,
+          customerEmail: null,
+          storeName: null,
+          total: null,
+          itemCount: null,
+          createdAt: new Date(payload.data.cancelledAt),
+          read: false,
+        };
+
+        setNotifications((prev) =>
+          [cancelledNotification, ...prev].slice(0, 50)
+        );
+        setUnreadCount((prev) => prev + 1);
+
+        toast.error("Order Cancelled", {
+          description: `Order #${payload.data.orderNumber} was cancelled by ${payload.data.customerName}`,
+          action: {
+            label: "View Order",
+            onClick: () => {
+              router.push(`/point-of-sales/orders/${payload.data.orderId}`);
+            },
+          },
+        });
+      }
     },
   });
 
-  const getNotificationIcon = (type: "new" | "status_update") => {
+  // Listen for order confirmations and cancellations (customer)
+  useRealtime({
+    channels: userId ? [`user:${userId}`] : [],
+    events: ["orders.confirmed", "orders.cancelled"],
+    onData: (payload) => {
+      if (payload.event === "orders.confirmed") {
+        const confirmedNotification: OrderNotification = {
+          id: crypto.randomUUID(),
+          organizationId: null,
+          orderId: payload.data.orderId,
+          type: "order_confirmed",
+          orderNumber: payload.data.orderNumber,
+          customerName: null,
+          customerEmail: null,
+          storeName: payload.data.storeName,
+          total: payload.data.total,
+          itemCount: payload.data.itemCount,
+          createdAt: new Date(payload.data.confirmedAt),
+          read: false,
+        };
+
+        setNotifications((prev) =>
+          [confirmedNotification, ...prev].slice(0, 50)
+        );
+        setUnreadCount((prev) => prev + 1);
+
+        toast.success("Order Confirmed!", {
+          description: `Order #${payload.data.orderNumber} from ${payload.data.storeName} has been confirmed`,
+          action: {
+            label: "View Order",
+            onClick: () => {
+              router.push(`/point-of-sales/orders/${payload.data.orderId}`);
+            },
+          },
+        });
+      }
+
+      // Merchant cancelled → notify customer
+      if (
+        payload.event === "orders.cancelled" &&
+        payload.data.cancelledBy === "merchant"
+      ) {
+        const cancelledNotification: OrderNotification = {
+          id: crypto.randomUUID(),
+          organizationId: null,
+          orderId: payload.data.orderId,
+          type: "order_cancelled",
+          orderNumber: payload.data.orderNumber,
+          customerName: null,
+          customerEmail: null,
+          storeName: payload.data.storeName,
+          total: null,
+          itemCount: null,
+          createdAt: new Date(payload.data.cancelledAt),
+          read: false,
+        };
+
+        setNotifications((prev) =>
+          [cancelledNotification, ...prev].slice(0, 50)
+        );
+        setUnreadCount((prev) => prev + 1);
+
+        toast.error("Order Cancelled", {
+          description: `Order #${payload.data.orderNumber} was cancelled by ${payload.data.storeName}`,
+          action: {
+            label: "View Order",
+            onClick: () => {
+              router.push(`/point-of-sales/orders/${payload.data.orderId}`);
+            },
+          },
+        });
+      }
+    },
+  });
+
+  const getNotificationIcon = (type: NotificationType) => {
     switch (type) {
       case "new":
         return <Package className="size-4 text-orange-500" />;
       case "status_update":
         return <Clock className="size-4 text-blue-500" />;
+      case "order_confirmed":
+        return <CheckCircle className="size-4 text-green-500" />;
+      case "order_paid":
+        return <Banknote className="size-4 text-green-600" />;
+      case "order_cancelled":
+        return <XCircle className="size-4 text-red-500" />;
       default:
         return <Package className="size-4 text-orange-500" />;
+    }
+  };
+
+  const getNotificationTitle = (type: NotificationType) => {
+    switch (type) {
+      case "new":
+        return "New Order";
+      case "status_update":
+        return "Order Update";
+      case "order_confirmed":
+        return "Order Confirmed";
+      case "order_paid":
+        return "Order Paid";
+      case "order_cancelled":
+        return "Order Cancelled";
+      default:
+        return "Notification";
     }
   };
 
@@ -216,15 +408,13 @@ export function NotificationsDropdownMenu() {
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center justify-between">
                         <p className="font-medium text-sm">
-                          {notification.type === "new"
-                            ? "New Order"
-                            : `Order Update`}
+                          {getNotificationTitle(notification.type)}
                         </p>
                         {!notification.read && (
                           <div className="size-2 bg-blue-500 rounded-full" />
                         )}
                       </div>
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 flex-wrap">
                         <p className="text-xs text-muted-foreground">
                           Order #{notification.orderNumber}
                         </p>
@@ -243,6 +433,14 @@ export function NotificationsDropdownMenu() {
                                   formatPriceInRWF(Number(notification.total))}
                               </p>
                             </>
+                          )}
+                        {notification.type === "order_confirmed" &&
+                          notification.storeName && (
+                            <p className="text-xs text-muted-foreground">
+                              from {notification.storeName} •{" "}
+                              {notification.itemCount ?? 0} item
+                              {(notification.itemCount ?? 0) > 1 ? "s" : ""}
+                            </p>
                           )}
                       </div>
                       <p className="text-xs text-muted-foreground">

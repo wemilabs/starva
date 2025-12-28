@@ -278,9 +278,10 @@ export const payment = pgTable(
     provider: text("provider"),
     // Payment details
     status: paymentStatus("status").default("pending").notNull(),
-    planName: text("plan_name").notNull(),
+    planName: text("plan_name"),
     billingPeriod: text("billing_period").default("monthly"),
     isRenewal: boolean("is_renewal").default(false).notNull(),
+    orderId: text("order_id"),
     processedAt: timestamp("processed_at"),
     createdAt: timestamp("created_at")
       .$defaultFn(() => new Date())
@@ -628,6 +629,8 @@ export const order = pgTable(
     notes: text("notes"),
     status: orderStatus("status").default("pending").notNull(),
     totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),
+    isPaid: boolean("is_paid").default(false).notNull(),
+    paidAt: timestamp("paid_at"),
     confirmedAt: timestamp("confirmed_at"),
     confirmedBy: text("confirmed_by").references(() => user.id),
     createdAt: timestamp("created_at")

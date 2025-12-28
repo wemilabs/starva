@@ -339,6 +339,18 @@ export async function updateOrderStatus(
           }
         }
       }
+
+      // Emit real-time notification to customer when order is confirmed
+      await realtime
+        .channel(`user:${existingOrder.userId}`)
+        .emit("orders.confirmed", {
+          orderId: existingOrder.id,
+          orderNumber: existingOrder.orderNumber,
+          storeName: existingOrder.organization.name,
+          total: existingOrder.totalPrice,
+          itemCount: orderItems.length,
+          confirmedAt: new Date().toISOString(),
+        });
     }
 
     revalidatePath("/point-of-sales/orders");
@@ -361,11 +373,18 @@ export async function cancelOrder(orderId: string) {
   try {
     const existingOrder = await db.query.order.findFirst({
       where: eq(orderTable.id, orderId),
+      with: {
+        user: true,
+        organization: true,
+      },
     });
 
     if (!existingOrder) return { ok: false, error: "Order not found" };
 
-    if (existingOrder.userId !== session.user.id) {
+    const isCustomer = existingOrder.userId === session.user.id;
+    let isMerchant = false;
+
+    if (!isCustomer) {
       const organizationMember = await db.query.member.findFirst({
         where: (member, { and, eq }) =>
           and(
@@ -380,6 +399,8 @@ export async function cancelOrder(orderId: string) {
           organizationMember.role !== "owner")
       )
         return { ok: false, error: "Unauthorized to cancel this order" };
+
+      isMerchant = true;
     }
 
     if (existingOrder.status === "delivered")
@@ -417,13 +438,39 @@ export async function cancelOrder(orderId: string) {
       }
     }
 
+    const now = new Date();
+
     await db
       .update(orderTable)
       .set({
         status: "cancelled",
-        updatedAt: new Date(),
+        updatedAt: now,
       })
       .where(eq(orderTable.id, orderId));
+
+    const cancelledBy: "merchant" | "customer" = isMerchant
+      ? "merchant"
+      : "customer";
+    const cancelData = {
+      orderId: existingOrder.id,
+      orderNumber: existingOrder.orderNumber,
+      cancelledBy,
+      storeName: existingOrder.organization.name,
+      customerName: existingOrder.user.name,
+      organizationId: existingOrder.organizationId,
+      userId: existingOrder.userId,
+      cancelledAt: now.toISOString(),
+    };
+
+    if (isMerchant) {
+      await realtime
+        .channel(`user:${existingOrder.userId}`)
+        .emit("orders.cancelled", cancelData);
+    } else {
+      await realtime
+        .channel(`org:${existingOrder.organizationId}`)
+        .emit("orders.cancelled", cancelData);
+    }
 
     revalidatePath("/point-of-sales/orders");
     revalidatePath(`/point-of-sales/orders/${orderId}`);

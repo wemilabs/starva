@@ -37,6 +37,14 @@ const schema = {
       itemCount: z.number(),
       confirmedAt: z.string(),
     }),
+    paid: z.object({
+      orderId: z.string(),
+      orderNumber: z.number(),
+      customerName: z.string(),
+      total: z.string(),
+      organizationId: z.string(),
+      paidAt: z.string(),
+    }),
     preparing: z.object({
       orderId: z.string(),
       orderNumber: z.number(),
@@ -55,14 +63,6 @@ const schema = {
       storeName: z.string(),
       customerName: z.string().optional(),
       deliveredAt: z.string(),
-    }),
-    paid: z.object({
-      orderId: z.string(),
-      orderNumber: z.number(),
-      customerName: z.string(),
-      total: z.string(),
-      organizationId: z.string(),
-      paidAt: z.string(),
     }),
     cancelled: z.object({
       orderId: z.string(),

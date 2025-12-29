@@ -81,7 +81,6 @@ export function PaymentModal({
         setStatus("success");
         toast.success("Payment successful! Your subscription is now active.");
         onSuccess?.();
-        // Close modal after showing success
         setTimeout(() => onOpenChange(false), 2000);
       } else if (result.status === "failed") {
         if (pollIntervalRef.current) clearInterval(pollIntervalRef.current);
@@ -108,6 +107,7 @@ export function PaymentModal({
     };
   }, [status, paymentRef, onSuccess, onOpenChange]);
 
+  // Initiate the payment
   const handleInitiatePayment = async () => {
     if (!phone || phone.length < 9) {
       toast.error("Please enter a valid phone number");

@@ -37,6 +37,25 @@ const schema = {
       itemCount: z.number(),
       confirmedAt: z.string(),
     }),
+    preparing: z.object({
+      orderId: z.string(),
+      orderNumber: z.number(),
+      storeName: z.string(),
+      preparingAt: z.string(),
+    }),
+    ready: z.object({
+      orderId: z.string(),
+      orderNumber: z.number(),
+      storeName: z.string(),
+      readyAt: z.string(),
+    }),
+    delivered: z.object({
+      orderId: z.string(),
+      orderNumber: z.number(),
+      storeName: z.string(),
+      customerName: z.string().optional(),
+      deliveredAt: z.string(),
+    }),
     paid: z.object({
       orderId: z.string(),
       orderNumber: z.number(),

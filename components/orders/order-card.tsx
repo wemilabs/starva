@@ -1,6 +1,8 @@
-import { Clock, Package, Wallet2 } from "lucide-react";
+import { CheckCircle, Clock, Package, Wallet2 } from "lucide-react";
 import Link from "next/link";
+import { Activity } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import type { Order, OrderItem } from "@/db/schema";
 import { formatPriceInRWF, formatRelativeTime } from "@/lib/utils";
@@ -53,6 +55,12 @@ export function OrderCard({ order, variant = "merchant" }: OrderCardProps) {
             <div className="flex items-center gap-2">
               <h3 className="font-medium text-lg">#{orderNumber}</h3>
               <OrderStatusBadge status={order.status} />
+              <Activity mode={order.isPaid ? "visible" : "hidden"}>
+                <Badge variant="successful">
+                  <CheckCircle className="size-3" />
+                  Paid
+                </Badge>
+              </Activity>
             </div>
             <div className="flex items-center gap-1 font-medium text-lg">
               <Wallet2 className="size-4" />

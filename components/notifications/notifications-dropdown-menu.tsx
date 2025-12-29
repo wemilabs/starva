@@ -4,8 +4,11 @@ import {
   Banknote,
   Bell,
   CheckCircle,
+  ChefHat,
   Clock,
   Package,
+  PackageCheck,
+  Truck,
   XCircle,
 } from "lucide-react";
 import Link from "next/link";
@@ -36,6 +39,9 @@ type NotificationType =
   | "new"
   | "status_update"
   | "order_confirmed"
+  | "order_preparing"
+  | "order_ready"
+  | "order_delivered"
   | "order_paid"
   | "order_cancelled";
 
@@ -128,10 +134,15 @@ export function NotificationsDropdownMenu() {
     }
   };
 
-  // Listen for new orders, payments, and cancellations (merchant)
+  // Listen for new orders, payments, deliveries, and cancellations (merchant)
   useRealtime({
     channels: activeStore ? [`org:${activeStore.id}`] : [],
-    events: ["orders.new", "orders.paid", "orders.cancelled"],
+    events: [
+      "orders.new",
+      "orders.paid",
+      "orders.delivered",
+      "orders.cancelled",
+    ],
     onData: (payload) => {
       if (
         payload.event === "orders.new" &&
@@ -199,6 +210,39 @@ export function NotificationsDropdownMenu() {
         });
       }
 
+      // Customer marked as delivered → notify merchant
+      if (payload.event === "orders.delivered" && payload.data.customerName) {
+        const deliveredNotification: OrderNotification = {
+          id: crypto.randomUUID(),
+          organizationId: activeStore?.id ?? null,
+          orderId: payload.data.orderId,
+          type: "order_delivered",
+          orderNumber: payload.data.orderNumber,
+          customerName: payload.data.customerName,
+          customerEmail: null,
+          storeName: null,
+          total: null,
+          itemCount: null,
+          createdAt: new Date(payload.data.deliveredAt),
+          read: false,
+        };
+
+        setNotifications((prev) =>
+          [deliveredNotification, ...prev].slice(0, 50)
+        );
+        setUnreadCount((prev) => prev + 1);
+
+        toast.success("Order Delivered!", {
+          description: `Order #${payload.data.orderNumber} was marked as delivered by ${payload.data.customerName}`,
+          action: {
+            label: "View Order",
+            onClick: () => {
+              router.push(`/point-of-sales/orders/${payload.data.orderId}`);
+            },
+          },
+        });
+      }
+
       // Customer cancelled → notify merchant
       if (
         payload.event === "orders.cancelled" &&
@@ -238,10 +282,16 @@ export function NotificationsDropdownMenu() {
     },
   });
 
-  // Listen for order confirmations and cancellations (customer)
+  // Listen for order status updates (customer)
   useRealtime({
     channels: userId ? [`user:${userId}`] : [],
-    events: ["orders.confirmed", "orders.cancelled"],
+    events: [
+      "orders.confirmed",
+      "orders.preparing",
+      "orders.ready",
+      "orders.delivered",
+      "orders.cancelled",
+    ],
     onData: (payload) => {
       if (payload.event === "orders.confirmed") {
         const confirmedNotification: OrderNotification = {
@@ -266,6 +316,100 @@ export function NotificationsDropdownMenu() {
 
         toast.success("Order Confirmed!", {
           description: `Order #${payload.data.orderNumber} from ${payload.data.storeName} has been confirmed`,
+          action: {
+            label: "View Order",
+            onClick: () => {
+              router.push(`/point-of-sales/orders/${payload.data.orderId}`);
+            },
+          },
+        });
+      }
+
+      if (payload.event === "orders.preparing") {
+        const preparingNotification: OrderNotification = {
+          id: crypto.randomUUID(),
+          organizationId: null,
+          orderId: payload.data.orderId,
+          type: "order_preparing",
+          orderNumber: payload.data.orderNumber,
+          customerName: null,
+          customerEmail: null,
+          storeName: payload.data.storeName,
+          total: null,
+          itemCount: null,
+          createdAt: new Date(payload.data.preparingAt),
+          read: false,
+        };
+
+        setNotifications((prev) =>
+          [preparingNotification, ...prev].slice(0, 50)
+        );
+        setUnreadCount((prev) => prev + 1);
+
+        toast.info("Order Being Prepared", {
+          description: `Order #${payload.data.orderNumber} from ${payload.data.storeName} is being prepared`,
+          action: {
+            label: "View Order",
+            onClick: () => {
+              router.push(`/point-of-sales/orders/${payload.data.orderId}`);
+            },
+          },
+        });
+      }
+
+      if (payload.event === "orders.ready") {
+        const readyNotification: OrderNotification = {
+          id: crypto.randomUUID(),
+          organizationId: null,
+          orderId: payload.data.orderId,
+          type: "order_ready",
+          orderNumber: payload.data.orderNumber,
+          customerName: null,
+          customerEmail: null,
+          storeName: payload.data.storeName,
+          total: null,
+          itemCount: null,
+          createdAt: new Date(payload.data.readyAt),
+          read: false,
+        };
+
+        setNotifications((prev) => [readyNotification, ...prev].slice(0, 50));
+        setUnreadCount((prev) => prev + 1);
+
+        toast.success("Order Ready!", {
+          description: `Order #${payload.data.orderNumber} from ${payload.data.storeName} is ready for pickup`,
+          action: {
+            label: "View Order",
+            onClick: () => {
+              router.push(`/point-of-sales/orders/${payload.data.orderId}`);
+            },
+          },
+        });
+      }
+
+      if (payload.event === "orders.delivered") {
+        const deliveredNotification: OrderNotification = {
+          id: crypto.randomUUID(),
+          organizationId: null,
+          orderId: payload.data.orderId,
+          type: "order_delivered",
+          orderNumber: payload.data.orderNumber,
+          customerName: null,
+          customerEmail: null,
+          storeName: payload.data.storeName,
+          total: null,
+          itemCount: null,
+          createdAt: new Date(payload.data.deliveredAt),
+          read: false,
+        };
+
+        setNotifications((prev) =>
+          [deliveredNotification, ...prev].slice(0, 50)
+        );
+        setUnreadCount((prev) => prev + 1);
+
+        toast.success("Order Delivered!", {
+          description: `Order #${payload.data.orderNumber} from ${payload.data.storeName} has been delivered`,
           action: {
             label: "View Order",
             onClick: () => {
@@ -321,6 +465,12 @@ export function NotificationsDropdownMenu() {
         return <Clock className="size-4 text-blue-500" />;
       case "order_confirmed":
         return <CheckCircle className="size-4 text-green-500" />;
+      case "order_preparing":
+        return <ChefHat className="size-4 text-yellow-500" />;
+      case "order_ready":
+        return <PackageCheck className="size-4 text-blue-500" />;
+      case "order_delivered":
+        return <Truck className="size-4 text-green-600" />;
       case "order_paid":
         return <Banknote className="size-4 text-green-600" />;
       case "order_cancelled":
@@ -338,6 +488,12 @@ export function NotificationsDropdownMenu() {
         return "Order Update";
       case "order_confirmed":
         return "Order Confirmed";
+      case "order_preparing":
+        return "Order Preparing";
+      case "order_ready":
+        return "Order Ready";
+      case "order_delivered":
+        return "Order Delivered";
       case "order_paid":
         return "Order Paid";
       case "order_cancelled":
@@ -434,12 +590,13 @@ export function NotificationsDropdownMenu() {
                               </p>
                             </>
                           )}
-                        {notification.type === "order_confirmed" &&
+                        {(notification.type === "order_confirmed" ||
+                          notification.type === "order_preparing" ||
+                          notification.type === "order_ready" ||
+                          notification.type === "order_delivered") &&
                           notification.storeName && (
                             <p className="text-xs text-muted-foreground">
-                              from {notification.storeName} •{" "}
-                              {notification.itemCount ?? 0} item
-                              {(notification.itemCount ?? 0) > 1 ? "s" : ""}
+                              from {notification.storeName}
                             </p>
                           )}
                       </div>

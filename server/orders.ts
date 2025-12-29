@@ -236,6 +236,7 @@ export async function updateOrderStatus(
     const existingOrder = await db.query.order.findFirst({
       where: eq(orderTable.id, orderId),
       with: {
+        user: true,
         organization: {
           with: {
             members: {
@@ -350,6 +351,54 @@ export async function updateOrderStatus(
           total: existingOrder.totalPrice,
           itemCount: orderItems.length,
           confirmedAt: new Date().toISOString(),
+        });
+    }
+
+    if (status === "preparing" && oldStatus !== "preparing") {
+      await realtime
+        .channel(`user:${existingOrder.userId}`)
+        .emit("orders.preparing", {
+          orderId: existingOrder.id,
+          orderNumber: existingOrder.orderNumber,
+          storeName: existingOrder.organization.name,
+          preparingAt: new Date().toISOString(),
+        });
+    }
+
+    if (status === "ready" && oldStatus !== "ready") {
+      await realtime
+        .channel(`user:${existingOrder.userId}`)
+        .emit("orders.ready", {
+          orderId: existingOrder.id,
+          orderNumber: existingOrder.orderNumber,
+          storeName: existingOrder.organization.name,
+          readyAt: new Date().toISOString(),
+        });
+    }
+
+    if (status === "delivered" && oldStatus !== "delivered") {
+      await realtime
+        .channel(`user:${existingOrder.userId}`)
+        .emit("orders.delivered", {
+          orderId: existingOrder.id,
+          orderNumber: existingOrder.orderNumber,
+          storeName: existingOrder.organization.name,
+          deliveredAt: new Date().toISOString(),
+        });
+    }
+
+    if (status === "cancelled" && oldStatus !== "cancelled") {
+      await realtime
+        .channel(`user:${existingOrder.userId}`)
+        .emit("orders.cancelled", {
+          orderId: existingOrder.id,
+          orderNumber: existingOrder.orderNumber,
+          cancelledBy: "merchant",
+          storeName: existingOrder.organization.name,
+          customerName: existingOrder.user.name,
+          organizationId: existingOrder.organizationId,
+          userId: existingOrder.userId,
+          cancelledAt: new Date().toISOString(),
         });
     }
 
@@ -503,6 +552,10 @@ export async function markOrderAsDelivered(
   try {
     const existingOrder = await db.query.order.findFirst({
       where: (order, { eq }) => eq(order.id, orderId),
+      with: {
+        organization: true,
+        user: true,
+      },
     });
 
     if (!existingOrder) return { ok: false, error: "Order not found" };
@@ -526,6 +579,16 @@ export async function markOrderAsDelivered(
         updatedAt: new Date(),
       })
       .where(eq(orderTable.id, orderId));
+
+    await realtime
+      .channel(`org:${existingOrder.organizationId}`)
+      .emit("orders.delivered", {
+        orderId: existingOrder.id,
+        orderNumber: existingOrder.orderNumber,
+        storeName: existingOrder.organization.name,
+        customerName: existingOrder.user.name,
+        deliveredAt: new Date().toISOString(),
+      });
 
     revalidatePath("/point-of-sales/orders");
     revalidatePath(`/point-of-sales/orders/${orderId}`);

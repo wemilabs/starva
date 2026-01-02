@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  CheckCircle,
-  CreditCard,
-  Loader2,
-  Smartphone,
-  XCircle,
-} from "lucide-react";
+import { CheckCircle, CreditCard, Smartphone, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -188,7 +182,7 @@ export function PayOrderButton({
 
           {status === "polling" && (
             <Alert>
-              <Loader2 className="size-4 animate-spin" />
+              <Spinner />
               <AlertDescription>
                 A payment prompt has been sent to your phone. Please enter your
                 PIN to confirm.

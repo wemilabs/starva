@@ -106,7 +106,7 @@ export function NavMain({
       </SidebarGroupLabel>
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton asChild tooltip="stores">
+          <SidebarMenuButton asChild tooltip="Stores">
             <Link href="/stores">
               <Building2 />
               <span>Stores</span>

@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { z } from "zod";
 import { productCategory } from "@/db/schema";
 import { COUNTRIES, USD_TO_RWF } from "./constants";
 
@@ -19,14 +20,18 @@ export const getInitials = (name?: string | null) => {
     .toUpperCase();
 };
 
+// export const slugify = (text: string): string => {
+//   return text
+//     .toLowerCase()
+//     .trim()
+//     .replace(/\s+/g, "-") // Replace spaces with hyphens
+//     .replace(/[^\w-]+/g, "") // Remove non-alphanumeric characters except hyphens
+//     .replace(/--+/g, "-") // Replace multiple hyphens with single hyphen
+//     .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
+// };
 export const slugify = (text: string): string => {
-  return text
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "-") // Replace spaces with hyphens
-    .replace(/[^\w-]+/g, "") // Remove non-alphanumeric characters except hyphens
-    .replace(/--+/g, "-") // Replace multiple hyphens with single hyphen
-    .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
+  const Slug = z.string().slugify();
+  return Slug.parse(text);
 };
 
 export const removeUnderscoreAndCapitalizeOnlyTheFirstChar = (

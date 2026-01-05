@@ -128,6 +128,8 @@ export const paymentStatus = pgEnum("payment_status", [
   "expired",
 ]);
 
+export const paymentKind = pgEnum("payment_kind", ["CASHIN", "CASHOUT"]);
+
 export const notificationType = pgEnum("notification_type", [
   "renewal_reminder_7d",
   "renewal_reminder_3d",
@@ -270,7 +272,11 @@ export const payment = pgTable(
       .notNull()
       .references(() => user.id, { onDelete: "cascade" }),
     subscriptionId: text("subscription_id"),
+    organizationId: text("organization_id").references(() => organization.id, {
+      onDelete: "set null",
+    }),
     // Paypack fields
+    kind: paymentKind("kind").default("CASHIN").notNull(),
     paypackRef: text("paypack_ref").unique(),
     phoneNumber: text("phone_number").notNull(),
     amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),

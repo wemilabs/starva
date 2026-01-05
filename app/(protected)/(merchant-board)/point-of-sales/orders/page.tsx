@@ -1,4 +1,4 @@
-import { Lock, ScrollText } from "lucide-react";
+import { Lock, Store } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -55,22 +55,24 @@ async function OrdersContent() {
     activeOrgId ? getOrderStats(activeOrgId) : Promise.resolve([]),
   ]);
 
-  const hasAnyOrders = myOrders.length > 0 || customerOrders.length > 0;
-
   return (
     <div className="space-y-7">
-      {!hasAnyOrders ? (
+      {!activeOrgId ? (
         <Empty className="min-h-[400px]">
           <EmptyHeader>
             <EmptyMedia variant="icon">
-              <ScrollText className="size-6" />
+              <Store className="size-6" />
             </EmptyMedia>
-            <EmptyTitle>No orders yet</EmptyTitle>
+            <EmptyTitle>No active store</EmptyTitle>
             <EmptyDescription className="font-mono tracking-tighter">
-              Start shopping from stores to place your first order. Your order
-              history will appear here.
+              Please select or create a store from the top store switcher, to
+              view and manage orders from your customers
             </EmptyDescription>
           </EmptyHeader>
+          <EmptyContent>
+            The store switcher is located at the top of the sidebar, right below
+            the logo.
+          </EmptyContent>
         </Empty>
       ) : (
         <OrderTabs

@@ -1,6 +1,38 @@
 import "server-only";
-
 import { formatRwandanPhone } from "./utils";
+
+type CashinResponse = {
+  amount: number;
+  created_at: string;
+  kind: "CASHIN";
+  ref: string;
+  status: "pending" | "successful" | "failed";
+};
+
+type CashoutResponse = {
+  amount: number;
+  created_at: string;
+  kind: "CASHOUT";
+  ref: string;
+  status: "pending" | "successful" | "failed";
+};
+
+type TransactionEvent = {
+  event_id: string;
+  event_kind: "transaction:processed" | "transaction:created";
+  created_at: string;
+  data: {
+    ref: string;
+    kind: "CASHIN" | "CASHOUT";
+    fee: number;
+    merchant: string;
+    client: string;
+    amount: number;
+    status: "pending" | "successful" | "failed";
+    created_at: string;
+    processed_at?: string;
+  };
+};
 
 const PAYPACK_BASE_URL = "https://payments.paypack.rw/api";
 
@@ -55,31 +87,6 @@ async function paypackRequest(
   return response.json();
 }
 
-export type CashinResponse = {
-  amount: number;
-  created_at: string;
-  kind: "CASHIN";
-  ref: string;
-  status: "pending" | "successful" | "failed";
-};
-
-export type TransactionEvent = {
-  event_id: string;
-  event_kind: "transaction:processed" | "transaction:created";
-  created_at: string;
-  data: {
-    ref: string;
-    kind: "CASHIN" | "CASHOUT";
-    fee: number;
-    merchant: string;
-    client: string;
-    amount: number;
-    status: "pending" | "successful" | "failed";
-    created_at: string;
-    processed_at?: string;
-  };
-};
-
 export async function initiatePayment(
   phoneNumber: string,
   amount: number
@@ -94,6 +101,23 @@ export async function initiatePayment(
     environment,
   });
   return response as CashinResponse;
+}
+
+export async function initiateCashout(
+  phoneNumber: string,
+  amount: number
+): Promise<CashoutResponse> {
+  const formattedPhone = formatRwandanPhone(phoneNumber);
+
+  const environment = process.env.PAYPACK_ENVIRONMENT || "development";
+
+  const response = await paypackRequest("/transactions/cashout", "POST", {
+    number: formattedPhone,
+    amount,
+    environment,
+  });
+
+  return response as CashoutResponse;
 }
 
 export async function getTransactionEvents(

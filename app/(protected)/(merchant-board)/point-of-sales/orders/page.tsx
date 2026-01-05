@@ -60,41 +60,42 @@ async function OrdersContent() {
   return (
     <div className="space-y-7">
       {!hasAnyOrders ? (
-        <Empty className="min-h-[400px]">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <ScrollText className="size-6" />
-            </EmptyMedia>
-            <EmptyTitle>No order yet</EmptyTitle>
-            <EmptyDescription className="font-mono tracking-tighter">
-              Start shopping from stores to place your first order. Your order
-              history will appear here.
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      ) : hasAnyOrders && !activeOrgId ? (
-        <Empty className="min-h-[400px]">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <Store className="size-6" />
-            </EmptyMedia>
-            <EmptyTitle>No active store</EmptyTitle>
-            <EmptyDescription className="font-mono tracking-tighter">
-              Please select or create a store from the top store switcher, to
-              view and manage orders from your customers
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
-            The store switcher is located at the top of the sidebar, right below
-            the logo.
-          </EmptyContent>
-        </Empty>
+        activeOrgId ? (
+          <Empty className="min-h-[400px]">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <ScrollText className="size-6" />
+              </EmptyMedia>
+              <EmptyTitle>No order yet</EmptyTitle>
+              <EmptyDescription className="font-mono tracking-tighter">
+                Start shopping from stores to place your first order. Your order
+                history will appear here.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        ) : (
+          <Empty className="min-h-[400px]">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <Store className="size-6" />
+              </EmptyMedia>
+              <EmptyTitle>No active store</EmptyTitle>
+              <EmptyDescription className="font-mono tracking-tighter">
+                Please select or create a store from the top store switcher, to
+                view and manage orders from your customers
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              The store switcher is located at the top of the sidebar, right
+              below the logo.
+            </EmptyContent>
+          </Empty>
+        )
       ) : (
         <OrderTabs
           myOrders={myOrders}
           customerOrders={customerOrders}
           merchantStats={merchantStats}
-          hasActiveStore={!!activeOrgId}
         />
       )}
     </div>

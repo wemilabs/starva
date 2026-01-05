@@ -53,7 +53,7 @@ async function StoresList() {
           <EmptyMedia variant="icon">
             <Building2 className="size-6" />
           </EmptyMedia>
-          <EmptyTitle>No stores yet</EmptyTitle>
+          <EmptyTitle>No store yet</EmptyTitle>
           <EmptyDescription className="font-mono tracking-tighter">
             Get started by creating your first store. You'll be able to manage
             products, team members, and more.

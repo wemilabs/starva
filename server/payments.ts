@@ -8,6 +8,7 @@ import { order, payment, subscription } from "@/db/schema";
 import { type BillingPeriod, PRICING_PLANS } from "@/lib/constants";
 import {
   getTransactionEvents,
+  initiateCashout as paypackCashout,
   initiatePayment as paypackInitiate,
 } from "@/lib/paypack";
 import { realtime } from "@/lib/realtime";
@@ -45,6 +46,7 @@ export async function initiateSubscriptionPayment(data: {
         phoneNumber: phone,
         amount: String(amountRWF),
         currency: "RWF",
+        kind: "CASHIN",
         planName: data.planName,
         billingPeriod: data.billingPeriod,
         isRenewal: data.isRenewal,
@@ -258,9 +260,11 @@ export async function initiateOrderPayment(data: {
       .insert(payment)
       .values({
         userId: session.user.id,
+        organizationId: order.organizationId,
         phoneNumber: phone,
         amount: String(amountRWF),
         currency: "RWF",
+        kind: "CASHIN",
         planName: null,
         billingPeriod: null,
         isRenewal: false,
@@ -360,6 +364,110 @@ export async function checkOrderPaymentStatus(paypackRef: string) {
     return { status: "pending" };
   } catch (error) {
     console.error("Order payment status check failed:", error);
+    return { status: "pending" };
+  }
+}
+
+export async function initiateMerchantWithdrawal(data: {
+  organizationId: string;
+  amount: number;
+  orderId?: string;
+}) {
+  const verified = await verifySession();
+  if (!verified.success) return { error: "Unauthorized" };
+
+  const { session } = verified;
+
+  const org = await db.query.organization.findFirst({
+    where: (o, { eq }) => eq(o.id, data.organizationId),
+  });
+
+  if (!org) return { error: "Organization not found" };
+
+  const metadata = org.metadata
+    ? typeof org.metadata === "string"
+      ? JSON.parse(org.metadata)
+      : org.metadata
+    : {};
+
+  const merchantPhone = metadata.phoneForPayments;
+  if (!merchantPhone) {
+    return { error: "Merchant payment phone not configured" };
+  }
+
+  try {
+    const phone = formatRwandanPhone(merchantPhone);
+    const result = await paypackCashout(phone, data.amount);
+
+    const [newPayment] = await db
+      .insert(payment)
+      .values({
+        userId: session.user.id,
+        organizationId: data.organizationId,
+        phoneNumber: phone,
+        amount: String(data.amount),
+        currency: "RWF",
+        kind: "CASHOUT",
+        paypackRef: result.ref,
+        status: "pending",
+        orderId: data.orderId ?? null,
+      })
+      .returning();
+
+    return {
+      paymentId: newPayment.id,
+      paypackRef: result.ref,
+      status: "pending",
+      message: "Withdrawal initiated",
+    };
+  } catch (error) {
+    console.error("Merchant withdrawal failed:", error);
+    return { error: "Failed to initiate withdrawal. Please try again." };
+  }
+}
+
+export async function checkCashoutStatus(paypackRef: string) {
+  const verified = await verifySession();
+  if (!verified.success) return { error: "Unauthorized" };
+
+  const existingPayment = await db.query.payment.findFirst({
+    where: (p, { eq, and }) =>
+      and(eq(p.paypackRef, paypackRef), eq(p.kind, "CASHOUT")),
+  });
+
+  if (!existingPayment) return { error: "Cashout not found", status: "error" };
+
+  if (existingPayment.status !== "pending") {
+    return { status: existingPayment.status };
+  }
+
+  try {
+    const events = await getTransactionEvents(paypackRef);
+    const latestEvent = events[0];
+
+    if (!latestEvent) return { status: "pending" };
+
+    const transactionStatus = latestEvent.data?.status;
+
+    if (transactionStatus === "successful") {
+      await db
+        .update(payment)
+        .set({ status: "successful", processedAt: new Date() })
+        .where(eq(payment.id, existingPayment.id));
+      return { status: "successful" };
+    }
+
+    if (transactionStatus === "failed") {
+      await db
+        .update(payment)
+        .set({ status: "failed" })
+        .where(eq(payment.id, existingPayment.id));
+      return { status: "failed" };
+    }
+
+    return { status: "pending" };
+  } catch (error) {
+    console.error("Cashout status check failed:", error);
     return { status: "pending" };
   }
 }

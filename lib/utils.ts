@@ -20,15 +20,6 @@ export const getInitials = (name?: string | null) => {
     .toUpperCase();
 };
 
-// export const slugify = (text: string): string => {
-//   return text
-//     .toLowerCase()
-//     .trim()
-//     .replace(/\s+/g, "-") // Replace spaces with hyphens
-//     .replace(/[^\w-]+/g, "") // Remove non-alphanumeric characters except hyphens
-//     .replace(/--+/g, "-") // Replace multiple hyphens with single hyphen
-//     .replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
-// };
 export const slugify = (text: string): string => {
   const Slug = z.string().slugify();
   return Slug.parse(text);
@@ -45,12 +36,12 @@ export const removeUnderscoreAndCapitalizeOnlyTheFirstChar = (
 export const parsePhoneNumber = (fullPhone: string) => {
   if (!fullPhone) return { countryCode: COUNTRIES[0].code, phoneNumber: "" };
   const country = COUNTRIES.find((c) => fullPhone.startsWith(c.code));
-  if (country) {
+  if (country)
     return {
       countryCode: country.code,
       phoneNumber: fullPhone.substring(country.code.length).trim(),
     };
-  }
+
   return { countryCode: COUNTRIES[0].code, phoneNumber: fullPhone };
 };
 

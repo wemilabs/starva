@@ -92,10 +92,10 @@ async function SettingsContent() {
             <EmptyMedia variant="icon">
               <Warehouse className="size-6" />
             </EmptyMedia>
-            <EmptyTitle>No Active Organization</EmptyTitle>
+            <EmptyTitle>No active store</EmptyTitle>
             <EmptyDescription className="font-mono tracking-tighter">
-              Please select or create an organization from the top store
-              switcher to access settings.
+              Please select or create a store from the top store switcher, to
+              access settings.
             </EmptyDescription>
           </EmptyHeader>
           <EmptyContent>

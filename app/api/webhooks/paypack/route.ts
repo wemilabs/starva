@@ -62,13 +62,7 @@ export async function POST(request: Request) {
     const event: PaypackWebhookEvent = JSON.parse(body);
     console.log("[Paypack Webhook] Event:", event.event_kind, event.data.ref);
 
-    // Only process CASHIN transactions
-    if (event.data.kind !== "CASHIN") {
-      console.log("[Paypack Webhook] Skipping non-CASHIN event");
-      return NextResponse.json({ received: true, skipped: true });
-    }
-
-    const { ref, status } = event.data;
+    const { ref, status, kind } = event.data;
 
     // Find payment by Paypack ref
     const existingPayment = await db.query.payment.findFirst({
@@ -76,19 +70,26 @@ export async function POST(request: Request) {
     });
 
     if (!existingPayment) {
-      console.log("Payment not found for ref:", ref);
+      console.log("[Paypack Webhook] Payment not found for ref:", ref);
       return NextResponse.json({ received: true, notFound: true });
     }
 
     // Already processed
-    if (existingPayment.status !== "pending") {
+    if (existingPayment.status !== "pending")
       return NextResponse.json({ received: true, alreadyProcessed: true });
-    }
 
-    if (status === "successful") {
-      await processSuccessfulPayment(existingPayment);
-    } else if (status === "failed") {
-      await processFailedPayment(existingPayment);
+    if (kind === "CASHIN") {
+      if (status === "successful") {
+        await processSuccessfulCashin(existingPayment);
+      } else if (status === "failed") {
+        await processFailedCashin(existingPayment);
+      }
+    } else if (kind === "CASHOUT") {
+      if (status === "successful") {
+        await processSuccessfulCashout(existingPayment);
+      } else if (status === "failed") {
+        await processFailedCashout(existingPayment);
+      }
     }
 
     return NextResponse.json({ received: true, processed: true });
@@ -101,7 +102,7 @@ export async function POST(request: Request) {
   }
 }
 
-async function processSuccessfulPayment(
+async function processSuccessfulCashin(
   paymentRecord: typeof payment.$inferSelect
 ) {
   if (!paymentRecord.planName) return;
@@ -174,9 +175,7 @@ async function processSuccessfulPayment(
   });
 }
 
-async function processFailedPayment(
-  paymentRecord: typeof payment.$inferSelect
-) {
+async function processFailedCashin(paymentRecord: typeof payment.$inferSelect) {
   await db
     .update(payment)
     .set({ status: "failed" })
@@ -189,6 +188,47 @@ async function processFailedPayment(
     title: "Payment Failed",
     message: `Your payment for ${paymentRecord.planName} plan failed. Please try again.`,
     actionUrl: "/usage/billing",
+    sendPush: true,
+  });
+}
+
+async function processSuccessfulCashout(
+  paymentRecord: typeof payment.$inferSelect
+) {
+  const now = new Date();
+
+  await db
+    .update(payment)
+    .set({
+      status: "successful",
+      processedAt: now,
+    })
+    .where(eq(payment.id, paymentRecord.id));
+
+  await createNotification({
+    userId: paymentRecord.userId,
+    type: "payment_successful",
+    title: "Withdrawal Successful",
+    message: `Your withdrawal of ${paymentRecord.amount} RWF has been sent to ${paymentRecord.phoneNumber}.`,
+    actionUrl: "/stores",
+    sendPush: true,
+  });
+}
+
+async function processFailedCashout(
+  paymentRecord: typeof payment.$inferSelect
+) {
+  await db
+    .update(payment)
+    .set({ status: "failed" })
+    .where(eq(payment.id, paymentRecord.id));
+
+  await createNotification({
+    userId: paymentRecord.userId,
+    type: "payment_failed",
+    title: "Withdrawal Failed",
+    message: `Your withdrawal of ${paymentRecord.amount} RWF failed. The funds remain in your account.`,
+    actionUrl: "/stores",
     sendPush: true,
   });
 }

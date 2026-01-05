@@ -43,8 +43,8 @@ const data = {
           url: "/point-of-sales/inventory",
         },
         {
-          title: "Transactions",
-          url: "/point-of-sales/transactions",
+          title: "Wallet",
+          url: "/point-of-sales/wallet",
         },
         {
           title: "Analytics",

@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   Empty,
+  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
@@ -137,12 +138,16 @@ export function OrderTabs({
               <EmptyMedia variant="icon">
                 <Store className="size-6" />
               </EmptyMedia>
-              <EmptyTitle>No store selected</EmptyTitle>
+              <EmptyTitle>No active store</EmptyTitle>
               <EmptyDescription className="font-mono tracking-tighter">
-                Please select a store to view and manage orders from your
-                customers
+                Please select or create a store from the top store switcher, to
+                view and manage orders from your customers
               </EmptyDescription>
             </EmptyHeader>
+            <EmptyContent>
+              The store switcher is located at the top of the sidebar, right
+              below the logo.
+            </EmptyContent>
           </Empty>
         ) : customerOrders.length > 0 ? (
           <>

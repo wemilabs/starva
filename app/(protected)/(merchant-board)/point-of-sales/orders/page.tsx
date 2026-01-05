@@ -1,4 +1,4 @@
-import { Lock, Store } from "lucide-react";
+import { Lock, ScrollText, Store } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -55,6 +55,8 @@ async function OrdersContent() {
     activeOrgId ? getOrderStats(activeOrgId) : Promise.resolve([]),
   ]);
 
+  const hasAnyOrders = myOrders.length > 0 || customerOrders.length > 0;
+
   return (
     <div className="space-y-7">
       {!activeOrgId ? (
@@ -73,6 +75,19 @@ async function OrdersContent() {
             The store switcher is located at the top of the sidebar, right below
             the logo.
           </EmptyContent>
+        </Empty>
+      ) : !hasAnyOrders ? (
+        <Empty className="min-h-[400px]">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <ScrollText className="size-6" />
+            </EmptyMedia>
+            <EmptyTitle>No order yet</EmptyTitle>
+            <EmptyDescription className="font-mono tracking-tighter">
+              Start shopping from stores to place your first order. Your order
+              history will appear here.
+            </EmptyDescription>
+          </EmptyHeader>
         </Empty>
       ) : (
         <OrderTabs

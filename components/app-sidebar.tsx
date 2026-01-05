@@ -43,12 +43,12 @@ const data = {
           url: "/point-of-sales/inventory",
         },
         {
-          title: "Wallet",
-          url: "/point-of-sales/wallet",
-        },
-        {
           title: "Analytics",
           url: "/point-of-sales/analytics",
+        },
+        {
+          title: "Wallet",
+          url: "/point-of-sales/wallet",
         },
       ],
     },

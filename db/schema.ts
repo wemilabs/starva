@@ -420,6 +420,14 @@ export const paymentRelations = relations(payment, ({ one }) => ({
     fields: [payment.userId],
     references: [user.id],
   }),
+  organization: one(organization, {
+    fields: [payment.organizationId],
+    references: [organization.id],
+  }),
+  order: one(order, {
+    fields: [payment.orderId],
+    references: [order.id],
+  }),
 }));
 
 export const pushSubscriptionRelations = relations(

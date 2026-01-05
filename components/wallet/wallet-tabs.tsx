@@ -120,7 +120,12 @@ export function WalletTabs({
                   {icon}
                 </CardHeader>
                 <CardContent>
-                  <div className={cn("text-2xl font-bold", valueColor)}>
+                  <div
+                    className={cn(
+                      "text-2xl font-bold font-mono tracking-tighter",
+                      valueColor
+                    )}
+                  >
                     {formatPriceInRWF(value)}
                   </div>
                   <p className="text-xs text-muted-foreground font-mono tracking-tighter">

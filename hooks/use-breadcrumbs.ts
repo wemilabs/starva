@@ -13,13 +13,12 @@ const routeConfig: Record<string, (params: string[]) => Crumb[]> = {
   "/merchants": () => [{ label: "Merchants" }],
   "/products": () => [{ label: "Products" }],
   "/point-of-sales/orders": () => [{ label: "POS" }, { label: "Orders" }],
+  "/point-of-sales/inventory": () => [{ label: "POS" }, { label: "Inventory" }],
+  "/point-of-sales/analytics": () => [{ label: "POS" }, { label: "Analytics" }],
+  "/point-of-sales/wallet": () => [{ label: "POS" }, { label: "Wallet" }],
   "/usage/billing": () => [{ label: "Billing" }],
   "/usage/pricing": () => [{ label: "Pricing" }],
-  "/point-of-sales/analytics": () => [{ label: "POS" }, { label: "Analytics" }],
-  "/point-of-sales/transactions": () => [
-    { label: "POS" },
-    { label: "Transactions" },
-  ],
+
   "/trends": () => [{ label: "Trends" }],
   "/support": () => [{ label: "Support" }],
   "/feedback": () => [{ label: "Feedback" }],
@@ -31,44 +30,55 @@ const routeConfig: Record<string, (params: string[]) => Crumb[]> = {
     { label: "Admin", href: "/admin" },
     { label: "User Management" },
   ],
-  "/admin/feedback": () => [
+  "/admin/feedback-management": () => [
     { label: "Admin", href: "/admin" },
-    { label: "Feedback" },
+    { label: "Feedback Management" },
+  ],
+  "/admin/email-management": () => [
+    { label: "Admin", href: "/admin" },
+    { label: "Email Management" },
   ],
 
   // Dynamic routes
   "/stores/[storeSlug]": (params) => [
     { label: "Stores", href: "/stores" },
-    { label: formatStoreName(params[0]) },
+    { label: formatDynamicSlug(params[0]) },
   ],
   "/merchants/[merchantSlug]": (params) => [
     { label: "Merchants", href: "/merchants" },
-    { label: formatStoreName(params[0]) },
+    { label: formatDynamicSlug(params[0]) },
   ],
   "/products/[productSlug]": (params) => [
     { label: "Products", href: "/products" },
-    { label: formatProductName(params[0]) },
+    { label: formatDynamicSlug(params[0]) },
+  ],
+  "/products/category/[categorySlug]": (params) => [
+    { label: "Products", href: "/products" },
+    { label: "Category" },
+    { label: formatDynamicSlug(params[0]) },
   ],
   "/point-of-sales/orders/[orderId]": (params) => [
     { label: "POS" },
     { label: "Orders", href: "/point-of-sales/orders" },
-    { label: `Order #${params[0]?.slice(-8) || params[0]}` },
+    { label: `Order #${formatDynamicSegment(params[0])}` },
+  ],
+  "/point-of-sales/wallet/transactions/[transactionId]": (params) => [
+    { label: "POS" },
+    { label: "Wallet", href: "/point-of-sales/wallet" },
+    { label: "Transactions" },
+    { label: `Transaction #${formatDynamicSegment(params[0])}` },
   ],
 };
 
-// Helper functions to format dynamic segments
-function formatStoreName(slug: string): string {
+function formatDynamicSlug(slug: string): string {
   return slug
     .split("-")
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
     .join(" ");
 }
 
-function formatProductName(slug: string): string {
-  return slug
-    .split("-")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
+function formatDynamicSegment(id: string): string {
+  return id.slice(-8) || id;
 }
 
 // Find matching route configuration

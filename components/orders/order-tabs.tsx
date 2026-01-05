@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   Empty,
-  EmptyContent,
+  // EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
@@ -71,14 +71,12 @@ interface OrderTabsProps {
     count: number;
     totalRevenue: string | null;
   }[];
-  hasActiveStore: boolean;
 }
 
 export function OrderTabs({
   myOrders,
   customerOrders,
   merchantStats,
-  hasActiveStore,
 }: OrderTabsProps) {
   const myOrdersStats = calculateOrderStats(myOrders);
 
@@ -132,24 +130,7 @@ export function OrderTabs({
       </TabsContent>
 
       <TabsContent value="customer-orders" className="space-y-6 mt-6">
-        {!hasActiveStore ? (
-          <Empty className="min-h-[300px]">
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                <Store className="size-6" />
-              </EmptyMedia>
-              <EmptyTitle>No active store</EmptyTitle>
-              <EmptyDescription className="font-mono tracking-tighter">
-                Please select or create a store from the top store switcher, to
-                view and manage orders from your customers
-              </EmptyDescription>
-            </EmptyHeader>
-            <EmptyContent>
-              The store switcher is located at the top of the sidebar, right
-              below the logo.
-            </EmptyContent>
-          </Empty>
-        ) : customerOrders.length > 0 ? (
+        {customerOrders.length > 0 ? (
           <>
             <OrderStats stats={merchantStats} />
             <Suspense

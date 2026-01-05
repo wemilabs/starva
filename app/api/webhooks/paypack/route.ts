@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { db } from "@/db/drizzle";
-import { payment, subscription } from "@/db/schema";
+import { type Payment, payment, subscription } from "@/db/schema";
 import { PRICING_PLANS } from "@/lib/constants";
 import { createNotification } from "@/server/push-notifications";
 
@@ -102,19 +102,9 @@ export async function POST(request: Request) {
   }
 }
 
-async function processSuccessfulCashin(
-  paymentRecord: typeof payment.$inferSelect
-) {
-  if (!paymentRecord.planName) return;
-
-  const plan = PRICING_PLANS.find((p) => p.name === paymentRecord.planName);
-  if (!plan) return;
-
+async function processSuccessfulCashin(paymentRecord: Payment) {
   const now = new Date();
-  const periodEnd = new Date(now);
-  periodEnd.setMonth(periodEnd.getMonth() + 1);
 
-  // Update payment status
   await db
     .update(payment)
     .set({
@@ -123,7 +113,22 @@ async function processSuccessfulCashin(
     })
     .where(eq(payment.id, paymentRecord.id));
 
-  // Update or create subscription
+  if (paymentRecord.planName) {
+    await processSubscriptionPayment(paymentRecord, now);
+  } else if (paymentRecord.orderId) {
+    await processOrderPayment(paymentRecord);
+  }
+}
+
+async function processSubscriptionPayment(paymentRecord: Payment, now: Date) {
+  // biome-ignore lint/style/noNonNullAssertion: planName is checked before calling this function
+  const planName = paymentRecord.planName!;
+  const plan = PRICING_PLANS.find((p) => p.name === planName);
+  if (!plan) return;
+
+  const periodEnd = new Date(now);
+  periodEnd.setMonth(periodEnd.getMonth() + 1);
+
   const existingSub = await db.query.subscription.findFirst({
     where: (s, { eq }) => eq(s.userId, paymentRecord.userId),
   });
@@ -132,7 +137,7 @@ async function processSuccessfulCashin(
     await db
       .update(subscription)
       .set({
-        planName: paymentRecord.planName,
+        planName,
         status: "active",
         currentPeriodStart: now,
         currentPeriodEnd: periodEnd,
@@ -149,7 +154,7 @@ async function processSuccessfulCashin(
   } else {
     await db.insert(subscription).values({
       userId: paymentRecord.userId,
-      planName: paymentRecord.planName,
+      planName,
       status: "active",
       startDate: now,
       currentPeriodStart: now,
@@ -162,20 +167,28 @@ async function processSuccessfulCashin(
     });
   }
 
-  // Send notification
   await createNotification({
     userId: paymentRecord.userId,
     type: "payment_successful",
     title: "Payment Successful! 🎉",
-    message: `Your ${
-      paymentRecord.planName
-    } subscription is now active until ${periodEnd.toLocaleDateString()}.`,
+    message: `Your ${planName} subscription is now active until ${periodEnd.toLocaleDateString()}.`,
     actionUrl: "/usage/billing",
     sendPush: true,
   });
 }
 
-async function processFailedCashin(paymentRecord: typeof payment.$inferSelect) {
+async function processOrderPayment(paymentRecord: Payment) {
+  await createNotification({
+    userId: paymentRecord.userId,
+    type: "payment_successful",
+    title: "Order Payment Received",
+    message: `Payment of ${paymentRecord.amount} RWF received for your order.`,
+    actionUrl: "/point-of-sales/orders",
+    sendPush: true,
+  });
+}
+
+async function processFailedCashin(paymentRecord: Payment) {
   await db
     .update(payment)
     .set({ status: "failed" })
@@ -192,9 +205,7 @@ async function processFailedCashin(paymentRecord: typeof payment.$inferSelect) {
   });
 }
 
-async function processSuccessfulCashout(
-  paymentRecord: typeof payment.$inferSelect
-) {
+async function processSuccessfulCashout(paymentRecord: Payment) {
   const now = new Date();
 
   await db
@@ -210,14 +221,12 @@ async function processSuccessfulCashout(
     type: "payment_successful",
     title: "Withdrawal Successful",
     message: `Your withdrawal of ${paymentRecord.amount} RWF has been sent to ${paymentRecord.phoneNumber}.`,
-    actionUrl: "/stores",
+    actionUrl: "/point-of-sales/wallet",
     sendPush: true,
   });
 }
 
-async function processFailedCashout(
-  paymentRecord: typeof payment.$inferSelect
-) {
+async function processFailedCashout(paymentRecord: Payment) {
   await db
     .update(payment)
     .set({ status: "failed" })
@@ -228,7 +237,7 @@ async function processFailedCashout(
     type: "payment_failed",
     title: "Withdrawal Failed",
     message: `Your withdrawal of ${paymentRecord.amount} RWF failed. The funds remain in your account.`,
-    actionUrl: "/stores",
+    actionUrl: "/point-of-sales/wallet",
     sendPush: true,
   });
 }

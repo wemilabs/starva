@@ -45,6 +45,16 @@ export async function getWalletTransactions(
   return transactions;
 }
 
+export async function getTransactionById(transactionId: string) {
+  return await db.query.payment.findFirst({
+    where: (p, { eq }) => eq(p.id, transactionId),
+    with: {
+      organization: true,
+      order: true,
+    },
+  });
+}
+
 export async function getOrganizationForWallet(organizationId: string) {
   const org = await db.query.organization.findFirst({
     where: (o, { eq }) => eq(o.id, organizationId),

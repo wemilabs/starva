@@ -59,7 +59,20 @@ async function OrdersContent() {
 
   return (
     <div className="space-y-7">
-      {!activeOrgId ? (
+      {!hasAnyOrders ? (
+        <Empty className="min-h-[400px]">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <ScrollText className="size-6" />
+            </EmptyMedia>
+            <EmptyTitle>No order yet</EmptyTitle>
+            <EmptyDescription className="font-mono tracking-tighter">
+              Start shopping from stores to place your first order. Your order
+              history will appear here.
+            </EmptyDescription>
+          </EmptyHeader>
+        </Empty>
+      ) : hasAnyOrders && !activeOrgId ? (
         <Empty className="min-h-[400px]">
           <EmptyHeader>
             <EmptyMedia variant="icon">
@@ -75,19 +88,6 @@ async function OrdersContent() {
             The store switcher is located at the top of the sidebar, right below
             the logo.
           </EmptyContent>
-        </Empty>
-      ) : !hasAnyOrders ? (
-        <Empty className="min-h-[400px]">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <ScrollText className="size-6" />
-            </EmptyMedia>
-            <EmptyTitle>No order yet</EmptyTitle>
-            <EmptyDescription className="font-mono tracking-tighter">
-              Start shopping from stores to place your first order. Your order
-              history will appear here.
-            </EmptyDescription>
-          </EmptyHeader>
         </Empty>
       ) : (
         <OrderTabs

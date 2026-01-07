@@ -51,11 +51,10 @@ async function withdrawAction(
   const organizationId = formData.get("organizationId") as string;
   const amount = parseFloat(formData.get("amount") as string);
 
-  if (!amount || amount < MINIMUM_WITHDRAWAL) {
+  if (!amount || amount < MINIMUM_WITHDRAWAL)
     return {
       error: `Minimum withdrawal is ${formatPriceInRWF(MINIMUM_WITHDRAWAL)}`,
     };
-  }
 
   const result = await initiateMerchantWithdrawal({
     organizationId,

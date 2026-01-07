@@ -17,7 +17,7 @@ import { formatPriceInRWF } from "@/lib/utils";
 import { initiateMerchantWithdrawal } from "@/server/payments";
 import { Spinner } from "../ui/spinner";
 
-const MINIMUM_WITHDRAWAL = 5000;
+const MINIMUM_WITHDRAWAL = 10_000;
 
 type WalletBalance = {
   totalCashin: number;
@@ -132,6 +132,7 @@ export function WithdrawalForm({ balance, organization }: WithdrawalFormProps) {
               max={balance.available}
               step={100}
               placeholder={`Min ${formatPriceInRWF(MINIMUM_WITHDRAWAL)}`}
+              className="placeholder:text-sm text-sm"
               disabled={!canWithdraw || isPending}
               required
             />

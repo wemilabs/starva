@@ -1,7 +1,7 @@
 # Starva.shop
 
 <p align="center">
-  <img src="https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6du5UdXxlTLMJtliDeN9nXqzs57GUH6RgZbryB" alt="Starva.shop Logo" width="280" height="280" />
+  <img src="https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6du5UdXxlTLMJtliDeN9nXqzs57GUH6RgZbryB" alt="Starva.shop Logo" width="200" height="200" />
 </p>
 
 A modern, multi-tenant e-commerce platform. Starva.shop enables stores across various categories to showcase their products and manage orders while providing customers with a seamless shopping experience.
@@ -157,10 +157,16 @@ Each organization operates independently with:
 
 ## License
 
-MIT
+This project is licensed under the Business Source License 1.1 (BSL 1.1).
+
+**Summary:**
+
+- Free to use, modify, and distribute for non-production purposes
+- Commercial production use requires a commercial license from Starva.shop
+- After 4 years from first distribution, the license converts to MIT License
+
+See the [LICENSE.md](./LICENSE.md) file for the full license text.
 
 ## TODO
 
 - [ ] Multiple languages, currencies
-- [ ] Payment gateways
-- [ ] Delivery methods

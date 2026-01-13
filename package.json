@@ -3,8 +3,8 @@
   "version": "0.120.6",
   "private": true,
   "scripts": {
-    "dev": "next dev --inspect --turbopack",
-    "build": "next build --turbopack",
+    "dev": "next dev --inspect",
+    "build": "next build",
     "start": "next start",
     "lint": "biome check",
     "format": "biome format --write",

@@ -3,9 +3,6 @@ import { ProtectedImage } from "@/components/ui/protected-image";
 export const Logo = () => {
   return (
     <div className="flex items-center py-2 rounded-lg">
-      {/* <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 justify-center rounded-lg text-lg font-semibold text-center">
-        s.
-      </div> */}
       <ProtectedImage
         src="https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6du5UdXxlTLMJtliDeN9nXqzs57GUH6RgZbryB"
         alt="Logo"

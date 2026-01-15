@@ -279,7 +279,7 @@ export const payment = pgTable(
     kind: paymentKind("kind").default("CASHIN").notNull(),
     paypackRef: text("paypack_ref").unique(),
     phoneNumber: text("phone_number").notNull(),
-    amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+    amount: text("amount").notNull(),
     currency: text("currency").default("RWF").notNull(),
     provider: text("provider"),
     // Payment details
@@ -642,7 +642,7 @@ export const order = pgTable(
       .references(() => organization.id, { onDelete: "cascade" }),
     notes: text("notes"),
     status: orderStatus("status").default("pending").notNull(),
-    totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),
+    totalPrice: text("total_price").notNull(),
     isPaid: boolean("is_paid").default(false).notNull(),
     paidAt: timestamp("paid_at"),
     confirmedAt: timestamp("confirmed_at"),
@@ -676,11 +676,8 @@ export const orderItem = pgTable(
       .notNull()
       .references(() => product.id, { onDelete: "cascade" }),
     quantity: integer("quantity").notNull().default(1),
-    priceAtOrder: decimal("price_at_order", {
-      precision: 10,
-      scale: 2,
-    }).notNull(),
-    subtotal: decimal("subtotal", { precision: 10, scale: 2 }).notNull(),
+    priceAtOrder: text("price_at_order").notNull(),
+    subtotal: text("subtotal").notNull(),
     createdAt: timestamp("created_at")
       .$defaultFn(() => new Date())
       .notNull(),
@@ -746,7 +743,7 @@ export const inventoryHistory = pgTable(
     organizationId: text("organization_id")
       .notNull()
       .references(() => organization.id, { onDelete: "cascade" }),
-    changeType: text("change_type").notNull(), // 'sale', 'restock', 'adjustment'
+    changeType: text("change_type").notNull(),
     quantityChange: integer("quantity_change").notNull(),
     previousStock: integer("previous_stock").notNull(),
     newStock: integer("new_stock").notNull(),

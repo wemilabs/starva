@@ -3,7 +3,25 @@ import { cacheLife } from "next/cache";
 import { cache } from "react";
 import { db } from "@/db/drizzle";
 import { type OrderStatus, order } from "@/db/schema";
+import { decrypt } from "@/lib/encryption";
 import "server-only";
+
+function decryptOrderItems<
+  T extends { priceAtOrder: string; subtotal: string }
+>(items: T[]): T[] {
+  return items.map((item) => ({
+    ...item,
+    priceAtOrder: decrypt(item.priceAtOrder),
+    subtotal: decrypt(item.subtotal),
+  }));
+}
+
+function decryptOrder<T extends { totalPrice: string }>(ord: T): T {
+  return {
+    ...ord,
+    totalPrice: decrypt(ord.totalPrice),
+  };
+}
 
 async function calculateMerchantOrderNumberPerOrg(
   organizationId: string,
@@ -80,7 +98,8 @@ export const getOrdersByOrganization = cache(async (organizationId: string) => {
         ord.createdAt
       );
       return {
-        ...ord,
+        ...decryptOrder(ord),
+        orderItems: decryptOrderItems(ord.orderItems),
         merchantOrderNumber,
       };
     })
@@ -140,7 +159,8 @@ export const getOrderById = cache(async (orderId: string) => {
   ]);
 
   return {
-    ...orderData,
+    ...decryptOrder(orderData),
+    orderItems: decryptOrderItems(orderData.orderItems),
     merchantOrderNumber,
     customerOrderNumber,
   };
@@ -183,7 +203,8 @@ export const getOrdersByUser = cache(async (userId: string) => {
           ord.createdAt
         );
       return {
-        ...ord,
+        ...decryptOrder(ord),
+        orderItems: decryptOrderItems(ord.orderItems),
         customerOrderNumber,
       };
     })
@@ -233,7 +254,8 @@ export const getOrdersByStatus = cache(
           ord.createdAt
         );
         return {
-          ...ord,
+          ...decryptOrder(ord),
+          orderItems: decryptOrderItems(ord.orderItems),
           merchantOrderNumber,
         };
       })
@@ -247,17 +269,29 @@ export const getOrderStats = cache(async (organizationId: string) => {
   "use cache";
   cacheLife("minutes");
 
-  const stats = await db
-    .select({
-      status: order.status,
-      count: sql<number>`count(*)::int`,
-      totalRevenue: sql<string>`sum(${order.totalPrice})`,
-    })
-    .from(order)
-    .where(eq(order.organizationId, organizationId))
-    .groupBy(order.status);
+  const orders = await db.query.order.findMany({
+    where: eq(order.organizationId, organizationId),
+    columns: {
+      status: true,
+      totalPrice: true,
+    },
+  });
 
-  return stats;
+  const statsByStatus = orders.reduce((acc, ord) => {
+    const status = ord.status;
+    if (!acc[status]) {
+      acc[status] = { status, count: 0, totalRevenue: 0 };
+    }
+    acc[status].count += 1;
+    acc[status].totalRevenue += Number(decrypt(ord.totalPrice) || 0);
+    return acc;
+  }, {} as Record<string, { status: OrderStatus; count: number; totalRevenue: number }>);
+
+  return Object.values(statsByStatus).map((s) => ({
+    status: s.status,
+    count: s.count,
+    totalRevenue: String(s.totalRevenue),
+  }));
 });
 
 export const getRecentOrders = cache(
@@ -297,7 +331,8 @@ export const getRecentOrders = cache(
           ord.createdAt
         );
         return {
-          ...ord,
+          ...decryptOrder(ord),
+          orderItems: decryptOrderItems(ord.orderItems),
           merchantOrderNumber,
         };
       })

@@ -2,7 +2,7 @@ import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
-import { Suspense } from "react";
+import { Suspense, ViewTransition } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { BreadcrumbManager } from "@/components/breadcrumb-manager";
 import { Header } from "@/components/header";
@@ -120,7 +120,7 @@ export default async function RootLayout(props: LayoutProps<"/">) {
                         <Suspense>
                           <UploadThingProvider />
                         </Suspense>
-                        {children}
+                        <ViewTransition>{children}</ViewTransition>
                       </NuqsAdapter>
                     </main>
                   </SidebarInset>

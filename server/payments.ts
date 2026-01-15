@@ -6,6 +6,7 @@ import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
 import { order, payment, subscription } from "@/db/schema";
 import { type BillingPeriod, PRICING_PLANS } from "@/lib/constants";
+import { decrypt, encrypt } from "@/lib/encryption";
 import {
   getTransactionEvents,
   initiateCashout as paypackCashout,
@@ -38,13 +39,13 @@ export async function initiateSubscriptionPayment(data: {
 
     const result = await paypackInitiate(phone, amountRWF);
 
-    // Create payment record
+    // Create payment record with encrypted sensitive data
     const [newPayment] = await db
       .insert(payment)
       .values({
         userId: session.user.id,
-        phoneNumber: phone,
-        amount: String(amountRWF),
+        phoneNumber: encrypt(phone),
+        amount: encrypt(String(amountRWF)),
         currency: "RWF",
         kind: "CASHIN",
         planName: data.planName,
@@ -63,7 +64,7 @@ export async function initiateSubscriptionPayment(data: {
     if (existingSub) {
       await db
         .update(subscription)
-        .set({ phoneNumber: phone })
+        .set({ phoneNumber: encrypt(phone) })
         .where(eq(subscription.userId, session.user.id));
     }
 
@@ -222,7 +223,11 @@ export async function getUserPayments(limit = 10) {
     limit,
   });
 
-  return payments;
+  return payments.map((p) => ({
+    ...p,
+    amount: decrypt(p.amount),
+    phoneNumber: decrypt(p.phoneNumber),
+  }));
 }
 
 export async function getPaymentByRef(paypackRef: string) {
@@ -252,7 +257,7 @@ export async function initiateOrderPayment(data: {
 
   try {
     const phone = formatRwandanPhone(data.phoneNumber);
-    const amountRWF = Number(order.totalPrice);
+    const amountRWF = Number(decrypt(order.totalPrice));
 
     const result = await paypackInitiate(phone, amountRWF);
 
@@ -261,8 +266,8 @@ export async function initiateOrderPayment(data: {
       .values({
         userId: session.user.id,
         organizationId: order.organizationId,
-        phoneNumber: phone,
-        amount: String(amountRWF),
+        phoneNumber: encrypt(phone),
+        amount: encrypt(String(amountRWF)),
         currency: "RWF",
         kind: "CASHIN",
         planName: null,
@@ -342,7 +347,7 @@ export async function checkOrderPaymentStatus(paypackRef: string) {
               orderId: paidOrder.id,
               orderNumber: paidOrder.orderNumber,
               customerName: paidOrder.user.name,
-              total: paidOrder.totalPrice,
+              total: decrypt(paidOrder.totalPrice),
               organizationId: paidOrder.organizationId,
               paidAt: now.toISOString(),
             });
@@ -404,8 +409,8 @@ export async function initiateMerchantWithdrawal(data: {
       .values({
         userId: session.user.id,
         organizationId: data.organizationId,
-        phoneNumber: phone,
-        amount: String(data.amount),
+        phoneNumber: encrypt(phone),
+        amount: encrypt(String(data.amount)),
         currency: "RWF",
         kind: "CASHOUT",
         paypackRef: result.ref,

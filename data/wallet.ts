@@ -1,33 +1,50 @@
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "@/db/drizzle";
 import { payment } from "@/db/schema";
+import { decrypt } from "@/lib/encryption";
 import "server-only";
 
-export async function getWalletBalance(organizationId: string) {
-  const result = await db
-    .select({
-      totalCashin: sql<string>`COALESCE(SUM(CASE WHEN ${payment.kind} = 'CASHIN' AND ${payment.status} = 'successful' THEN ${payment.amount} ELSE 0 END), 0)`,
-      totalCashout: sql<string>`COALESCE(SUM(CASE WHEN ${payment.kind} = 'CASHOUT' AND ${payment.status} = 'successful' THEN ${payment.amount} ELSE 0 END), 0)`,
-      pendingCashout: sql<string>`COALESCE(SUM(CASE WHEN ${payment.kind} = 'CASHOUT' AND ${payment.status} = 'pending' THEN ${payment.amount} ELSE 0 END), 0)`,
-    })
-    .from(payment)
-    .where(eq(payment.organizationId, organizationId));
-
-  const { totalCashin, totalCashout, pendingCashout } = result[0] || {
-    totalCashin: "0",
-    totalCashout: "0",
-    pendingCashout: "0",
+function decryptPayment<T extends { amount: string; phoneNumber: string }>(
+  p: T
+): T {
+  return {
+    ...p,
+    amount: decrypt(p.amount),
+    phoneNumber: decrypt(p.phoneNumber),
   };
+}
 
-  const available =
-    parseFloat(totalCashin) -
-    parseFloat(totalCashout) -
-    parseFloat(pendingCashout);
+export async function getWalletBalance(organizationId: string) {
+  const payments = await db.query.payment.findMany({
+    where: eq(payment.organizationId, organizationId),
+    columns: {
+      kind: true,
+      status: true,
+      amount: true,
+    },
+  });
+
+  let totalCashin = 0;
+  let totalCashout = 0;
+  let pendingCashout = 0;
+
+  for (const p of payments) {
+    const amount = parseFloat(decrypt(p.amount) || "0");
+    if (p.kind === "CASHIN" && p.status === "successful") {
+      totalCashin += amount;
+    } else if (p.kind === "CASHOUT" && p.status === "successful") {
+      totalCashout += amount;
+    } else if (p.kind === "CASHOUT" && p.status === "pending") {
+      pendingCashout += amount;
+    }
+  }
+
+  const available = totalCashin - totalCashout - pendingCashout;
 
   return {
-    totalCashin: parseFloat(totalCashin),
-    totalCashout: parseFloat(totalCashout),
-    pendingCashout: parseFloat(pendingCashout),
+    totalCashin,
+    totalCashout,
+    pendingCashout,
     available: Math.max(0, available),
   };
 }
@@ -42,17 +59,29 @@ export async function getWalletTransactions(
     limit,
   });
 
-  return transactions;
+  return transactions.map(decryptPayment);
 }
 
 export async function getTransactionById(transactionId: string) {
-  return await db.query.payment.findFirst({
+  const transaction = await db.query.payment.findFirst({
     where: (p, { eq }) => eq(p.id, transactionId),
     with: {
       organization: true,
       order: true,
     },
   });
+
+  if (!transaction) return null;
+
+  return {
+    ...decryptPayment(transaction),
+    order: transaction.order
+      ? {
+          ...transaction.order,
+          totalPrice: decrypt(transaction.order.totalPrice),
+        }
+      : null,
+  };
 }
 
 export async function getOrganizationForWallet(organizationId: string) {

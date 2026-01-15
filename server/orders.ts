@@ -7,6 +7,7 @@ import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
 import { orderItem, order as orderTable, user } from "@/db/schema";
 import { ORDER_STATUS_VALUES } from "@/lib/constants";
+import { decrypt, encrypt } from "@/lib/encryption";
 import { realtime } from "@/lib/realtime";
 import { getProductsStock, updateStock } from "./inventory";
 import { createOrderNotification } from "./notifications";
@@ -47,7 +48,6 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
     if (products.length !== items.length)
       return { ok: false, error: "One or more products not found" };
 
-    // Ensure all products belong to the same organization
     const organizationIds = [...new Set(products.map((p) => p.organizationId))];
     if (organizationIds.length > 1)
       return {
@@ -56,7 +56,6 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       };
 
     const organizationId = organizationIds[0];
-    // const organization = products[0].organization;
 
     // Check order limit - find the organization owner (merchant)
     const orgOwner = await db.query.member.findFirst({
@@ -160,18 +159,18 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
         userId: session.user.id,
         organizationId,
         notes: notes || null,
-        totalPrice: totalPrice.toFixed(2),
+        totalPrice: encrypt(totalPrice.toFixed(2)),
       })
       .returning();
 
-    // Store order items in database
+    // Store order items in database with encrypted prices
     await db.insert(orderItem).values(
       orderItems.map((item) => ({
         orderId: newOrder.id,
         productId: item.productId,
         quantity: item.quantity,
-        priceAtOrder: item.priceAtOrder,
-        subtotal: item.subtotal,
+        priceAtOrder: encrypt(String(item.priceAtOrder)),
+        subtotal: encrypt(item.subtotal),
       }))
     );
 
@@ -348,7 +347,7 @@ export async function updateOrderStatus(
           orderId: existingOrder.id,
           orderNumber: existingOrder.orderNumber,
           storeName: existingOrder.organization.name,
-          total: existingOrder.totalPrice,
+          total: decrypt(existingOrder.totalPrice),
           itemCount: orderItems.length,
           confirmedAt: new Date().toISOString(),
         });
@@ -655,7 +654,7 @@ export async function getOrganizationAnalyticsOverview(
     // Week aggregation
     const weekOfMonth = Math.floor((d.getDate() - 1) / 7) + 1;
     const wKey = `Week ${weekOfMonth}`;
-    const revenue = Number(o.totalPrice ?? 0);
+    const revenue = Number(decrypt(o.totalPrice) ?? 0);
     byWeek[wKey] = (byWeek[wKey] || 0) + revenue;
 
     // Hour aggregation for peak time analysis
@@ -685,7 +684,7 @@ export async function getOrganizationAnalyticsOverview(
   // Calculate basic metrics
   const totalOrders = orders.length;
   const totalRevenue = orders.reduce(
-    (sum, order) => sum + Number(order.totalPrice ?? 0),
+    (sum, order) => sum + Number(decrypt(order.totalPrice) ?? 0),
     0
   );
   const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
@@ -710,7 +709,7 @@ export async function getOrganizationAnalyticsOverview(
   const productRevenue: Record<string, number> = {};
   for (const item of orderItems) {
     const productName = item.product?.name || "Unknown";
-    const revenue = Number(item.subtotal ?? 0);
+    const revenue = Number(decrypt(item.subtotal) ?? 0);
     productRevenue[productName] = (productRevenue[productName] || 0) + revenue;
   }
 

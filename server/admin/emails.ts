@@ -4,7 +4,9 @@ import { and, count, desc, eq, gte, ilike, or } from "drizzle-orm";
 import { UTApi } from "uploadthing/server";
 import { db } from "@/db/drizzle";
 import { emailAttachment, receivedEmail } from "@/db/schema";
+import { logAdminAction } from "@/lib/admin-audit";
 import { requireAdmin } from "@/lib/admin-auth";
+import { requireAdminRateLimit } from "@/lib/admin-rate-limit";
 
 const utapi = new UTApi();
 
@@ -14,7 +16,7 @@ export async function getReceivedEmails(
     offset?: number;
     search?: string;
     status?: "received" | "processed" | "failed";
-  } = {}
+  } = {},
 ) {
   await requireAdmin();
 
@@ -32,7 +34,7 @@ export async function getReceivedEmails(
     const searchConditions = or(
       ilike(receivedEmail.from, `%${search}%`),
       ilike(receivedEmail.subject, `%${search}%`),
-      ilike(receivedEmail.textBody, `%${search}%`)
+      ilike(receivedEmail.textBody, `%${search}%`),
     );
     if (searchConditions) whereConditions.push(searchConditions);
   }
@@ -84,7 +86,8 @@ export async function getEmailAttachmentUrl(id: string) {
 }
 
 export async function deleteReceivedEmail(emailId: string) {
-  await requireAdmin();
+  const session = await requireAdmin();
+  await requireAdminRateLimit(session.user.id, "delete_email", true);
 
   const email = await db.query.receivedEmail.findFirst({
     where: eq(receivedEmail.emailId, emailId),
@@ -105,12 +108,20 @@ export async function deleteReceivedEmail(emailId: string) {
       } catch (error) {
         console.error(
           `Failed to delete attachment ${attachment.fileKey}:`,
-          error
+          error,
         );
       }
   }
 
   await db.delete(receivedEmail).where(eq(receivedEmail.emailId, emailId));
+
+  await logAdminAction({
+    adminId: session.user.id,
+    action: "DELETE_EMAIL",
+    targetId: emailId,
+    targetType: "email",
+    metadata: { subject: email.subject, from: email.from },
+  });
 
   return { success: true };
 }

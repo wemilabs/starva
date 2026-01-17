@@ -47,7 +47,7 @@ export const session = pgTable("session", {
     .references(() => user.id, { onDelete: "cascade" }),
   activeOrganizationId: text("active_organization_id").references(
     () => organization.id,
-    { onDelete: "set null" }
+    { onDelete: "set null" },
   ),
 });
 
@@ -75,10 +75,10 @@ export const verification = pgTable("verification", {
   value: text("value").notNull(),
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").$defaultFn(
-    () => /* @__PURE__ */ new Date()
+    () => /* @__PURE__ */ new Date(),
   ),
   updatedAt: timestamp("updated_at").$defaultFn(
-    () => /* @__PURE__ */ new Date()
+    () => /* @__PURE__ */ new Date(),
   ),
 });
 
@@ -140,6 +140,51 @@ export const notificationType = pgEnum("notification_type", [
   "payment_failed",
   "general",
 ]);
+
+export const adminActionType = pgEnum("admin_action_type", [
+  "CREATE_USER",
+  "UPDATE_USER",
+  "DELETE_USER",
+  "BAN_USER",
+  "UNBAN_USER",
+  "DELETE_EMAIL",
+  "UPDATE_FEEDBACK",
+  "DELETE_FEEDBACK",
+  "VIEW_METRICS",
+]);
+
+export const adminAuditLog = pgTable(
+  "admin_audit_log",
+  {
+    id: text("id")
+      .$defaultFn(() => randomUUID())
+      .primaryKey(),
+    adminId: text("admin_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    action: adminActionType("action").notNull(),
+    targetId: text("target_id"),
+    targetType: text("target_type"),
+    metadata: text("metadata"),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    createdAt: timestamp("created_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (t) => [
+    index("admin_audit_log_admin_idx").on(t.adminId),
+    index("admin_audit_log_action_idx").on(t.action),
+    index("admin_audit_log_created_idx").on(t.createdAt),
+  ],
+);
+
+export const adminAuditLogRelations = relations(adminAuditLog, ({ one }) => ({
+  admin: one(user, {
+    fields: [adminAuditLog.adminId],
+    references: [user.id],
+  }),
+}));
 
 export const emailStatus = pgEnum("email_status", [
   "received",
@@ -233,7 +278,7 @@ export const subscription = pgTable(
   (t) => [
     index("subscription_user_idx").on(t.userId),
     index("subscription_status_idx").on(t.status),
-  ]
+  ],
 );
 
 export const orderUsageTracking = pgTable(
@@ -259,7 +304,7 @@ export const orderUsageTracking = pgTable(
     index("order_usage_org_idx").on(t.organizationId),
     index("order_usage_month_idx").on(t.monthYear),
     unique("order_usage_org_month").on(t.organizationId, t.monthYear),
-  ]
+  ],
 );
 
 export const payment = pgTable(
@@ -297,7 +342,7 @@ export const payment = pgTable(
     index("payment_user_idx").on(t.userId),
     index("payment_status_idx").on(t.status),
     index("payment_ref_idx").on(t.paypackRef),
-  ]
+  ],
 );
 
 export const pushSubscription = pgTable(
@@ -320,7 +365,7 @@ export const pushSubscription = pgTable(
   (t) => [
     index("push_sub_user_idx").on(t.userId),
     unique("push_sub_endpoint").on(t.endpoint),
-  ]
+  ],
 );
 
 export const notification = pgTable(
@@ -345,7 +390,7 @@ export const notification = pgTable(
   (t) => [
     index("notification_user_idx").on(t.userId),
     index("notification_read_idx").on(t.read),
-  ]
+  ],
 );
 
 export const orderNotification = pgTable(
@@ -375,7 +420,7 @@ export const orderNotification = pgTable(
     index("order_notification_org_idx").on(t.organizationId),
     index("order_notification_order_idx").on(t.orderId),
     index("order_notification_read_idx").on(t.read),
-  ]
+  ],
 );
 
 export const userRelations = relations(user, ({ one, many }) => ({
@@ -412,7 +457,7 @@ export const orderUsageTrackingRelations = relations(
       fields: [orderUsageTracking.organizationId],
       references: [organization.id],
     }),
-  })
+  }),
 );
 
 export const paymentRelations = relations(payment, ({ one }) => ({
@@ -437,7 +482,7 @@ export const pushSubscriptionRelations = relations(
       fields: [pushSubscription.userId],
       references: [user.id],
     }),
-  })
+  }),
 );
 
 export const notificationRelations = relations(notification, ({ one }) => ({
@@ -522,7 +567,7 @@ export const product = pgTable(
     specifications: text("specifications"),
     isLandlord: boolean("is_landlord").default(false).notNull(),
     visitFees: decimal("visit_fees", { precision: 10, scale: 2 }).default(
-      "0.00"
+      "0.00",
     ),
     createdAt: timestamp("created_at")
       .$defaultFn(() => /* @__PURE__ */ new Date())
@@ -534,7 +579,7 @@ export const product = pgTable(
   (t) => [
     index("product_slug_idx").on(t.slug),
     index("product_org_idx").on(t.organizationId),
-  ]
+  ],
 );
 
 export const tag = pgTable(
@@ -553,7 +598,7 @@ export const tag = pgTable(
       .$defaultFn(() => /* @__PURE__ */ new Date())
       .notNull(),
   },
-  (t) => [index("tag_slug_idx").on(t.slug)]
+  (t) => [index("tag_slug_idx").on(t.slug)],
 );
 
 export const productTag = pgTable(
@@ -575,7 +620,7 @@ export const productTag = pgTable(
     index("product_tag_product_idx").on(t.productId),
     index("product_tag_tag_idx").on(t.tagId),
     unique("product_tag_unique").on(t.productId, t.tagId),
-  ]
+  ],
 );
 
 export const productLike = pgTable(
@@ -598,7 +643,7 @@ export const productLike = pgTable(
     index("product_like_product_idx").on(t.productId),
     index("product_like_user_idx").on(t.userId),
     unique("product_like_unique").on(t.productId, t.userId),
-  ]
+  ],
 );
 
 export const productLikeRelations = relations(productLike, ({ one }) => ({
@@ -660,7 +705,7 @@ export const order = pgTable(
     index("order_status_idx").on(t.status),
     index("order_number_idx").on(t.orderNumber),
     unique("order_number_per_org").on(t.organizationId, t.orderNumber),
-  ]
+  ],
 );
 
 export const orderItem = pgTable(
@@ -685,7 +730,7 @@ export const orderItem = pgTable(
   (t) => [
     index("order_item_order_idx").on(t.orderId),
     index("order_item_product_idx").on(t.productId),
-  ]
+  ],
 );
 
 export const orderRelations = relations(order, ({ one, many }) => ({
@@ -758,7 +803,7 @@ export const inventoryHistory = pgTable(
     index("inventory_history_product_idx").on(t.productId),
     index("inventory_history_org_idx").on(t.organizationId),
     index("inventory_history_order_idx").on(t.orderId),
-  ]
+  ],
 );
 
 export const inventoryHistoryRelations = relations(
@@ -780,7 +825,7 @@ export const inventoryHistoryRelations = relations(
       fields: [inventoryHistory.userId],
       references: [user.id],
     }),
-  })
+  }),
 );
 
 export const feedback = pgTable(
@@ -808,7 +853,7 @@ export const feedback = pgTable(
     index("feedback_user_idx").on(t.userId),
     index("feedback_type_idx").on(t.type),
     index("feedback_status_idx").on(t.status),
-  ]
+  ],
 );
 
 export const feedbackRelations = relations(feedback, ({ one, many }) => ({
@@ -841,7 +886,7 @@ export const feedbackHistory = pgTable(
   (t) => [
     index("feedback_history_feedback_idx").on(t.feedbackId),
     index("feedback_history_changed_by_idx").on(t.changedBy),
-  ]
+  ],
 );
 
 export const feedbackHistoryRelations = relations(
@@ -855,7 +900,7 @@ export const feedbackHistoryRelations = relations(
       fields: [feedbackHistory.changedBy],
       references: [user.id],
     }),
-  })
+  }),
 );
 
 export const receivedEmail = pgTable(
@@ -887,7 +932,7 @@ export const receivedEmail = pgTable(
     index("received_email_status_idx").on(t.status),
     index("received_email_created_idx").on(t.createdAt),
     unique("received_email_email_id").on(t.emailId),
-  ]
+  ],
 );
 
 export const emailAttachment = pgTable(
@@ -916,7 +961,7 @@ export const emailAttachment = pgTable(
   (t) => [
     index("email_attachment_email_idx").on(t.emailId),
     unique("email_attachment_attachment_id").on(t.attachmentId),
-  ]
+  ],
 );
 
 export const receivedEmailRelations = relations(receivedEmail, ({ many }) => ({
@@ -930,7 +975,7 @@ export const emailAttachmentRelations = relations(
       fields: [emailAttachment.emailId],
       references: [receivedEmail.emailId],
     }),
-  })
+  }),
 );
 
 export type Organization = typeof organization.$inferSelect;
@@ -967,6 +1012,8 @@ export type NotificationType = (typeof notificationType.enumValues)[number];
 export type ReceivedEmail = typeof receivedEmail.$inferSelect;
 export type EmailStatus = (typeof emailStatus.enumValues)[number];
 export type EmailAttachment = typeof emailAttachment.$inferSelect;
+export type AdminAuditLog = typeof adminAuditLog.$inferSelect;
+export type AdminActionType = (typeof adminActionType.enumValues)[number];
 
 export const schema = {
   user,
@@ -993,6 +1040,7 @@ export const schema = {
   notification,
   receivedEmail,
   emailAttachment,
+  adminAuditLog,
   userRelations,
   organizationRelations,
   memberRelations,
@@ -1015,4 +1063,5 @@ export const schema = {
   notificationRelations,
   receivedEmailRelations,
   emailAttachmentRelations,
+  adminAuditLogRelations,
 };

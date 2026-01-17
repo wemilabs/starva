@@ -3,31 +3,8 @@ import { NextResponse } from "next/server";
 import { db } from "@/db/drizzle";
 import { type Payment, payment, subscription } from "@/db/schema";
 import { PRICING_PLANS } from "@/lib/constants";
+import { decrypt } from "@/lib/encryption";
 import { createNotification } from "@/server/push-notifications";
-
-// Verify webhook signature if secret is configured
-function verifyWebhookSignature(
-  _payload: string, // Will be used for HMAC verification if Paypack supports it
-  signature: string | null
-): boolean {
-  const secret = process.env.PAYPACK_WEBHOOK_SECRET_KEY;
-
-  // If no secret configured, skip verification (for testing)
-  if (!secret) {
-    console.warn(
-      "[Paypack Webhook] No PAYPACK_WEBHOOK_SECRET_KEY configured - skipping verification"
-    );
-    return true;
-  }
-
-  if (!signature) {
-    console.error("[Paypack Webhook] Missing signature header");
-    return false;
-  }
-
-  // Simple secret comparison (check Paypack docs for proper HMAC method if available)
-  return signature === secret;
-}
 
 type PaypackWebhookEvent = {
   event_id: string;
@@ -45,6 +22,28 @@ type PaypackWebhookEvent = {
     processed_at?: string;
   };
 };
+
+// Verify webhook signature if secret is configured
+function verifyWebhookSignature(
+  _payload: string, // Will be used for HMAC verification if Paypack supports it
+  signature: string | null,
+): boolean {
+  const secret = process.env.PAYPACK_WEBHOOK_SECRET_KEY;
+
+  if (!secret) {
+    console.warn(
+      "[Paypack Webhook] No PAYPACK_WEBHOOK_SECRET_KEY configured - skipping verification",
+    );
+    return true;
+  }
+
+  if (!signature) {
+    console.error("[Paypack Webhook] Missing signature header");
+    return false;
+  }
+
+  return signature === secret;
+}
 
 export async function POST(request: Request) {
   console.log("[Paypack Webhook] Received request");
@@ -97,7 +96,7 @@ export async function POST(request: Request) {
     console.error("Webhook error:", error);
     return NextResponse.json(
       { error: "Webhook processing failed" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -127,7 +126,11 @@ async function processSubscriptionPayment(paymentRecord: Payment, now: Date) {
   if (!plan) return;
 
   const periodEnd = new Date(now);
-  periodEnd.setMonth(periodEnd.getMonth() + 1);
+  if (paymentRecord.billingPeriod === "yearly") {
+    periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+  } else {
+    periodEnd.setMonth(periodEnd.getMonth() + 1);
+  }
 
   const existingSub = await db.query.subscription.findFirst({
     where: (s, { eq }) => eq(s.userId, paymentRecord.userId),
@@ -182,7 +185,7 @@ async function processOrderPayment(paymentRecord: Payment) {
     userId: paymentRecord.userId,
     type: "payment_successful",
     title: "Order Payment Received",
-    message: `Payment of ${paymentRecord.amount} RWF received for your order.`,
+    message: `Payment of ${decrypt(paymentRecord.amount)} RWF received for your order.`,
     actionUrl: "/point-of-sales/orders",
     sendPush: true,
   });
@@ -220,7 +223,7 @@ async function processSuccessfulCashout(paymentRecord: Payment) {
     userId: paymentRecord.userId,
     type: "payment_successful",
     title: "Withdrawal Successful",
-    message: `Your withdrawal of ${paymentRecord.amount} RWF has been sent to ${paymentRecord.phoneNumber}.`,
+    message: `Your withdrawal of ${decrypt(paymentRecord.amount)} RWF has been sent to ${paymentRecord.phoneNumber}.`,
     actionUrl: "/point-of-sales/wallet",
     sendPush: true,
   });
@@ -236,7 +239,7 @@ async function processFailedCashout(paymentRecord: Payment) {
     userId: paymentRecord.userId,
     type: "payment_failed",
     title: "Withdrawal Failed",
-    message: `Your withdrawal of ${paymentRecord.amount} RWF failed. The funds remain in your account.`,
+    message: `Your withdrawal of ${decrypt(paymentRecord.amount)} RWF failed. The funds remain in your account.`,
     actionUrl: "/point-of-sales/wallet",
     sendPush: true,
   });

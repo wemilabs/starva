@@ -4,9 +4,9 @@ import { and, count, desc, eq, gte, ilike, or } from "drizzle-orm";
 import { UTApi } from "uploadthing/server";
 import { db } from "@/db/drizzle";
 import { emailAttachment, receivedEmail } from "@/db/schema";
-import { logAdminAction } from "@/lib/admin-audit";
-import { requireAdmin } from "@/lib/admin-auth";
-import { requireAdminRateLimit } from "@/lib/admin-rate-limit";
+import { logAdminAction } from "@/lib/admin/admin-audit";
+import { requireAdmin } from "@/lib/admin/admin-auth";
+import { requireAdminRateLimit } from "@/lib/admin/admin-rate-limit";
 
 const utapi = new UTApi();
 

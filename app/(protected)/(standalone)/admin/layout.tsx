@@ -1,6 +1,6 @@
 import { cacheLife } from "next/cache";
 import { Suspense } from "react";
-import { requireAdmin } from "@/lib/admin-auth";
+import { requireAdmin } from "@/lib/admin/admin-auth";
 
 async function AdminAuthCheck({ children }: { children: React.ReactNode }) {
   await requireAdmin();

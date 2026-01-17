@@ -11,9 +11,9 @@ import {
 } from "@/data/users";
 import { db } from "@/db/drizzle";
 import { user } from "@/db/schema";
-import { logAdminAction } from "@/lib/admin-audit";
-import { requireAdmin } from "@/lib/admin-auth";
-import { requireAdminRateLimit } from "@/lib/admin-rate-limit";
+import { logAdminAction } from "@/lib/admin/admin-audit";
+import { requireAdmin } from "@/lib/admin/admin-auth";
+import { requireAdminRateLimit } from "@/lib/admin/admin-rate-limit";
 import { auth } from "@/lib/auth";
 import { getUserSubscription } from "@/server/subscription";
 

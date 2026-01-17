@@ -149,12 +149,12 @@ async function OrderContent({
 
               <Separator className="my-4" />
 
-              <div className="space-y-2">
-                <div className="flex justify-between font-medium">
+              <div className="space-y-0.5">
+                <div className="flex justify-between font-semibold">
                   <span>
                     {!order.isPaid ? "Total to be paid" : "Total paid"}
                   </span>
-                  <span className="font-bold">
+                  <span className="text-lg">
                     {formatPriceInRWF(displayTotal)}
                   </span>
                 </div>

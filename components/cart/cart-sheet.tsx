@@ -389,9 +389,9 @@ export function CartSheet() {
                     {formatPriceInRWF(fees.totalFee)}
                   </span>
                 </div>
-                <div className="flex items-center justify-between pt-1 border-t">
-                  <span className="font-medium">Total</span>
-                  <span className="text-lg font-medium font-mono tracking-tighter">
+                <div className="flex items-center justify-between pt-1 border-t font-bold">
+                  <span>Total</span>
+                  <span className="text-lg">
                     {formatPriceInRWF(fees.totalAmount)}
                   </span>
                 </div>

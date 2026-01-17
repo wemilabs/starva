@@ -148,7 +148,13 @@ async function TransactionContent({
                   )}
                 >
                   {isCashin ? "+" : "-"}
-                  {formatPriceInRWF(parseFloat(transaction.amount))}
+                  {formatPriceInRWF(
+                    parseFloat(
+                      isCashin && transaction.baseAmount
+                        ? transaction.baseAmount
+                        : transaction.amount,
+                    ),
+                  )}
                 </p>
                 <p className="text-sm text-muted-foreground mt-2">
                   {transaction.currency}

@@ -200,6 +200,17 @@ export const USD_TO_RWF = 1457.39;
 export const TRIAL_DAYS = 14;
 export const ANNUAL_DISCOUNT_PERCENT = 10;
 
+export const TRANSACTION_FEES = {
+  PAYPACK_CASHIN_RATE: 0.03,
+  PAYPACK_CASHOUT_RATE: 0.03,
+  PLATFORM_RATE: 0.014,
+  get TOTAL_RATE() {
+    return (
+      this.PAYPACK_CASHIN_RATE + this.PAYPACK_CASHOUT_RATE + this.PLATFORM_RATE
+    );
+  },
+} as const;
+
 export const PRICING_PLANS: PricingPlan[] = [
   {
     name: "Starter",

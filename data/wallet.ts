@@ -5,13 +5,14 @@ import { decrypt } from "@/lib/encryption";
 import "server-only";
 import { verifySession } from "./user-session";
 
-function decryptPayment<T extends { amount: string; phoneNumber: string }>(
-  p: T,
-): T {
+function decryptPayment<
+  T extends { amount: string; phoneNumber: string; baseAmount?: string | null },
+>(p: T): T {
   return {
     ...p,
     amount: decrypt(p.amount),
     phoneNumber: decrypt(p.phoneNumber),
+    baseAmount: p.baseAmount ? decrypt(p.baseAmount) : null,
   };
 }
 
@@ -38,6 +39,7 @@ export async function getWalletBalance(organizationId: string) {
       kind: true,
       status: true,
       amount: true,
+      baseAmount: true,
     },
   });
 
@@ -46,13 +48,15 @@ export async function getWalletBalance(organizationId: string) {
   let pendingCashout = 0;
 
   for (const p of payments) {
-    const amount = parseFloat(decrypt(p.amount) || "0");
     if (p.kind === "CASHIN" && p.status === "successful") {
-      totalCashin += amount;
+      const cashinAmount = p.baseAmount
+        ? parseFloat(decrypt(p.baseAmount) || "0")
+        : parseFloat(decrypt(p.amount) || "0");
+      totalCashin += cashinAmount;
     } else if (p.kind === "CASHOUT" && p.status === "successful") {
-      totalCashout += amount;
+      totalCashout += parseFloat(decrypt(p.amount) || "0");
     } else if (p.kind === "CASHOUT" && p.status === "pending") {
-      pendingCashout += amount;
+      pendingCashout += parseFloat(decrypt(p.amount) || "0");
     }
   }
 

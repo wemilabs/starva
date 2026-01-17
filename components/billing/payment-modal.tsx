@@ -22,6 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { type BillingPeriod, PRICING_PLANS, USD_TO_RWF } from "@/lib/constants";
+import { calculateSubscriptionFees } from "@/lib/utils";
 import {
   checkPaymentStatus,
   initiateSubscriptionPayment,
@@ -58,7 +59,8 @@ export function PaymentModal({
   const plan = PRICING_PLANS.find((p) => p.name === planName);
   const priceUSD =
     billingPeriod === "yearly" ? plan?.yearlyPrice : plan?.monthlyPrice;
-  const amountRWF = priceUSD ? Math.round(priceUSD * USD_TO_RWF) : 0;
+  const baseAmountRWF = priceUSD ? Math.round(priceUSD * USD_TO_RWF) : 0;
+  const fees = calculateSubscriptionFees(baseAmountRWF);
 
   // Cleanup polling on unmount or close
   useEffect(() => {
@@ -96,7 +98,7 @@ export function PaymentModal({
       if (status === "polling") {
         setStatus("idle");
         toast.info(
-          "Payment timed out. If you approved the payment, it will be processed shortly."
+          "Payment timed out. If you approved the payment, it will be processed shortly.",
         );
       }
     }, 120000);
@@ -143,7 +145,7 @@ export function PaymentModal({
   const handleClose = () => {
     if (status === "polling") {
       toast.info(
-        "Payment is being processed. You'll be notified when it completes."
+        "Payment is being processed. You'll be notified when it completes.",
       );
     }
     onOpenChange(false);
@@ -163,13 +165,12 @@ export function PaymentModal({
         </DialogHeader>
 
         <div className="space-y-4 py-4">
-          {/* Amount display */}
           <div className="bg-muted rounded-lg p-4 text-center">
             <p className="text-sm text-muted-foreground">Amount to pay</p>
             <p className="text-3xl font-bold">
-              {amountRWF.toLocaleString()} RWF
+              {fees.totalAmount.toLocaleString()} RWF
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground mt-1">
               ≈ ${priceUSD}/{billingPeriod === "yearly" ? "year" : "month"}
             </p>
           </div>
@@ -263,7 +264,7 @@ export function PaymentModal({
             ) : (
               <>
                 <CreditCard className="size-4" />
-                Pay {amountRWF.toLocaleString()} RWF
+                Pay {fees.totalAmount.toLocaleString()} RWF
               </>
             )}
           </Button>

@@ -1,4 +1,4 @@
-import type { FeedbackStatus, FeedbackType } from "@/db/schema";
+import type { FeedbackStatus, FeedbackType, OrderStatus } from "@/db/schema";
 
 export const GENERAL_BRANDING_IMG_URL =
   "https://hsl8jk540a.ufs.sh/f/JFF4Q8WebB6du5UdXxlTLMJtliDeN9nXqzs57GUH6RgZbryB";
@@ -15,6 +15,24 @@ export const PRODUCT_STATUS_VALUES = [
   "out_of_stock",
   "archived",
 ] as const;
+
+export const validTransitions: Record<OrderStatus, OrderStatus[]> = {
+  pending: ["confirmed", "cancelled"],
+  confirmed: ["preparing", "cancelled"],
+  preparing: ["ready", "cancelled"],
+  ready: ["delivered", "cancelled"],
+  delivered: [],
+  cancelled: [],
+};
+
+export const statusLabels: Record<OrderStatus, string> = {
+  pending: "Pending",
+  confirmed: "Confirmed",
+  preparing: "Preparing",
+  ready: "Ready",
+  delivered: "Delivered",
+  cancelled: "Cancelled",
+};
 
 export const COUNTRIES = [
   // African countries
@@ -273,14 +291,14 @@ export const PRICING_PLANS: PricingPlan[] = [
 
 export function getPlanPrice(
   plan: PricingPlan,
-  billingPeriod: BillingPeriod
+  billingPeriod: BillingPeriod,
 ): number | null {
   return billingPeriod === "yearly" ? plan.yearlyPrice : plan.monthlyPrice;
 }
 
 export function getMonthlyEquivalent(
   plan: PricingPlan,
-  billingPeriod: BillingPeriod
+  billingPeriod: BillingPeriod,
 ): number | null {
   if (billingPeriod === "yearly" && plan.yearlyPrice) {
     return Math.round(plan.yearlyPrice / 12);

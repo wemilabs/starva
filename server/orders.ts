@@ -6,7 +6,11 @@ import { z } from "zod";
 import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
 import { orderItem, order as orderTable, user } from "@/db/schema";
-import { ORDER_STATUS_VALUES } from "@/lib/constants";
+import {
+  ORDER_STATUS_VALUES,
+  statusLabels,
+  validTransitions,
+} from "@/lib/constants";
 import { decrypt, encrypt } from "@/lib/encryption";
 import { realtime } from "@/lib/realtime";
 import { getProductsStock, updateStock } from "./inventory";
@@ -88,7 +92,7 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
     const stockWarnings: string[] = [];
     for (const item of items) {
       const productStock = stockCheck.stocks.find(
-        (s) => s.id === item.productId
+        (s) => s.id === item.productId,
       );
       if (productStock?.inventoryEnabled) {
         const availableStock = productStock.currentStock || 0;
@@ -98,7 +102,7 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
               products.find((p) => p.id === item.productId)?.name
             }, but ${
               item.quantity
-            } requested. Order will be confirmed when stock is available.`
+            } requested. Order will be confirmed when stock is available.`,
           );
       }
     }
@@ -171,7 +175,7 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
         quantity: item.quantity,
         priceAtOrder: encrypt(String(item.priceAtOrder)),
         subtotal: encrypt(item.subtotal),
-      }))
+      })),
     );
 
     const userData = await db.query.user.findFirst({
@@ -219,7 +223,7 @@ const updateOrderStatusSchema = z.object({
 });
 
 export async function updateOrderStatus(
-  input: z.infer<typeof updateOrderStatusSchema>
+  input: z.infer<typeof updateOrderStatusSchema>,
 ) {
   const verified = await verifySession();
   if (!verified.success) return { ok: false, error: "Unauthorized" };
@@ -254,6 +258,39 @@ export async function updateOrderStatus(
 
     const oldStatus = existingOrder.status;
 
+    const allowedNextStatuses = validTransitions[oldStatus] || [];
+
+    if (status === oldStatus) {
+      return { ok: false, error: "Order is already in this status" };
+    }
+
+    if (!allowedNextStatuses.includes(status)) {
+      if (oldStatus === "delivered") {
+        return {
+          ok: false,
+          error: "Cannot change status of a delivered order",
+        };
+      }
+      if (oldStatus === "cancelled") {
+        return {
+          ok: false,
+          error: "Cannot change status of a cancelled order",
+        };
+      }
+
+      return {
+        ok: false,
+        error: `Invalid status transition. Order must be "${statusLabels[allowedNextStatuses[0] || oldStatus]}" before it can be "${statusLabels[status]}"`,
+      };
+    }
+
+    if (status === "preparing" && !existingOrder.isPaid) {
+      return {
+        ok: false,
+        error: "Order must be paid before it can start preparing",
+      };
+    }
+
     await db
       .update(orderTable)
       .set({
@@ -287,7 +324,7 @@ export async function updateOrderStatus(
         // Check each item against current stock
         for (const item of orderItems) {
           const productStock = stockCheck.stocks.find(
-            (s) => s.id === item.productId
+            (s) => s.id === item.productId,
           );
           if (productStock?.inventoryEnabled) {
             const availableStock = productStock.currentStock || 0;
@@ -437,7 +474,7 @@ export async function cancelOrder(orderId: string) {
         where: (member, { and, eq }) =>
           and(
             eq(member.organizationId, existingOrder.organizationId),
-            eq(member.userId, session.user.id)
+            eq(member.userId, session.user.id),
           ),
       });
 
@@ -536,7 +573,7 @@ const markOrderAsDeliveredSchema = z.object({
 });
 
 export async function markOrderAsDelivered(
-  input: z.infer<typeof markOrderAsDeliveredSchema>
+  input: z.infer<typeof markOrderAsDeliveredSchema>,
 ) {
   const verified = await verifySession();
   if (!verified.success) return { ok: false, error: "Unauthorized" };
@@ -601,7 +638,7 @@ export async function markOrderAsDelivered(
 
 export async function getOrganizationAnalyticsOverview(
   organizationId: string,
-  days: number = 28
+  days: number = 28,
 ) {
   const verified = await verifySession();
   if (!verified.success) return { ok: false, error: "Unauthorized" };
@@ -628,7 +665,7 @@ export async function getOrganizationAnalyticsOverview(
     where: (order, { and, eq, gte }) =>
       and(
         eq(order.organizationId, organizationId),
-        gte(order.createdAt, startDate)
+        gte(order.createdAt, startDate),
       ),
     columns: {
       id: true,
@@ -678,14 +715,14 @@ export async function getOrganizationAnalyticsOverview(
   // Find peak hour
   const peakHour = Object.entries(byHour).reduce(
     (a, b) => (byHour[a[0]] > byHour[b[0]] ? a : b),
-    ["0", 0]
+    ["0", 0],
   );
 
   // Calculate basic metrics
   const totalOrders = orders.length;
   const totalRevenue = orders.reduce(
     (sum, order) => sum + Number(decrypt(order.totalPrice) ?? 0),
-    0
+    0,
   );
   const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 

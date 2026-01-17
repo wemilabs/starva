@@ -98,10 +98,7 @@ async function OrderContent({
                   <OrderStatusSelect
                     orderId={order.id}
                     currentStatus={order.status}
-                    disabled={
-                      order.status === "delivered" ||
-                      order.status === "cancelled"
-                    }
+                    isPaid={order.isPaid}
                   />
                 )}
               </div>

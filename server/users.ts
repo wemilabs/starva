@@ -11,7 +11,9 @@ import {
 } from "@/data/users";
 import { db } from "@/db/drizzle";
 import { user } from "@/db/schema";
+import { logAdminAction } from "@/lib/admin-audit";
 import { requireAdmin } from "@/lib/admin-auth";
+import { requireAdminRateLimit } from "@/lib/admin-rate-limit";
 import { auth } from "@/lib/auth";
 import { getUserSubscription } from "@/server/subscription";
 
@@ -35,7 +37,7 @@ export async function signInUser(email: string, password: string) {
 export async function signUpUser(
   email: string,
   password: string,
-  name: string
+  name: string,
 ) {
   try {
     await auth.api.signUpEmail({
@@ -93,15 +95,23 @@ export async function getUserStatsAdmin() {
 
 export async function updateUserAdmin(
   userId: string,
-  data: { name?: string; emailVerified?: boolean }
+  data: { name?: string; emailVerified?: boolean },
 ) {
-  await requireAdmin();
+  const session = await requireAdmin();
 
   try {
     await db
       .update(user)
       .set({ ...data, updatedAt: new Date() })
       .where(eq(user.id, userId));
+
+    await logAdminAction({
+      adminId: session.user.id,
+      action: "UPDATE_USER",
+      targetId: userId,
+      targetType: "user",
+      metadata: data,
+    });
 
     return { success: true, message: "User updated successfully" };
   } catch (error) {
@@ -111,11 +121,19 @@ export async function updateUserAdmin(
 }
 
 export async function deleteUserAdmin(userId: string) {
-  await requireAdmin();
+  const session = await requireAdmin();
+  await requireAdminRateLimit(session.user.id, "delete_user", true);
 
   try {
     await auth.api.removeUser({
       body: { userId },
+    });
+
+    await logAdminAction({
+      adminId: session.user.id,
+      action: "DELETE_USER",
+      targetId: userId,
+      targetType: "user",
     });
 
     return { success: true, message: "User deleted successfully" };
@@ -126,11 +144,19 @@ export async function deleteUserAdmin(userId: string) {
 }
 
 export async function banUserAdmin(userId: string) {
-  await requireAdmin();
+  const session = await requireAdmin();
+  await requireAdminRateLimit(session.user.id, "ban_user", true);
 
   try {
     await auth.api.banUser({
       body: { userId },
+    });
+
+    await logAdminAction({
+      adminId: session.user.id,
+      action: "BAN_USER",
+      targetId: userId,
+      targetType: "user",
     });
 
     return { success: true, message: "User banned successfully" };
@@ -141,11 +167,19 @@ export async function banUserAdmin(userId: string) {
 }
 
 export async function unbanUserAdmin(userId: string) {
-  await requireAdmin();
+  const session = await requireAdmin();
+  await requireAdminRateLimit(session.user.id, "unban_user", true);
 
   try {
     await auth.api.unbanUser({
       body: { userId },
+    });
+
+    await logAdminAction({
+      adminId: session.user.id,
+      action: "UNBAN_USER",
+      targetId: userId,
+      targetType: "user",
     });
 
     return { success: true, message: "User unbanned successfully" };
@@ -161,7 +195,8 @@ export async function createUserAdmin(data: {
   password: string;
   emailVerified?: boolean;
 }) {
-  await requireAdmin();
+  const session = await requireAdmin();
+  await requireAdminRateLimit(session.user.id, "create_user", true);
 
   try {
     await auth.api.createUser({
@@ -171,6 +206,13 @@ export async function createUserAdmin(data: {
         password: data.password,
         data: { emailVerified: data.emailVerified ?? false },
       },
+    });
+
+    await logAdminAction({
+      adminId: session.user.id,
+      action: "CREATE_USER",
+      targetType: "user",
+      metadata: { email: data.email, name: data.name },
     });
 
     return { success: true, message: "User created successfully" };

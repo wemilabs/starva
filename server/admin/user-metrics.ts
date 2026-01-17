@@ -3,6 +3,7 @@
 import { and, count, gte, lte } from "drizzle-orm";
 import { db } from "@/db/drizzle";
 import { session } from "@/db/schema";
+import { requireAdmin } from "@/lib/admin-auth";
 
 export type UserMetricsData = {
   visitors: {
@@ -27,80 +28,73 @@ export type UserMetricsData = {
 };
 
 export async function getUserMetrics(): Promise<UserMetricsData> {
+  await requireAdmin();
+
   const now = new Date();
   const currentPeriodStart = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   const previousPeriodStart = new Date(now.getTime() - 48 * 60 * 60 * 1000);
   const previousPeriodEnd = currentPeriodStart;
 
-  // Get current period visitors (unique users)
   const currentVisitors = await db
     .select({ count: count() })
     .from(session)
     .where(
       and(
         gte(session.createdAt, currentPeriodStart),
-        lte(session.createdAt, now)
-      )
+        lte(session.createdAt, now),
+      ),
     )
     .then((result) => result[0]?.count || 0);
 
-  // Get previous period visitors
   const previousVisitors = await db
     .select({ count: count() })
     .from(session)
     .where(
       and(
         gte(session.createdAt, previousPeriodStart),
-        lte(session.createdAt, previousPeriodEnd)
-      )
+        lte(session.createdAt, previousPeriodEnd),
+      ),
     )
     .then((result) => result[0]?.count || 0);
 
-  // Calculate visitor change
   const visitorsChange =
     previousVisitors > 0
       ? Math.round(
-          ((currentVisitors - previousVisitors) / previousVisitors) * 100
+          ((currentVisitors - previousVisitors) / previousVisitors) * 100,
         )
       : 0;
 
-  // Get current period page views (sessions as proxy)
   const currentPageViews = await db
     .select({ count: count() })
     .from(session)
     .where(
       and(
         gte(session.createdAt, currentPeriodStart),
-        lte(session.createdAt, now)
-      )
+        lte(session.createdAt, now),
+      ),
     )
     .then((result) => result[0]?.count || 0);
 
-  // Get previous period page views
   const previousPageViews = await db
     .select({ count: count() })
     .from(session)
     .where(
       and(
         gte(session.createdAt, previousPeriodStart),
-        lte(session.createdAt, previousPeriodEnd)
-      )
+        lte(session.createdAt, previousPeriodEnd),
+      ),
     )
     .then((result) => result[0]?.count || 0);
 
-  // Calculate page views change
   const pageViewsChange =
     previousPageViews > 0
       ? Math.round(
-          ((currentPageViews - previousPageViews) / previousPageViews) * 100
+          ((currentPageViews - previousPageViews) / previousPageViews) * 100,
         )
       : 0;
 
-  // Calculate bounce rate (sessions with duration < 10 seconds)
-  // A "bounce" is when a user leaves quickly without meaningful interaction
-  const BOUNCE_THRESHOLD_MS = 10 * 1000; // 10 seconds
+  const BOUNCE_THRESHOLD_MS = 10 * 1000;
 
-  // Get current period sessions with their durations
   const currentSessions = await db
     .select({
       createdAt: session.createdAt,
@@ -110,8 +104,8 @@ export async function getUserMetrics(): Promise<UserMetricsData> {
     .where(
       and(
         gte(session.createdAt, currentPeriodStart),
-        lte(session.createdAt, now)
-      )
+        lte(session.createdAt, now),
+      ),
     );
 
   const currentBounces = currentSessions.filter((s) => {
@@ -125,7 +119,6 @@ export async function getUserMetrics(): Promise<UserMetricsData> {
       ? Math.round((currentBounces / currentSessions.length) * 100)
       : 0;
 
-  // Get previous period sessions
   const previousSessions = await db
     .select({
       createdAt: session.createdAt,
@@ -135,8 +128,8 @@ export async function getUserMetrics(): Promise<UserMetricsData> {
     .where(
       and(
         gte(session.createdAt, previousPeriodStart),
-        lte(session.createdAt, previousPeriodEnd)
-      )
+        lte(session.createdAt, previousPeriodEnd),
+      ),
     );
 
   const previousBounces = previousSessions.filter((s) => {
@@ -153,11 +146,10 @@ export async function getUserMetrics(): Promise<UserMetricsData> {
   const bounceRateChange =
     previousBounceRate > 0
       ? Math.round(
-          ((currentBounceRate - previousBounceRate) / previousBounceRate) * 100
+          ((currentBounceRate - previousBounceRate) / previousBounceRate) * 100,
         )
       : 0;
 
-  // Get hourly activity for the last 24 hours (midnight to midnight)
   const hourlyActivity = [];
   const startOfDay = new Date(now);
   startOfDay.setHours(0, 0, 0, 0);
@@ -170,7 +162,7 @@ export async function getUserMetrics(): Promise<UserMetricsData> {
       .select({ count: count() })
       .from(session)
       .where(
-        and(gte(session.createdAt, hourStart), lte(session.createdAt, hourEnd))
+        and(gte(session.createdAt, hourStart), lte(session.createdAt, hourEnd)),
       )
       .then((result) => result[0]?.count || 0);
 

@@ -3,15 +3,29 @@
 import { and, desc, eq } from "drizzle-orm";
 import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
-import { orderNotification } from "@/db/schema";
+import { member, orderNotification } from "@/db/schema";
 
 export async function getOrderNotifications(
   organizationId: string,
-  limit = 50
+  limit = 50,
 ) {
   const sessionResult = await verifySession();
   if (!sessionResult.success || !sessionResult.session?.user)
-    throw new Error("Unauthorized");
+    return { ok: false, error: "Unauthorized", notifications: [] };
+
+  const membership = await db.query.member.findFirst({
+    where: and(
+      eq(member.organizationId, organizationId),
+      eq(member.userId, sessionResult.session.user.id),
+    ),
+  });
+
+  if (!membership)
+    return {
+      ok: false,
+      error: "Only organization members can view notifications",
+      notifications: [],
+    };
 
   const notifications = await db.query.orderNotification.findMany({
     where: eq(orderNotification.organizationId, organizationId),
@@ -19,13 +33,27 @@ export async function getOrderNotifications(
     limit,
   });
 
-  return notifications;
+  return { ok: true, notifications };
 }
 
 export async function getUnreadOrderNotificationCount(organizationId: string) {
   const sessionResult = await verifySession();
   if (!sessionResult.success || !sessionResult.session?.user)
-    throw new Error("Unauthorized");
+    return { ok: false, error: "Unauthorized", count: 0 };
+
+  const membership = await db.query.member.findFirst({
+    where: and(
+      eq(member.organizationId, organizationId),
+      eq(member.userId, sessionResult.session.user.id),
+    ),
+  });
+
+  if (!membership)
+    return {
+      ok: false,
+      error: "Only organization members can view notification count",
+      count: 0,
+    };
 
   const result = await db
     .select({ count: orderNotification.id })
@@ -33,30 +61,62 @@ export async function getUnreadOrderNotificationCount(organizationId: string) {
     .where(
       and(
         eq(orderNotification.organizationId, organizationId),
-        eq(orderNotification.read, false)
-      )
+        eq(orderNotification.read, false),
+      ),
     );
 
-  return result.length;
+  return { ok: true, count: result.length };
 }
 
 export async function markOrderNotificationAsRead(notificationId: string) {
   const sessionResult = await verifySession();
   if (!sessionResult.success || !sessionResult.session?.user)
-    throw new Error("Unauthorized");
+    return { ok: false, error: "Unauthorized" };
+
+  const notification = await db.query.orderNotification.findFirst({
+    where: eq(orderNotification.id, notificationId),
+  });
+
+  if (!notification) return { ok: false, error: "Notification not found" };
+
+  const membership = await db.query.member.findFirst({
+    where: and(
+      eq(member.organizationId, notification.organizationId),
+      eq(member.userId, sessionResult.session.user.id),
+    ),
+  });
+
+  if (!membership)
+    return {
+      ok: false,
+      error: "Only organization members can mark notifications as read",
+    };
 
   await db
     .update(orderNotification)
     .set({ read: true })
     .where(eq(orderNotification.id, notificationId));
 
-  return { success: true };
+  return { ok: true };
 }
 
 export async function markAllOrderNotificationsAsRead(organizationId: string) {
   const sessionResult = await verifySession();
   if (!sessionResult.success || !sessionResult.session?.user)
-    throw new Error("Unauthorized");
+    return { ok: false, error: "Unauthorized" };
+
+  const membership = await db.query.member.findFirst({
+    where: and(
+      eq(member.organizationId, organizationId),
+      eq(member.userId, sessionResult.session.user.id),
+    ),
+  });
+
+  if (!membership)
+    return {
+      ok: false,
+      error: "Only organization members can mark notifications as read",
+    };
 
   await db
     .update(orderNotification)
@@ -64,11 +124,11 @@ export async function markAllOrderNotificationsAsRead(organizationId: string) {
     .where(
       and(
         eq(orderNotification.organizationId, organizationId),
-        eq(orderNotification.read, false)
-      )
+        eq(orderNotification.read, false),
+      ),
     );
 
-  return { success: true };
+  return { ok: true };
 }
 
 export async function createOrderNotification(data: {

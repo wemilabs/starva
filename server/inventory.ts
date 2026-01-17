@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
-import { inventoryHistory, product as productTable } from "@/db/schema";
+import { inventoryHistory, member, product as productTable } from "@/db/schema";
 
 const updateStockSchema = z.object({
   productId: z.string().min(1),
@@ -27,10 +27,25 @@ export async function updateStock(input: z.infer<typeof updateStockSchema>) {
     return { ok: false, error: "Unauthorized" } as const;
   }
 
+  const { organizationId } = parsed.data;
+
+  const membership = await db.query.member.findFirst({
+    where: and(
+      eq(member.organizationId, organizationId),
+      eq(member.userId, sessionData.session.user.id),
+    ),
+  });
+
+  if (!membership) {
+    return {
+      ok: false,
+      error: "Only organization members can manage inventory",
+    } as const;
+  }
+
   try {
     const {
       productId,
-      organizationId,
       quantityChange,
       changeType,
       reason,
@@ -48,8 +63,8 @@ export async function updateStock(input: z.infer<typeof updateStockSchema>) {
       .where(
         and(
           eq(productTable.id, productId),
-          eq(productTable.organizationId, organizationId)
-        )
+          eq(productTable.organizationId, organizationId),
+        ),
       )
       .limit(1);
 
@@ -101,8 +116,8 @@ export async function updateStock(input: z.infer<typeof updateStockSchema>) {
       .where(
         and(
           eq(productTable.id, productId),
-          eq(productTable.organizationId, organizationId)
-        )
+          eq(productTable.organizationId, organizationId),
+        ),
       );
 
     // Record inventory history
@@ -139,7 +154,7 @@ const getInventorySchema = z.object({
 });
 
 export async function getInventoryList(
-  input: z.infer<typeof getInventorySchema>
+  input: z.infer<typeof getInventorySchema>,
 ) {
   const parsed = getInventorySchema.safeParse(input);
   if (!parsed.success) {
@@ -155,9 +170,24 @@ export async function getInventoryList(
     return { ok: false, error: "Unauthorized", products: [] } as const;
   }
 
-  try {
-    const { organizationId } = parsed.data;
+  const { organizationId } = parsed.data;
 
+  const membership = await db.query.member.findFirst({
+    where: and(
+      eq(member.organizationId, organizationId),
+      eq(member.userId, sessionData.session.user.id),
+    ),
+  });
+
+  if (!membership) {
+    return {
+      ok: false,
+      error: "Only organization members can view inventory",
+      products: [],
+    } as const;
+  }
+
+  try {
     const products = await db
       .select({
         id: productTable.id,
@@ -175,8 +205,8 @@ export async function getInventoryList(
       .where(
         and(
           eq(productTable.organizationId, organizationId),
-          eq(productTable.inventoryEnabled, true)
-        )
+          eq(productTable.inventoryEnabled, true),
+        ),
       )
       .orderBy(productTable.name);
 
@@ -200,7 +230,7 @@ const getProductsStockSchema = z.object({
 });
 
 export async function getInventoryHistory(
-  input: z.infer<typeof getInventoryHistorySchema>
+  input: z.infer<typeof getInventoryHistorySchema>,
 ) {
   const parsed = getInventoryHistorySchema.safeParse(input);
   if (!parsed.success) {
@@ -216,17 +246,32 @@ export async function getInventoryHistory(
     return { ok: false, error: "Unauthorized", history: [] } as const;
   }
 
-  try {
-    const { productId, organizationId, limit } = parsed.data;
+  const { productId, organizationId, limit } = parsed.data;
 
+  const membership = await db.query.member.findFirst({
+    where: and(
+      eq(member.organizationId, organizationId),
+      eq(member.userId, sessionData.session.user.id),
+    ),
+  });
+
+  if (!membership) {
+    return {
+      ok: false,
+      error: "Only organization members can view inventory history",
+      history: [],
+    } as const;
+  }
+
+  try {
     const history = await db
       .select()
       .from(inventoryHistory)
       .where(
         and(
           eq(inventoryHistory.productId, productId),
-          eq(inventoryHistory.organizationId, organizationId)
-        )
+          eq(inventoryHistory.organizationId, organizationId),
+        ),
       )
       .orderBy(desc(inventoryHistory.createdAt))
       .limit(limit);
@@ -240,7 +285,7 @@ export async function getInventoryHistory(
 }
 
 export async function getProductsStock(
-  input: z.infer<typeof getProductsStockSchema>
+  input: z.infer<typeof getProductsStockSchema>,
 ) {
   const parsed = getProductsStockSchema.safeParse(input);
   if (!parsed.success) {
@@ -256,9 +301,9 @@ export async function getProductsStock(
     return { ok: false, error: "Unauthorized", stocks: [] } as const;
   }
 
-  try {
-    const { productIds, organizationId } = parsed.data;
+  const { productIds, organizationId } = parsed.data;
 
+  try {
     if (productIds.length === 0) {
       return { ok: true, stocks: [] } as const;
     }
@@ -273,8 +318,8 @@ export async function getProductsStock(
       .where(
         and(
           eq(productTable.organizationId, organizationId),
-          inArray(productTable.id, productIds)
-        )
+          inArray(productTable.id, productIds),
+        ),
       );
 
     return { ok: true, stocks: products } as const;

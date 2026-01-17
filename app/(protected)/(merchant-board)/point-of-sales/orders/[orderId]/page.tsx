@@ -38,16 +38,17 @@ async function OrderContent({
     redirect("/sign-in");
   }
 
-  const order = await getOrderById(orderId);
-  if (!order) notFound();
+  const orderResult = await getOrderById(orderId);
+  if (!orderResult.ok) notFound();
 
+  const order = orderResult.order;
   const isOwner = order.userId === session.session.user.id;
   const activeOrgId = session.session.session.activeOrganizationId;
   const isMerchant = order.organizationId === activeOrgId;
 
   const totalItems = order.orderItems.reduce(
     (sum, item) => sum + item.quantity,
-    0
+    0,
   );
 
   const orderNumber = isMerchant
@@ -309,13 +310,15 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { orderId } = await params;
 
-  const order = await getOrderById(orderId);
-  if (!order) {
+  const orderResult = await getOrderById(orderId);
+  if (!orderResult.ok) {
     return {
       title: "Order Not Found - Starva.shop",
       description: "The requested order could not be found.",
     };
   }
+
+  const order = orderResult.order;
 
   const session = await verifySession();
   const activeOrgId = session?.session?.session.activeOrganizationId;
@@ -327,7 +330,7 @@ export async function generateMetadata({
 
   const totalItems = order.orderItems.reduce(
     (sum, item) => sum + item.quantity,
-    0
+    0,
   );
 
   const firstItem = order.orderItems[0];
@@ -336,12 +339,12 @@ export async function generateMetadata({
   const title = `Order #${orderNumber} - Starva.shop`;
   const description = hasMultipleItems
     ? `Order #${orderNumber} with ${totalItems} items. Total: ${formatPriceInRWF(
-        order.totalPrice
+        order.totalPrice,
       )}. Placed on ${formatDate(order.createdAt)}. Status: ${order.status}.`
     : `Order #${orderNumber} for ${
         firstItem?.product.name || "items"
       }. Total: ${formatPriceInRWF(order.totalPrice)}. Placed on ${formatDate(
-        order.createdAt
+        order.createdAt,
       )}. Status: ${order.status}.`;
 
   const images = [];
@@ -389,7 +392,7 @@ export async function generateMetadata({
 }
 
 export default async function OrderPage(
-  props: PageProps<"/point-of-sales/orders/[orderId]">
+  props: PageProps<"/point-of-sales/orders/[orderId]">,
 ) {
   return (
     <Suspense

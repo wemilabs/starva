@@ -1,13 +1,14 @@
 import { and, desc, eq, inArray, lt, or, sql } from "drizzle-orm";
 import { cacheLife } from "next/cache";
 import { cache } from "react";
+import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
-import { type OrderStatus, order } from "@/db/schema";
+import { member, type OrderStatus, order } from "@/db/schema";
 import { decrypt } from "@/lib/encryption";
 import "server-only";
 
 function decryptOrderItems<
-  T extends { priceAtOrder: string; subtotal: string }
+  T extends { priceAtOrder: string; subtotal: string },
 >(items: T[]): T[] {
   return items.map((item) => ({
     ...item,
@@ -25,7 +26,7 @@ function decryptOrder<T extends { totalPrice: string }>(ord: T): T {
 
 async function calculateMerchantOrderNumberPerOrg(
   organizationId: string,
-  orderCreatedAt: Date
+  orderCreatedAt: Date,
 ): Promise<number> {
   const result = await db
     .select({ count: sql<number>`count(*)::int` })
@@ -35,9 +36,9 @@ async function calculateMerchantOrderNumberPerOrg(
         eq(order.organizationId, organizationId),
         or(
           lt(order.createdAt, orderCreatedAt),
-          and(eq(order.createdAt, orderCreatedAt))
-        )
-      )
+          and(eq(order.createdAt, orderCreatedAt)),
+        ),
+      ),
     );
   return result[0]?.count || 0;
 }
@@ -45,7 +46,7 @@ async function calculateMerchantOrderNumberPerOrg(
 async function calculateCustomerOrderNumberPerUserPerOrg(
   userId: string,
   organizationId: string,
-  orderCreatedAt: Date
+  orderCreatedAt: Date,
 ): Promise<number> {
   const result = await db
     .select({ count: sql<number>`count(*)::int` })
@@ -56,14 +57,34 @@ async function calculateCustomerOrderNumberPerUserPerOrg(
         eq(order.organizationId, organizationId),
         or(
           lt(order.createdAt, orderCreatedAt),
-          and(eq(order.createdAt, orderCreatedAt))
-        )
-      )
+          and(eq(order.createdAt, orderCreatedAt)),
+        ),
+      ),
     );
   return result[0]?.count || 0;
 }
 
 export const getOrdersByOrganization = cache(async (organizationId: string) => {
+  const verified = await verifySession();
+  if (!verified.success)
+    return { ok: false, error: "Unauthorized", orders: [] };
+
+  const { session } = verified;
+
+  const membership = await db.query.member.findFirst({
+    where: and(
+      eq(member.organizationId, organizationId),
+      eq(member.userId, session.user.id),
+    ),
+  });
+
+  if (!membership)
+    return {
+      ok: false,
+      error: "Only organization members can view orders",
+      orders: [],
+    };
+
   const orders = await db.query.order.findMany({
     where: eq(order.organizationId, organizationId),
     with: {
@@ -95,20 +116,25 @@ export const getOrdersByOrganization = cache(async (organizationId: string) => {
     orders.map(async (ord) => {
       const merchantOrderNumber = await calculateMerchantOrderNumberPerOrg(
         organizationId,
-        ord.createdAt
+        ord.createdAt,
       );
       return {
         ...decryptOrder(ord),
         orderItems: decryptOrderItems(ord.orderItems),
         merchantOrderNumber,
       };
-    })
+    }),
   );
 
-  return ordersWithNumbers;
+  return { ok: true, orders: ordersWithNumbers };
 });
 
 export const getOrderById = cache(async (orderId: string) => {
+  const verified = await verifySession();
+  if (!verified.success)
+    return { ok: false as const, error: "Unauthorized", order: null };
+
+  const { session } = verified;
   const orderData = await db.query.order.findFirst({
     where: eq(order.id, orderId),
     with: {
@@ -144,29 +170,65 @@ export const getOrderById = cache(async (orderId: string) => {
     },
   });
 
-  if (!orderData) return null;
+  if (!orderData)
+    return { ok: false as const, error: "Order not found", order: null };
+
+  const isCustomer = orderData.userId === session.user.id;
+
+  if (!isCustomer) {
+    const membership = await db.query.member.findFirst({
+      where: and(
+        eq(member.organizationId, orderData.organizationId),
+        eq(member.userId, session.user.id),
+      ),
+    });
+
+    if (!membership)
+      return {
+        ok: false as const,
+        error:
+          "You can only view your own orders or orders from your organization",
+        order: null,
+      };
+  }
 
   const [merchantOrderNumber, customerOrderNumber] = await Promise.all([
     calculateMerchantOrderNumberPerOrg(
       orderData.organizationId,
-      orderData.createdAt
+      orderData.createdAt,
     ),
     calculateCustomerOrderNumberPerUserPerOrg(
       orderData.userId,
       orderData.organizationId,
-      orderData.createdAt
+      orderData.createdAt,
     ),
   ]);
 
   return {
-    ...decryptOrder(orderData),
-    orderItems: decryptOrderItems(orderData.orderItems),
-    merchantOrderNumber,
-    customerOrderNumber,
+    ok: true as const,
+    order: {
+      ...decryptOrder(orderData),
+      orderItems: decryptOrderItems(orderData.orderItems),
+      merchantOrderNumber,
+      customerOrderNumber,
+    },
   };
 });
 
 export const getOrdersByUser = cache(async (userId: string) => {
+  const verified = await verifySession();
+  if (!verified.success)
+    return { ok: false, error: "Unauthorized", orders: [] };
+
+  const { session } = verified;
+
+  if (session.user.id !== userId)
+    return {
+      ok: false,
+      error: "You can only view your own orders",
+      orders: [],
+    };
+
   const orders = await db.query.order.findMany({
     where: eq(order.userId, userId),
     with: {
@@ -200,27 +262,47 @@ export const getOrdersByUser = cache(async (userId: string) => {
         await calculateCustomerOrderNumberPerUserPerOrg(
           userId,
           ord.organizationId,
-          ord.createdAt
+          ord.createdAt,
         );
       return {
         ...decryptOrder(ord),
         orderItems: decryptOrderItems(ord.orderItems),
         customerOrderNumber,
       };
-    })
+    }),
   );
 
-  return ordersWithNumbers;
+  return { ok: true, orders: ordersWithNumbers };
 });
 
 export const getOrdersByStatus = cache(
   async (organizationId: string, status: OrderStatus | OrderStatus[]) => {
+    const verified = await verifySession();
+    if (!verified.success)
+      return { ok: false, error: "Unauthorized", orders: [] };
+
+    const { session } = verified;
+
+    const membership = await db.query.member.findFirst({
+      where: and(
+        eq(member.organizationId, organizationId),
+        eq(member.userId, session.user.id),
+      ),
+    });
+
+    if (!membership)
+      return {
+        ok: false,
+        error: "Only organization members can view orders",
+        orders: [],
+      };
+
     const statuses = Array.isArray(status) ? status : [status];
 
     const orders = await db.query.order.findMany({
       where: and(
         eq(order.organizationId, organizationId),
-        inArray(order.status, statuses)
+        inArray(order.status, statuses),
       ),
       with: {
         user: {
@@ -251,53 +333,98 @@ export const getOrdersByStatus = cache(
       orders.map(async (ord) => {
         const merchantOrderNumber = await calculateMerchantOrderNumberPerOrg(
           organizationId,
-          ord.createdAt
+          ord.createdAt,
         );
         return {
           ...decryptOrder(ord),
           orderItems: decryptOrderItems(ord.orderItems),
           merchantOrderNumber,
         };
-      })
+      }),
     );
 
-    return ordersWithNumbers;
-  }
+    return { ok: true, orders: ordersWithNumbers };
+  },
 );
 
-export const getOrderStats = cache(async (organizationId: string) => {
-  "use cache";
-  cacheLife("minutes");
+export const getOrderStats = cache(
+  async (organizationId: string, userId: string) => {
+    "use cache";
+    cacheLife("minutes");
 
-  const orders = await db.query.order.findMany({
-    where: eq(order.organizationId, organizationId),
-    columns: {
-      status: true,
-      totalPrice: true,
-    },
-  });
+    const membership = await db.query.member.findFirst({
+      where: and(
+        eq(member.organizationId, organizationId),
+        eq(member.userId, userId),
+      ),
+    });
 
-  const statsByStatus = orders.reduce((acc, ord) => {
-    const status = ord.status;
-    if (!acc[status]) {
-      acc[status] = { status, count: 0, totalRevenue: 0 };
-    }
-    acc[status].count += 1;
-    acc[status].totalRevenue += Number(decrypt(ord.totalPrice) || 0);
-    return acc;
-  }, {} as Record<string, { status: OrderStatus; count: number; totalRevenue: number }>);
+    if (!membership)
+      return {
+        ok: false,
+        error: "Only organization members can view order stats",
+        stats: [],
+      };
 
-  return Object.values(statsByStatus).map((s) => ({
-    status: s.status,
-    count: s.count,
-    totalRevenue: String(s.totalRevenue),
-  }));
-});
+    const orders = await db.query.order.findMany({
+      where: eq(order.organizationId, organizationId),
+      columns: {
+        status: true,
+        totalPrice: true,
+      },
+    });
+
+    const statsByStatus = orders.reduce(
+      (acc, ord) => {
+        const status = ord.status;
+        if (!acc[status]) {
+          acc[status] = { status, count: 0, totalRevenue: 0 };
+        }
+        acc[status].count += 1;
+        acc[status].totalRevenue += Number(decrypt(ord.totalPrice) || 0);
+        return acc;
+      },
+      {} as Record<
+        string,
+        { status: OrderStatus; count: number; totalRevenue: number }
+      >,
+    );
+
+    return {
+      ok: true,
+      stats: Object.values(statsByStatus).map((s) => ({
+        status: s.status,
+        count: s.count,
+        totalRevenue: String(s.totalRevenue),
+      })),
+    };
+  },
+);
 
 export const getRecentOrders = cache(
   async (organizationId: string, limit: number = 10) => {
     "use cache";
     cacheLife("seconds");
+
+    const verified = await verifySession();
+    if (!verified.success)
+      return { ok: false, error: "Unauthorized", orders: [] };
+
+    const { session } = verified;
+
+    const membership = await db.query.member.findFirst({
+      where: and(
+        eq(member.organizationId, organizationId),
+        eq(member.userId, session.user.id),
+      ),
+    });
+
+    if (!membership)
+      return {
+        ok: false,
+        error: "Only organization members can view orders",
+        orders: [],
+      };
 
     const orders = await db.query.order.findMany({
       where: eq(order.organizationId, organizationId),
@@ -328,16 +455,16 @@ export const getRecentOrders = cache(
       orders.map(async (ord) => {
         const merchantOrderNumber = await calculateMerchantOrderNumberPerOrg(
           organizationId,
-          ord.createdAt
+          ord.createdAt,
         );
         return {
           ...decryptOrder(ord),
           orderItems: decryptOrderItems(ord.orderItems),
           merchantOrderNumber,
         };
-      })
+      }),
     );
 
-    return ordersWithNumbers;
-  }
+    return { ok: true, orders: ordersWithNumbers };
+  },
 );

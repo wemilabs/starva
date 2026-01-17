@@ -1,11 +1,12 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/db/drizzle";
-import { payment } from "@/db/schema";
+import { member, payment } from "@/db/schema";
 import { decrypt } from "@/lib/encryption";
 import "server-only";
+import { verifySession } from "./user-session";
 
 function decryptPayment<T extends { amount: string; phoneNumber: string }>(
-  p: T
+  p: T,
 ): T {
   return {
     ...p,
@@ -15,6 +16,22 @@ function decryptPayment<T extends { amount: string; phoneNumber: string }>(
 }
 
 export async function getWalletBalance(organizationId: string) {
+  const verified = await verifySession();
+  if (!verified.success)
+    return { ok: false as const, error: "Unauthorized", balance: null };
+
+  const { session } = verified;
+
+  const membership = await db.query.member.findFirst({
+    where: and(
+      eq(member.organizationId, organizationId),
+      eq(member.userId, session.user.id),
+    ),
+  });
+
+  if (!membership)
+    return { ok: false as const, error: "Unauthorized", balance: null };
+
   const payments = await db.query.payment.findMany({
     where: eq(payment.organizationId, organizationId),
     columns: {
@@ -42,27 +59,56 @@ export async function getWalletBalance(organizationId: string) {
   const available = totalCashin - totalCashout - pendingCashout;
 
   return {
-    totalCashin,
-    totalCashout,
-    pendingCashout,
-    available: Math.max(0, available),
+    ok: true as const,
+    balance: {
+      totalCashin,
+      totalCashout,
+      pendingCashout,
+      available: Math.max(0, available),
+    },
   };
 }
 
 export async function getWalletTransactions(
   organizationId: string,
-  limit = 50
+  limit = 50,
 ) {
+  const verified = await verifySession();
+  if (!verified.success)
+    return { ok: false as const, error: "Unauthorized", transactions: [] };
+
+  const { session } = verified;
+
+  const membership = await db.query.member.findFirst({
+    where: and(
+      eq(member.organizationId, organizationId),
+      eq(member.userId, session.user.id),
+    ),
+  });
+
+  if (!membership)
+    return {
+      ok: false as const,
+      error: "Only organization members can view wallet transactions",
+      transactions: [],
+    };
+
   const transactions = await db.query.payment.findMany({
     where: (p, { eq }) => eq(p.organizationId, organizationId),
     orderBy: (p, { desc }) => [desc(p.createdAt)],
     limit,
   });
 
-  return transactions.map(decryptPayment);
+  return { ok: true as const, transactions: transactions.map(decryptPayment) };
 }
 
 export async function getTransactionById(transactionId: string) {
+  const verified = await verifySession();
+  if (!verified.success)
+    return { ok: false as const, error: "Unauthorized", transaction: null };
+
+  const { session } = verified;
+
   const transaction = await db.query.payment.findFirst({
     where: (p, { eq }) => eq(p.id, transactionId),
     with: {
@@ -71,25 +117,80 @@ export async function getTransactionById(transactionId: string) {
     },
   });
 
-  if (!transaction) return null;
+  if (!transaction)
+    return {
+      ok: false as const,
+      error: "Transaction not found",
+      transaction: null,
+    };
+
+  if (transaction.organizationId) {
+    const membership = await db.query.member.findFirst({
+      where: and(
+        eq(member.organizationId, transaction.organizationId),
+        eq(member.userId, session.user.id),
+      ),
+    });
+
+    if (!membership)
+      return {
+        ok: false as const,
+        error: "Only organization members can view this transaction",
+        transaction: null,
+      };
+  } else if (transaction.userId !== session.user.id) {
+    return {
+      ok: false as const,
+      error: "You can only view your own transactions",
+      transaction: null,
+    };
+  }
 
   return {
-    ...decryptPayment(transaction),
-    order: transaction.order
-      ? {
-          ...transaction.order,
-          totalPrice: decrypt(transaction.order.totalPrice),
-        }
-      : null,
+    ok: true as const,
+    transaction: {
+      ...decryptPayment(transaction),
+      order: transaction.order
+        ? {
+            ...transaction.order,
+            totalPrice: decrypt(transaction.order.totalPrice),
+          }
+        : null,
+    },
   };
 }
 
 export async function getOrganizationForWallet(organizationId: string) {
+  const verified = await verifySession();
+  if (!verified.success)
+    return { ok: false as const, error: "Unauthorized", organization: null };
+
+  const { session } = verified;
+
+  const membership = await db.query.member.findFirst({
+    where: and(
+      eq(member.organizationId, organizationId),
+      eq(member.userId, session.user.id),
+    ),
+  });
+
+  if (!membership)
+    return {
+      ok: false as const,
+      error: "Only organization members can access wallet settings",
+      organization: null,
+    };
+
   const org = await db.query.organization.findFirst({
     where: (o, { eq }) => eq(o.id, organizationId),
   });
 
-  if (!org) return null;
+  if (!org)
+    return {
+      ok: false as const,
+      error: "Organization not found",
+      organization: null,
+    };
 
   const metadata = org.metadata
     ? typeof org.metadata === "string"
@@ -98,9 +199,12 @@ export async function getOrganizationForWallet(organizationId: string) {
     : {};
 
   return {
-    id: org.id,
-    name: org.name,
-    slug: org.slug,
-    phoneForPayments: metadata.phoneForPayments || null,
+    ok: true as const,
+    organization: {
+      id: org.id,
+      name: org.name,
+      slug: org.slug,
+      phoneForPayments: metadata.phoneForPayments || null,
+    },
   };
 }

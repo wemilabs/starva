@@ -75,16 +75,17 @@ async function TransactionContent({
     redirect("/sign-in");
   }
 
-  const transaction = await getTransactionById(transactionId);
-  if (!transaction) notFound();
+  const transactionResult = await getTransactionById(transactionId);
+  if (!transactionResult.ok || !transactionResult.transaction) notFound();
 
+  const transaction = transactionResult.transaction;
   const activeOrgId = session.session.session.activeOrganizationId;
   const hasAccess = transaction.organizationId === activeOrgId;
 
   if (!hasAccess) redirect("/point-of-sales/wallet");
 
   const isCashin = transaction.kind === "CASHIN";
-  const status = statusConfig[transaction.status];
+  const status = statusConfig[transaction.status as keyof typeof statusConfig];
   const StatusIcon = status.icon;
 
   return (
@@ -117,7 +118,7 @@ async function TransactionContent({
                 <div
                   className={cn(
                     "flex size-14 items-center justify-center rounded-full",
-                    isCashin ? "bg-green-100" : "bg-blue-100"
+                    isCashin ? "bg-green-100" : "bg-blue-100",
                   )}
                 >
                   {isCashin ? (
@@ -143,7 +144,7 @@ async function TransactionContent({
                 <p
                   className={cn(
                     "text-4xl font-bold font-mono tracking-tighter",
-                    isCashin ? "text-green-600" : "text-blue-600"
+                    isCashin ? "text-green-600" : "text-blue-600",
                   )}
                 >
                   {isCashin ? "+" : "-"}
@@ -290,7 +291,7 @@ async function TransactionContent({
               <div
                 className={cn(
                   "flex items-center gap-3 p-3 rounded-lg",
-                  status.bgClassName
+                  status.bgClassName,
                 )}
               >
                 <StatusIcon className={cn("size-5", status.className)} />
@@ -325,22 +326,23 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { transactionId } = await params;
 
-  const transaction = await getTransactionById(transactionId);
-  if (!transaction) {
+  const transactionResult = await getTransactionById(transactionId);
+  if (!transactionResult.ok || !transactionResult.transaction) {
     return {
       title: "Transaction Not Found - Starva.shop",
       description: "The requested transaction could not be found.",
     };
   }
 
+  const transaction = transactionResult.transaction;
   const isCashin = transaction.kind === "CASHIN";
   const typeLabel = isCashin ? "Payment Received" : "Withdrawal";
 
   const title = `${typeLabel} - ${formatPriceInRWF(
-    parseFloat(transaction.amount)
+    parseFloat(transaction.amount),
   )} - Starva.shop`;
   const description = `${typeLabel} of ${formatPriceInRWF(
-    parseFloat(transaction.amount)
+    parseFloat(transaction.amount),
   )} on ${formatDate(transaction.createdAt)}. Status: ${transaction.status}.`;
 
   const transactionUrl = `${
@@ -378,7 +380,7 @@ export async function generateMetadata({
 }
 
 export default async function TransactionPage(
-  props: PageProps<"/point-of-sales/wallet/transactions/[transactionId]">
+  props: PageProps<"/point-of-sales/wallet/transactions/[transactionId]">,
 ) {
   return (
     <Suspense

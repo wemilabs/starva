@@ -82,9 +82,8 @@ export async function initiateSubscriptionPayment(data: {
 
 export async function checkPaymentStatus(paypackRef: string) {
   const verified = await verifySession();
-  if (!verified.success) return { ok: false, error: "Unauthorized" };
+  if (!verified.success) return { status: "error", error: "Unauthorized" };
 
-  // Get payment from our DB
   const existingPayment = await db.query.payment.findFirst({
     where: (p, { eq }) => eq(p.paypackRef, paypackRef),
   });
@@ -125,7 +124,7 @@ export async function checkPaymentStatus(paypackRef: string) {
 }
 
 async function processSuccessfulPayment(
-  paymentRecord: typeof payment.$inferSelect
+  paymentRecord: typeof payment.$inferSelect,
 ) {
   const verified = await verifySession();
   if (!verified.success) return { ok: false, error: "Unauthorized" };
@@ -293,7 +292,7 @@ export async function initiateOrderPayment(data: {
 
 export async function checkOrderPaymentStatus(paypackRef: string) {
   const verified = await verifySession();
-  if (!verified.success) return { ok: false, error: "Unauthorized" };
+  if (!verified.success) return { status: "error", error: "Unauthorized" };
 
   const existingPayment = await db.query.payment.findFirst({
     where: (p, { eq }) => eq(p.paypackRef, paypackRef),

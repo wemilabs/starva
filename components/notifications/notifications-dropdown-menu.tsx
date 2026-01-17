@@ -85,12 +85,12 @@ export function NotificationsDropdownMenu() {
 
         if (!ignore) {
           setNotifications(
-            notificationsData.map((n) => ({
+            notificationsData.notifications?.map((n) => ({
               ...n,
               storeName: null,
-            }))
+            })) ?? [],
           );
-          setUnreadCount(unreadData);
+          setUnreadCount(unreadData.count);
         }
       } catch (error) {
         console.error("Failed to load notifications:", error);
@@ -107,7 +107,7 @@ export function NotificationsDropdownMenu() {
   // Mark notification as read when clicked
   const handleNotificationClick = async (notificationId: string) => {
     setNotifications((prev) =>
-      prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
+      prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n)),
     );
     setUnreadCount((prev) => Math.max(0, prev - 1));
 
@@ -228,7 +228,7 @@ export function NotificationsDropdownMenu() {
         };
 
         setNotifications((prev) =>
-          [deliveredNotification, ...prev].slice(0, 50)
+          [deliveredNotification, ...prev].slice(0, 50),
         );
         setUnreadCount((prev) => prev + 1);
 
@@ -265,7 +265,7 @@ export function NotificationsDropdownMenu() {
         };
 
         setNotifications((prev) =>
-          [cancelledNotification, ...prev].slice(0, 50)
+          [cancelledNotification, ...prev].slice(0, 50),
         );
         setUnreadCount((prev) => prev + 1);
 
@@ -310,7 +310,7 @@ export function NotificationsDropdownMenu() {
         };
 
         setNotifications((prev) =>
-          [confirmedNotification, ...prev].slice(0, 50)
+          [confirmedNotification, ...prev].slice(0, 50),
         );
         setUnreadCount((prev) => prev + 1);
 
@@ -342,7 +342,7 @@ export function NotificationsDropdownMenu() {
         };
 
         setNotifications((prev) =>
-          [preparingNotification, ...prev].slice(0, 50)
+          [preparingNotification, ...prev].slice(0, 50),
         );
         setUnreadCount((prev) => prev + 1);
 
@@ -404,7 +404,7 @@ export function NotificationsDropdownMenu() {
         };
 
         setNotifications((prev) =>
-          [deliveredNotification, ...prev].slice(0, 50)
+          [deliveredNotification, ...prev].slice(0, 50),
         );
         setUnreadCount((prev) => prev + 1);
 
@@ -440,7 +440,7 @@ export function NotificationsDropdownMenu() {
         };
 
         setNotifications((prev) =>
-          [cancelledNotification, ...prev].slice(0, 50)
+          [cancelledNotification, ...prev].slice(0, 50),
         );
         setUnreadCount((prev) => prev + 1);
 

@@ -23,7 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useSession } from "@/lib/auth-client";
 import { type CartItem, useCartStore } from "@/lib/cart-store";
 import { FALLBACK_PRODUCT_IMG_URL } from "@/lib/constants";
-import { formatPriceInRWF } from "@/lib/utils";
+import { calculateOrderFees, formatPriceInRWF } from "@/lib/utils";
 import { getProductsStock } from "@/server/inventory";
 import { placeOrder } from "@/server/orders";
 import { Separator } from "../ui/separator";
@@ -50,12 +50,13 @@ export function CartSheet() {
 
   const totalPrice = getTotalPrice();
   const itemCount = getItemCount();
+  const fees = calculateOrderFees(totalPrice);
 
   const getItemDisplayPrice = (item: CartItem) => {
     if (item.category === "real-estate") {
       if (!item.isLandlord)
         return `${formatPriceInRWF(Number(item.price))} + ${formatPriceInRWF(
-          Number(item.visitFees)
+          Number(item.visitFees),
         )} fees`;
       else return formatPriceInRWF(Number(item.price));
     }
@@ -257,7 +258,7 @@ export function CartSheet() {
                           onClick={() =>
                             handleQuantityChange(
                               item.productId,
-                              item.quantity - 1
+                              item.quantity - 1,
                             )
                           }
                         >
@@ -276,7 +277,7 @@ export function CartSheet() {
                           onChange={(e) =>
                             handleQuantityChange(
                               item.productId,
-                              Number.parseInt(e.target.value, 10) || 1
+                              Number.parseInt(e.target.value, 10) || 1,
                             )
                           }
                           className="w-16 text-center"
@@ -288,7 +289,7 @@ export function CartSheet() {
                           onClick={() =>
                             handleQuantityChange(
                               item.productId,
-                              item.quantity + 1
+                              item.quantity + 1,
                             )
                           }
                         >
@@ -355,7 +356,7 @@ export function CartSheet() {
                   <ul className="space-y-1 text-blue-800">
                     {items.some(
                       (item) =>
-                        item.category === "real-estate" && !item.isLandlord
+                        item.category === "real-estate" && !item.isLandlord,
                     ) && (
                       <li>
                         • Visit arrangement fees will be charged at checkout
@@ -363,7 +364,7 @@ export function CartSheet() {
                     )}
                     {items.some(
                       (item) =>
-                        item.category === "real-estate" && item.isLandlord
+                        item.category === "real-estate" && item.isLandlord,
                     ) && (
                       <li>
                         • Property payments are handled directly with landlords
@@ -373,11 +374,27 @@ export function CartSheet() {
                 </div>
               )}
 
-              <div className="flex items-center justify-between rounded-lg bg-muted px-3 py-2">
-                <span className="font-medium">Total to Pay</span>
-                <span className="text-lg font-medium font-mono tracking-tighter">
-                  {formatPriceInRWF(totalPrice)}
-                </span>
+              <div className="rounded-lg bg-muted px-3 py-2 space-y-1 mt-4">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">Subtotal</span>
+                  <span className="font-mono tracking-tighter">
+                    {formatPriceInRWF(fees.baseAmount)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">
+                    Processing fee (7.4%)
+                  </span>
+                  <span className="font-mono tracking-tighter">
+                    {formatPriceInRWF(fees.totalFee)}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between pt-1 border-t">
+                  <span className="font-medium">Total</span>
+                  <span className="text-lg font-medium font-mono tracking-tighter">
+                    {formatPriceInRWF(fees.totalAmount)}
+                  </span>
+                </div>
               </div>
             </div>
 

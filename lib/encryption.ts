@@ -24,7 +24,7 @@ export function encrypt(plaintext: string): string {
   const cipher = createCipheriv(
     process.env.ALGORITHM as CipherGCMTypes,
     key,
-    iv
+    iv,
   );
 
   let encrypted = cipher.update(plaintext, "utf8", "hex");
@@ -40,9 +40,7 @@ export function decrypt(ciphertext: string): string {
   try {
     const [ivHex, authTagHex, encrypted] = ciphertext.split(":");
 
-    if (!ivHex || !authTagHex || !encrypted) {
-      return ciphertext;
-    }
+    if (!ivHex || !authTagHex || !encrypted) return ciphertext;
 
     const key = getEncryptionKey();
     const iv = Buffer.from(ivHex, "hex");
@@ -50,7 +48,7 @@ export function decrypt(ciphertext: string): string {
     const decipher = createDecipheriv(
       process.env.ALGORITHM as CipherGCMTypes,
       key,
-      iv
+      iv,
     );
     decipher.setAuthTag(authTag);
 

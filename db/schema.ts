@@ -325,6 +325,9 @@ export const payment = pgTable(
     paypackRef: text("paypack_ref").unique(),
     phoneNumber: text("phone_number").notNull(),
     amount: text("amount").notNull(),
+    baseAmount: text("base_amount"),
+    paypackFee: text("paypack_fee"),
+    platformFee: text("platform_fee"),
     currency: text("currency").default("RWF").notNull(),
     provider: text("provider"),
     // Payment details

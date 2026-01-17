@@ -13,7 +13,12 @@ import {
   initiatePayment as paypackInitiate,
 } from "@/lib/paypack";
 import { realtime } from "@/lib/realtime";
-import { convertUsdToRwf, formatRwandanPhone } from "@/lib/utils";
+import {
+  calculateOrderFees,
+  calculateSubscriptionFees,
+  convertUsdToRwf,
+  formatRwandanPhone,
+} from "@/lib/utils";
 import { createNotification } from "./push-notifications";
 
 export async function initiateSubscriptionPayment(data: {
@@ -35,9 +40,10 @@ export async function initiateSubscriptionPayment(data: {
 
   try {
     const phone = formatRwandanPhone(data.phoneNumber);
-    const amountRWF = convertUsdToRwf(priceUSD as number);
+    const baseAmountRWF = convertUsdToRwf(priceUSD as number);
+    const fees = calculateSubscriptionFees(baseAmountRWF);
 
-    const result = await paypackInitiate(phone, amountRWF);
+    const result = await paypackInitiate(phone, fees.totalAmount);
 
     // Create payment record with encrypted sensitive data
     const [newPayment] = await db
@@ -45,7 +51,10 @@ export async function initiateSubscriptionPayment(data: {
       .values({
         userId: session.user.id,
         phoneNumber: encrypt(phone),
-        amount: encrypt(String(amountRWF)),
+        amount: encrypt(String(fees.totalAmount)),
+        baseAmount: encrypt(String(fees.baseAmount)),
+        paypackFee: encrypt(String(fees.paypackFee)),
+        platformFee: encrypt(String(fees.platformFee)),
         currency: "RWF",
         kind: "CASHIN",
         planName: data.planName,
@@ -226,6 +235,9 @@ export async function getUserPayments(limit = 10) {
     ...p,
     amount: decrypt(p.amount),
     phoneNumber: decrypt(p.phoneNumber),
+    baseAmount: p.baseAmount ? decrypt(p.baseAmount) : null,
+    paypackFee: p.paypackFee ? decrypt(p.paypackFee) : null,
+    platformFee: p.platformFee ? decrypt(p.platformFee) : null,
   }));
 }
 
@@ -256,9 +268,10 @@ export async function initiateOrderPayment(data: {
 
   try {
     const phone = formatRwandanPhone(data.phoneNumber);
-    const amountRWF = Number(decrypt(order.totalPrice));
+    const baseAmountRWF = Number(decrypt(order.totalPrice));
+    const fees = calculateOrderFees(baseAmountRWF);
 
-    const result = await paypackInitiate(phone, amountRWF);
+    const result = await paypackInitiate(phone, fees.totalAmount);
 
     const [newPayment] = await db
       .insert(payment)
@@ -266,7 +279,10 @@ export async function initiateOrderPayment(data: {
         userId: session.user.id,
         organizationId: order.organizationId,
         phoneNumber: encrypt(phone),
-        amount: encrypt(String(amountRWF)),
+        amount: encrypt(String(fees.totalAmount)),
+        baseAmount: encrypt(String(fees.baseAmount)),
+        paypackFee: encrypt(String(fees.paypackFee)),
+        platformFee: encrypt(String(fees.platformFee)),
         currency: "RWF",
         kind: "CASHIN",
         planName: null,

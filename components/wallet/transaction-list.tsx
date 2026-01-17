@@ -120,7 +120,7 @@ export function TransactionList({ transactions }: { transactions: Payment[] }) {
                         <div
                           className={cn(
                             "flex size-10 items-center justify-center rounded-full",
-                            isCashin ? "bg-green-100" : "bg-blue-100"
+                            isCashin ? "bg-green-100" : "bg-blue-100",
                           )}
                         >
                           {isCashin ? (
@@ -143,11 +143,17 @@ export function TransactionList({ transactions }: { transactions: Payment[] }) {
                         <p
                           className={cn(
                             "font-semibold font-mono tracking-tighter",
-                            isCashin ? "text-green-600" : "text-blue-600"
+                            isCashin ? "text-green-600" : "text-blue-600",
                           )}
                         >
                           {isCashin ? "+" : "-"}
-                          {formatPriceInRWF(parseFloat(tx.amount))}
+                          {formatPriceInRWF(
+                            parseFloat(
+                              isCashin && tx.baseAmount
+                                ? tx.baseAmount
+                                : tx.amount,
+                            ),
+                          )}
                         </p>
                         <div className="flex items-center justify-end gap-1.5 mt-1">
                           <StatusIcon

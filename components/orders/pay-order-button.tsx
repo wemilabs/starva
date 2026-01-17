@@ -18,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
+import { calculateOrderFees } from "@/lib/utils";
 import {
   checkOrderPaymentStatus,
   initiateOrderPayment,
@@ -47,6 +48,8 @@ export function PayOrderButton({
   const [status, setStatus] = useState<PaymentStatus>("idle");
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const fees = calculateOrderFees(amount);
 
   useEffect(() => {
     return () => {
@@ -83,7 +86,7 @@ export function PayOrderButton({
       if (status === "polling") {
         setStatus("idle");
         toast.info(
-          "Payment timed out. If you approved the payment, it will be processed shortly."
+          "Payment timed out. If you approved the payment, it will be processed shortly.",
         );
       }
     }, 120000);
@@ -127,7 +130,7 @@ export function PayOrderButton({
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen && status === "polling") {
       toast.info(
-        "Payment is being processed. You'll be notified when it completes."
+        "Payment is being processed. You'll be notified when it completes.",
       );
     }
     setOpen(newOpen);
@@ -138,7 +141,7 @@ export function PayOrderButton({
       <DialogTrigger asChild>
         <Button className="w-full">
           <CreditCard className="mr-2 size-4" />
-          Pay {amount.toLocaleString()} RWF
+          Pay {fees.totalAmount.toLocaleString()} RWF
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
@@ -155,7 +158,9 @@ export function PayOrderButton({
         <div className="space-y-4 py-4">
           <div className="bg-muted rounded-lg p-4 text-center">
             <p className="text-sm text-muted-foreground">Amount to pay</p>
-            <p className="text-3xl font-bold">{amount.toLocaleString()} RWF</p>
+            <p className="text-3xl font-bold">
+              {fees.totalAmount.toLocaleString()} RWF
+            </p>
           </div>
 
           <div className="space-y-2">
@@ -245,7 +250,7 @@ export function PayOrderButton({
             ) : (
               <>
                 <CreditCard className="size-4" />
-                Pay {amount.toLocaleString()} RWF
+                Pay {fees.totalAmount.toLocaleString()} RWF
               </>
             )}
           </Button>

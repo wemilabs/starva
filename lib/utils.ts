@@ -2,7 +2,7 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { z } from "zod";
 import { productCategory } from "@/db/schema";
-import { COUNTRIES, USD_TO_RWF } from "./constants";
+import { COUNTRIES, TRANSACTION_FEES, USD_TO_RWF } from "./constants";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -26,7 +26,7 @@ export const slugify = (text: string): string => {
 };
 
 export const removeUnderscoreAndCapitalizeOnlyTheFirstChar = (
-  text: string
+  text: string,
 ): string => {
   const withSpaces = text.replace(/_/g, " ");
   return withSpaces.charAt(0).toUpperCase() + withSpaces.slice(1);
@@ -144,7 +144,7 @@ export const getDaysUntil = (date: Date | string): number => {
 export const formatPrice = (
   price: string | number,
   currency: string = "USD",
-  locale: string = "en-US"
+  locale: string = "en-US",
 ) => {
   const numPrice = typeof price === "string" ? parseFloat(price) : price;
   return new Intl.NumberFormat(locale, {
@@ -163,6 +163,42 @@ export const formatPriceInRWF = (price: string | number) => {
 
 export function convertUsdToRwf(usd: number): number {
   return Math.round(usd * USD_TO_RWF);
+}
+
+export function calculateOrderFees(baseAmount: number) {
+  const paypackFee = Math.ceil(
+    baseAmount *
+      (TRANSACTION_FEES.PAYPACK_CASHIN_RATE +
+        TRANSACTION_FEES.PAYPACK_CASHOUT_RATE),
+  );
+  const platformFee = Math.ceil(baseAmount * TRANSACTION_FEES.PLATFORM_RATE);
+  const totalFee = paypackFee + platformFee;
+  const totalAmount = baseAmount + totalFee;
+
+  return {
+    baseAmount,
+    paypackFee,
+    platformFee,
+    totalFee,
+    totalAmount,
+  };
+}
+
+export function calculateSubscriptionFees(baseAmount: number) {
+  const paypackFee = Math.ceil(
+    baseAmount *
+      (TRANSACTION_FEES.PAYPACK_CASHIN_RATE +
+        TRANSACTION_FEES.PAYPACK_CASHOUT_RATE),
+  );
+  const totalAmount = baseAmount + paypackFee;
+
+  return {
+    baseAmount,
+    paypackFee,
+    platformFee: 0,
+    totalFee: paypackFee,
+    totalAmount,
+  };
 }
 
 // Format phone number for Paypack API (07xxxxxxx format - 9 digits, no country code)

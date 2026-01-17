@@ -24,7 +24,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { getOrderById } from "@/data/orders";
 import { verifySession } from "@/data/user-session";
 import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
-import { formatDate, formatPriceInRWF } from "@/lib/utils";
+import { calculateOrderFees, formatDate, formatPriceInRWF } from "@/lib/utils";
 
 async function OrderContent({
   params,
@@ -50,6 +50,9 @@ async function OrderContent({
     (sum, item) => sum + item.quantity,
     0,
   );
+
+  const fees = calculateOrderFees(Number(order.totalPrice));
+  const displayTotal = isMerchant ? Number(order.totalPrice) : fees.totalAmount;
 
   const orderNumber = isMerchant
     ? order.merchantOrderNumber
@@ -148,9 +151,18 @@ async function OrderContent({
 
               <div className="space-y-2">
                 <div className="flex justify-between font-medium">
-                  <span>Total</span>
-                  <span>{formatPriceInRWF(order.totalPrice)}</span>
+                  <span>
+                    {!order.isPaid ? "Total to be paid" : "Total paid"}
+                  </span>
+                  <span className="font-bold">
+                    {formatPriceInRWF(displayTotal)}
+                  </span>
                 </div>
+                <Activity mode={!isMerchant ? "visible" : "hidden"}>
+                  <p className="text-xs text-muted-foreground text-right">
+                    Includes {formatPriceInRWF(fees.totalFee)} processing fee
+                  </p>
+                </Activity>
               </div>
             </CardContent>
           </Card>

@@ -6,6 +6,7 @@ import { Webhook } from "svix";
 import { UTApi } from "uploadthing/server";
 import { db } from "@/db/drizzle";
 import { emailAttachment, receivedEmail } from "@/db/schema";
+import { encrypt } from "@/lib/encryption";
 
 interface ResendWebhookEvent {
   type: string;
@@ -29,7 +30,7 @@ export async function POST(request: NextRequest) {
     console.error("RESEND_WEBHOOK_SECRET is not configured");
     return NextResponse.json(
       { error: "Webhook secret not configured" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
     if (!svixId || !svixTimestamp || !svixSignature)
       return NextResponse.json(
         { error: "Missing required svix headers" },
-        { status: 400 }
+        { status: 400 },
       );
 
     // Verify webhook signature
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
       console.error("Webhook verification failed:", err);
       return NextResponse.json(
         { error: "Invalid webhook signature" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -82,7 +83,7 @@ export async function POST(request: NextRequest) {
     console.error("Webhook processing error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -164,17 +165,17 @@ async function handleEmailReceived(data: {
               size: buffer.byteLength,
               contentDisposition: attachment.content_disposition,
               contentId: attachment.content_id,
-              downloadUrl: attachment.download_url || "",
+              downloadUrl: encrypt(attachment.download_url || ""),
               expiresAt: attachment.expires_at
                 ? new Date(attachment.expires_at)
                 : null,
-              fileKey: uploadResponse[0]?.data?.key || "",
+              fileKey: encrypt(uploadResponse[0]?.data?.key || ""),
               uploadedAt: new Date(),
             });
           } catch (error) {
             console.error(
               `Failed to process attachment ${attachment.filename}:`,
-              error
+              error,
             );
           }
         }

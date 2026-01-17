@@ -7,6 +7,7 @@ import { emailAttachment, receivedEmail } from "@/db/schema";
 import { logAdminAction } from "@/lib/admin/admin-audit";
 import { requireAdmin } from "@/lib/admin/admin-auth";
 import { requireAdminRateLimit } from "@/lib/admin/admin-rate-limit";
+import { decrypt } from "@/lib/encryption";
 
 const utapi = new UTApi();
 
@@ -76,11 +77,12 @@ export async function getEmailAttachmentUrl(id: string) {
 
   if (!attachment) throw new Error("Attachment not found");
 
-  if (attachment.fileKey)
-    return `https://${process.env.UPLOADTHING_APP_ID}.ufs.sh/f/${attachment.fileKey}`;
+  const decryptedFileKey = decrypt(attachment.fileKey || "");
+  if (decryptedFileKey)
+    return `https://${process.env.UPLOADTHING_APP_ID}.ufs.sh/f/${decryptedFileKey}`;
 
   if (attachment.expiresAt && attachment.expiresAt > new Date())
-    return attachment.downloadUrl;
+    return decrypt(attachment.downloadUrl || "");
 
   throw new Error("Attachment URL has expired");
 }
@@ -102,9 +104,10 @@ export async function deleteReceivedEmail(emailId: string) {
   });
 
   for (const attachment of attachments) {
-    if (attachment.fileKey)
+    const decryptedKey = decrypt(attachment.fileKey || "");
+    if (decryptedKey)
       try {
-        await utapi.deleteFiles(attachment.fileKey);
+        await utapi.deleteFiles(decryptedKey);
       } catch (error) {
         console.error(
           `Failed to delete attachment ${attachment.fileKey}:`,

@@ -3,7 +3,7 @@
 import { and, count, gte, lte } from "drizzle-orm";
 import { db } from "@/db/drizzle";
 import { session } from "@/db/schema";
-import { requireAdmin } from "@/lib/admin-auth";
+import { requireAdmin } from "@/lib/admin/admin-auth";
 
 export type UserMetricsData = {
   visitors: {

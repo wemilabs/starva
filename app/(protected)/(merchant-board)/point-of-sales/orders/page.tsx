@@ -49,11 +49,16 @@ async function OrdersContent() {
   const userId = sessionData.session.user?.id;
   const activeOrgId = sessionData.session.session?.activeOrganizationId;
 
-  const [myOrders, customerOrders, merchantStats] = await Promise.all([
-    getOrdersByUser(userId),
-    activeOrgId ? getOrdersByOrganization(activeOrgId) : Promise.resolve([]),
-    activeOrgId ? getOrderStats(activeOrgId) : Promise.resolve([]),
-  ]);
+  const [myOrdersResult, customerOrdersResult, merchantStatsResult] =
+    await Promise.all([
+      getOrdersByUser(userId),
+      activeOrgId ? getOrdersByOrganization(activeOrgId) : null,
+      activeOrgId ? getOrderStats(activeOrgId, userId) : null,
+    ]);
+
+  const myOrders = myOrdersResult.orders ?? [];
+  const customerOrders = customerOrdersResult?.orders ?? [];
+  const merchantStats = merchantStatsResult?.stats ?? [];
 
   const hasAnyOrders = myOrders.length > 0 || customerOrders.length > 0;
 

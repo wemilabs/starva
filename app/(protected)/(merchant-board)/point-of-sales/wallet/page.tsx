@@ -89,13 +89,20 @@ async function WalletContent() {
       </Empty>
     );
 
-  const [balance, transactions, organization] = await Promise.all([
-    getWalletBalance(activeOrgId),
-    getWalletTransactions(activeOrgId),
-    getOrganizationForWallet(activeOrgId),
-  ]);
+  const [balanceResult, transactionsResult, organizationResult] =
+    await Promise.all([
+      getWalletBalance(activeOrgId),
+      getWalletTransactions(activeOrgId),
+      getOrganizationForWallet(activeOrgId),
+    ]);
 
-  if (!organization)
+  if (
+    !balanceResult.ok ||
+    !balanceResult.balance ||
+    !transactionsResult.ok ||
+    !organizationResult.ok ||
+    !organizationResult.organization
+  )
     return (
       <Empty className="min-h-[400px]">
         <EmptyHeader>
@@ -112,9 +119,9 @@ async function WalletContent() {
 
   return (
     <WalletTabs
-      balance={balance}
-      transactions={transactions}
-      organization={organization}
+      balance={balanceResult.balance}
+      transactions={transactionsResult.transactions}
+      organization={organizationResult.organization}
     />
   );
 }

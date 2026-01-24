@@ -1,6 +1,6 @@
 {
   "name": "strv-web",
-  "version": "0.120.15",
+  "version": "0.121.1",
   "private": true,
   "scripts": {
     "dev": "next dev --inspect",
@@ -11,6 +11,7 @@
     "db:push": "npx drizzle-kit push"
   },
   "dependencies": {
+    "@better-auth/expo": "^1.4.17",
     "@hookform/resolvers": "^5.2.2",
     "@neondatabase/serverless": "^1.0.2",
     "@radix-ui/react-accordion": "^1.2.12",

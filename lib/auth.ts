@@ -1,3 +1,4 @@
+import { expo } from "@better-auth/expo";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
@@ -24,7 +25,7 @@ import {
   admin as adminRole,
   member as memberRole,
   owner as ownerRole,
-} from "./auth/permissions";
+} from "./permissions";
 
 const resend = new Resend(process.env.RESEND_API_KEY as string);
 
@@ -112,7 +113,9 @@ export const auth = betterAuth({
         memberRole,
       },
     }),
+    expo(),
   ],
+  trustedOrigins: ["strvmobile://"],
   user: {
     deleteUser: {
       enabled: true,
@@ -183,7 +186,7 @@ export const auth = betterAuth({
         console.log(
           `Deleted ${userOrgs.length} organization${
             userOrgs.length <= 1 ? "" : "s"
-          } for user ${user.id}`
+          } for user ${user.id}`,
         );
       },
       afterDelete: async (user: { name: string }) => {

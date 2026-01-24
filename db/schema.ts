@@ -434,6 +434,9 @@ export const userRelations = relations(user, ({ one, many }) => ({
   payments: many(payment),
   pushSubscriptions: many(pushSubscription),
   notifications: many(notification),
+  followingOrganizations: many(userFollowOrganization),
+  followers: many(userFollowUser, { relationName: "following" }),
+  following: many(userFollowUser, { relationName: "follower" }),
 }));
 
 export const organizationRelations = relations(organization, ({ many }) => ({
@@ -444,6 +447,7 @@ export const organizationRelations = relations(organization, ({ many }) => ({
   orderUsageTracking: many(orderUsageTracking),
   orderNotifications: many(orderNotification),
   receivedEmails: many(receivedEmail),
+  followers: many(userFollowOrganization),
 }));
 
 export const subscriptionRelations = relations(subscription, ({ one }) => ({
@@ -657,6 +661,79 @@ export const productLikeRelations = relations(productLike, ({ one }) => ({
   user: one(user, {
     fields: [productLike.userId],
     references: [user.id],
+  }),
+}));
+
+export const userFollowOrganization = pgTable(
+  "user_follow_organization",
+  {
+    id: text("id")
+      .$defaultFn(() => randomUUID())
+      .primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    organizationId: text("organization_id")
+      .notNull()
+      .references(() => organization.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (t) => [
+    index("user_follow_org_user_idx").on(t.userId),
+    index("user_follow_org_org_idx").on(t.organizationId),
+    unique("user_follow_org_unique").on(t.userId, t.organizationId),
+  ],
+);
+
+export const userFollowOrganizationRelations = relations(
+  userFollowOrganization,
+  ({ one }) => ({
+    user: one(user, {
+      fields: [userFollowOrganization.userId],
+      references: [user.id],
+    }),
+    organization: one(organization, {
+      fields: [userFollowOrganization.organizationId],
+      references: [organization.id],
+    }),
+  }),
+);
+
+export const userFollowUser = pgTable(
+  "user_follow_user",
+  {
+    id: text("id")
+      .$defaultFn(() => randomUUID())
+      .primaryKey(),
+    followerId: text("follower_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    followingId: text("following_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at")
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (t) => [
+    index("user_follow_user_follower_idx").on(t.followerId),
+    index("user_follow_user_following_idx").on(t.followingId),
+    unique("user_follow_user_unique").on(t.followerId, t.followingId),
+  ],
+);
+
+export const userFollowUserRelations = relations(userFollowUser, ({ one }) => ({
+  follower: one(user, {
+    fields: [userFollowUser.followerId],
+    references: [user.id],
+    relationName: "follower",
+  }),
+  following: one(user, {
+    fields: [userFollowUser.followingId],
+    references: [user.id],
+    relationName: "following",
   }),
 }));
 
@@ -1017,6 +1094,8 @@ export type EmailStatus = (typeof emailStatus.enumValues)[number];
 export type EmailAttachment = typeof emailAttachment.$inferSelect;
 export type AdminAuditLog = typeof adminAuditLog.$inferSelect;
 export type AdminActionType = (typeof adminActionType.enumValues)[number];
+export type UserFollowOrganization = typeof userFollowOrganization.$inferSelect;
+export type UserFollowUser = typeof userFollowUser.$inferSelect;
 
 export const schema = {
   user,
@@ -1053,6 +1132,10 @@ export const schema = {
   unitFormatRelations,
   productRelations,
   productLikeRelations,
+  userFollowOrganization,
+  userFollowOrganizationRelations,
+  userFollowUser,
+  userFollowUserRelations,
   tagRelations,
   productTagRelations,
   orderRelations,

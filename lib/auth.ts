@@ -115,7 +115,12 @@ export const auth = betterAuth({
     }),
     expo(),
   ],
-  trustedOrigins: ["strvmobile://"],
+  trustedOrigins: [
+    "strvmobile://",
+    ...(process.env.NODE_ENV === "development"
+      ? ["exp://", "exp://192.168.*.*:*"]
+      : []),
+  ],
   user: {
     deleteUser: {
       enabled: true,

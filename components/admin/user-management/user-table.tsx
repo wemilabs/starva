@@ -39,7 +39,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatDistanceToNow, getInitials } from "@/lib/utils";
+import { formatRelativeTime, getInitials } from "@/lib/utils";
 
 interface UserTableProps {
   users: {
@@ -61,7 +61,7 @@ interface UserTableProps {
   }[];
   onUserUpdate: (
     userId: string,
-    data: { name?: string; emailVerified?: boolean }
+    data: { name?: string; emailVerified?: boolean },
   ) => void;
   onUserDelete: (userId: string) => void;
 }
@@ -150,7 +150,7 @@ export function UserTable({
               </TableCell>
               <TableCell>
                 <div className="text-sm">
-                  {formatDistanceToNow(new Date(user.createdAt))}
+                  {formatRelativeTime(new Date(user.createdAt))}
                 </div>
               </TableCell>
               <TableCell>
@@ -173,7 +173,7 @@ export function UserTable({
                     <DropdownMenuItem
                       onClick={() =>
                         handleUserAction(() =>
-                          onUserUpdate(user.id, { name: user.name })
+                          onUserUpdate(user.id, { name: user.name }),
                         )
                       }
                       disabled={isPending}
@@ -186,7 +186,7 @@ export function UserTable({
                       <DropdownMenuItem
                         onClick={() =>
                           handleUserAction(() =>
-                            onUserUpdate(user.id, { emailVerified: false })
+                            onUserUpdate(user.id, { emailVerified: false }),
                           )
                         }
                         disabled={isPending}
@@ -198,7 +198,7 @@ export function UserTable({
                       <DropdownMenuItem
                         onClick={() =>
                           handleUserAction(() =>
-                            onUserUpdate(user.id, { emailVerified: true })
+                            onUserUpdate(user.id, { emailVerified: true }),
                           )
                         }
                         disabled={isPending}

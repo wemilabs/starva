@@ -50,7 +50,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Spinner } from "@/components/ui/spinner";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn, formatDateShort, formatDistanceToNow } from "@/lib/utils";
+import { cn, formatDateShort, formatRelativeTime } from "@/lib/utils";
 import {
   deleteReceivedEmail,
   getEmailStats,
@@ -238,7 +238,7 @@ export function AdminEmailManagement() {
     {
       shallow: true,
       throttleMs: 300,
-    }
+    },
   );
 
   const {
@@ -372,14 +372,14 @@ export function AdminEmailManagement() {
                 <div
                   className={cn(
                     emailStatsAddClassName,
-                    "text-2xl font-bold font-mono tracking-tighter"
+                    "text-2xl font-bold font-mono tracking-tighter",
                   )}
                 >
                   {emailStatsQty}
                 </div>
               </CardContent>
             </Card>
-          )
+          ),
         )}
       </div>
 
@@ -472,7 +472,7 @@ export function AdminEmailManagement() {
                             {email.subject || "No Subject"}
                           </p>
                           <p className="text-xs text-muted-foreground font-mono tracking-tighter">
-                            {formatDistanceToNow(new Date(email.createdAt))}
+                            {formatRelativeTime(new Date(email.createdAt))}
                           </p>
                         </div>
                         {email.attachments && email.attachments.length > 0 && (

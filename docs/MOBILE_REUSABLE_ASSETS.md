@@ -243,7 +243,6 @@ formatDate(date: Date | string): string           // "Jan 24, 2026, 1:58 PM"
 formatDateShort(date: Date | string): string      // "Jan 24, 2026"
 formatTime(time: string): string                  // "1:58 PM"
 formatRelativeTime(date: Date | string): string   // "2 hours ago"
-formatDistanceToNow(date: Date): string           // "2 hours ago"
 getDaysUntil(date: Date | string): number
 ```
 

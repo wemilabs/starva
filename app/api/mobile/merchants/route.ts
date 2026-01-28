@@ -1,12 +1,16 @@
-import { count, ilike, or, sql } from "drizzle-orm";
-import { connection, type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db/drizzle";
 import { organization } from "@/db/schema";
+import { getMobileSession } from "@/lib/mobile-auth";
+import { count, ilike, or, sql } from "drizzle-orm";
+import { connection, type NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   await connection();
 
   try {
+    const session = await getMobileSession();
+    const userId = session?.user?.id;
+
     const { searchParams } = new URL(request.url);
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
     const limit = Math.min(
@@ -40,6 +44,13 @@ export async function GET(request: NextRequest) {
             SELECT COUNT(*)::int FROM product 
             WHERE organization_id = ${organization.id} AND status = 'in_stock'
           )`,
+          isFollowing: userId
+            ? sql<boolean>`EXISTS (
+                SELECT 1 FROM user_follow_organization 
+                WHERE organization_id = ${organization.id} 
+                AND user_id = ${userId}
+              )`
+            : sql<boolean>`false`,
         })
         .from(organization)
         .where(whereClause)

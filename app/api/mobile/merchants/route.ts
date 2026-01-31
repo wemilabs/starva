@@ -1,8 +1,8 @@
+import { count, ilike, or, sql } from "drizzle-orm";
+import { connection, type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db/drizzle";
 import { organization } from "@/db/schema";
 import { getMobileSession } from "@/lib/mobile-auth";
-import { count, ilike, or, sql } from "drizzle-orm";
-import { connection, type NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   await connection();

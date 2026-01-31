@@ -28,9 +28,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "The Next-Gen Marketplace - Starva.shop", // Too Global to be local
+  title: "Starva.shop - The Next Generation Social Marketplace",
   description:
-    "Search. Shop. Smile. - Starva.shop is super fast, secure, reliable and easy to use.",
+    "Search. Shop. Smile. - Starva.shop is the super fast, secure, reliable and easy to use next-gen social marketplace.",
   metadataBase: new URL("https://starva.shop/"),
   keywords: [
     "starva",
@@ -66,9 +66,9 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: "https://starva.shop/",
-    title: "The Next-Gen Marketplace - Starva.shop", // Too Global to be local
+    title: "Starva.shop - The Next Generation Social Marketplace",
     description:
-      "Search. Shop. Smile. - Starva.shop is super fast, secure, reliable and easy to use.",
+      "Search. Shop. Smile. - Starva.shop is the super fast, secure, reliable and easy to use next-gen social marketplace.",
     siteName: "Starva.shop",
     images: [
       {
@@ -81,9 +81,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "The Next-Gen Marketplace - Starva.shop", // Too Global to be local
+    title: "Starva.shop - The Next Generation Social Marketplace",
     description:
-      "Search. Shop. Smile. - Starva.shop is super fast, secure, reliable and easy to use.",
+      "Search. Shop. Smile. - Starva.shop is the super fast, secure, reliable and easy to use next-gen social marketplace.",
     images: [GENERAL_BRANDING_IMG_URL],
     creator: "@DorianTho5",
   },

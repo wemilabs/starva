@@ -19,7 +19,7 @@ const routeConfig: Record<string, (params: string[]) => Crumb[]> = {
   "/usage/billing": () => [{ label: "Billing" }],
   "/usage/pricing": () => [{ label: "Pricing" }],
 
-  "/trends": () => [{ label: "Trends" }],
+  "/trends-and-socials": () => [{ label: "Trends & Socials" }],
   "/support": () => [{ label: "Support" }],
   "/feedback": () => [{ label: "Feedback" }],
   "/unauthorized": () => [{ label: "Unauthorized" }],
@@ -68,6 +68,10 @@ const routeConfig: Record<string, (params: string[]) => Crumb[]> = {
     { label: "Transactions" },
     { label: `Transaction #${formatDynamicSegment(params[0])}` },
   ],
+  "/users/[userId]": (params) => [
+    { label: "Users", href: "/users" },
+    { label: formatDynamicSegment(params[0]) },
+  ],
 };
 
 function formatDynamicSlug(slug: string): string {
@@ -83,7 +87,7 @@ function formatDynamicSegment(id: string): string {
 
 // Find matching route configuration
 function findRouteConfig(
-  pathname: string
+  pathname: string,
 ): { config: (params: string[]) => Crumb[]; params: string[] } | null {
   // First try exact matches
   if (routeConfig[pathname]) {
@@ -153,8 +157,11 @@ export function useAutoBreadcrumbs() {
       ? [{ label: "Home" }]
       : [{ label: "Home", href: "/" }, ...routeMatch.config(routeMatch.params)]
     : pathname === "/"
-    ? [{ label: "Home" }]
-    : [{ label: "Home", href: "/" }, ...generateBreadcrumbsFromPath(pathname)];
+      ? [{ label: "Home" }]
+      : [
+          { label: "Home", href: "/" },
+          ...generateBreadcrumbsFromPath(pathname),
+        ];
 
   // Update context with computed breadcrumbs
   useEffect(() => {

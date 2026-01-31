@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getMobileSession();
     const userId = session?.user?.id;
-    console.log("[merchants] session userId:", userId);
+    // console.log("[merchants] session userId:", userId);
 
     const { searchParams } = new URL(request.url);
     const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
@@ -19,12 +19,15 @@ export async function GET(request: NextRequest) {
       Math.max(1, parseInt(searchParams.get("limit") || "20", 10)),
     );
     const search = searchParams.get("search")?.trim();
+    const sanitizedSearch = search
+      ? search.replace(/[%_]/g, "\\$&")
+      : undefined;
     const offset = (page - 1) * limit;
 
-    const whereClause = search
+    const whereClause = sanitizedSearch
       ? or(
-          ilike(organization.name, `%${search}%`),
-          ilike(organization.slug, `%${search}%`),
+          ilike(organization.name, `%${sanitizedSearch}%`),
+          ilike(organization.slug, `%${sanitizedSearch}%`),
         )
       : undefined;
 
@@ -38,13 +41,15 @@ export async function GET(request: NextRequest) {
           metadata: organization.metadata,
           createdAt: organization.createdAt,
           followerCount: sql<number>`(
-            SELECT COUNT(*)::int FROM user_follow_organization 
+            SELECT COUNT(*)::int 
+            FROM user_follow_organization 
             WHERE organization_id = ${organization.id}
-          )`,
+          )`.as("followerCount"),
           productCount: sql<number>`(
-            SELECT COUNT(*)::int FROM product 
+            SELECT COUNT(*)::int 
+            FROM product 
             WHERE organization_id = ${organization.id} AND status = 'in_stock'
-          )`,
+          )`.as("productCount"),
           isFollowing: userId
             ? sql<boolean>`EXISTS (
                 SELECT 1 FROM user_follow_organization 

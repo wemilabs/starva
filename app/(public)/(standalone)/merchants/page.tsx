@@ -13,12 +13,11 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { getAllStores } from "@/data/stores";
+import { getAllStoresWithFollowData } from "@/data/stores";
 import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
 
 async function MerchantsList() {
-  "use cache";
-  const merchants = await getAllStores();
+  const merchants = await getAllStoresWithFollowData();
 
   if (!merchants || merchants.length === 0) {
     return (
@@ -86,7 +85,7 @@ export default async function MerchantsPage() {
     <div className="container max-w-7xl py-7 space-y-7">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-medium tracking-tight">All Merchants</h1>
+          <h1 className="text-2xl font-medium tracking-tight">Merchants</h1>
           <p className="text-muted-foreground mt-0.5 text-sm text-pretty font-mono tracking-tighter">
             Engage with all current available merchants
           </p>

@@ -1,9 +1,10 @@
-import { Clock } from "lucide-react";
+import { Clock, Users } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
+import { OrganizationFollowButton } from "@/components/follows/organization-follow-button";
 import { ProductCatalogueControls } from "@/components/products/product-catalogue-controls";
 import { ProductCatalogueSection } from "@/components/products/product-catalogue-section";
 import { SkeletonProductCard } from "@/components/products/skeleton-product-card";
@@ -14,8 +15,10 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { getFollowStatusForCurrentUser } from "@/data/follows";
 import { getProductsPerStoreWithoutAuth } from "@/data/products";
 import { getStoreBySlug } from "@/data/stores";
+import { getOrganizationFollowersCount } from "@/data/trends";
 import { DAYS, GENERAL_BRANDING_IMG_URL, today } from "@/lib/constants";
 import { formatTime } from "@/lib/utils";
 
@@ -61,9 +64,12 @@ async function MerchantContent({
   const resolvedSlug = merchant.slug || merchantSlug;
   const metadata = merchant.metadata ? JSON.parse(merchant.metadata) : {};
   const description = metadata.description || "";
-  // const phoneForNotifications = metadata.phoneForNotifications || "";
-  // const phoneForPayments = metadata.phoneForPayments || "";
   const timetable = metadata.timetable || {};
+
+  const [followStatus, followersCount] = await Promise.all([
+    getFollowStatusForCurrentUser(merchant.id),
+    getOrganizationFollowersCount(merchant.id),
+  ]);
 
   const hasTimetable =
     timetable &&
@@ -116,6 +122,19 @@ async function MerchantContent({
             </div> */}
           </div>
           <div className="flex items-center gap-3 justify-end">
+            <div className="flex items-center gap-2 text-white/80 text-sm">
+              <Users className="size-4" />
+              <span>
+                {followersCount} follower{followersCount <= 1 ? "" : "s"}
+              </span>
+            </div>
+            <OrganizationFollowButton
+              organizationId={merchant.id}
+              initialIsFollowing={followStatus.isFollowing}
+              initialFollowersCount={followersCount}
+              revalidateTargetPath={`/merchants/${resolvedSlug}`}
+              className="bg-white/10 hover:bg-white/20 text-white border-white/20"
+            />
             <ShareDialog
               url={`${
                 process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
@@ -177,7 +196,7 @@ async function MerchantContent({
                           {isClosed
                             ? "Closed"
                             : `${formatTime(dayData.open)} - ${formatTime(
-                                dayData.close
+                                dayData.close,
                               )}`}
                         </span>
                       </div>
@@ -297,7 +316,7 @@ export async function generateMetadata({
 }
 
 export default async function MerchantSlugPage(
-  props: PageProps<"/merchants/[merchantSlug]">
+  props: PageProps<"/merchants/[merchantSlug]">,
 ) {
   return (
     <Suspense

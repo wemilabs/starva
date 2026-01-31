@@ -81,6 +81,18 @@ const schema = {
       organizationId: z.string(),
     }),
   },
+  followers: {
+    new: z.object({
+      notificationId: z.string(),
+      followerId: z.string(),
+      followerName: z.string(),
+      followerImage: z.string().optional(),
+      targetId: z.string(),
+      targetType: z.enum(["user", "organization"]),
+      targetName: z.string(),
+      createdAt: z.string(),
+    }),
+  },
 };
 
 export const realtime = new Realtime({ schema, redis });

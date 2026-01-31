@@ -94,9 +94,9 @@ export function NavMain({
         </SidebarMenuItem>
         <SidebarMenuItem>
           <SidebarMenuButton asChild tooltip="Trends">
-            <Link href="/trends">
+            <Link href="/trends-and-socials">
               <Globe />
-              <span>Trends</span>
+              <span>Trends & Socials</span>
             </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>

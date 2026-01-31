@@ -56,7 +56,6 @@ export function StoreSwitcher() {
 
   const router = useRouter();
 
-  // Show loading skeleton during hydration to prevent mismatch
   const isLoading = storesPending || activeStorePending || sessionPending;
 
   const userId = session?.session?.userId;
@@ -64,7 +63,7 @@ export function StoreSwitcher() {
   const handleStoreChange = async (
     e: React.MouseEvent<HTMLAnchorElement>,
     organizationId: string,
-    organizationSlug: string
+    organizationSlug: string,
   ) => {
     e.preventDefault();
     try {
@@ -166,7 +165,7 @@ export function StoreSwitcher() {
                                   "ml-auto",
                                   activeStore?.id === store.id
                                     ? "opacity-100"
-                                    : "opacity-0"
+                                    : "opacity-0",
                                 )}
                               />
 

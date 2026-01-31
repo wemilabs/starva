@@ -21,7 +21,6 @@ import {
 } from "@/lib/utils";
 import { DeleteProductForm } from "../forms/delete-product-form";
 import { EditProductForm } from "../forms/edit-product-form";
-// import { ShareDialog } from "../share-dialog";
 import { AddToCartButton } from "./add-to-cart-button";
 import { ProductDetailsLink } from "./product-details-link";
 import { ProductLikeButton } from "./product-like-button";

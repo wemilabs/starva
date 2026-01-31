@@ -7,11 +7,23 @@ import {
   gte,
   ilike,
   inArray,
+  ne,
   or,
   type SQL,
 } from "drizzle-orm";
+import { cache } from "react";
+
+import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
-import { member, organization, user } from "@/db/schema";
+import {
+  member,
+  organization,
+  productLike,
+  user,
+  userFollowOrganization,
+  userFollowUser,
+} from "@/db/schema";
+import { isFollowingUser } from "./follows";
 
 export interface UserOptions {
   page?: number;
@@ -73,7 +85,7 @@ export async function getAllUsers(options: UserOptions = {}) {
           ...userRecord,
           members: userMembers,
         };
-      })
+      }),
     );
 
     const totalCountResult = await db
@@ -168,3 +180,101 @@ export async function getUserStats() {
     };
   }
 }
+
+export const getUserByIdWithFollowStatus = cache(
+  async (targetUserId: string) => {
+    const { success, session } = await verifySession();
+
+    const userRecord = await db.query.user.findFirst({
+      where: eq(user.id, targetUserId),
+    });
+
+    if (!userRecord) return null;
+
+    const userMembers = await db.query.member.findMany({
+      where: eq(member.userId, targetUserId),
+      with: {
+        organization: true,
+      },
+    });
+
+    const likesCount = await db
+      .select({ count: count() })
+      .from(productLike)
+      .where(eq(productLike.userId, targetUserId));
+
+    const followedOrgsCount = await db
+      .select({ count: count() })
+      .from(userFollowOrganization)
+      .where(eq(userFollowOrganization.userId, targetUserId));
+
+    let isFollowing = false;
+    let isSelf = false;
+    const isAuthenticated = success && !!session?.user;
+
+    if (isAuthenticated) {
+      isSelf = session.user.id === targetUserId;
+      if (!isSelf) {
+        isFollowing = await isFollowingUser(session.user.id, targetUserId);
+      }
+    }
+
+    return {
+      ...userRecord,
+      members: userMembers,
+      likesCount: likesCount[0]?.count ?? 0,
+      followedOrgsCount: followedOrgsCount[0]?.count ?? 0,
+      isFollowing,
+      isSelf,
+      isAuthenticated,
+    };
+  },
+);
+
+export const getDiscoverableUsers = cache(async (limit = 20) => {
+  const { success, session } = await verifySession();
+
+  let excludeUserIds: string[] = [];
+
+  if (success && session?.user) {
+    const followedUsers = await db
+      .select({ followingId: userFollowUser.followingId })
+      .from(userFollowUser)
+      .where(eq(userFollowUser.followerId, session.user.id));
+
+    excludeUserIds = [
+      session.user.id,
+      ...followedUsers.map((f) => f.followingId),
+    ];
+  }
+
+  const whereCondition =
+    excludeUserIds.length > 0
+      ? and(
+          ne(user.banned, true),
+          ...excludeUserIds.map((id) => ne(user.id, id)),
+        )
+      : ne(user.banned, true);
+
+  const users = await db.query.user.findMany({
+    where: whereCondition,
+    orderBy: desc(user.followersCount),
+    limit,
+  });
+
+  const usersWithStats = await Promise.all(
+    users.map(async (userRecord) => {
+      const likesCount = await db
+        .select({ count: count() })
+        .from(productLike)
+        .where(eq(productLike.userId, userRecord.id));
+
+      return {
+        ...userRecord,
+        likesCount: likesCount[0]?.count ?? 0,
+      };
+    }),
+  );
+
+  return usersWithStats;
+});

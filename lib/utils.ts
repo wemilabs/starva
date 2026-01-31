@@ -32,6 +32,17 @@ export const removeUnderscoreAndCapitalizeOnlyTheFirstChar = (
   return withSpaces.charAt(0).toUpperCase() + withSpaces.slice(1);
 };
 
+export const parseOrgMetadata = (metadataStr: string | null) => {
+  if (!metadataStr) return {};
+  try {
+    return typeof metadataStr === "string"
+      ? JSON.parse(metadataStr)
+      : metadataStr;
+  } catch {
+    return {};
+  }
+};
+
 // ------------------------ Phone utils ------------------------
 export const parsePhoneNumber = (fullPhone: string) => {
   if (!fullPhone) return { countryCode: COUNTRIES[0].code, phoneNumber: "" };

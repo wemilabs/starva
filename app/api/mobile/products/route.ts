@@ -1,5 +1,4 @@
 import { and, eq, ilike, inArray, sql } from "drizzle-orm";
-import { headers } from "next/headers";
 import { connection, type NextRequest, NextResponse } from "next/server";
 import { db } from "@/db/drizzle";
 import {
@@ -9,7 +8,7 @@ import {
   productTag,
   tag,
 } from "@/db/schema";
-import { auth } from "@/lib/auth";
+import { getMobileSession } from "@/lib/mobile-auth";
 
 type ProductFilters = {
   search?: string;
@@ -32,9 +31,7 @@ export async function GET(request: NextRequest) {
   await connection();
 
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
+    const session = await getMobileSession();
 
     const { searchParams } = new URL(request.url);
     const filters: ProductFilters = {

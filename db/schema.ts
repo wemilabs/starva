@@ -31,6 +31,8 @@ export const user = pgTable("user", {
   updatedAt: timestamp("updated_at")
     .$defaultFn(() => /* @__PURE__ */ new Date())
     .notNull(),
+  followersCount: integer("followers_count").default(0).notNull(),
+  followingCount: integer("following_count").default(0).notNull(),
 });
 
 export const session = pgTable("session", {
@@ -139,6 +141,7 @@ export const notificationType = pgEnum("notification_type", [
   "payment_successful",
   "payment_failed",
   "general",
+  "new_follower",
 ]);
 
 export const adminActionType = pgEnum("admin_action_type", [

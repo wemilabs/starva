@@ -2,19 +2,22 @@
 
 import { usePathname } from "next/navigation";
 import { useQueryState } from "nuqs";
-import { StoreCard } from "../forms/store-card";
+import { StoreCard } from "./store-card";
+
+type StoreWithFollowData = {
+  id: string;
+  name: string;
+  createdAt: Date;
+  slug: string;
+  logo: string | null;
+  metadata: string | null;
+  followersCount?: number;
+  productsCount?: number;
+  isFollowing?: boolean;
+};
 
 type StoreCatalogueSectionProps = {
-  data:
-    | {
-        id: string;
-        name: string;
-        createdAt: Date;
-        slug: string;
-        logo: string | null;
-        metadata: string | null;
-      }[]
-    | null;
+  data: StoreWithFollowData[] | null;
 };
 
 export function FilteredStore({ data }: StoreCatalogueSectionProps) {
@@ -40,11 +43,13 @@ export function FilteredStore({ data }: StoreCatalogueSectionProps) {
       </div>
     );
 
-  return (
-    <>
-      {filteredStores.map((store) => (
-        <StoreCard key={store.id} store={store} />
-      ))}
-    </>
-  );
+  return filteredStores.map((store) => (
+    <StoreCard
+      key={store.id}
+      store={store}
+      followersCount={store.followersCount}
+      productsCount={store.productsCount}
+      isFollowing={store.isFollowing}
+    />
+  ));
 }

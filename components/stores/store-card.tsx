@@ -1,10 +1,12 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
+import { Package, Trash2, Users } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Activity, useState, useTransition } from "react";
 import { toast } from "sonner";
+
+import { OrganizationFollowButton } from "@/components/follows/organization-follow-button";
 
 import {
   AlertDialog,
@@ -23,6 +25,7 @@ import {
   Card,
   CardAction,
   CardDescription,
+  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -31,7 +34,21 @@ import { getInitials } from "@/lib/utils";
 import { deleteStore } from "@/server/stores";
 import { Spinner } from "../ui/spinner";
 
-export function StoreCard({ store }: { store: Organization }) {
+type StoreCardProps = {
+  store: Organization;
+  followersCount?: number;
+  productsCount?: number;
+  isFollowing?: boolean;
+  showFollowButton?: boolean;
+};
+
+export function StoreCard({
+  store,
+  followersCount = 0,
+  productsCount = 0,
+  isFollowing = false,
+  showFollowButton = true,
+}: StoreCardProps) {
   const [isPending, startTransition] = useTransition();
   const pathname = usePathname();
 
@@ -55,8 +72,14 @@ export function StoreCard({ store }: { store: Organization }) {
   };
 
   const metadata = store.metadata
-    ? (JSON.parse(store.metadata) as { description?: string })
+    ? (JSON.parse(store.metadata) as {
+        description?: string;
+        followersCount?: number;
+      })
     : null;
+
+  const displayFollowersCount = followersCount || metadata?.followersCount || 0;
+  const isMerchantPage = pathname.startsWith("/merchants");
 
   return (
     <Card className="group transition-all hover:shadow-lg hover:border-primary/50">
@@ -72,9 +95,9 @@ export function StoreCard({ store }: { store: Organization }) {
             <Link
               className="block hover:opacity-80 transition-opacity"
               href={
-                pathname === "/stores"
-                  ? `/stores/${store.slug}`
-                  : `/merchants/${store.slug}`
+                isMerchantPage
+                  ? `/merchants/${store.slug}`
+                  : `/stores/${store.slug}`
               }
             >
               <CardTitle className="truncate md:text-lg mb-2">
@@ -87,7 +110,7 @@ export function StoreCard({ store }: { store: Organization }) {
           </div>
         </div>
 
-        <Activity mode={pathname === "/stores" ? "visible" : "hidden"}>
+        <Activity mode={isMerchantPage ? "hidden" : "visible"}>
           <CardAction>
             <AlertDialog open={open} onOpenChange={setOpen}>
               <AlertDialogTrigger asChild>
@@ -134,6 +157,28 @@ export function StoreCard({ store }: { store: Organization }) {
           </CardAction>
         </Activity>
       </CardHeader>
+      <CardFooter className="flex items-center justify-between gap-3 pt-3 border-t">
+        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1.5">
+            <Users className="size-4" />
+            <span>{displayFollowersCount}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Package className="size-4" />
+            <span>{productsCount}</span>
+          </div>
+        </div>
+        <Activity
+          mode={showFollowButton && isMerchantPage ? "visible" : "hidden"}
+        >
+          <OrganizationFollowButton
+            organizationId={store.id}
+            initialIsFollowing={isFollowing}
+            initialFollowersCount={displayFollowersCount}
+            revalidateTargetPath={pathname}
+          />
+        </Activity>
+      </CardFooter>
     </Card>
   );
 }

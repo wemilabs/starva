@@ -9,8 +9,10 @@ import {
   Package,
   PackageCheck,
   Truck,
+  UserPlus,
   XCircle,
 } from "lucide-react";
+import type { Route } from "next";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -43,7 +45,8 @@ type NotificationType =
   | "order_ready"
   | "order_delivered"
   | "order_paid"
-  | "order_cancelled";
+  | "order_cancelled"
+  | "new_follower";
 
 interface OrderNotification {
   id: string;
@@ -60,10 +63,25 @@ interface OrderNotification {
   read: boolean;
 }
 
+interface FollowerNotification {
+  id: string;
+  type: "new_follower";
+  followerId: string;
+  followerName: string;
+  followerImage?: string;
+  targetId: string;
+  targetType: "user" | "organization";
+  targetName: string;
+  createdAt: Date;
+  read: boolean;
+}
+
+type Notification = OrderNotification | FollowerNotification;
+
 export function NotificationsDropdownMenu() {
   const router = useRouter();
   const { data: session } = useSession();
-  const [notifications, setNotifications] = useState<OrderNotification[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const { data: activeStore } = useActiveOrganization();
 
@@ -457,6 +475,46 @@ export function NotificationsDropdownMenu() {
     },
   });
 
+  // Listen for new followers (user channel)
+  useRealtime({
+    channels: userId ? [`user:${userId}`] : [],
+    events: ["followers.new"],
+    onData: (payload) => {
+      if (payload.event === "followers.new") {
+        const followerNotification: FollowerNotification = {
+          id: payload.data.notificationId,
+          type: "new_follower",
+          followerId: payload.data.followerId,
+          followerName: payload.data.followerName,
+          followerImage: payload.data.followerImage,
+          targetId: payload.data.targetId,
+          targetType: payload.data.targetType,
+          targetName: payload.data.targetName,
+          createdAt: new Date(payload.data.createdAt),
+          read: false,
+        };
+
+        setNotifications((prev) =>
+          [followerNotification, ...prev].slice(0, 50),
+        );
+        setUnreadCount((prev) => prev + 1);
+
+        toast.success("New Follower!", {
+          description:
+            payload.data.targetType === "organization"
+              ? `${payload.data.followerName} started following ${payload.data.targetName}`
+              : `${payload.data.followerName} started following you`,
+          action: {
+            label: "View",
+            onClick: () => {
+              router.push(`/users/${payload.data.followerId}`);
+            },
+          },
+        });
+      }
+    },
+  });
+
   const getNotificationIcon = (type: NotificationType) => {
     switch (type) {
       case "new":
@@ -475,6 +533,8 @@ export function NotificationsDropdownMenu() {
         return <Banknote className="size-4 text-green-600" />;
       case "order_cancelled":
         return <XCircle className="size-4 text-red-500" />;
+      case "new_follower":
+        return <UserPlus className="size-4 text-primary" />;
       default:
         return <Package className="size-4 text-orange-500" />;
     }
@@ -498,9 +558,24 @@ export function NotificationsDropdownMenu() {
         return "Order Paid";
       case "order_cancelled":
         return "Order Cancelled";
+      case "new_follower":
+        return "New Follower";
       default:
         return "Notification";
     }
+  };
+
+  const isOrderNotification = (n: Notification): n is OrderNotification =>
+    n.type !== "new_follower";
+
+  const isFollowerNotification = (n: Notification): n is FollowerNotification =>
+    n.type === "new_follower";
+
+  const getNotificationHref = (notification: Notification): string => {
+    if (isFollowerNotification(notification)) {
+      return `/users/${notification.followerId}`;
+    }
+    return `/point-of-sales/orders/${notification.orderId}`;
   };
 
   return (
@@ -554,7 +629,7 @@ export function NotificationsDropdownMenu() {
                 asChild
               >
                 <Link
-                  href={`/point-of-sales/orders/${notification.orderId}`}
+                  href={getNotificationHref(notification) as Route}
                   onClick={() => handleNotificationClick(notification.id)}
                 >
                   <div className="flex items-start gap-3 w-full">
@@ -571,34 +646,50 @@ export function NotificationsDropdownMenu() {
                         )}
                       </div>
                       <div className="flex items-center gap-1 flex-wrap">
-                        <p className="text-xs text-muted-foreground">
-                          Order #{notification.orderNumber}
-                        </p>
-                        {notification.type === "new" &&
-                          notification.customerName && (
+                        {isFollowerNotification(notification) ? (
+                          <p className="text-xs text-muted-foreground">
+                            {notification.followerName} started following{" "}
+                            {notification.targetType === "organization"
+                              ? notification.targetName
+                              : "you"}
+                          </p>
+                        ) : (
+                          isOrderNotification(notification) && (
                             <>
                               <p className="text-xs text-muted-foreground">
-                                from {notification.customerName} |{" "}
+                                Order #{notification.orderNumber}
                               </p>
-                              <p className="text-xs text-muted-foreground">
-                                {notification.itemCount ?? 0} item
-                                {(notification.itemCount ?? 0) > 1
-                                  ? "s"
-                                  : ""} •{" "}
-                                {notification.total &&
-                                  formatPriceInRWF(Number(notification.total))}
-                              </p>
+                              {notification.type === "new" &&
+                                notification.customerName && (
+                                  <>
+                                    <p className="text-xs text-muted-foreground">
+                                      from {notification.customerName} |{" "}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {notification.itemCount ?? 0} item
+                                      {(notification.itemCount ?? 0) > 1
+                                        ? "s"
+                                        : ""}{" "}
+                                      •{" "}
+                                      {notification.total &&
+                                        formatPriceInRWF(
+                                          Number(notification.total),
+                                        )}
+                                    </p>
+                                  </>
+                                )}
+                              {(notification.type === "order_confirmed" ||
+                                notification.type === "order_preparing" ||
+                                notification.type === "order_ready" ||
+                                notification.type === "order_delivered") &&
+                                notification.storeName && (
+                                  <p className="text-xs text-muted-foreground">
+                                    from {notification.storeName}
+                                  </p>
+                                )}
                             </>
-                          )}
-                        {(notification.type === "order_confirmed" ||
-                          notification.type === "order_preparing" ||
-                          notification.type === "order_ready" ||
-                          notification.type === "order_delivered") &&
-                          notification.storeName && (
-                            <p className="text-xs text-muted-foreground">
-                              from {notification.storeName}
-                            </p>
-                          )}
+                          )
+                        )}
                       </div>
                       <p className="text-xs text-muted-foreground">
                         {formatRelativeTime(notification.createdAt)}

@@ -154,13 +154,13 @@ export function NavUser({
               <Link href="#">
                 <DropdownMenuItem>
                   <Sparkles />
-                  Upgrade to Pro
+                  Upgrade Plan
                 </DropdownMenuItem>
               </Link>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <Link href="#">
+              <Link href={`/users/${user?.id}`}>
                 <DropdownMenuItem>
                   <BadgeCheck />
                   Account

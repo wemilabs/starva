@@ -24,7 +24,7 @@ const DiscoverUsersContent = () => {
   >({
     queryKey: ["discoverable-users"],
     queryFn: () => fetchDiscoverableUsers(),
-    staleTime: 5 * 60 * 1000,
+    // staleTime: 5 * 60 * 1000,
   });
 
   if (isLoading) {

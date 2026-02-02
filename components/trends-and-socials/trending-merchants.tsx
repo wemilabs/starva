@@ -24,7 +24,7 @@ const TrendingMerchantsContent = () => {
   >({
     queryKey: ["trending-merchants"],
     queryFn: () => fetchTrendingMerchants(20),
-    staleTime: 5 * 60 * 1000,
+    // staleTime: 5 * 60 * 1000,
   });
 
   if (isLoading) {
@@ -87,7 +87,7 @@ const TrendingMerchantsContent = () => {
                 </p>
                 <div className="flex items-center gap-1 mt-2 text-xs text-muted-foreground">
                   <Users className="size-3" />
-                  <span>{merchant.followersCount} followers</span>
+                  <span>{merchant.followersCount}</span>
                 </div>
               </div>
             </div>
@@ -97,7 +97,7 @@ const TrendingMerchantsContent = () => {
               organizationId={merchant.id}
               initialIsFollowing={merchant.isFollowing}
               initialFollowersCount={merchant.followersCount}
-              revalidateTargetPath="/trends"
+              revalidateTargetPath="/trends-and-socials"
               className="w-full"
             />
           </CardContent>

@@ -20,7 +20,7 @@ const FollowingFeedContent = () => {
   >({
     queryKey: ["following-feed"],
     queryFn: () => fetchFollowingFeed(20),
-    staleTime: 5 * 60 * 1000,
+    // staleTime: 5 * 60 * 1000,
   });
 
   if (isLoading) {

@@ -20,7 +20,7 @@ const TrendingProductsContent = () => {
   >({
     queryKey: ["trending-products"],
     queryFn: () => fetchTrendingProducts(20, 7),
-    staleTime: 5 * 60 * 1000,
+    // staleTime: 5 * 60 * 1000,
   });
 
   if (isLoading) {

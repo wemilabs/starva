@@ -1,5 +1,6 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { UserCheck, UserPlus } from "lucide-react";
 import { useOptimistic, useTransition } from "react";
 import { toast } from "sonner";
@@ -31,6 +32,7 @@ export function OrganizationFollowButton({
   className,
 }: OrganizationFollowButtonProps) {
   const [isPending, startTransition] = useTransition();
+  const queryClient = useQueryClient();
   const [optimisticState, setOptimisticState] = useOptimistic<
     OptimisticState,
     OptimisticState
@@ -59,7 +61,9 @@ export function OrganizationFollowButton({
         revalidateTargetPath,
       });
 
-      if (!result.ok) {
+      if (result.ok) {
+        queryClient.invalidateQueries({ queryKey: ["trending-merchants"] });
+      } else {
         console.error("Failed to toggle follow:", result.error);
         toast.error("Failed to toggle follow", {
           description:

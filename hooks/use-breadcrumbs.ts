@@ -69,7 +69,7 @@ const routeConfig: Record<string, (params: string[]) => Crumb[]> = {
     { label: `Transaction #${formatDynamicSegment(params[0])}` },
   ],
   "/users/[userId]": (params) => [
-    { label: "Users", href: "/users" },
+    { label: "Users" },
     { label: formatDynamicSegment(params[0]) },
   ],
 };

@@ -23,7 +23,7 @@ const DiscoverUsersContent = () => {
     Awaited<ReturnType<typeof fetchDiscoverableUsers>>
   >({
     queryKey: ["discoverable-users"],
-    queryFn: () => fetchDiscoverableUsers(20),
+    queryFn: () => fetchDiscoverableUsers(),
     staleTime: 5 * 60 * 1000,
   });
 
@@ -79,11 +79,11 @@ const DiscoverUsersContent = () => {
                 <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <Users className="size-3" />
-                    <span>{user.followersCount} followers</span>
+                    <span>{user.followersCount}</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Heart className="size-3" />
-                    <span>{user.likesCount} likes</span>
+                    <span>{user.likesCount}</span>
                   </div>
                 </div>
               </div>

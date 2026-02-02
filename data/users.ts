@@ -11,14 +11,15 @@ import {
   or,
   type SQL,
 } from "drizzle-orm";
+import { cacheLife } from "next/cache";
 import { cache } from "react";
-
 import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
 import {
   member,
   organization,
   productLike,
+  product as productTable,
   user,
   userFollowOrganization,
   userFollowUser,
@@ -231,7 +232,7 @@ export const getUserByIdWithFollowStatus = cache(
   },
 );
 
-export const getDiscoverableUsers = cache(async (limit = 20) => {
+export const getDiscoverableUsers = cache(async () => {
   const { success, session } = await verifySession();
 
   let excludeUserIds: string[] = [];
@@ -259,7 +260,6 @@ export const getDiscoverableUsers = cache(async (limit = 20) => {
   const users = await db.query.user.findMany({
     where: whereCondition,
     orderBy: desc(user.followersCount),
-    limit,
   });
 
   const usersWithStats = await Promise.all(
@@ -277,4 +277,133 @@ export const getDiscoverableUsers = cache(async (limit = 20) => {
   );
 
   return usersWithStats;
+});
+
+export const getUserProfileData = cache(async (targetUserId: string) => {
+  "use cache: private";
+  cacheLife("minutes");
+
+  const { success, session } = await verifySession();
+  const viewerUserId = success && session?.user ? session.user.id : null;
+
+  const likedByProfile = await db
+    .select({ productId: productLike.productId })
+    .from(productLike)
+    .where(eq(productLike.userId, targetUserId))
+    .orderBy(desc(productLike.createdAt))
+    .limit(12);
+
+  const likedProductIds = likedByProfile.map((l) => l.productId);
+
+  const likedProducts =
+    likedProductIds.length > 0
+      ? await db.query.product.findMany({
+          where: and(
+            inArray(productTable.id, likedProductIds),
+            eq(productTable.status, "in_stock"),
+          ),
+          with: {
+            organization: {
+              columns: {
+                id: true,
+                name: true,
+                logo: true,
+                slug: true,
+                metadata: true,
+              },
+            },
+          },
+        })
+      : [];
+
+  const viewerLikedIds = viewerUserId
+    ? await db
+        .select({ productId: productLike.productId })
+        .from(productLike)
+        .where(
+          and(
+            inArray(
+              productLike.productId,
+              likedProductIds.length > 0 ? likedProductIds : ["__none__"],
+            ),
+            eq(productLike.userId, viewerUserId),
+          ),
+        )
+    : [];
+
+  const viewerLikedSet = new Set(viewerLikedIds.map((l) => l.productId));
+
+  const followerIds = await db
+    .select({ followerId: userFollowUser.followerId })
+    .from(userFollowUser)
+    .where(eq(userFollowUser.followingId, targetUserId))
+    .limit(24);
+
+  const followingIds = await db
+    .select({ followingId: userFollowUser.followingId })
+    .from(userFollowUser)
+    .where(eq(userFollowUser.followerId, targetUserId))
+    .limit(24);
+
+  const followers =
+    followerIds.length > 0
+      ? await db.query.user.findMany({
+          where: inArray(
+            user.id,
+            followerIds.map((f) => f.followerId),
+          ),
+          columns: {
+            id: true,
+            name: true,
+            image: true,
+            followersCount: true,
+          },
+          limit: 24,
+        })
+      : [];
+
+  const following =
+    followingIds.length > 0
+      ? await db.query.user.findMany({
+          where: inArray(
+            user.id,
+            followingIds.map((f) => f.followingId),
+          ),
+          columns: {
+            id: true,
+            name: true,
+            image: true,
+            followersCount: true,
+          },
+          limit: 24,
+        })
+      : [];
+
+  // Get follow status for followers list
+  const followersWithStatus = await Promise.all(
+    followers.map(async (follower) => ({
+      ...follower,
+      isFollowing: viewerUserId
+        ? await isFollowingUser(viewerUserId, follower.id)
+        : false,
+    })),
+  );
+
+  // Get follow status for following list
+  const followingWithStatus = await Promise.all(
+    following.map(async (followedUser) => ({
+      ...followedUser,
+      isFollowing: viewerUserId
+        ? await isFollowingUser(viewerUserId, followedUser.id)
+        : false,
+    })),
+  );
+
+  return {
+    likedProducts,
+    viewerLikedSet,
+    followers: followersWithStatus,
+    following: followingWithStatus,
+    viewerUserId,
+  };
 });

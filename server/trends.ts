@@ -19,6 +19,6 @@ export async function fetchTrendingMerchants(limit = 20) {
   return getTrendingMerchants(limit);
 }
 
-export async function fetchDiscoverableUsers(limit = 20) {
-  return getDiscoverableUsers(limit);
+export async function fetchDiscoverableUsers() {
+  return getDiscoverableUsers();
 }

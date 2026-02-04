@@ -132,6 +132,7 @@ export function NavUser({
             side={isMobile ? "bottom" : "right"}
             sideOffset={4}
           >
+            {/* Once we click on it, we should open other accounts to switch between them */}
             <DropdownMenuLabel className="p-0 font-normal">
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="size-8 rounded-lg">

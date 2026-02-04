@@ -25,7 +25,7 @@ export async function getUserSubscription(userId: string) {
   if (!currentSubscription) return null;
 
   const plan = PRICING_PLANS.find(
-    (p) => p.name === currentSubscription.planName
+    (p) => p.name === currentSubscription.planName,
   );
 
   return {
@@ -34,10 +34,20 @@ export async function getUserSubscription(userId: string) {
   };
 }
 
+export async function hasUserEverHadSubscription(
+  userId: string,
+): Promise<boolean> {
+  const existingSub = await db.query.subscription.findFirst({
+    where: (s, { eq }) => eq(s.userId, userId),
+    columns: { id: true },
+  });
+  return !!existingSub;
+}
+
 export async function createSubscription(
   userId: string,
   planName: string,
-  billingPeriod: BillingPeriod = "monthly"
+  billingPeriod: BillingPeriod = "monthly",
 ) {
   const plan = PRICING_PLANS.find((p) => p.name === planName);
   if (!plan) throw new Error(`Invalid plan name: ${planName}`);
@@ -66,7 +76,7 @@ export async function createSubscription(
 export async function updateSubscription(
   userId: string,
   planName: string,
-  billingPeriod?: BillingPeriod
+  billingPeriod?: BillingPeriod,
 ) {
   const existingSubscription = await getUserSubscription(userId);
   const plan = PRICING_PLANS.find((p) => p.name === planName);
@@ -240,7 +250,7 @@ export async function checkOrganizationLimit(userId: string) {
 
   return {
     canCreate: maxOrgs === null || totalOrgs < (maxOrgs ?? 0),
-    maxOrgs: maxOrgs === null ? "Unlimited" : maxOrgs ?? defaultMaxOrgs,
+    maxOrgs: maxOrgs === null ? "Unlimited" : (maxOrgs ?? defaultMaxOrgs),
     currentOrgs: totalOrgs,
     planName: plan?.name || null,
   };
@@ -303,7 +313,7 @@ export async function checkProductLimit(organizationId: string) {
     maxProducts:
       maxProductsPerOrg === null
         ? "Unlimited"
-        : maxProductsPerOrg ?? defaultMaxProducts,
+        : (maxProductsPerOrg ?? defaultMaxProducts),
     currentProducts: totalProducts,
     planName: plan?.name || null,
   };
@@ -316,7 +326,7 @@ export async function checkOrderLimit(organizationId: string) {
     where: (tracking, { eq, and }) =>
       and(
         eq(tracking.organizationId, organizationId),
-        eq(tracking.monthYear, currentMonth)
+        eq(tracking.monthYear, currentMonth),
       ),
   });
 
@@ -368,7 +378,8 @@ export async function checkOrderLimit(organizationId: string) {
 
   return {
     canCreate: maxOrders === null || currentOrders < (maxOrders ?? 0),
-    maxOrders: maxOrders === null ? "Unlimited" : maxOrders ?? defaultMaxOrders,
+    maxOrders:
+      maxOrders === null ? "Unlimited" : (maxOrders ?? defaultMaxOrders),
     currentOrders,
     planName: plan?.name || null,
   };

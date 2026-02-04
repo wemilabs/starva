@@ -81,7 +81,6 @@ export const COUNTRIES = [
 
   // American countries
   { code: "+1", name: "United States", flag: "🇺🇸" },
-  { code: "+1", name: "Canada", flag: "🇨🇦" },
   // { code: "+52", name: "Mexico", flag: "🇲🇽" },
   // { code: "+55", name: "Brazil", flag: "🇧🇷" },
   // { code: "+54", name: "Argentina", flag: "🇦🇷" },

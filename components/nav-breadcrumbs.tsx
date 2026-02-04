@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment } from "react";
+import { Fragment, useEffect, useState } from "react";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -13,11 +13,18 @@ import { type Crumb, useBreadcrumbs } from "@/contexts/breadcrumbs-context";
 
 export function NavBreadcrumbs({ base }: { base: Crumb[] }) {
   const { crumbs } = useBreadcrumbs();
+  const [mounted, setMounted] = useState(false);
   const all = [...base, ...crumbs];
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   return (
     <Breadcrumb>
-      <BreadcrumbList suppressHydrationWarning>
+      <BreadcrumbList>
         {all.map((c, idx) => (
           <Fragment key={`${c.label}-${idx}`}>
             <BreadcrumbItem>

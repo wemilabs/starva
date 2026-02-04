@@ -22,9 +22,10 @@ import {
   schema,
 } from "@/db/schema";
 import {
-  admin as adminRole,
-  member as memberRole,
-  owner as ownerRole,
+  ac,
+  admin as customAdminRole,
+  member as customMemberRole,
+  owner as customOwnerRole,
 } from "./permissions";
 
 const resend = new Resend(process.env.RESEND_API_KEY as string);
@@ -91,6 +92,7 @@ export const auth = betterAuth({
     lastLoginMethod({ storeInDatabase: true }),
     nextCookies(),
     organization({
+      ac,
       sendInvitationEmail: async (data) => {
         const inviteLink = `${process.env.NEXT_PUBLIC_APP_URL}/api/accept-invitation/${data.id}`;
 
@@ -108,9 +110,9 @@ export const auth = betterAuth({
         });
       },
       roles: {
-        ownerRole,
-        adminRole,
-        memberRole,
+        owner: customOwnerRole,
+        admin: customAdminRole,
+        member: customMemberRole,
       },
     }),
     expo(),

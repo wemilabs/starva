@@ -214,8 +214,8 @@ export const TRANSACTION_FEES = {
 export const PRICING_PLANS: PricingPlan[] = [
   {
     name: "Starter",
-    monthlyPrice: 50,
-    yearlyPrice: 540,
+    monthlyPrice: 30, // 50
+    yearlyPrice: 324, // 540
     period: "month",
     orderLimit: 200,
     maxOrgs: 3,
@@ -235,8 +235,8 @@ export const PRICING_PLANS: PricingPlan[] = [
   },
   {
     name: "Growth",
-    monthlyPrice: 100,
-    yearlyPrice: 1080,
+    monthlyPrice: 90, // 100
+    yearlyPrice: 972, // 1080
     period: "month",
     orderLimit: 500,
     maxOrgs: 10,

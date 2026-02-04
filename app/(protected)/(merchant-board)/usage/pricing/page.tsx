@@ -4,13 +4,13 @@ import { PricingGrid } from "@/components/usage/pricing-grid";
 import { PRICING_PLANS } from "@/lib/constants";
 
 export const metadata: Metadata = {
-  title: "Pricing - Starva.shop",
+  title: "Pricing | Starva.shop",
   description: "Start free. Upgrade as your needs grow.",
 };
 
 async function PricingHeader() {
   "use cache";
-  cacheLife("weeks");
+  cacheLife("max");
 
   return (
     <div className="text-center space-y-2 mt-2">
@@ -26,7 +26,7 @@ async function PricingHeader() {
 
 async function PricingFooter() {
   "use cache";
-  cacheLife("weeks");
+  cacheLife("max");
 
   return (
     <div className="mt-16 text-center space-y-4 pt-8 max-w-7xl mx-auto border-t">

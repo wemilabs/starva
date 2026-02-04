@@ -77,18 +77,15 @@ export function PricingGrid({ plans }: PricingGridProps) {
       return;
     }
 
-    // Check if there's already a scheduled downgrade
     if (subscription?.scheduledPlanName) {
       toast.info(
-        `You already have a plan change scheduled to ${subscription.scheduledPlanName}.`
+        `You already have a plan change scheduled to ${subscription.scheduledPlanName}.`,
       );
       return;
     }
 
-    // Enterprise plan - contact sales
     if (planName === "Enterprise") {
       toast.info("Please contact us for Enterprise pricing");
-      // router.push("/contact");
       return;
     }
 
@@ -121,7 +118,7 @@ export function PricingGrid({ plans }: PricingGridProps) {
         ? formatDateShort(subscription.currentPeriodEnd)
         : "the end of your billing period";
       toast.success(
-        `Downgrade to ${selectedPlan} scheduled. You'll keep ${currentPlanName} features until ${periodEnd}.`
+        `Downgrade to ${selectedPlan} scheduled. You'll keep ${currentPlanName} features until ${periodEnd}.`,
       );
       refetch();
     } catch (error) {

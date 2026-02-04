@@ -62,7 +62,7 @@ const data = {
           url: "/usage/billing",
         },
         {
-          title: "Plans & Pricing",
+          title: "Pricing",
           url: "/usage/pricing",
         },
       ],

@@ -37,7 +37,7 @@ async function ProductsList({
       <div className="text-center py-10 border border-dashed border-muted-foreground/50 rounded-lg mt-10">
         <h2 className="font-semibold">No products available</h2>
         <p className="text-muted-foreground text-sm font-mono tracking-tighter">
-          This merchant has no product yet.
+          This merchant has no products yet.
         </p>
       </div>
     );

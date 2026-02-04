@@ -131,7 +131,7 @@ export function StoreSwitcher() {
               <Command>
                 <CommandInput className="h-9" placeholder="Search store..." />
                 <CommandList>
-                  <CommandEmpty>No store found.</CommandEmpty>
+                  <CommandEmpty>No stores found.</CommandEmpty>
                   <CommandGroup>
                     {userId &&
                       stores?.map((store, index) => (

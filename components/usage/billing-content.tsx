@@ -69,7 +69,7 @@ export async function BillingContent() {
   const subscription = await getUserSubscription(sessionData.session.user.id);
 
   const organizationLimit = await checkOrganizationLimit(
-    sessionData.session.user.id
+    sessionData.session.user.id,
   );
 
   // Get user's organizations to check product and order limits
@@ -87,19 +87,19 @@ export async function BillingContent() {
       ? "Unlimited"
       : ((plan?.maxProductsPerOrg === null
           ? "Unlimited"
-          : plan?.maxProductsPerOrg ?? 10) as number | string),
+          : (plan?.maxProductsPerOrg ?? 10)) as number | string),
     currentProducts: 0,
-    planName: isAdmin ? "Admin" : plan?.name ?? null,
+    planName: isAdmin ? "Admin" : (plan?.name ?? null),
   };
   let orderLimit = {
     canCreate: true,
     maxOrders: isAdmin
       ? "Unlimited"
-      : ((plan?.orderLimit === null ? "Unlimited" : plan?.orderLimit ?? 50) as
-          | number
-          | string),
+      : ((plan?.orderLimit === null
+          ? "Unlimited"
+          : (plan?.orderLimit ?? 50)) as number | string),
     currentOrders: 0,
-    planName: isAdmin ? "Admin" : plan?.name ?? null,
+    planName: isAdmin ? "Admin" : (plan?.name ?? null),
   };
 
   if (userOrgs.length > 0) {
@@ -152,15 +152,15 @@ export async function BillingContent() {
 
   const orgPercentage = calculatePercentage(
     organizationLimit.currentOrgs,
-    organizationLimit.maxOrgs
+    organizationLimit.maxOrgs,
   );
   const productPercentage = calculatePercentage(
     productLimit.currentProducts,
-    productLimit.maxProducts
+    productLimit.maxProducts,
   );
   const orderPercentage = calculatePercentage(
     orderLimit.currentOrders,
-    orderLimit.maxOrders
+    orderLimit.maxOrders,
   );
 
   return (
@@ -170,8 +170,8 @@ export async function BillingContent() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                <Crown className="h-5 w-5 text-primary" />
+              <div className="flex size-10 items-center justify-center rounded-lg bg-primary/10">
+                <Crown className="size-5 text-primary" />
               </div>
               <div>
                 <CardTitle className="text-lg">Current Plan</CardTitle>
@@ -179,10 +179,10 @@ export async function BillingContent() {
                   {organizationLimit.planName === "Admin"
                     ? "Unlimited access"
                     : isTrial
-                    ? "Trial period"
-                    : subscription
-                    ? "Active subscription"
-                    : "No active plan"}
+                      ? "Trial period"
+                      : subscription
+                        ? "Active subscription"
+                        : "No active plan"}
                 </CardDescription>
               </div>
             </div>
@@ -194,13 +194,14 @@ export async function BillingContent() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 grid-cols-2 md:flex md:items-center md:justify-between">
             <div>
               <p className="text-sm font-medium">Monthly Price</p>
               <p className="text-2xl font-bold">
                 {plan?.monthlyPrice ? `$${plan.monthlyPrice}` : "—"}
               </p>
             </div>
+
             <div>
               <p className="text-sm font-medium">Status</p>
               <div className="flex items-center gap-2 mt-1">
@@ -216,6 +217,37 @@ export async function BillingContent() {
                   {isTrial && " (14 days)"}
                 </span>
               </div>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium">Billing Period</p>
+              <p className="text-sm mt-1 capitalize">
+                {subscription?.billingPeriod || "—"}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium">Started On</p>
+              <p className="text-sm mt-1">
+                {subscription?.startDate
+                  ? new Date(subscription.startDate).toLocaleDateString()
+                  : "—"}
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium">Expires On</p>
+              <p className="text-sm mt-1">
+                {isAdmin
+                  ? "Never"
+                  : isTrial && subscription?.trialEndsAt
+                    ? new Date(subscription.trialEndsAt).toLocaleDateString()
+                    : subscription?.currentPeriodEnd
+                      ? new Date(
+                          subscription.currentPeriodEnd,
+                        ).toLocaleDateString()
+                      : "—"}
+              </p>
             </div>
           </div>
 
@@ -264,7 +296,7 @@ export async function BillingContent() {
               <div className="flex items-center justify-between">
                 <span
                   className={`text-xs font-medium ${getStatusColor(
-                    orgPercentage
+                    orgPercentage,
                   )}`}
                 >
                   {orgPercentage}% used
@@ -305,7 +337,7 @@ export async function BillingContent() {
               <div className="flex items-center justify-between">
                 <span
                   className={`text-xs font-medium ${getStatusColor(
-                    productPercentage
+                    productPercentage,
                   )}`}
                 >
                   {productPercentage}% used
@@ -346,7 +378,7 @@ export async function BillingContent() {
               <div className="flex items-center justify-between">
                 <span
                   className={`text-xs font-medium ${getStatusColor(
-                    orderPercentage
+                    orderPercentage,
                   )}`}
                 >
                   {orderPercentage}% used
@@ -426,8 +458,8 @@ export async function BillingContent() {
                         payment.status === "successful"
                           ? "bg-green-500"
                           : payment.status === "pending"
-                          ? "bg-yellow-500"
-                          : "bg-red-500"
+                            ? "bg-yellow-500"
+                            : "bg-red-500"
                       }`}
                     />
                     <div>

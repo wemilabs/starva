@@ -58,48 +58,51 @@ const DiscoverUsersContent = () => {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {users.map((user) => (
-        <Card key={user.id} className="group hover:shadow-md transition-shadow">
-          <CardHeader className="pb-3">
-            <div className="flex items-start gap-4">
-              <Link href={`/users/${user.id}`}>
-                <Avatar className="size-14 ring-2 ring-border group-hover:ring-primary/50 transition-all">
-                  <AvatarImage src={user.image ?? ""} alt={user.name} />
-                  <AvatarFallback className="bg-linear-to-br from-primary to-red-500 text-white font-semibold">
-                    {getInitials(user.name)}
-                  </AvatarFallback>
-                </Avatar>
-              </Link>
-              <div className="flex-1 min-w-0">
-                <Link href={`/users/${user.id}`} className="hover:opacity-80">
-                  <CardTitle className="text-base truncate">
-                    {user.name}
-                  </CardTitle>
+      {users.map(
+        ({ id: userId, followersCount, likesCount, name, image: imgSrc }) => (
+          <Card
+            key={userId}
+            className="group hover:shadow-md transition-shadow"
+          >
+            <CardHeader className="pb-3">
+              <div className="flex items-start gap-4">
+                <Link href={`/users/${userId}`}>
+                  <Avatar className="size-14 ring-2 ring-border group-hover:ring-primary/50 transition-all">
+                    <AvatarImage src={imgSrc ?? ""} alt={name} />
+                    <AvatarFallback className="bg-linear-to-br from-primary to-red-500 text-white font-semibold">
+                      {getInitials(name)}
+                    </AvatarFallback>
+                  </Avatar>
                 </Link>
-                <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1">
-                    <Users className="size-3" />
-                    <span>{user.followersCount}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Heart className="size-3" />
-                    <span>{user.likesCount}</span>
+                <div className="flex-1 min-w-0">
+                  <Link href={`/users/${userId}`} className="hover:opacity-80">
+                    <CardTitle className="text-base truncate">{name}</CardTitle>
+                  </Link>
+                  <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                    <div className="flex items-center gap-1">
+                      <Users className="size-3" />
+                      <span>{followersCount}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Heart className="size-3" />
+                      <span>{likesCount}</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <UserFollowButton
-              userId={user.id}
-              initialIsFollowing={false}
-              initialFollowersCount={user.followersCount}
-              revalidateTargetPath="/trends"
-              className="w-full"
-            />
-          </CardContent>
-        </Card>
-      ))}
+            </CardHeader>
+            <CardContent className="pt-0">
+              <UserFollowButton
+                userId={userId}
+                initialIsFollowing={false}
+                initialFollowersCount={followersCount}
+                revalidateTargetPath="/trends-and-socials"
+                className="w-full"
+              />
+            </CardContent>
+          </Card>
+        ),
+      )}
     </div>
   );
 };

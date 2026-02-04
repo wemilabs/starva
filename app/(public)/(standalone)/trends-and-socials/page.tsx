@@ -80,7 +80,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const trendsUrl = `${
     process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"
-  }/trends`;
+  }/trends-and-socials`;
 
   return {
     title,
@@ -151,9 +151,9 @@ export default function TrendsAndSocialsPage() {
                 <EmptyMedia variant="icon">
                   <LoaderIcon className="size-6 animate-spin" />
                 </EmptyMedia>
-                <EmptyTitle>Page loading...</EmptyTitle>
+                <EmptyTitle>Data loading...</EmptyTitle>
                 <EmptyDescription className="font-mono tracking-tighter">
-                  Please wait while the page is loading...
+                  Please wait while data is loading...
                 </EmptyDescription>
               </EmptyHeader>
             </Empty>

@@ -71,7 +71,7 @@ async function OrdersContent() {
               <EmptyMedia variant="icon">
                 <ScrollText className="size-6" />
               </EmptyMedia>
-              <EmptyTitle>No order yet</EmptyTitle>
+              <EmptyTitle>No orders yet</EmptyTitle>
               <EmptyDescription className="font-mono tracking-tighter">
                 Start shopping from stores to place your first order. Your order
                 history will appear here.
@@ -84,7 +84,7 @@ async function OrdersContent() {
               <EmptyMedia variant="icon">
                 <Store className="size-6" />
               </EmptyMedia>
-              <EmptyTitle>No active store</EmptyTitle>
+              <EmptyTitle>No active stores</EmptyTitle>
               <EmptyDescription className="font-mono tracking-tighter">
                 Please select or create a store from the top store switcher, to
                 view and manage orders from your customers

@@ -76,7 +76,7 @@ async function WalletContent() {
           <EmptyMedia variant="icon">
             <Store className="size-6" />
           </EmptyMedia>
-          <EmptyTitle>No active store</EmptyTitle>
+          <EmptyTitle>No active stores</EmptyTitle>
           <EmptyDescription className="font-mono tracking-tighter">
             Please select or create a store from the top store switcher, to view
             your wallet and manage withdrawals

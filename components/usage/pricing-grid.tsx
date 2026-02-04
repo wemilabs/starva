@@ -25,7 +25,11 @@ import {
   type PricingPlan,
 } from "@/lib/constants";
 import { formatDateShort } from "@/lib/utils";
-import { scheduleDowngrade } from "@/server/subscription";
+import {
+  createSubscription,
+  hasUserEverHadSubscription,
+  scheduleDowngrade,
+} from "@/server/subscription";
 import { PricingCard } from "./pricing-card";
 
 interface PricingGridProps {
@@ -89,10 +93,32 @@ export function PricingGrid({ plans }: PricingGridProps) {
       return;
     }
 
-    // No current subscription or new user - all plans require trial/payment
+    // No current subscription - check trial eligibility
     if (!currentPlanName) {
-      setSelectedPlan(planName);
-      setShowPaymentModal(true);
+      setLoadingPlan(planName);
+      try {
+        const hadSubscription = await hasUserEverHadSubscription(
+          session.user.id,
+        );
+
+        if (!hadSubscription) {
+          // First-time user: start free trial directly (no payment)
+          await createSubscription(session.user.id, planName, billingPeriod);
+          toast.success(
+            `Your 14-day free trial of ${planName} has started! Enjoy all features.`,
+          );
+          refetch();
+        } else {
+          // User had a subscription before (expired/cancelled) - require payment
+          setSelectedPlan(planName);
+          setShowPaymentModal(true);
+        }
+      } catch (error) {
+        console.error("Trial start error:", error);
+        toast.error("Failed to start trial. Please try again.");
+      } finally {
+        setLoadingPlan(null);
+      }
       return;
     }
 

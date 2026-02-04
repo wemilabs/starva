@@ -151,7 +151,7 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <Link href="#">
+              <Link href="/usage/pricing">
                 <DropdownMenuItem>
                   <Sparkles />
                   Upgrade Plan

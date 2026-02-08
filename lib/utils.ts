@@ -218,6 +218,7 @@ export function getCategoryLabel(key: string): string {
     "toys-games": "Toys & Games",
     others: "Others",
   };
+
   return categoryMap[key] || key;
 }
 
@@ -292,4 +293,14 @@ export function getCategorySpecificationPlaceholder(category: string): string {
     default:
       return "e.g., Key features or details";
   }
+}
+
+// Fisher-Yates shuffle algorithm for unbiased array shuffling
+export function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
 }

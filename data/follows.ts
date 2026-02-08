@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq } from "drizzle-orm";
+import { and, eq, desc } from "drizzle-orm";
 import { cache } from "react";
 
 import { verifySession } from "@/data/user-session";
@@ -85,6 +85,26 @@ export async function getFollowStatusForCurrentUser(organizationId: string) {
   );
   return { isFollowing, isAuthenticated: true };
 }
+
+export const getUserFollowedOrganizations = cache(async (userId: string) => {
+  const followedOrgs = await db.query.userFollowOrganization.findMany({
+    where: eq(userFollowOrganization.userId, userId),
+    with: {
+      organization: {
+        columns: {
+          id: true,
+          name: true,
+          logo: true,
+          slug: true,
+          metadata: true,
+        },
+      },
+    },
+    orderBy: desc(userFollowOrganization.createdAt),
+  });
+
+  return followedOrgs.map((follow) => follow.organization);
+});
 
 export async function getUserFollowStatusForCurrentUser(targetUserId: string) {
   const { success, session } = await verifySession();

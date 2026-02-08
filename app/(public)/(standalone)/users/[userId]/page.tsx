@@ -1,4 +1,4 @@
-import { Heart, MessageCircle, Users } from "lucide-react";
+import { Heart, MessageCircle, Users, Store } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -44,8 +44,14 @@ async function UserProfileContent({
   const profileUser = await getUserByIdWithFollowStatus(userId);
   if (!profileUser) notFound();
 
-  const { likedProducts, viewerLikedSet, followers, following, viewerUserId } =
-    await getUserProfileData(userId);
+  const {
+    likedProducts,
+    viewerLikedSet,
+    followers,
+    following,
+    followedOrgs,
+    viewerUserId,
+  } = await getUserProfileData(userId);
 
   const bioLines = [profileUser.email].filter(Boolean);
 
@@ -201,7 +207,7 @@ async function UserProfileContent({
 
       <Tabs defaultValue="liked" className="w-full">
         <div className="flex items-center justify-between gap-3 border-b">
-          <TabsList className="bg-transparent p-0 h-auto rounded-none mx-auto gap-x-10">
+          <TabsList className="bg-transparent p-0 h-auto rounded-none mx-auto gap-x-2.5 sm:gap-x-4 md:gap-x-6 lg:gap-x-10">
             <TabsTrigger
               value="liked"
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
@@ -227,6 +233,13 @@ async function UserProfileContent({
               className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
             >
               Stores
+            </TabsTrigger>
+            <TabsTrigger
+              value="followed-orgs"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent"
+            >
+              <Store className="size-4" />
+              Followed
             </TabsTrigger>
           </TabsList>
         </div>
@@ -339,6 +352,49 @@ async function UserProfileContent({
               <div className="text-sm text-muted-foreground">No stores</div>
             </div>
           </Activity>
+        </TabsContent>
+
+        <TabsContent value="followed-orgs" className="pt-5">
+          {followedOrgs.length === 0 ? (
+            <div className="flex min-h-[220px] items-center justify-center rounded-lg border border-dashed">
+              <div className="text-sm text-muted-foreground">
+                No followed organizations yet
+              </div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {followedOrgs.map((org) => {
+                const followersCount =
+                  (typeof org.metadata === "string"
+                    ? JSON.parse(org.metadata)
+                    : org.metadata
+                  )?.followersCount ?? 0;
+
+                return (
+                  <Link
+                    key={org.id}
+                    href={`/merchants/${org.slug}`}
+                    className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors"
+                  >
+                    <Avatar className="size-10">
+                      <AvatarImage src={org.logo ?? ""} alt={org.name} />
+                      <AvatarFallback>{getInitials(org.name)}</AvatarFallback>
+                    </Avatar>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium truncate">{org.name}</p>
+                      <div className="text-xs text-muted-foreground">
+                        {Intl.NumberFormat("en", {
+                          notation: "compact",
+                          maximumFractionDigits: 1,
+                        }).format(followersCount)}{" "}
+                        follower{followersCount <= 1 ? "" : "s"}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>

@@ -24,7 +24,7 @@ import {
   userFollowOrganization,
   userFollowUser,
 } from "@/db/schema";
-import { isFollowingUser } from "./follows";
+import { isFollowingUser, getUserFollowedOrganizations } from "./follows";
 
 export interface UserOptions {
   page?: number;
@@ -399,11 +399,15 @@ export const getUserProfileData = cache(async (targetUserId: string) => {
     })),
   );
 
+  // Get followed organizations
+  const followedOrgs = await getUserFollowedOrganizations(targetUserId);
+
   return {
     likedProducts,
     viewerLikedSet,
     followers: followersWithStatus,
     following: followingWithStatus,
+    followedOrgs,
     viewerUserId,
   };
 });

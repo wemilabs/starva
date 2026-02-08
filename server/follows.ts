@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -10,6 +10,8 @@ import {
   member,
   notification,
   organization,
+  product,
+  productLike,
   user,
   userFollowOrganization,
   userFollowUser,
@@ -336,6 +338,176 @@ export async function toggleUserFollow(
       error: e.message,
       isFollowing: false,
       followersCount: 0,
+    } as const;
+  }
+}
+
+const getFollowingFeedProductsSchema = z.object({
+  limit: z.number().min(1).max(50).default(20),
+  offset: z.number().min(0).default(0),
+});
+
+export async function getFollowingFeedProducts(
+  input: z.infer<typeof getFollowingFeedProductsSchema>,
+) {
+  const parsed = getFollowingFeedProductsSchema.safeParse(input);
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: z.treeifyError(parsed.error),
+      products: [],
+      total: 0,
+      hasMore: false,
+    } as const;
+  }
+
+  try {
+    const { success, session } = await verifySession();
+    if (!success || !session?.user) {
+      return {
+        ok: false,
+        error: "Unauthorized",
+        products: [],
+        total: 0,
+        hasMore: false,
+      } as const;
+    }
+
+    const { limit, offset } = parsed.data;
+    const userId = session.user.id;
+
+    // Get followed organizations and users
+    const followedOrgs = await db
+      .select({ organizationId: userFollowOrganization.organizationId })
+      .from(userFollowOrganization)
+      .where(eq(userFollowOrganization.userId, userId));
+
+    const followedUsers = await db
+      .select({ followingId: userFollowUser.followingId })
+      .from(userFollowUser)
+      .where(eq(userFollowUser.followerId, userId));
+
+    const followedOrgIds = followedOrgs.map((f) => f.organizationId);
+    const followedUserIds = followedUsers.map((f) => f.followingId);
+
+    if (followedOrgIds.length === 0 && followedUserIds.length === 0) {
+      return {
+        ok: true,
+        products: [],
+        total: 0,
+        hasMore: false,
+        message: "Follow some merchants or users to see products here",
+      } as const;
+    }
+
+    // Get products liked by followed users
+    let likedProductIds: string[] = [];
+    if (followedUserIds.length > 0) {
+      const likedByFollowed = await db
+        .select({ productId: productLike.productId })
+        .from(productLike)
+        .where(inArray(productLike.userId, followedUserIds));
+      likedProductIds = likedByFollowed.map((l) => l.productId);
+    }
+
+    const allProductIds = new Set<string>();
+
+    // Get products from followed organizations
+    const productsFromOrgs =
+      followedOrgIds.length > 0
+        ? await db.query.product.findMany({
+            where: and(
+              inArray(product.organizationId, followedOrgIds),
+              eq(product.status, "in_stock"),
+            ),
+            with: {
+              organization: {
+                columns: { id: true, name: true, logo: true, slug: true },
+              },
+              productTags: {
+                with: {
+                  tag: { columns: { id: true, name: true, slug: true } },
+                },
+              },
+            },
+            orderBy: [desc(product.createdAt)],
+          })
+        : [];
+
+    for (const p of productsFromOrgs) {
+      allProductIds.add(p.id);
+    }
+
+    // Get products liked by followed users (excluding those already from orgs)
+    const uniqueLikedIds = likedProductIds.filter(
+      (id) => !allProductIds.has(id),
+    );
+
+    const productsLikedByFollowed =
+      uniqueLikedIds.length > 0
+        ? await db.query.product.findMany({
+            where: and(
+              inArray(product.id, uniqueLikedIds),
+              eq(product.status, "in_stock"),
+            ),
+            with: {
+              organization: {
+                columns: { id: true, name: true, logo: true, slug: true },
+              },
+              productTags: {
+                with: {
+                  tag: { columns: { id: true, name: true, slug: true } },
+                },
+              },
+            },
+            orderBy: [desc(product.createdAt)],
+          })
+        : [];
+
+    // Combine and sort all products
+    const allProducts = [...productsFromOrgs, ...productsLikedByFollowed];
+    allProducts.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+
+    // Apply pagination
+    const paginatedProducts = allProducts.slice(offset, offset + limit);
+
+    // Get user's liked products for isLiked flag
+    const userLikedProducts = await db
+      .select({ productId: productLike.productId })
+      .from(productLike)
+      .where(eq(productLike.userId, userId));
+    const userLikedIds = new Set(
+      userLikedProducts.map((like) => like.productId),
+    );
+
+    // Format products with metadata
+    const productsWithMeta = paginatedProducts.map((p) => ({
+      ...p,
+      tags: p.productTags.map((pt) => pt.tag),
+      isLiked: userLikedIds.has(p.id),
+      source: followedOrgIds.includes(p.organizationId)
+        ? "followed_merchant"
+        : "liked_by_followed",
+    }));
+
+    return {
+      ok: true,
+      products: productsWithMeta,
+      total: allProducts.length,
+      hasMore: offset + limit < allProducts.length,
+    } as const;
+  } catch (error: unknown) {
+    const e = error as Error;
+    console.error("getFollowingFeedProducts error:", e);
+    return {
+      ok: false,
+      error: e.message,
+      products: [],
+      total: 0,
+      hasMore: false,
     } as const;
   }
 }

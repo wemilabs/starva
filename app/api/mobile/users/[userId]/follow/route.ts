@@ -1,29 +1,41 @@
-import { and, eq } from "drizzle-orm";
-import { connection, type NextRequest, NextResponse } from "next/server";
+import { eq } from "drizzle-orm";
+import { connection, type NextRequest } from "next/server";
+import { z } from "zod";
+
 import { db } from "@/db/drizzle";
-import { user, userFollowUser } from "@/db/schema";
-import { getMobileSession } from "@/lib/mobile-auth";
+import { user } from "@/db/schema";
+import {
+  errorResponse,
+  getMobileSession,
+  successResponse,
+  unauthorizedResponse,
+} from "@/lib/mobile-auth";
+import { toggleUserFollow } from "@/server/follows";
+
+const toggleFollowSchema = z.object({
+  revalidateTargetPath: z.string().optional().default("/"),
+});
 
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ userId: string }> },
 ) {
   await connection();
 
   try {
     const session = await getMobileSession();
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    if (!session?.user) return unauthorizedResponse();
 
     const { userId } = await params;
+    const body = await request.json();
+    const parsed = toggleFollowSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return errorResponse("Invalid request data", 400);
+    }
 
     if (userId === session.user.id) {
-      return NextResponse.json(
-        { error: "Cannot follow yourself" },
-        { status: 400 },
-      );
+      return errorResponse("Cannot follow yourself", 400);
     }
 
     const targetUser = await db.query.user.findFirst({
@@ -31,68 +43,75 @@ export async function POST(
     });
 
     if (!targetUser) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return errorResponse("User not found", 404);
     }
 
-    const existingFollow = await db.query.userFollowUser.findFirst({
-      where: and(
-        eq(userFollowUser.followerId, session.user.id),
-        eq(userFollowUser.followingId, userId),
-      ),
+    const result = await toggleUserFollow({
+      userId: userId,
+      revalidateTargetPath: parsed.data.revalidateTargetPath,
     });
 
-    if (existingFollow) {
-      return NextResponse.json(
-        { error: "Already following this user" },
-        { status: 400 },
-      );
+    if (!result.ok) {
+      const errorMessage =
+        typeof result.error === "string" ? result.error : "Validation failed";
+      return errorResponse(errorMessage, 400);
     }
 
-    await db.insert(userFollowUser).values({
-      followerId: session.user.id,
-      followingId: userId,
+    return successResponse({
+      success: true,
+      following: result.isFollowing,
+      followersCount: result.followersCount,
     });
-
-    return NextResponse.json({ success: true, following: true });
   } catch (error) {
     console.error("Failed to follow user:", error);
-    return NextResponse.json(
-      { error: "Failed to follow user" },
-      { status: 500 },
-    );
+    return errorResponse("Failed to follow user", 500);
   }
 }
 
 export async function DELETE(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ userId: string }> },
 ) {
   await connection();
 
   try {
     const session = await getMobileSession();
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    if (!session?.user) return unauthorizedResponse();
 
     const { userId } = await params;
+    const body = await request.json();
+    const parsed = toggleFollowSchema.safeParse(body);
 
-    await db
-      .delete(userFollowUser)
-      .where(
-        and(
-          eq(userFollowUser.followerId, session.user.id),
-          eq(userFollowUser.followingId, userId),
-        ),
-      );
+    if (!parsed.success) {
+      return errorResponse("Invalid request data", 400);
+    }
 
-    return NextResponse.json({ success: true, following: false });
+    const targetUser = await db.query.user.findFirst({
+      where: eq(user.id, userId),
+    });
+
+    if (!targetUser) {
+      return errorResponse("User not found", 404);
+    }
+
+    const result = await toggleUserFollow({
+      userId: userId,
+      revalidateTargetPath: parsed.data.revalidateTargetPath,
+    });
+
+    if (!result.ok) {
+      const errorMessage =
+        typeof result.error === "string" ? result.error : "Validation failed";
+      return errorResponse(errorMessage, 400);
+    }
+
+    return successResponse({
+      success: true,
+      following: result.isFollowing,
+      followersCount: result.followersCount,
+    });
   } catch (error) {
     console.error("Failed to unfollow user:", error);
-    return NextResponse.json(
-      { error: "Failed to unfollow user" },
-      { status: 500 },
-    );
+    return errorResponse("Failed to unfollow user", 500);
   }
 }

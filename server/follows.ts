@@ -1,6 +1,6 @@
 "use server";
 
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
@@ -342,25 +342,7 @@ export async function toggleUserFollow(
   }
 }
 
-const getFollowingFeedProductsSchema = z.object({
-  limit: z.number().min(1).max(50).default(20),
-  offset: z.number().min(0).default(0),
-});
-
-export async function getFollowingFeedProducts(
-  input: z.infer<typeof getFollowingFeedProductsSchema>,
-) {
-  const parsed = getFollowingFeedProductsSchema.safeParse(input);
-  if (!parsed.success) {
-    return {
-      ok: false,
-      error: z.treeifyError(parsed.error),
-      products: [],
-      total: 0,
-      hasMore: false,
-    } as const;
-  }
-
+export async function getFollowingFeedProducts() {
   try {
     const { success, session } = await verifySession();
     if (!success || !session?.user) {
@@ -368,12 +350,9 @@ export async function getFollowingFeedProducts(
         ok: false,
         error: "Unauthorized",
         products: [],
-        total: 0,
-        hasMore: false,
       } as const;
     }
 
-    const { limit, offset } = parsed.data;
     const userId = session.user.id;
 
     // Get followed organizations and users
@@ -394,8 +373,6 @@ export async function getFollowingFeedProducts(
       return {
         ok: true,
         products: [],
-        total: 0,
-        hasMore: false,
         message: "Follow some merchants or users to see products here",
       } as const;
     }
@@ -430,7 +407,6 @@ export async function getFollowingFeedProducts(
                 },
               },
             },
-            orderBy: [desc(product.createdAt)],
           })
         : [];
 
@@ -460,19 +436,17 @@ export async function getFollowingFeedProducts(
                 },
               },
             },
-            orderBy: [desc(product.createdAt)],
           })
         : [];
 
-    // Combine and sort all products
+    // Combine all products
     const allProducts = [...productsFromOrgs, ...productsLikedByFollowed];
-    allProducts.sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
 
-    // Apply pagination
-    const paginatedProducts = allProducts.slice(offset, offset + limit);
+    // Shuffle array for random order
+    for (let i = allProducts.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [allProducts[i], allProducts[j]] = [allProducts[j], allProducts[i]];
+    }
 
     // Get user's liked products for isLiked flag
     const userLikedProducts = await db
@@ -484,7 +458,7 @@ export async function getFollowingFeedProducts(
     );
 
     // Format products with metadata
-    const productsWithMeta = paginatedProducts.map((p) => ({
+    const productsWithMeta = allProducts.map((p) => ({
       ...p,
       tags: p.productTags.map((pt) => pt.tag),
       isLiked: userLikedIds.has(p.id),
@@ -496,8 +470,6 @@ export async function getFollowingFeedProducts(
     return {
       ok: true,
       products: productsWithMeta,
-      total: allProducts.length,
-      hasMore: offset + limit < allProducts.length,
     } as const;
   } catch (error: unknown) {
     const e = error as Error;
@@ -506,8 +478,6 @@ export async function getFollowingFeedProducts(
       ok: false,
       error: e.message,
       products: [],
-      total: 0,
-      hasMore: false,
     } as const;
   }
 }

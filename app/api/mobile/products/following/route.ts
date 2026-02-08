@@ -1,9 +1,9 @@
-import { connection, type NextRequest, NextResponse } from "next/server";
+import { connection, NextResponse } from "next/server";
 
 import { getMobileSession } from "@/lib/mobile-auth";
 import { getFollowingFeedProducts } from "@/server/follows";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   await connection();
 
   try {
@@ -13,11 +13,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { searchParams } = new URL(request.url);
-    const limit = Math.min(parseInt(searchParams.get("limit") ?? "20", 10), 50);
-    const offset = parseInt(searchParams.get("offset") ?? "0", 10);
-
-    const result = await getFollowingFeedProducts({ limit, offset });
+    const result = await getFollowingFeedProducts();
 
     if (!result.ok) {
       return NextResponse.json(
@@ -28,13 +24,9 @@ export async function GET(request: NextRequest) {
 
     const response: {
       products: typeof result.products;
-      total: number;
-      hasMore: boolean;
       message?: string;
     } = {
       products: result.products,
-      total: result.total,
-      hasMore: result.hasMore,
     };
 
     if (result.message) {

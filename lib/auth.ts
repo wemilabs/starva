@@ -117,7 +117,7 @@ export const auth = betterAuth({
     }),
     expo(),
   ],
-  trustedOrigins: ["strvmobile://", "exp://192.168.1.64:8081"],
+  trustedOrigins: ["strvmobile://", "exp://192.168.1.66:8081"],
   user: {
     deleteUser: {
       enabled: true,

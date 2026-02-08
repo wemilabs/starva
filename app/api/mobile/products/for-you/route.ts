@@ -5,6 +5,7 @@ import {
   successResponse,
   unauthorizedResponse,
 } from "@/lib/mobile-auth";
+import { shuffleArray } from "@/lib/utils";
 
 export async function GET() {
   try {
@@ -12,10 +13,11 @@ export async function GET() {
     if (!session?.user) return unauthorizedResponse();
 
     const products = await getInStockProducts();
+    const shuffledProducts = shuffleArray(products);
 
     return successResponse({
-      products,
-      total: products.length,
+      products: shuffledProducts,
+      total: shuffledProducts.length,
     });
   } catch (error) {
     console.error("Failed to fetch for-you products:", error);

@@ -1,4 +1,6 @@
+import { connection, type NextRequest } from "next/server";
 import { z } from "zod";
+
 import { getProductsByCategorySlug } from "@/data/products";
 import type { ProductCategory } from "@/db/schema";
 import {
@@ -12,11 +14,12 @@ const categoryParamsSchema = z.object({
   categorySlug: z.custom<ProductCategory>(),
 });
 
-export async function GET({
-  params,
-}: {
-  params: Promise<{ categorySlug: string }>;
-}) {
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ categorySlug: string }> },
+) {
+  await connection();
+
   try {
     const session = await getMobileSession();
     if (!session?.user) return unauthorizedResponse();

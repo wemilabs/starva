@@ -1,4 +1,6 @@
+import { connection, type NextRequest } from "next/server";
 import { z } from "zod";
+
 import { getProductsPerStoreWithoutAuth } from "@/data/products";
 import {
   errorResponse,
@@ -11,11 +13,12 @@ const storeParamsSchema = z.object({
   organizationId: z.string().min(1),
 });
 
-export async function GET({
-  params,
-}: {
-  params: Promise<{ organizationId: string }>;
-}) {
+export async function GET(
+  _request: NextRequest,
+  { params }: { params: Promise<{ organizationId: string }> },
+) {
+  await connection();
+
   try {
     const session = await getMobileSession();
     if (!session?.user) return unauthorizedResponse();

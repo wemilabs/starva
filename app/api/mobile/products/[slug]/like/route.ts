@@ -1,5 +1,6 @@
 import { and, eq, sql } from "drizzle-orm";
 import { connection, type NextRequest, NextResponse } from "next/server";
+
 import { db } from "@/db/drizzle";
 import { product, productLike } from "@/db/schema";
 import { getMobileSession } from "@/lib/mobile-auth";
@@ -13,9 +14,8 @@ export async function POST(
   try {
     const session = await getMobileSession();
 
-    if (!session?.user) {
+    if (!session?.user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
     const { slug } = await params;
 
@@ -23,12 +23,8 @@ export async function POST(
       where: eq(product.slug, slug),
     });
 
-    if (!foundProduct) {
-      return NextResponse.json(
-        { error: "Product not found" },
-        { status: 404 },
-      );
-    }
+    if (!foundProduct)
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
 
     const existingLike = await db.query.productLike.findFirst({
       where: and(
@@ -84,9 +80,8 @@ export async function DELETE(
   try {
     const session = await getMobileSession();
 
-    if (!session?.user) {
+    if (!session?.user)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
 
     const { slug } = await params;
 
@@ -94,12 +89,8 @@ export async function DELETE(
       where: eq(product.slug, slug),
     });
 
-    if (!foundProduct) {
-      return NextResponse.json(
-        { error: "Product not found" },
-        { status: 404 },
-      );
-    }
+    if (!foundProduct)
+      return NextResponse.json({ error: "Product not found" }, { status: 404 });
 
     await db
       .delete(productLike)

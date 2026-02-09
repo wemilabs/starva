@@ -1,5 +1,6 @@
 import { eq } from "drizzle-orm";
-import type { NextRequest } from "next/server";
+import { connection, type NextRequest } from "next/server";
+
 import { db } from "@/db/drizzle";
 import { order } from "@/db/schema";
 import {
@@ -14,6 +15,8 @@ export async function POST(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
+  await connection();
+
   try {
     const session = await getMobileSession();
     if (!session?.user) return unauthorizedResponse();

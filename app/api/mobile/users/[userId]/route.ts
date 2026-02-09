@@ -1,5 +1,6 @@
 import { and, count, eq } from "drizzle-orm";
 import { connection, type NextRequest, NextResponse } from "next/server";
+
 import { db } from "@/db/drizzle";
 import { productLike, user, userFollowUser } from "@/db/schema";
 import { getMobileSession } from "@/lib/mobile-auth";

@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { getInStockProducts } from "@/data/products";
 import {
   errorResponse,
@@ -8,6 +9,8 @@ import {
 import { shuffleArray } from "@/lib/utils";
 
 export async function GET() {
+  await connection();
+
   try {
     const session = await getMobileSession();
     if (!session?.user) return unauthorizedResponse();

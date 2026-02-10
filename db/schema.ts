@@ -768,6 +768,7 @@ export const order = pgTable(
     organizationId: text("organization_id")
       .notNull()
       .references(() => organization.id, { onDelete: "cascade" }),
+    deliveryLocation: text("delivery_location"),
     notes: text("notes"),
     status: orderStatus("status").default("pending").notNull(),
     totalPrice: text("total_price").notNull(),

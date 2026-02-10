@@ -1,3 +1,4 @@
+import "server-only";
 import { and, desc, eq, inArray, lt, or, sql } from "drizzle-orm";
 import { cacheLife } from "next/cache";
 import { cache } from "react";
@@ -6,7 +7,6 @@ import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
 import { member, type OrderStatus, order } from "@/db/schema";
 import { decrypt } from "@/lib/encryption";
-import "server-only";
 
 function decryptOrderItems<
   T extends { priceAtOrder: string; subtotal: string },

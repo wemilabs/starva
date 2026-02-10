@@ -13,6 +13,7 @@ import {
 } from "drizzle-orm";
 import { cacheLife } from "next/cache";
 import { cache } from "react";
+
 import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
 import {
@@ -24,7 +25,7 @@ import {
   userFollowOrganization,
   userFollowUser,
 } from "@/db/schema";
-import { isFollowingUser, getUserFollowedOrganizations } from "./follows";
+import { getUserFollowedOrganizations, isFollowingUser } from "./follows";
 
 export interface UserOptions {
   page?: number;

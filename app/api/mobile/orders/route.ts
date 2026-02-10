@@ -1,10 +1,7 @@
-import { desc, eq } from "drizzle-orm";
-import type { NextRequest } from "next/server";
+import { connection, type NextRequest } from "next/server";
 import { z } from "zod";
 
-import { db } from "@/db/drizzle";
-import { order } from "@/db/schema";
-import { decrypt } from "@/lib/encryption";
+import { getOrdersByUserForMobile } from "@/data/orders";
 import {
   errorResponse,
   getMobileSession,
@@ -25,57 +22,18 @@ const placeOrderSchema = z.object({
   deliveryLocation: z.string().min(1).optional(),
 });
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
+  await connection();
+
   try {
     const session = await getMobileSession();
     if (!session?.user) return unauthorizedResponse();
 
-    const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get("limit") ?? "20", 10);
-    const offset = parseInt(searchParams.get("offset") ?? "0", 10);
-
-    const orders = await db.query.order.findMany({
-      where: eq(order.userId, session.user.id),
-      with: {
-        organization: {
-          columns: {
-            id: true,
-            name: true,
-            slug: true,
-            logo: true,
-          },
-        },
-        orderItems: {
-          with: {
-            product: {
-              columns: {
-                id: true,
-                name: true,
-                imageUrls: true,
-                price: true,
-              },
-            },
-          },
-        },
-      },
-      orderBy: [desc(order.createdAt)],
-      limit,
-      offset,
-    });
-
-    const decryptedOrders = orders.map((ord) => ({
-      ...ord,
-      totalPrice: decrypt(ord.totalPrice),
-      orderItems: ord.orderItems.map((item) => ({
-        ...item,
-        priceAtOrder: decrypt(item.priceAtOrder),
-        subtotal: decrypt(item.subtotal),
-      })),
-    }));
+    const orders = await getOrdersByUserForMobile(session.user.id);
 
     return successResponse({
-      orders: decryptedOrders,
-      total: decryptedOrders.length,
+      orders,
+      total: orders.length,
     });
   } catch (error) {
     console.error("Failed to fetch orders:", error);
@@ -84,6 +42,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  await connection();
+
   try {
     const session = await getMobileSession();
     if (!session?.user) return unauthorizedResponse();

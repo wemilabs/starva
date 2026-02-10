@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq, desc } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { cache } from "react";
 
 import { verifySession } from "@/data/user-session";

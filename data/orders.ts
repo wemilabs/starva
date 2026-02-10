@@ -1,6 +1,7 @@
 import { and, desc, eq, inArray, lt, or, sql } from "drizzle-orm";
 import { cacheLife } from "next/cache";
 import { cache } from "react";
+
 import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
 import { member, type OrderStatus, order } from "@/db/schema";
@@ -274,6 +275,111 @@ export const getOrdersByUser = cache(async (userId: string) => {
 
   return { ok: true, orders: ordersWithNumbers };
 });
+
+export async function getOrdersByUserForMobile(userId: string) {
+  const orders = await db.query.order.findMany({
+    where: eq(order.userId, userId),
+    with: {
+      organization: {
+        columns: {
+          id: true,
+          name: true,
+          slug: true,
+          logo: true,
+        },
+      },
+      orderItems: {
+        with: {
+          product: {
+            columns: {
+              id: true,
+              name: true,
+              imageUrls: true,
+              price: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: [desc(order.createdAt)],
+  });
+
+  return orders.map((ord) => ({
+    ...decryptOrder(ord),
+    orderItems: decryptOrderItems(ord.orderItems),
+  }));
+}
+
+export async function getOrderByIdForMobile(input: {
+  orderId: string;
+  userId: string;
+}) {
+  const orderData = await db.query.order.findFirst({
+    where: eq(order.id, input.orderId),
+    with: {
+      user: {
+        columns: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+        },
+      },
+      organization: {
+        columns: {
+          id: true,
+          name: true,
+          slug: true,
+          logo: true,
+        },
+      },
+      orderItems: {
+        with: {
+          product: {
+            columns: {
+              id: true,
+              name: true,
+              imageUrls: true,
+              price: true,
+              description: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!orderData) {
+    return { ok: false as const, error: "Order not found", status: 404 };
+  }
+
+  const isCustomer = orderData.userId === input.userId;
+
+  if (!isCustomer) {
+    const membership = await db.query.member.findFirst({
+      where: and(
+        eq(member.organizationId, orderData.organizationId),
+        eq(member.userId, input.userId),
+      ),
+    });
+
+    if (!membership) {
+      return {
+        ok: false as const,
+        error: "You can only view your own orders",
+        status: 403,
+      };
+    }
+  }
+
+  return {
+    ok: true as const,
+    order: {
+      ...decryptOrder(orderData),
+      orderItems: decryptOrderItems(orderData.orderItems),
+    },
+  };
+}
 
 export const getOrdersByStatus = cache(
   async (organizationId: string, status: OrderStatus | OrderStatus[]) => {

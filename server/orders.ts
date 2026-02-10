@@ -3,6 +3,7 @@
 import { eq, sql } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+
 import { verifySession } from "@/data/user-session";
 import { db } from "@/db/drizzle";
 import { orderItem, order as orderTable, user } from "@/db/schema";
@@ -26,19 +27,21 @@ const orderItemSchema = z.object({
 const orderSchema = z.object({
   items: z.array(orderItemSchema).min(1),
   notes: z.string().optional(),
+  deliveryLocation: z.string().min(1).optional(),
 });
 
-export async function placeOrder(input: z.infer<typeof orderSchema>) {
-  const verified = await verifySession();
-  if (!verified.success) return { ok: false, error: "Unauthorized" };
+type CreateOrderInput = z.infer<typeof orderSchema> & {
+  userId: string;
+  userEmail: string;
+  userName: string;
+};
 
-  const { session } = verified;
-
+export async function createOrderForUser(input: CreateOrderInput) {
   const parsed = orderSchema.safeParse(input);
   if (!parsed.success)
     return { ok: false, error: z.treeifyError(parsed.error) };
 
-  const { items, notes } = parsed.data;
+  const { items, notes, deliveryLocation } = parsed.data;
 
   try {
     const productIds = items.map((item) => item.productId);
@@ -61,7 +64,6 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
 
     const organizationId = organizationIds[0];
 
-    // Check order limit - find the organization owner (merchant)
     const orgOwner = await db.query.member.findFirst({
       where: (member, { eq }) => eq(member.organizationId, organizationId),
       with: {
@@ -71,7 +73,6 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
 
     if (!orgOwner) return { ok: false, error: "Organization owner not found" };
 
-    // Check if merchant has reached their order limit
     const orderLimit = await checkOrderLimit(organizationId);
     if (!orderLimit.canCreate)
       return {
@@ -79,7 +80,6 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
         error: `Merchant has reached their monthly order limit of ${orderLimit.maxOrders}. Please try again next month or contact the merchant.`,
       };
 
-    // Validate stock availability for products with inventory tracking
     const stockCheck = await getProductsStock({
       productIds,
       organizationId,
@@ -88,7 +88,6 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
     if (!stockCheck.ok)
       return { ok: false, error: "Failed to check product availability" };
 
-    // Check each item against current stock
     const stockWarnings: string[] = [];
     for (const item of items) {
       const productStock = stockCheck.stocks.find(
@@ -115,18 +114,15 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       let priceAtOrder = productData.price;
       let subtotal = 0;
 
-      // Real estate pricing logic
       if (productData.category === "real-estate") {
         priceAtOrder = productData.price;
         subtotal = 0;
       } else subtotal = Number(priceAtOrder) * item.quantity;
 
-      // Only add to total if it's not a real estate product
       if (productData.category !== "real-estate") totalPrice += subtotal;
       else if (!productData.isLandlord)
         totalPrice += Number(productData.visitFees || "0") * item.quantity;
 
-      // For display, show property price for real estate, but actual charge is different
       const displaySubtotal =
         productData.category === "real-estate"
           ? Number(priceAtOrder) * item.quantity
@@ -147,7 +143,6 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       };
     });
 
-    // Generate sequential order number per organization
     const maxOrderResult = await db
       .select({
         maxNum: sql<number>`COALESCE(MAX(${orderTable.orderNumber}), 0)`,
@@ -160,14 +155,14 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       .insert(orderTable)
       .values({
         orderNumber: nextOrderNumber,
-        userId: session.user.id,
+        userId: input.userId,
         organizationId,
+        deliveryLocation: deliveryLocation || null,
         notes: notes || null,
         totalPrice: encrypt(totalPrice.toFixed(2)),
       })
       .returning();
 
-    // Store order items in database with encrypted prices
     await db.insert(orderItem).values(
       orderItems.map((item) => ({
         orderId: newOrder.id,
@@ -179,7 +174,7 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
     );
 
     const userData = await db.query.user.findFirst({
-      where: eq(user.id, session.user.id),
+      where: eq(user.id, input.userId),
     });
 
     const { notificationId } = await createOrderNotification({
@@ -187,8 +182,8 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       orderId: newOrder.id,
       orderNumber: newOrder.orderNumber,
       type: "new",
-      customerName: userData?.name || session.user.name,
-      customerEmail: userData?.email || session.user.email,
+      customerName: userData?.name || input.userName,
+      customerEmail: userData?.email || input.userEmail,
       total: totalPrice.toFixed(2),
       itemCount: items.length,
     });
@@ -197,8 +192,8 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
       notificationId,
       orderId: newOrder.id,
       orderNumber: newOrder.orderNumber,
-      customerName: userData?.name || session.user.name,
-      customerEmail: userData?.email || session.user.email,
+      customerName: userData?.name || input.userName,
+      customerEmail: userData?.email || input.userEmail,
       total: totalPrice.toFixed(2),
       organizationId,
       itemCount: items.length,
@@ -208,6 +203,9 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
     return {
       ok: true,
       orderId: newOrder.id,
+      orderNumber: newOrder.orderNumber,
+      totalPrice: totalPrice.toFixed(2),
+      deliveryLocation: newOrder.deliveryLocation,
       stockWarnings: stockWarnings.length > 0 ? stockWarnings : undefined,
     };
   } catch (error: unknown) {
@@ -215,6 +213,20 @@ export async function placeOrder(input: z.infer<typeof orderSchema>) {
     console.error("Order placement failed:", { err });
     return { ok: false, error: err.message };
   }
+}
+
+export async function placeOrder(input: z.infer<typeof orderSchema>) {
+  const verified = await verifySession();
+  if (!verified.success) return { ok: false, error: "Unauthorized" };
+
+  const { session } = verified;
+
+  return createOrderForUser({
+    ...input,
+    userId: session.user.id,
+    userEmail: session.user.email,
+    userName: session.user.name,
+  });
 }
 
 const updateOrderStatusSchema = z.object({

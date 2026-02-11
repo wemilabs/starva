@@ -1,20 +1,13 @@
 import { connection } from "next/server";
+
 import { getInStockProducts } from "@/data/products";
-import {
-  errorResponse,
-  getMobileSession,
-  successResponse,
-  unauthorizedResponse,
-} from "@/lib/mobile-auth";
+import { errorResponse, successResponse } from "@/lib/mobile-auth";
 import { shuffleArray } from "@/lib/utils";
 
 export async function GET() {
   await connection();
 
   try {
-    const session = await getMobileSession();
-    if (!session?.user) return unauthorizedResponse();
-
     const products = await getInStockProducts();
     const shuffledProducts = shuffleArray(products);
 

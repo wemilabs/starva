@@ -126,6 +126,20 @@ export const auth = betterAuth({
     "exp://192.168.1.66:8081",
   ],
   user: {
+    additionalFields: {
+      followersCount: {
+        type: "number",
+        required: false,
+        defaultValue: 0,
+        input: false,
+      },
+      followingCount: {
+        type: "number",
+        required: false,
+        defaultValue: 0,
+        input: false,
+      },
+    },
     deleteUser: {
       enabled: true,
       beforeDelete: async (user: { id: string | SQLWrapper }) => {

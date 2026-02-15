@@ -14,7 +14,9 @@ import {
 } from "@/db/schema";
 import { CATEGORY_CONFIG } from "@/lib/constants";
 
-const getUserLikedProductIds = async (userId: string): Promise<Set<string>> => {
+export const getUserLikedProductIds = async (
+  userId: string,
+): Promise<Set<string>> => {
   const likes = await db
     .select({ productId: productLike.productId })
     .from(productLike)

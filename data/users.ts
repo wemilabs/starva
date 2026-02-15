@@ -26,6 +26,7 @@ import {
   userFollowUser,
 } from "@/db/schema";
 import { getUserFollowedOrganizations, isFollowingUser } from "./follows";
+import { getUserLikedProductIds } from "./products";
 
 export interface UserOptions {
   page?: number;
@@ -181,6 +182,45 @@ export async function getUserStats() {
       newToday: 0,
     };
   }
+}
+
+export async function getMyLikedProductsForMobile(userId: string) {
+  const likedByUser = await db
+    .select({ productId: productLike.productId })
+    .from(productLike)
+    .where(eq(productLike.userId, userId))
+    .orderBy(desc(productLike.createdAt));
+
+  const likedProductIds = likedByUser.map((l) => l.productId);
+  if (likedProductIds.length === 0) return [];
+
+  const products = await db.query.product.findMany({
+    where: and(
+      inArray(productTable.id, likedProductIds),
+      eq(productTable.status, "in_stock"),
+    ),
+    with: {
+      organization: {
+        columns: {
+          id: true,
+          name: true,
+          logo: true,
+          slug: true,
+          metadata: true,
+        },
+      },
+    },
+  });
+
+  const productById = new Map(products.map((p) => [p.id, p] as const));
+
+  return likedProductIds
+    .map((id) => productById.get(id))
+    .filter((p): p is NonNullable<typeof p> => Boolean(p))
+    .map((p) => ({
+      ...p,
+      isLiked: true,
+    }));
 }
 
 export const getUserByIdWithFollowStatus = cache(

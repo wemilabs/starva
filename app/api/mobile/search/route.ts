@@ -10,7 +10,6 @@ import {
   successResponse,
   unauthorizedResponse,
 } from "@/lib/mobile-auth";
-import { shuffleArray } from "@/lib/utils";
 
 const searchSchema = z.object({
   q: z.string().optional(),
@@ -63,10 +62,8 @@ export async function GET(request: NextRequest) {
           )
       : [];
 
-    const shuffledAndSlicedMerchants = shuffleArray(merchants).slice(0, 3);
-
     return successResponse({
-      merchants: shuffledAndSlicedMerchants,
+      merchants,
       products,
       totalMerchants: merchants.length,
       totalProducts: products.length,

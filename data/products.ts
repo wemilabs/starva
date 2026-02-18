@@ -203,6 +203,7 @@ async function getFilteredCachedProductsBase(filters: ProductFilters = {}) {
         price: product.price,
         likesCount: product.likesCount,
         status: product.status,
+        category: product.category,
         organizationId: product.organizationId,
         calories: product.calories,
         imageUrls: product.imageUrls,

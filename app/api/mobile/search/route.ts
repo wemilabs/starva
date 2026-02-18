@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
     const shuffledAndSlicedMerchants = shuffleArray(merchants).slice(0, 3);
 
     return successResponse({
-      shuffledAndSlicedMerchants,
+      merchants: shuffledAndSlicedMerchants,
       products,
       totalMerchants: merchants.length,
       totalProducts: products.length,

@@ -20,6 +20,10 @@ const routeConfig: Record<string, (params: string[]) => Crumb[]> = {
   "/usage/pricing": () => [{ label: "Pricing" }],
 
   "/trends-and-socials": () => [{ label: "Trends & Socials" }],
+  "/merchant-studio/how-it-works": () => [
+    { label: "Merchant Studio" },
+    { label: "How it works" },
+  ],
   "/support": () => [{ label: "Support" }],
   "/feedback": () => [{ label: "Feedback" }],
   "/unauthorized": () => [{ label: "Unauthorized" }],

@@ -65,7 +65,7 @@ const HIGHLIGHTS = [
   },
 ] as const;
 
-export default function MerchantStudioHowItWorksPage() {
+export default async function MerchantStudioHowItWorksPage() {
   "use cache";
   cacheLife("max");
 

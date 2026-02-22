@@ -7,6 +7,23 @@ import { db } from "@/db/drizzle";
 import { mobilePushToken, notification, pushSubscription } from "@/db/schema";
 import { auth } from "@/lib/auth";
 
+type PushNotificationPayload = {
+  title: string;
+  body: string;
+  url?: string;
+  tag?: string;
+  actions?: { action: string; title: string }[];
+  requireInteraction?: boolean;
+};
+
+type ExpoPushMessage = {
+  to: string;
+  title: string;
+  body: string;
+  sound?: "default" | null;
+  data?: Record<string, unknown>;
+};
+
 // Configure web-push with VAPID keys
 if (
   process.env.VAPID_SUBJECT &&
@@ -65,22 +82,6 @@ export async function unsubscribeFromPush(endpoint: string) {
   return { success: true };
 }
 
-type PushNotificationPayload = {
-  title: string;
-  body: string;
-  url?: string;
-  tag?: string;
-  actions?: { action: string; title: string }[];
-  requireInteraction?: boolean;
-};
-
-type ExpoPushMessage = {
-  to: string;
-  title: string;
-  body: string;
-  data?: Record<string, unknown>;
-};
-
 async function sendExpoPushMessages(messages: ExpoPushMessage[]) {
   const response = await fetch("https://exp.host/--/api/v2/push/send", {
     method: "POST",
@@ -118,6 +119,7 @@ export async function sendExpoPushToUser(
     to: t.expoPushToken,
     title: payload.title,
     body: payload.body,
+    sound: "default",
     data: payload.url ? { url: payload.url } : undefined,
   }));
 

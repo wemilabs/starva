@@ -16,6 +16,7 @@ import { decrypt, encrypt } from "@/lib/encryption";
 import { realtime } from "@/lib/realtime";
 import { getProductsStock, updateStock } from "./inventory";
 import { createOrderNotification } from "./notifications";
+import { createNotification } from "./push-notifications";
 import { checkOrderLimit } from "./subscription";
 
 const orderItemSchema = z.object({
@@ -35,6 +36,8 @@ type CreateOrderInput = z.infer<typeof orderSchema> & {
   userEmail: string;
   userName: string;
 };
+
+const getMobileOrderUrl = (orderId: string) => `/my-orders/${orderId}`;
 
 export async function createOrderForUser(input: CreateOrderInput) {
   const parsed = orderSchema.safeParse(input);
@@ -200,6 +203,15 @@ export async function createOrderForUser(input: CreateOrderInput) {
       createdAt: newOrder.createdAt.toISOString(),
     });
 
+    await createNotification({
+      userId: input.userId,
+      type: "general",
+      title: "Order placed",
+      message: `Your order #${newOrder.orderNumber} has been placed successfully.`,
+      actionUrl: getMobileOrderUrl(newOrder.id),
+      sendPush: true,
+    });
+
     return {
       ok: true,
       orderId: newOrder.id,
@@ -310,6 +322,19 @@ export async function updateOrderStatus(
         updatedAt: new Date(),
       })
       .where(eq(orderTable.id, orderId));
+
+    const actionUrl = getMobileOrderUrl(existingOrder.id);
+
+    if (status !== oldStatus) {
+      await createNotification({
+        userId: existingOrder.userId,
+        type: "general",
+        title: "Order update",
+        message: `Order #${existingOrder.orderNumber} is now ${statusLabels[status]}.`,
+        actionUrl,
+        sendPush: true,
+      });
+    }
 
     // Deduct stock when order is confirmed (if status changed to confirmed)
     if (status === "confirmed" && oldStatus !== "confirmed") {

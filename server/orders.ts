@@ -330,7 +330,13 @@ export async function updateOrderStatus(
         userId: existingOrder.userId,
         type: "general",
         title: "Order update",
-        message: `Order #${existingOrder.orderNumber} is now ${statusLabels[status]}.`,
+        message: `Order #${existingOrder.orderNumber} ${
+          statusLabels[status] === "confirmed" ||
+          statusLabels[status] === "delivered" ||
+          statusLabels[status] === "cancelled"
+            ? "has been"
+            : "is now"
+        } ${statusLabels[status]}.`,
         actionUrl,
         sendPush: true,
       });

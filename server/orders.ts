@@ -594,10 +594,45 @@ export async function cancelOrder(orderId: string) {
       await realtime
         .channel(`user:${existingOrder.userId}`)
         .emit("orders.cancelled", cancelData);
+
+      await createNotification({
+        userId: existingOrder.userId,
+        type: "general",
+        title: "Order cancelled",
+        message: `Your order #${existingOrder.orderNumber} has been cancelled by the merchant.`,
+        actionUrl: getMobileOrderUrl(existingOrder.id),
+        sendPush: true,
+      });
     } else {
       await realtime
         .channel(`org:${existingOrder.organizationId}`)
         .emit("orders.cancelled", cancelData);
+
+      const orgMembers = await db.query.member.findMany({
+        where: (member, { and, eq, or }) =>
+          and(
+            eq(member.organizationId, existingOrder.organizationId),
+            or(eq(member.role, "admin"), eq(member.role, "owner")),
+          ),
+        columns: {
+          userId: true,
+        },
+      });
+
+      const actionUrl = `/point-of-sales/orders/${existingOrder.id}`;
+
+      await Promise.allSettled(
+        orgMembers.map((m) =>
+          createNotification({
+            userId: m.userId,
+            type: "general",
+            title: "Order cancelled",
+            message: `Order #${existingOrder.orderNumber} has been cancelled by the customer.`,
+            actionUrl,
+            sendPush: true,
+          }),
+        ),
+      );
     }
 
     revalidatePath("/point-of-sales/orders");
@@ -668,6 +703,32 @@ export async function markOrderAsDelivered(
         customerName: existingOrder.user.name,
         deliveredAt: new Date().toISOString(),
       });
+
+    const orgMembers = await db.query.member.findMany({
+      where: (member, { and, eq, or }) =>
+        and(
+          eq(member.organizationId, existingOrder.organizationId),
+          or(eq(member.role, "admin"), eq(member.role, "owner")),
+        ),
+      columns: {
+        userId: true,
+      },
+    });
+
+    const actionUrl = `/point-of-sales/orders/${existingOrder.id}`;
+
+    await Promise.allSettled(
+      orgMembers.map((m) =>
+        createNotification({
+          userId: m.userId,
+          type: "general",
+          title: "Order delivered",
+          message: `Order #${existingOrder.orderNumber} has been marked as delivered by the customer.`,
+          actionUrl,
+          sendPush: true,
+        }),
+      ),
+    );
 
     revalidatePath("/point-of-sales/orders");
     revalidatePath(`/point-of-sales/orders/${orderId}`);

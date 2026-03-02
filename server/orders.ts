@@ -14,7 +14,11 @@ import {
 } from "@/lib/constants";
 import { decrypt, encrypt } from "@/lib/encryption";
 import { realtime } from "@/lib/realtime";
-import { getProductsStock, updateStock } from "./inventory";
+import {
+  getProductsStock,
+  updateStock,
+  updateStockInternal,
+} from "./inventory";
 import { createOrderNotification } from "./notifications";
 import { createNotification } from "./push-notifications";
 import { checkOrderLimit } from "./subscription";
@@ -467,6 +471,42 @@ export async function updateOrderStatus(
     }
 
     if (status === "cancelled" && oldStatus !== "cancelled") {
+      const stockDeductedStatuses = ["confirmed", "preparing", "ready"];
+      if (stockDeductedStatuses.includes(oldStatus)) {
+        const cancelOrderItems = await db.query.orderItem.findMany({
+          where: eq(orderItem.orderId, orderId),
+          with: {
+            product: {
+              columns: {
+                id: true,
+                inventoryEnabled: true,
+              },
+            },
+          },
+        });
+
+        for (const item of cancelOrderItems) {
+          if (item.product.inventoryEnabled) {
+            const stockResult = await updateStockInternal({
+              productId: item.productId,
+              organizationId: existingOrder.organizationId,
+              quantityChange: item.quantity,
+              changeType: "return",
+              reason: `Order ${orderId} cancelled`,
+              revalidateTargetPath: "/point-of-sales/inventory",
+              userId: session.user.id,
+            });
+
+            if (!stockResult.ok) {
+              console.error(
+                `Failed to restore stock for product ${item.productId}:`,
+                stockResult.error,
+              );
+            }
+          }
+        }
+      }
+
       await realtime
         .channel(`user:${existingOrder.userId}`)
         .emit("orders.cancelled", {
@@ -492,12 +532,7 @@ export async function updateOrderStatus(
   }
 }
 
-export async function cancelOrder(orderId: string) {
-  const verified = await verifySession();
-  if (!verified.success) return { ok: false, error: "Unauthorized" };
-
-  const { session } = verified;
-
+export async function cancelOrderForUser(orderId: string, userId: string) {
   try {
     const existingOrder = await db.query.order.findFirst({
       where: eq(orderTable.id, orderId),
@@ -509,7 +544,7 @@ export async function cancelOrder(orderId: string) {
 
     if (!existingOrder) return { ok: false, error: "Order not found" };
 
-    const isCustomer = existingOrder.userId === session.user.id;
+    const isCustomer = existingOrder.userId === userId;
     let isMerchant = false;
 
     if (!isCustomer) {
@@ -517,7 +552,7 @@ export async function cancelOrder(orderId: string) {
         where: (member, { and, eq }) =>
           and(
             eq(member.organizationId, existingOrder.organizationId),
-            eq(member.userId, session.user.id),
+            eq(member.userId, userId),
           ),
       });
 
@@ -537,7 +572,6 @@ export async function cancelOrder(orderId: string) {
     if (existingOrder.status === "cancelled")
       return { ok: false, error: "Order is already cancelled" };
 
-    // Get order items with product inventory info
     const orderItems = await db.query.orderItem.findMany({
       where: eq(orderItem.orderId, orderId),
       with: {
@@ -550,18 +584,26 @@ export async function cancelOrder(orderId: string) {
       },
     });
 
-    // Restore stock for each item if order was confirmed
-    if (existingOrder.status === "confirmed") {
+    const stockDeductedStatuses = ["confirmed", "preparing", "ready"];
+    if (stockDeductedStatuses.includes(existingOrder.status)) {
       for (const item of orderItems) {
         if (item.product.inventoryEnabled) {
-          await updateStock({
+          const stockResult = await updateStockInternal({
             productId: item.productId,
             organizationId: existingOrder.organizationId,
             quantityChange: item.quantity,
             changeType: "return",
             reason: `Order ${orderId} cancelled`,
             revalidateTargetPath: "/point-of-sales/inventory",
+            userId,
           });
+
+          if (!stockResult.ok) {
+            console.error(
+              `Failed to restore stock for product ${item.productId}:`,
+              stockResult.error,
+            );
+          }
         }
       }
     }
@@ -644,6 +686,13 @@ export async function cancelOrder(orderId: string) {
     console.error("Order cancellation error:", error);
     return { ok: false, error: "Failed to cancel order" };
   }
+}
+
+export async function cancelOrder(orderId: string) {
+  const verified = await verifySession();
+  if (!verified.success) return { ok: false, error: "Unauthorized" };
+
+  return cancelOrderForUser(orderId, verified.session.user.id);
 }
 
 const markOrderAsDeliveredSchema = z.object({

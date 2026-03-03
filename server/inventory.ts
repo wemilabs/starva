@@ -16,43 +16,29 @@ const updateStockSchema = z.object({
   revalidateTargetPath: z.string().min(1),
 });
 
-export async function updateStock(input: z.infer<typeof updateStockSchema>) {
-  const parsed = updateStockSchema.safeParse(input);
+const updateStockInternalSchema = updateStockSchema.extend({
+  userId: z.string().min(1),
+});
+
+export async function updateStockInternal(
+  input: z.infer<typeof updateStockInternalSchema>,
+) {
+  const parsed = updateStockInternalSchema.safeParse(input);
   if (!parsed.success) {
     return { ok: false, error: z.treeifyError(parsed.error) } as const;
-  }
-
-  const sessionData = await verifySession();
-  if (!sessionData.success) {
-    return { ok: false, error: "Unauthorized" } as const;
-  }
-
-  const { organizationId } = parsed.data;
-
-  const membership = await db.query.member.findFirst({
-    where: and(
-      eq(member.organizationId, organizationId),
-      eq(member.userId, sessionData.session.user.id),
-    ),
-  });
-
-  if (!membership) {
-    return {
-      ok: false,
-      error: "Only organization members can manage inventory",
-    } as const;
   }
 
   try {
     const {
       productId,
+      organizationId,
       quantityChange,
       changeType,
       reason,
       revalidateTargetPath,
+      userId,
     } = parsed.data;
 
-    // Get current product stock
     const [currentProduct] = await db
       .select({
         currentStock: productTable.currentStock,
@@ -82,7 +68,6 @@ export async function updateStock(input: z.infer<typeof updateStockSchema>) {
     const previousStock = currentProduct.currentStock || 0;
     const newStock = Math.max(0, previousStock + quantityChange);
 
-    // Prevent stock from going negative for sales
     if (changeType === "sale" && newStock < 0) {
       return {
         ok: false,
@@ -90,10 +75,8 @@ export async function updateStock(input: z.infer<typeof updateStockSchema>) {
       } as const;
     }
 
-    // Determine new status based on stock level
     let newStatus = currentProduct.status;
     if (currentProduct.status === "draft" && newStock > 0) {
-      // First time adding stock to a draft product
       newStatus = "in_stock";
     } else if (
       (currentProduct.status === "in_stock" ||
@@ -105,7 +88,6 @@ export async function updateStock(input: z.infer<typeof updateStockSchema>) {
       newStatus = "in_stock";
     }
 
-    // Update product stock and status
     await db
       .update(productTable)
       .set({
@@ -120,7 +102,6 @@ export async function updateStock(input: z.infer<typeof updateStockSchema>) {
         ),
       );
 
-    // Record inventory history
     await db.insert(inventoryHistory).values({
       productId,
       organizationId,
@@ -129,7 +110,7 @@ export async function updateStock(input: z.infer<typeof updateStockSchema>) {
       previousStock,
       newStock,
       reason: reason || null,
-      userId: sessionData.session.session.userId,
+      userId,
       createdAt: new Date(),
     });
 
@@ -147,6 +128,39 @@ export async function updateStock(input: z.infer<typeof updateStockSchema>) {
     console.error(e);
     return { ok: false, error: e.message } as const;
   }
+}
+
+export async function updateStock(input: z.infer<typeof updateStockSchema>) {
+  const parsed = updateStockSchema.safeParse(input);
+  if (!parsed.success) {
+    return { ok: false, error: z.treeifyError(parsed.error) } as const;
+  }
+
+  const sessionData = await verifySession();
+  if (!sessionData.success) {
+    return { ok: false, error: "Unauthorized" } as const;
+  }
+
+  const { organizationId } = parsed.data;
+
+  const membership = await db.query.member.findFirst({
+    where: and(
+      eq(member.organizationId, organizationId),
+      eq(member.userId, sessionData.session.user.id),
+    ),
+  });
+
+  if (!membership) {
+    return {
+      ok: false,
+      error: "Only organization members can manage inventory",
+    } as const;
+  }
+
+  return updateStockInternal({
+    ...parsed.data,
+    userId: sessionData.session.session.userId,
+  });
 }
 
 const getInventorySchema = z.object({

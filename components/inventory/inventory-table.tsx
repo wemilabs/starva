@@ -92,7 +92,7 @@ export function InventoryTable({
 
   // Filter products by search query
   let filtered = products.filter((product) =>
-    product.name.toLowerCase().includes(searchQuery.toLowerCase())
+    product.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   // Sort filtered products
@@ -125,7 +125,7 @@ export function InventoryTable({
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedProducts = filteredAndSortedProducts.slice(
     startIndex,
-    startIndex + itemsPerPage
+    startIndex + itemsPerPage,
   );
 
   const handlePreviousPage = () => {
@@ -292,6 +292,8 @@ export function InventoryTable({
                               }
                               alt={product.name}
                               fill
+                              sizes="48px"
+                              unoptimized
                               className="object-cover"
                             />
                           </div>

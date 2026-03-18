@@ -59,7 +59,7 @@ const schema = z
       .min(1, "Price is required")
       .refine(
         (v) => !Number.isNaN(Number(v)) && Number(v) >= 0,
-        "Enter a valid price"
+        "Enter a valid price",
       ),
     imageUrls: z.array(z.url("Provide valid URLs")).optional(),
     videoUrl: z.url("Provide a valid URL").optional().or(z.literal("")),
@@ -84,7 +84,7 @@ const schema = z
     {
       message: "Visit fees are required for intermediaries",
       path: ["visitFees"],
-    }
+    },
   );
 
 export function EditProductForm({
@@ -146,7 +146,7 @@ export function EditProductForm({
           // Find and set the product's current unit format
           if (product.unitFormatId) {
             const currentFormat = unitFormatsResult.unitFormats.find(
-              (f) => f.id === product.unitFormatId
+              (f) => f.id === product.unitFormatId,
             );
             setSelectedUnitFormat(currentFormat || null);
           }
@@ -166,7 +166,7 @@ export function EditProductForm({
             unitFormat:
               unitFormatsResult.ok && product.unitFormatId
                 ? unitFormatsResult.unitFormats.find(
-                    (f) => f.id === product.unitFormatId
+                    (f) => f.id === product.unitFormatId,
                   ) || null
                 : null,
             inventoryEnabled: product.inventoryEnabled || false,
@@ -259,7 +259,6 @@ export function EditProductForm({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="slug"
@@ -278,7 +277,6 @@ export function EditProductForm({
                   </FormItem>
                 )}
               />
-
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:justify-items-end">
                 <FormField
                   control={form.control}
@@ -330,7 +328,6 @@ export function EditProductForm({
                   )}
                 />
               </div>
-
               <FormField
                 control={form.control}
                 name="specifications"
@@ -342,7 +339,7 @@ export function EditProductForm({
                     <FormControl>
                       <Input
                         placeholder={getCategorySpecificationPlaceholder(
-                          form.watch("category")
+                          form.watch("category"),
                         )}
                         className="placeholder:text-sm"
                         {...field}
@@ -352,7 +349,6 @@ export function EditProductForm({
                   </FormItem>
                 )}
               />
-
               {form.watch("category") === "real-estate" && (
                 <>
                   <FormField
@@ -401,7 +397,6 @@ export function EditProductForm({
                   )}
                 </>
               )}
-
               <FormField
                 control={form.control}
                 name="imageUrls"
@@ -421,6 +416,8 @@ export function EditProductForm({
                                   src={url}
                                   alt={`Product image ${index + 1}`}
                                   fill
+                                  sizes="(max-width: 640px) 30vw, 120px"
+                                  unoptimized
                                   className="object-cover"
                                 />
                                 <Button
@@ -431,7 +428,7 @@ export function EditProductForm({
                                   onClick={() => {
                                     const newUrls =
                                       field.value?.filter(
-                                        (_, i) => i !== index
+                                        (_, i) => i !== index,
                                       ) || [];
                                     field.onChange(newUrls);
                                   }}
@@ -454,7 +451,7 @@ export function EditProductForm({
                                   const imageUrls =
                                     res
                                       ?.filter((file) =>
-                                        file.type?.startsWith("image/")
+                                        file.type?.startsWith("image/"),
                                       )
                                       .map((file) => file.ufsUrl) || [];
                                   const currentUrls = field.value || [];
@@ -468,7 +465,7 @@ export function EditProductForm({
                                   console.error(err);
                                   toast.error(
                                     err?.message ||
-                                      "Upload failed. Please try again."
+                                      "Upload failed. Please try again.",
                                   );
                                 }}
                               />
@@ -484,7 +481,6 @@ export function EditProductForm({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="videoUrl"
@@ -529,7 +525,7 @@ export function EditProductForm({
                             onClientUploadComplete={(res) => {
                               const videoUrl =
                                 res?.find((file) =>
-                                  file.type?.startsWith("video/")
+                                  file.type?.startsWith("video/"),
                                 )?.ufsUrl || "";
                               if (videoUrl)
                                 form.setValue("videoUrl", videoUrl, {
@@ -540,7 +536,7 @@ export function EditProductForm({
                               console.error(err);
                               toast.error(
                                 err?.message ||
-                                  "Video upload failed. Please try again."
+                                  "Video upload failed. Please try again.",
                               );
                             }}
                           />
@@ -551,7 +547,6 @@ export function EditProductForm({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="description"
@@ -569,7 +564,6 @@ export function EditProductForm({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="unitFormat"
@@ -588,7 +582,6 @@ export function EditProductForm({
                   </FormItem>
                 )}
               />
-
               <FormField
                 control={form.control}
                 name="inventoryEnabled"
@@ -609,7 +602,6 @@ export function EditProductForm({
                   </FormItem>
                 )}
               />
-
               {form.watch("inventoryEnabled") && (
                 <FormField
                   control={form.control}
@@ -636,7 +628,6 @@ export function EditProductForm({
                   )}
                 />
               )}
-
               <FormField
                 control={form.control}
                 name="tags"
@@ -655,7 +646,6 @@ export function EditProductForm({
                   </FormItem>
                 )}
               />
-
               <DialogFooter>
                 <Button type="submit" disabled={isPending}>
                   {isPending ? (

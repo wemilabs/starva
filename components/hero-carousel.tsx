@@ -12,10 +12,10 @@ interface HeroCarouselProps {
   className?: string;
 }
 
-export function HeroCarousel({ 
-  images, 
-  interval = 5000, 
-  className = "" 
+export function HeroCarousel({
+  images,
+  interval = 5000,
+  className = "",
 }: HeroCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -43,7 +43,8 @@ export function HeroCarousel({
           className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-1000 ${
             index === currentIndex ? "opacity-100" : "opacity-0"
           }`}
-          priority={index === 0}
+          preload={index === 0}
+          loading="eager"
         />
       ))}
     </div>

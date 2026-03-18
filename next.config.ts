@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["192.168.1.69"],
   cacheComponents: true,
   experimental: { typedEnv: true, viewTransition: true },
   images: {

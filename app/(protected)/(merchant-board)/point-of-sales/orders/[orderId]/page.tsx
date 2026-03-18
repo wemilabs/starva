@@ -119,6 +119,8 @@ async function OrderContent({
                           src={item.product.imageUrls[0]}
                           alt={item.product.name}
                           fill
+                          sizes="64px"
+                          unoptimized
                           className="object-cover"
                         />
                       ) : (
@@ -220,6 +222,8 @@ async function OrderContent({
                         src={order.organization.logo}
                         alt={order.organization.name}
                         fill
+                        sizes="48px"
+                        unoptimized
                         className="object-cover"
                       />
                     </div>

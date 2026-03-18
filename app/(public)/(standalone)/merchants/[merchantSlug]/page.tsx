@@ -85,8 +85,10 @@ async function MerchantContent({
               src={merchant.logo}
               alt={`${merchant.name} logo`}
               fill
+              sizes="100vw"
+              unoptimized
               className="object-cover"
-              priority
+              preload
             />
           ) : (
             <div className="absolute inset-0 bg-linear-to-br from-orange-500 via-amber-500 to-yellow-500" />

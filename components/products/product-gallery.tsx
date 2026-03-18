@@ -55,7 +55,7 @@ export function ProductGallery({ images, video, alt }: ProductGalleryProps) {
                 "relative aspect-square h-auto w-full overflow-hidden rounded-md border-2 p-0 transition-all hover:scale-105",
                 index === currentIndex
                   ? "border-primary ring-2 ring-primary/20"
-                  : "border-transparent hover:border-muted-foreground/30"
+                  : "border-transparent hover:border-muted-foreground/30",
               )}
               aria-label={`Go to image ${index + 1}`}
             >
@@ -63,6 +63,7 @@ export function ProductGallery({ images, video, alt }: ProductGalleryProps) {
                 src={imageUrl}
                 alt={`${alt} - Image ${index + 1}`}
                 fill
+                sizes="80px"
                 className="object-cover"
                 onContextMenu={(e) => e.preventDefault()}
               />
@@ -77,7 +78,7 @@ export function ProductGallery({ images, video, alt }: ProductGalleryProps) {
                 "relative aspect-square h-auto w-full overflow-hidden rounded-md border-2 p-0 transition-all hover:scale-105",
                 currentIndex === imageUrls.length
                   ? "border-primary ring-2 ring-primary/20"
-                  : "border-transparent hover:border-muted-foreground/30"
+                  : "border-transparent hover:border-muted-foreground/30",
               )}
               aria-label="Go to video"
             >

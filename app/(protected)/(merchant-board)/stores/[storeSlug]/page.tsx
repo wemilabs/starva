@@ -64,8 +64,10 @@ async function StoreContent({
               src={store.logo}
               alt={`${store.name} logo`}
               fill
+              sizes="100vw"
+              unoptimized
               className="object-cover"
-              priority
+              preload
             />
           ) : (
             <div className="absolute inset-0 bg-linear-to-br from-orange-500 via-amber-500 to-yellow-500" />
@@ -217,7 +219,7 @@ export async function generateMetadata({
 }
 
 export default async function storeSlugPage(
-  props: PageProps<"/stores/[storeSlug]">
+  props: PageProps<"/stores/[storeSlug]">,
 ) {
   return (
     <Suspense

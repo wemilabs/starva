@@ -242,6 +242,8 @@ async function TransactionContent({
                         src={transaction.organization.logo}
                         alt={transaction.organization.name}
                         fill
+                        sizes="48px"
+                        unoptimized
                         className="object-cover"
                       />
                     </div>

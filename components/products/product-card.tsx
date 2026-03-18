@@ -78,7 +78,8 @@ export function ProductCard({
           src={imageUrls?.[0] ?? FALLBACK_PRODUCT_IMG_URL}
           alt={name}
           fill
-          priority
+          sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+          preload
           className="object-cover transition-transform duration-500 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-linear-to-tr from-black/70 via-black/30 to-transparent" />
@@ -106,50 +107,52 @@ export function ProductCard({
               </span>
             </div>
 
-            <Activity mode={!href ? "visible" : "hidden"}>
-              {/** biome-ignore lint/a11y/noStaticElementInteractions: actually needed */}
-              {/** biome-ignore lint/a11y/useKeyWithClickEvents: actually needed */}
-              <div
-                className="flex items-center gap-1.5"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <EditProductForm
-                  product={{
-                    id,
-                    name,
-                    slug,
-                    price,
-                    imageUrls,
-                    videoUrl,
-                    description,
-                    status,
-                    category,
-                    likesCount,
-                    createdAt,
-                    organizationId,
-                    calories,
-                    updatedAt,
-                    specifications,
-                    brand,
-                    unitFormatId,
-                    inventoryEnabled,
-                    currentStock,
-                    lowStockThreshold,
-                    isLandlord,
-                    visitFees,
-                  }}
-                  organizationId={organization?.id || ""}
-                  storeSlug={organization?.slug || ""}
-                  className="size-6 p-0 rounded-full bg-white/40 hover:bg-white/50 text-white/90 border-white/45"
-                />
-                <DeleteProductForm
-                  productId={id}
-                  organizationId={organization?.id || ""}
-                  storeSlug={organization?.slug || ""}
-                  className="size-6 p-0 rounded-full bg-red-600/70 hover:bg-red-600/80 text-red-100 ring-1 ring-red-600/80 flex-none flex items-center justify-center"
-                />
-              </div>
-            </Activity>
+            {!href ? (
+              <>
+                {/** biome-ignore lint/a11y/noStaticElementInteractions: actually needed */}
+                {/** biome-ignore lint/a11y/useKeyWithClickEvents: actually needed */}
+                <div
+                  className="flex items-center gap-1.5"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <EditProductForm
+                    product={{
+                      id,
+                      name,
+                      slug,
+                      price,
+                      imageUrls,
+                      videoUrl,
+                      description,
+                      status,
+                      category,
+                      likesCount,
+                      createdAt,
+                      organizationId,
+                      calories,
+                      updatedAt,
+                      specifications,
+                      brand,
+                      unitFormatId,
+                      inventoryEnabled,
+                      currentStock,
+                      lowStockThreshold,
+                      isLandlord,
+                      visitFees,
+                    }}
+                    organizationId={organization?.id || ""}
+                    storeSlug={organization?.slug || ""}
+                    className="size-6 p-0 rounded-full bg-white/40 hover:bg-white/50 text-white/90 border-white/45"
+                  />
+                  <DeleteProductForm
+                    productId={id}
+                    organizationId={organization?.id || ""}
+                    storeSlug={organization?.slug || ""}
+                    className="size-6 p-0 rounded-full bg-red-600/70 hover:bg-red-600/80 text-red-100 ring-1 ring-red-600/80 flex-none flex items-center justify-center"
+                  />
+                </div>
+              </>
+            ) : null}
           </div>
         </div>
 
@@ -211,7 +214,7 @@ export function ProductCard({
         </DialogTrigger>
         <DialogContent
           className="flex h-[calc(100vh-10rem)] flex-col gap-0 p-0 md:flex-row border-none md:h-[calc(100vh-20rem)] md:max-w-3xl md:w-full lg:max-w-4xl"
-          aria-describedby="product details"
+          aria-describedby={undefined}
         >
           <div className="relative aspect-square overflow-hidden md:aspect-auto md:w-1/2">
             <ImageCarousel

@@ -26,7 +26,6 @@ import {
   userFollowUser,
 } from "@/db/schema";
 import { getUserFollowedOrganizations, isFollowingUser } from "./follows";
-import { getUserLikedProductIds } from "./products";
 
 export interface UserOptions {
   page?: number;

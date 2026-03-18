@@ -80,6 +80,7 @@ export function ImageCarousel({
           src={currentImage}
           alt={alt}
           fill
+          sizes="(max-width: 768px) 100vw, 50vw"
           preload
           className={cn("object-cover", className)}
           onContextMenu={(e) => e.preventDefault()}

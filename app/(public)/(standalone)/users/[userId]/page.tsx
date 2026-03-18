@@ -1,4 +1,4 @@
-import { Heart, MessageCircle, Users, Store } from "lucide-react";
+import { Heart, MessageCircle, Store, Users } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -8,7 +8,6 @@ import { UserFollowButton } from "@/components/follows/user-follow-button";
 import { ProductCard } from "@/components/products/product-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-// import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { getUserByIdWithFollowStatus, getUserProfileData } from "@/data/users";
@@ -164,14 +163,12 @@ async function UserProfileContent({
 
               <div className="flex items-center mx-auto sm:mx-0 gap-x-6">
                 <ProfileStat label="Following" value={formattedFollowing} />
-                {/* <Separator orientation="vertical" /> */}
                 <ProfileStat
                   label={
                     Number(formattedFollowers) <= 1 ? "Follower" : "Followers"
                   }
                   value={formattedFollowers}
                 />
-                {/* <Separator orientation="vertical" /> */}
                 <ProfileStat
                   label={Number(formattedLikes) <= 1 ? "Like" : "Likes"}
                   value={formattedLikes}

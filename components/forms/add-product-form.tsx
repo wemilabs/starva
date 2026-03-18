@@ -63,7 +63,7 @@ const schema = z
       .min(1, "Price is required")
       .refine(
         (v) => !Number.isNaN(Number(v)) && Number(v) >= 0,
-        "Enter a valid price"
+        "Enter a valid price",
       ),
     imageUrls: z.array(z.url("Provide valid URLs")).optional(),
     videoUrl: z.url("Provide a valid URL").optional().or(z.literal("")),
@@ -88,7 +88,7 @@ const schema = z
     {
       message: "Visit fees are required for intermediaries",
       path: ["visitFees"],
-    }
+    },
   );
 
 export function AddProductForm({
@@ -213,8 +213,8 @@ export function AddProductForm({
             {isLoading
               ? "Checking your product limits..."
               : productLimit?.canCreate
-              ? "Provide details below. Slug is auto-generated."
-              : "Product limit reached"}
+                ? "Provide details below. Slug is auto-generated."
+                : "Product limit reached"}
           </DialogDescription>
         </DialogHeader>
 
@@ -355,7 +355,7 @@ export function AddProductForm({
                       <FormControl>
                         <Input
                           placeholder={getCategorySpecificationPlaceholder(
-                            form.watch("category")
+                            form.watch("category"),
                           )}
                           className="placeholder:text-sm"
                           {...field}
@@ -434,6 +434,8 @@ export function AddProductForm({
                                     src={url}
                                     alt={`Product image ${index + 1}`}
                                     fill
+                                    sizes="(max-width: 640px) 30vw, 120px"
+                                    unoptimized
                                     className="object-cover"
                                   />
                                   <Button
@@ -444,7 +446,7 @@ export function AddProductForm({
                                     onClick={() => {
                                       const newUrls =
                                         field.value?.filter(
-                                          (_, i) => i !== index
+                                          (_, i) => i !== index,
                                         ) || [];
                                       field.onChange(newUrls);
                                     }}
@@ -467,7 +469,7 @@ export function AddProductForm({
                                     const imageUrls =
                                       res
                                         ?.filter((file) =>
-                                          file.type?.startsWith("image/")
+                                          file.type?.startsWith("image/"),
                                         )
                                         .map((file) => file.ufsUrl) || [];
                                     const currentUrls = field.value || [];
@@ -481,7 +483,7 @@ export function AddProductForm({
                                     console.error(err);
                                     toast.error(
                                       err?.message ||
-                                        "Upload failed. Please try again."
+                                        "Upload failed. Please try again.",
                                     );
                                   }}
                                 />
@@ -542,7 +544,7 @@ export function AddProductForm({
                               onClientUploadComplete={(res) => {
                                 const videoUrl =
                                   res?.find((file) =>
-                                    file.type?.startsWith("video/")
+                                    file.type?.startsWith("video/"),
                                   )?.ufsUrl || "";
                                 if (videoUrl)
                                   form.setValue("videoUrl", videoUrl, {
@@ -553,7 +555,7 @@ export function AddProductForm({
                                 console.error(err);
                                 toast.error(
                                   err?.message ||
-                                    "Video upload failed. Please try again."
+                                    "Video upload failed. Please try again.",
                                 );
                               }}
                             />

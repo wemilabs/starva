@@ -267,7 +267,7 @@ export function InventoryTable({
                   }
                   className="p-8 text-center text-muted-foreground font-mono tracking-tighter"
                 >
-                  No products found.
+                  No product found.
                 </td>
               </tr>
             ) : (

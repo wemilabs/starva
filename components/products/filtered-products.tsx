@@ -39,7 +39,7 @@ export function FilteredProducts({
       sort: parseAsString.withDefault("newest"),
       status: parseAsString.withDefault(defaultStatus),
     },
-    { shallow: false }
+    { shallow: false },
   );
 
   const pathname = usePathname();
@@ -57,7 +57,7 @@ export function FilteredProducts({
         .toLowerCase()
         .includes(effectiveSearch.toLowerCase()) ||
       product.tags?.some((tag) =>
-        tag.name.toLowerCase().includes(effectiveSearch.toLowerCase())
+        tag.name.toLowerCase().includes(effectiveSearch.toLowerCase()),
       ) ||
       product.brand?.toLowerCase().includes(effectiveSearch.toLowerCase());
 
@@ -104,7 +104,7 @@ export function FilteredProducts({
         </Activity>
         <div className="w-full sm:col-span-full flex items-center justify-center min-h-[200px] border border-dashed border-muted-foreground/50 rounded-lg">
           <p className="text-sm text-muted-foreground text-center font-mono tracking-tighter">
-            No products found
+            No product found
           </p>
         </div>
       </>

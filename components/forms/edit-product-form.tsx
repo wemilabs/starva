@@ -408,7 +408,7 @@ export function EditProductForm({
                         <div className="grid grid-cols-3 gap-2">
                           {field.value?.map((url, index) => (
                             <div
-                              key={`image-${index}-${url.slice(-8)}`}
+                              key={`image-${url.slice(-10)}-${url.slice(-8)}`}
                               className="relative group"
                             >
                               <div className="relative aspect-square overflow-hidden rounded-md border">

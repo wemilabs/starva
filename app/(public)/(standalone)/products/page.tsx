@@ -13,7 +13,7 @@ import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
 async function getFilteredProductsForMetadata(
   search?: string,
   tags?: string[],
-  sort?: string
+  sort?: string,
 ) {
   const products = await getInStockProducts();
 
@@ -82,14 +82,14 @@ export async function generateMetadata({
   const parsedTags = Array.isArray(tags)
     ? tags
     : tags
-    ? tags.split(",").filter(Boolean)
-    : [];
+      ? tags.split(",").filter(Boolean)
+      : [];
 
   // Get filtered products to find the first one for image
   const filteredProducts = await getFilteredProductsForMetadata(
     search,
     parsedTags,
-    sort
+    sort,
   );
   const firstProduct = filteredProducts[0];
 
@@ -136,7 +136,7 @@ export async function generateMetadata({
       }`;
     }
   } else {
-    description = "No products found matching your criteria";
+    description = "No product found matching your criteria";
   }
 
   // Build Open Graph images array
@@ -204,8 +204,8 @@ async function ProductsPageContent({
   const parsedTags = Array.isArray(tags)
     ? tags
     : tags
-    ? tags.split(",").filter(Boolean)
-    : [];
+      ? tags.split(",").filter(Boolean)
+      : [];
 
   return (
     <>

@@ -20,13 +20,16 @@ export default function NotFound() {
   return (
     <Empty>
       <EmptyHeader>
-        <Image
-          src={NOTFOUND_PAGE_IMG_URL}
-          alt="404 Not Found"
-          width={200}
-          height={200}
-          className="rounded-md"
-        />
+        <div className="relative size-[200px]">
+          <Image
+            src={NOTFOUND_PAGE_IMG_URL}
+            alt="404 Not Found"
+            fill
+            sizes="200px"
+            loading="eager"
+            className="rounded-md object-cover"
+          />
+        </div>
         <EmptyTitle>404 - Not Found</EmptyTitle>
         <EmptyDescription>
           The page you&apos;re looking for doesn&apos;t exist.

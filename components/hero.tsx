@@ -44,9 +44,6 @@ export async function Hero() {
             className="mx-auto text-balance text-4xl font-semibold md:text-5xl lg:text-7xl tracking-wide lg:tracking-wider text-primary-foreground"
           >
             Search. Shop. Smile.
-            {/* Search. Shop. Ship. Smile. */}
-            {/* Search. Shop/Ship. Smile. */}
-            {/* Search. Shop or Ship. Smile. */}
           </TextEffect>
           <TextEffect
             per="line"

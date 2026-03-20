@@ -2,6 +2,7 @@ import { Lock, ScrollText, Store } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
+
 import { OrdersPageSkeleton } from "@/components/orders/order-skeleton";
 import { OrderTabs } from "@/components/orders/order-tabs";
 import { Button } from "@/components/ui/button";

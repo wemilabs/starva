@@ -35,7 +35,7 @@ export function HeroCarousel({
     <div className={`absolute inset-0 ${className}`}>
       {images.map((image, index) => (
         <Image
-          key={`${image.src}-${index}`}
+          key={`${image.src}-${image.src.slice(-10)}`}
           src={image.src}
           alt={image.alt}
           width={1000}

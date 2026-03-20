@@ -150,19 +150,25 @@ const AnimationComponent: React.FC<{
         </motion.span>
       ) : (
         <motion.span className="inline-block whitespace-pre">
-          {segment.split("").map((char, charIndex) => (
-            <motion.span
-              key={`char-${
-                // biome-ignore lint/suspicious/noArrayIndexKey: chill out bud
-                charIndex
-              }`}
-              aria-hidden="true"
-              variants={variants}
-              className="inline-block whitespace-pre"
-            >
-              {char}
-            </motion.span>
-          ))}
+          {(() => {
+            const charOccurrences = new Map<string, number>();
+
+            return segment.split("").map((char) => {
+              const occurrence = (charOccurrences.get(char) ?? 0) + 1;
+              charOccurrences.set(char, occurrence);
+
+              return (
+                <motion.span
+                  key={`char-${char}-${occurrence}`}
+                  aria-hidden="true"
+                  variants={variants}
+                  className="inline-block whitespace-pre"
+                >
+                  {char}
+                </motion.span>
+              );
+            });
+          })()}
         </motion.span>
       );
 
@@ -184,7 +190,7 @@ const AnimationComponent: React.FC<{
         {content}
       </Tag>
     );
-  }
+  },
 );
 
 AnimationComponent.displayName = "AnimationComponent";
@@ -195,7 +201,7 @@ const splitText = (text: string, per: PerType) => {
 };
 
 const hasTransition = (
-  variant?: Variant
+  variant?: Variant,
 ): variant is TargetAndTransition & { transition?: Transition } => {
   if (!variant) return false;
   return typeof variant === "object" && "transition" in variant;
@@ -203,7 +209,7 @@ const hasTransition = (
 
 const createVariantsWithTransition = (
   baseVariants: Variants,
-  transition?: Transition & { exit?: Transition }
+  transition?: Transition & { exit?: Transition },
 ): Variants => {
   if (!transition) return baseVariants;
 
@@ -289,7 +295,7 @@ export function TextEffect({
           staggerChildren: customStagger ?? stagger,
           staggerDirection: -1,
         },
-      }
+      },
     ),
     item: createVariantsWithTransition(variants?.item || baseVariants.item, {
       duration: baseDuration,
@@ -300,13 +306,13 @@ export function TextEffect({
   // Build a local, client-side function to decide per-segment highlighting
   const normalize = (s: string) => (caseSensitive ? s : s.toLowerCase());
   const wordsSet = new Set(
-    (highlightWords ?? []).map((w) => normalize(w.trim()))
+    (highlightWords ?? []).map((w) => normalize(w.trim())),
   );
   const indicesSet = new Set(highlightIndices ?? []);
 
   const localWrapperClassFn = (
     segment: string,
-    index: number
+    index: number,
   ): string | undefined => {
     const trimmed = segment.trim();
     const segNorm = normalize(trimmed);
@@ -318,6 +324,17 @@ export function TextEffect({
       return segmentWrapperClassName(segment, index);
     return segmentWrapperClassName;
   };
+
+  const segmentOccurrences = new Map<string, number>();
+  const keyedSegments = segments.map((segment) => {
+    const occurrence = (segmentOccurrences.get(segment) ?? 0) + 1;
+    segmentOccurrences.set(segment, occurrence);
+
+    return {
+      segment,
+      key: `${per}-${segment}-${occurrence}`,
+    };
+  });
 
   return (
     <AnimatePresence mode="popLayout">
@@ -333,9 +350,9 @@ export function TextEffect({
           style={style}
         >
           {per !== "line" ? <span className="sr-only">{children}</span> : null}
-          {segments.map((segment, index) => (
+          {keyedSegments.map(({ segment, key }, index) => (
             <AnimationComponent
-              key={`${per}-${index}-${segment}`}
+              key={key}
               segment={segment}
               variants={computedVariants.item}
               per={per}

@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ArrowRight,
   BookOpen,
   Car,
   ChevronRight,
@@ -19,14 +20,17 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useQueryState } from "nuqs";
+
 import {
   Empty,
+  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty";
 import type { Product } from "@/db/schema";
 import { useCategoryPrioritization } from "@/hooks/use-category-prioritization";
+import { Button } from "../ui/button";
 import { FilteredProducts } from "./filtered-products";
 
 // Icon mapping for dynamic rendering
@@ -149,6 +153,9 @@ export function LatestProductsContent({
 
   const { prioritizedCategories, totalMatches, hasSearchQuery } =
     useCategoryPrioritization(categoriesWithProducts, searchQuery);
+  const hasProductsToShow = hasSearchQuery
+    ? totalMatches > 0
+    : prioritizedCategories.length > 0;
 
   return (
     <section className="mx-auto flex w-full max-w-[1264px] flex-1 flex-col gap-4 mt-8">
@@ -159,7 +166,7 @@ export function LatestProductsContent({
           </h2>
           {hasSearchQuery && (
             <span className="text-sm text-muted-foreground animate-in fade-in-0 slide-in-from-2 duration-300 font-mono tracking-tighter">
-              {totalMatches} result{totalMatches !== 1 ? "s" : ""}
+              {totalMatches} result{totalMatches >= 2 ? "s" : ""}
             </span>
           )}
         </div>
@@ -170,7 +177,7 @@ export function LatestProductsContent({
         </p>
 
         <div className="w-full pt-6">
-          {prioritizedCategories.length > 0 ? (
+          {hasProductsToShow ? (
             <div className="space-y-12">
               {prioritizedCategories.map(
                 (
@@ -182,7 +189,7 @@ export function LatestProductsContent({
                     matchingProducts,
                     matchCount,
                   },
-                  index
+                  index,
                 ) => (
                   <div
                     key={category}
@@ -207,17 +214,30 @@ export function LatestProductsContent({
                       matchCount={matchCount}
                     />
                   </div>
-                )
+                ),
               )}
             </div>
           ) : (
             <Empty>
               <EmptyHeader>
-                <EmptyTitle>No products found</EmptyTitle>
-                <EmptyDescription className="font-mono tracking-tighter">
-                  Try adjusting your search terms
+                <EmptyTitle>
+                  No latest product matching "{searchQuery}"
+                </EmptyTitle>
+                <EmptyDescription className="">
+                  Try adjusting your search terms or browse all products
                 </EmptyDescription>
               </EmptyHeader>
+              <EmptyContent>
+                <Button variant="outline" asChild>
+                  <Link
+                    href={`/products?search=${searchQuery}`}
+                    // transitionTypes={["slide"]}
+                  >
+                    Browse all products
+                    <ArrowRight className="size-4" />
+                  </Link>
+                </Button>
+              </EmptyContent>
             </Empty>
           )}
         </div>

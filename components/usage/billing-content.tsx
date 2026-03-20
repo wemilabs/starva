@@ -255,9 +255,9 @@ export async function BillingContent() {
             <div className="mt-6">
               <p className="text-sm font-medium mb-3">Plan Features</p>
               <div className="grid gap-2 sm:grid-cols-2">
-                {plan.features.map((feature, index) => (
+                {plan.features.map((feature) => (
                   <div
-                    key={`feature-${index}-${feature.replace(/\s+/g, "-")}`}
+                    key={`feature-${feature}-${feature.replace(/\s+/g, "-")}`}
                     className="flex items-center gap-2 text-sm"
                   >
                     <CheckCircle2 className="size-3 text-green-600" />

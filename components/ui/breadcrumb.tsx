@@ -1,7 +1,8 @@
 /** biome-ignore-all lint/a11y/useFocusableInteractive: chill out bud */
 /** biome-ignore-all lint/a11y/useSemanticElements: chill out bud */
-import { Slot } from "@radix-ui/react-slot";
+
 import { ChevronRight, MoreHorizontal } from "lucide-react";
+import { Slot } from "radix-ui";
 import type * as React from "react";
 
 import { cn } from "@/lib/utils";
@@ -16,7 +17,7 @@ function BreadcrumbList({ className, ...props }: React.ComponentProps<"ol">) {
       data-slot="breadcrumb-list"
       className={cn(
         "text-muted-foreground flex flex-wrap items-center gap-1.5 text-sm wrap-break-word sm:gap-2.5",
-        className
+        className,
       )}
       {...props}
     />
@@ -40,7 +41,7 @@ function BreadcrumbLink({
 }: React.ComponentProps<"a"> & {
   asChild?: boolean;
 }) {
-  const Comp = asChild ? Slot : "a";
+  const Comp = asChild ? Slot.Root : "a";
 
   return (
     <Comp

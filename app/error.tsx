@@ -62,7 +62,7 @@ export default function ErrorPage(
             Try again
           </Button>
           <Button asChild variant="outline">
-            <Link href="/">Let&apos;s go Home buddy</Link>
+            <Link href="/">Go home</Link>
           </Button>
         </div>
         <EmptyDescription className="text-xs font-mono tracking-tighter">

@@ -2,6 +2,7 @@
 
 import { Filter, Search, X } from "lucide-react";
 import { parseAsArrayOf, parseAsString, useQueryStates } from "nuqs";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +30,7 @@ export function ProductFilters({ availableTags }: ProductFiltersProps) {
     {
       shallow: false,
       throttleMs: 300,
-    }
+    },
   );
 
   const toggleTag = (tagSlug: string) => {
@@ -58,7 +59,7 @@ export function ProductFilters({ availableTags }: ProductFiltersProps) {
               id="product-search"
               type="search"
               placeholder="Search products..."
-              className="w-full bg-transparent pl-10 focus:outline-none rounded-lg placeholder:text-xs md:placeholder:text-sm text-xs md:text-sm transition duration-300 ease-in-out h-9"
+              className="w-full h-9 bg-transparent pl-10 focus:outline-none rounded-lg placeholder:text-sm transition duration-300 ease-in-out"
               value={search}
               onChange={(e) => setFilters({ search: e.target.value || null })}
             />

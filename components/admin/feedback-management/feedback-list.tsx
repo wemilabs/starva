@@ -53,8 +53,8 @@ export function FeedbackList({ feedback }: FeedbackListClientProps) {
   const [selectedType, setSelectedType] = useQueryState(
     "type",
     parseAsStringLiteral(["all", ...FEEDBACK_TYPE_VALUES] as const).withDefault(
-      "all"
-    )
+      "all",
+    ),
   );
 
   const [selectedStatus, setSelectedStatus] = useQueryState(
@@ -62,7 +62,7 @@ export function FeedbackList({ feedback }: FeedbackListClientProps) {
     parseAsStringLiteral([
       "all",
       ...FEEDBACK_STATUS_VALUES,
-    ] as const).withDefault("all")
+    ] as const).withDefault("all"),
   );
 
   const [search] = useQueryState("search", { defaultValue: "" });
@@ -97,7 +97,7 @@ export function FeedbackList({ feedback }: FeedbackListClientProps) {
                   onClick={() => setSelectedType(option.value)}
                   className={cn(
                     "transition-colors border",
-                    selectedType === option.value && "border-primary shadow-md"
+                    selectedType === option.value && "border-primary shadow-md",
                   )}
                 >
                   {option.label}
@@ -129,10 +129,10 @@ export function FeedbackList({ feedback }: FeedbackListClientProps) {
             </div>
 
             <SearchForm
-              inputFieldOnlyClassName="h-9"
               formProps={{
                 className: "w-full sm:w-80",
               }}
+              inputFieldOnlyClassName="h-9"
               placeholder="eg. subject, message, etc."
             />
           </div>

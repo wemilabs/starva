@@ -58,10 +58,10 @@ export const metadata: Metadata = {
   authors: [
     {
       name: "Mr T",
-      url: "https://cuttypiedev.vercel.app/",
+      url: "https://lisham.dev/",
     },
   ],
-  creator: "Mr T",
+  creator: "Lisham",
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -85,7 +85,7 @@ export const metadata: Metadata = {
     description:
       "Search. Shop. Smile. - Starva.shop is the super fast, secure, reliable and easy to use next-gen social marketplace.",
     images: [GENERAL_BRANDING_IMG_URL],
-    creator: "@DorianTho5",
+    creator: "@mthlish",
   },
 };
 

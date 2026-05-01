@@ -9,7 +9,10 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { type Crumb, useBreadcrumbs } from "@/contexts/breadcrumbs-context";
+import {
+  type Crumb,
+  useBreadcrumbs,
+} from "@/components/context/breadcrumbs-context";
 
 export function NavBreadcrumbs({ base }: { base: Crumb[] }) {
   const { crumbs } = useBreadcrumbs();

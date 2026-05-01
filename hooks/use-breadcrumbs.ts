@@ -2,7 +2,10 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
-import { type Crumb, useBreadcrumbs } from "@/contexts/breadcrumbs-context";
+import {
+  type Crumb,
+  useBreadcrumbs,
+} from "@/components/context/breadcrumbs-context";
 
 const routeConfig: Record<string, (params: string[]) => Crumb[]> = {
   // Static routes

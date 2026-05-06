@@ -5,6 +5,7 @@ import { NuqsAdapter } from "nuqs/adapters/next/app";
 import { Suspense, ViewTransition } from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { BreadcrumbManager } from "@/components/breadcrumb-manager";
+import { BreadcrumbsProvider } from "@/components/context/breadcrumbs-context";
 import { Header } from "@/components/header";
 import { HeaderSkeleton } from "@/components/header-skeleton";
 import { QueryProvider } from "@/components/providers/query-client-provider";
@@ -13,7 +14,6 @@ import { UploadThingProvider } from "@/components/providers/uploadthing-provider
 import { UpstashRealtimeProvider } from "@/components/providers/upstash-realtime-provider";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
-import { BreadcrumbsProvider } from "@/components/context/breadcrumbs-context";
 import { GENERAL_BRANDING_IMG_URL } from "@/lib/constants";
 import "./globals.css";
 
